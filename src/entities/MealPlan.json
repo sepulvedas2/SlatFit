@@ -1,0 +1,87 @@
+{
+  "name": "MealPlan",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da refei\u00e7\u00e3o"
+    },
+    "meal_type": {
+      "type": "string",
+      "enum": [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "snack"
+      ],
+      "description": "Tipo de refei\u00e7\u00e3o"
+    },
+    "goal_type": {
+      "type": "string",
+      "enum": [
+        "weight_loss",
+        "muscle_gain",
+        "maintenance"
+      ],
+      "description": "Para qual objetivo"
+    },
+    "calories": {
+      "type": "number",
+      "description": "Calorias totais"
+    },
+    "protein": {
+      "type": "number",
+      "description": "Prote\u00edna em gramas"
+    },
+    "carbs": {
+      "type": "number",
+      "description": "Carboidratos em gramas"
+    },
+    "fats": {
+      "type": "number",
+      "description": "Gorduras em gramas"
+    },
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista de ingredientes"
+    },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modo de preparo passo a passo"
+    },
+    "prep_time_minutes": {
+      "type": "number",
+      "description": "Tempo de preparo em minutos"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL da imagem ilustrativa"
+    },
+    "dietary_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "vegan",
+          "vegetarian",
+          "gluten_free",
+          "dairy_free",
+          "high_protein",
+          "low_carb"
+        ]
+      },
+      "description": "Tags alimentares"
+    }
+  },
+  "required": [
+    "name",
+    "meal_type",
+    "goal_type"
+  ]
+}

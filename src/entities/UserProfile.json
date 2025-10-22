@@ -1,0 +1,74 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio vinculado"
+    },
+    "height": {
+      "type": "number",
+      "description": "Altura em cm"
+    },
+    "current_weight": {
+      "type": "number",
+      "description": "Peso atual em kg"
+    },
+    "target_weight": {
+      "type": "number",
+      "description": "Peso alvo em kg"
+    },
+    "goal": {
+      "type": "string",
+      "enum": [
+        "weight_loss",
+        "muscle_gain",
+        "maintenance"
+      ],
+      "description": "Objetivo principal"
+    },
+    "activity_level": {
+      "type": "string",
+      "enum": [
+        "sedentary",
+        "light",
+        "moderate",
+        "active",
+        "very_active"
+      ],
+      "description": "N\u00edvel de atividade f\u00edsica"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female"
+      ],
+      "description": "G\u00eanero"
+    },
+    "age": {
+      "type": "number",
+      "description": "Idade"
+    },
+    "daily_calorie_target": {
+      "type": "number",
+      "description": "Meta di\u00e1ria de calorias calculada"
+    },
+    "protein_target": {
+      "type": "number",
+      "description": "Meta di\u00e1ria de prote\u00edna em gramas"
+    },
+    "carbs_target": {
+      "type": "number",
+      "description": "Meta di\u00e1ria de carboidratos em gramas"
+    },
+    "fats_target": {
+      "type": "number",
+      "description": "Meta di\u00e1ria de gorduras em gramas"
+    }
+  },
+  "required": [
+    "user_email",
+    "goal"
+  ]
+}

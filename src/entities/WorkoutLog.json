@@ -1,0 +1,44 @@
+{
+  "name": "WorkoutLog",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "workout_id": {
+      "type": "string",
+      "description": "ID do treino realizado"
+    },
+    "workout_name": {
+      "type": "string",
+      "description": "Nome do treino"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de conclus\u00e3o"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o real em minutos"
+    },
+    "calories_burned": {
+      "type": "number",
+      "description": "Calorias queimadas"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas do treino"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Avalia\u00e7\u00e3o de 1 a 5"
+    }
+  },
+  "required": [
+    "user_email",
+    "workout_id",
+    "workout_name"
+  ]
+}

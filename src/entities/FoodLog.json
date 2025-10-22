@@ -1,0 +1,58 @@
+{
+  "name": "FoodLog",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "food_name": {
+      "type": "string",
+      "description": "Nome do alimento identificado"
+    },
+    "meal_type": {
+      "type": "string",
+      "enum": [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "snack"
+      ],
+      "description": "Tipo de refei\u00e7\u00e3o"
+    },
+    "calories": {
+      "type": "number",
+      "description": "Calorias totais"
+    },
+    "protein": {
+      "type": "number",
+      "description": "Prote\u00edna em gramas"
+    },
+    "carbs": {
+      "type": "number",
+      "description": "Carboidratos em gramas"
+    },
+    "fats": {
+      "type": "number",
+      "description": "Gorduras em gramas"
+    },
+    "portion_size": {
+      "type": "string",
+      "description": "Tamanho da por\u00e7\u00e3o estimado"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL da foto do alimento"
+    },
+    "log_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do registro"
+    }
+  },
+  "required": [
+    "user_email",
+    "food_name",
+    "calories"
+  ]
+}
