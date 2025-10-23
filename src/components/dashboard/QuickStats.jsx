@@ -79,9 +79,6 @@ export default function QuickStats({
               <Progress 
                 value={Math.min(progress, 100)} 
                 className="h-1.5 bg-white/20"
-                style={{ 
-                  '--progress-background': stat.color 
-                } as React.CSSProperties}
               />
             )}
           </Card>

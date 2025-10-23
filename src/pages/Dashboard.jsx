@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -8,7 +9,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Flame, Target, TrendingUp, Calendar, Zap, Trophy,
-  Crown, Sparkles, Award, Clock, Apple
+  Crown, Sparkles, Award, Clock, Apple, Camera, Dumbbell
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
