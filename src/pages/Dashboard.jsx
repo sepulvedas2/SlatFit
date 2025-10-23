@@ -18,9 +18,11 @@ import MacroProgress from "../components/dashboard/MacroProgress";
 import WeeklyActivity from "../components/dashboard/WeeklyActivity";
 import Achievements from "../components/dashboard/Achievements";
 import SubscriptionStatus from "../components/dashboard/SubscriptionStatus";
+import WelcomeModal from "../components/onboarding/WelcomeModal";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -45,6 +47,18 @@ export default function Dashboard() {
     },
     enabled: !!user?.email,
   });
+
+  // Check if user is new and needs welcome
+  useEffect(() => {
+    // Only show welcome if user is loaded and subscription data is loaded,
+    // and if there's no subscription associated with the user.
+    // We also need to make sure `subscription` is explicitly `null` or `undefined`
+    // (not just an empty array or object if API returns that for no subscription).
+    // The queryFn already returns null if no subscription is found.
+    if (user && subscription === null) {
+      setShowWelcome(true);
+    }
+  }, [user, subscription]);
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
@@ -88,7 +102,7 @@ export default function Dashboard() {
   const isFreeTrial = subscription?.plan === "free_trial";
   const daysLeft = subscription?.end_date 
     ? differenceInDays(new Date(subscription.end_date), new Date())
-    : 30;
+    : 30; // Default to 30 days if no subscription end date
 
   return (
     <div className="min-h-screen p-4 md:p-6">
@@ -123,6 +137,13 @@ export default function Dashboard() {
         </div>
 
         <SubscriptionStatus />
+
+        {showWelcome && user && (
+          <WelcomeModal 
+            user={user} 
+            onClose={() => setShowWelcome(false)} 
+          />
+        )}
 
         <AIFitLensCoach 
           userName={user?.full_name?.split(' ')[0]}

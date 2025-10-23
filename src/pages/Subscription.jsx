@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Check, Sparkles, Zap, Target, Trophy, ArrowLeft, AlertCircle } from "lucide-react";
+import { Crown, Check, Sparkles, Zap, Target, Trophy, ArrowLeft, AlertCircle, Shield } from "lucide-react";
 import { differenceInDays, addMonths } from "date-fns";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -235,6 +236,27 @@ export default function Subscription() {
           </div>
         </Card>
 
+        {/* Success Stories / Testimonials */}
+        <Card className="glass-effect p-6 border-[#CEF17B]/20">
+          <h3 className="text-xl font-bold text-white mb-4 text-center">
+            Junte-se a mais de 10.000 usuários! 🎉
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-white/5 rounded-lg">
+              <p className="text-3xl font-bold text-[#CEF17B] mb-2">98%</p>
+              <p className="text-sm text-[#CEEDB2]">Satisfação</p>
+            </div>
+            <div className="text-center p-4 bg-white/5 rounded-lg">
+              <p className="text-3xl font-bold text-[#CEF17B] mb-2">-8kg</p>
+              <p className="text-sm text-[#CEEDB2]">Média em 3 meses</p>
+            </div>
+            <div className="text-center p-4 bg-white/5 rounded-lg">
+              <p className="text-3xl font-bold text-[#CEF17B] mb-2">24/7</p>
+              <p className="text-sm text-[#CEEDB2]">Suporte</p>
+            </div>
+          </div>
+        </Card>
+
         <Card className="glass-effect p-6 border-[#CEF17B]/20">
           <h3 className="text-xl font-bold text-white mb-4">Perguntas Frequentes</h3>
           <div className="space-y-4">
@@ -265,6 +287,19 @@ export default function Subscription() {
               </p>
             </div>
           </div>
+        </Card>
+
+        {/* Guarantee */}
+        <Card className="glass-effect p-6 border-[#CEF17B]/20 text-center">
+          <div className="w-16 h-16 rounded-full bg-[#CEF17B]/20 flex items-center justify-center mx-auto mb-4">
+            <Shield className="w-8 h-8 text-[#CEF17B]" />
+          </div>
+          <h3 className="text-lg font-bold text-white mb-2">
+            Garantia de 30 dias
+          </h3>
+          <p className="text-sm text-[#CEEDB2]">
+            Não gostou? Devolvemos 100% do seu dinheiro, sem perguntas!
+          </p>
         </Card>
 
       </div>

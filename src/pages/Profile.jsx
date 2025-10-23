@@ -7,16 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Target, Activity, LogOut, Save, Loader2, Crown } from "lucide-react"; // Added Crown icon
+import { User, Target, Activity, LogOut, Save, Loader2, Crown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge"; // Added Badge component
-import { Link } from "react-router-dom"; // Assuming react-router-dom for navigation
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
+import { format } from 'date-fns'; // Added for date formatting
 
 // Helper function to create page URLs. In a real app, this would likely be imported from a utility.
 const createPageUrl = (pageName) => {
   switch (pageName) {
     case "Subscription":
       return "/subscription"; // Example path for the Subscription page
+    case "BillingHistory":
+      return "/billing-history"; // Example path for Billing History page
     default:
       return `/${pageName.toLowerCase()}`; // Generic fallback for other pages
   }
@@ -130,7 +133,7 @@ export default function Profile() {
             <User className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white">{user?.full_name}</h1>
-          <p className="text-white/70 mt-1">{user?.email}</p> {/* Updated text color */}
+          <p className="text-white/70 mt-1">{user?.email}</p>
           
           {/* NEW: Premium/Trial Badge */}
           {isPremium && (
@@ -190,6 +193,61 @@ export default function Profile() {
               </div>
             </Card>
           </div>
+        )}
+
+        {/* Subscription Card */}
+        {subscription && (
+          <Card className="glass-effect p-6 border-[#CEF17B]/20">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-white">Minha Assinatura</h3>
+              <Link to={createPageUrl("Subscription")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
+                >
+                  Gerenciar
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[#CEEDB2]">Plano Atual:</span>
+                <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0">
+                  {subscription.plan === "premium" ? "Premium" : "Teste Grátis"}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-[#CEEDB2]">Status:</span>
+                <span className={`text-sm font-semibold ${
+                  subscription.is_active ? "text-green-400" : "text-red-400"
+                }`}>
+                  {subscription.is_active ? "Ativo" : "Inativo"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-[#CEEDB2]">Vencimento:</span>
+                <span className="text-white font-semibold">
+                  {format(new Date(subscription.end_date), 'dd/MM/yyyy')}
+                </span>
+              </div>
+
+              <div className="pt-3 border-t border-white/10">
+                <Link to={createPageUrl("BillingHistory")}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-white/10 hover:bg-white/5"
+                  >
+                    Ver Histórico de Pagamentos
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </Card>
         )}
 
         {/* Profile Form */}

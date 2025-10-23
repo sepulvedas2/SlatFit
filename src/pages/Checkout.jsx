@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -6,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { 
-  CreditCard, 
-  Shield, 
-  Check, 
-  Loader2, 
+import {
+  CreditCard,
+  Shield,
+  Check,
+  Loader2,
   ArrowLeft,
   Crown,
   QrCode
@@ -27,7 +28,11 @@ export default function Checkout() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [pixCode, setPixCode] = useState("");
-  
+
+  const [couponCode, setCouponCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState(false);
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -57,10 +62,10 @@ export default function Checkout() {
     mutationFn: async (paymentData) => {
       // Simula processamento de pagamento (em produção, chamaria API real)
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       const startDate = new Date();
       const endDate = addMonths(startDate, 1);
-      
+
       if (subscription) {
         return base44.entities.Subscription.update(subscription.id, {
           plan: "premium",
@@ -107,7 +112,7 @@ export default function Checkout() {
           setProcessing(false);
           return;
         }
-        
+
         await processPaymentMutation.mutateAsync({
           method: "credit_card",
           ...formData
@@ -116,7 +121,7 @@ export default function Checkout() {
         // PIX
         const mockPixCode = "00020126580014BR.GOV.BCB.PIX0136" + Math.random().toString(36).substring(7);
         setPixCode(mockPixCode);
-        
+
         // Simula confirmação de pagamento PIX após 5 segundos
         setTimeout(async () => {
           await processPaymentMutation.mutateAsync({
@@ -127,7 +132,7 @@ export default function Checkout() {
     } catch (err) {
       setError("Erro inesperado. Tente novamente.");
     }
-    
+
     setProcessing(false);
   };
 
@@ -136,11 +141,11 @@ export default function Checkout() {
     const matches = v.match(/\d{4,16}/g);
     const match = (matches && matches[0]) || '';
     const parts = [];
-    
+
     for (let i = 0, len = match.length; i < len; i += 4) {
       parts.push(match.substring(i, i + 4));
     }
-    
+
     if (parts.length) {
       return parts.join(' ');
     } else {
@@ -148,10 +153,34 @@ export default function Checkout() {
     }
   };
 
+  const applyCoupon = () => {
+    // Cupons de exemplo - em produção, validaria no backend
+    const coupons = {
+      "FITLENS50": 0.5,  // 50% desconto
+      "BEMVINDO30": 0.3, // 30% desconto
+      "PROMO20": 0.2     // 20% desconto
+    };
+
+    if (coupons[couponCode.toUpperCase()] !== undefined) {
+      setDiscount(coupons[couponCode.toUpperCase()]);
+      setCouponApplied(true);
+      setError(null); // Clear any previous error
+    } else {
+      setError("Cupom inválido");
+      setTimeout(() => setError(null), 3000);
+      setDiscount(0);
+      setCouponApplied(false);
+    }
+  };
+
+  const originalPrice = 19.90;
+  const finalPrice = originalPrice * (1 - discount);
+
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
-        
+
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
@@ -196,26 +225,60 @@ export default function Checkout() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-white">R$ 19,90</p>
+              <p className="text-2xl font-bold text-white">R$ {finalPrice.toFixed(2).replace('.', ',')}</p>
               <p className="text-xs text-[#CEEDB2]">por mês</p>
             </div>
           </div>
-          
+
+          {/* Coupon Section */}
+          <div className="mb-4 p-3 bg-white/5 rounded-lg">
+            <p className="text-sm font-semibold text-white mb-2">Tem um cupom?</p>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Digite o código"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                disabled={couponApplied}
+                className="bg-white/5 border-white/10 text-white"
+              />
+              <Button
+                type="button"
+                onClick={applyCoupon}
+                disabled={couponApplied || !couponCode}
+                className={couponApplied ? "bg-green-500/20 border-green-500/30 text-green-400" : "gradient-button text-[#084734]"}
+              >
+                {couponApplied ? <Check className="w-4 h-4" /> : "Aplicar"}
+              </Button>
+            </div>
+            {couponApplied && (
+              <p className="text-xs text-green-400 mt-2 flex items-center gap-1">
+                <Check className="w-3 h-3" />
+                Cupom aplicado! Desconto de {(discount * 100).toFixed(0)}%
+              </p>
+            )}
+          </div>
+
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-white/70">
               <span>Subtotal</span>
-              <span>R$ 19,90</span>
+              <span>R$ {originalPrice.toFixed(2).replace('.', ',')}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-green-400">
+                <span>Desconto cupom</span>
+                <span>- R$ {(originalPrice * discount).toFixed(2).replace('.', ',')}</span>
+              </div>
+            )}
             <div className="flex justify-between text-white/70">
               <span>Desconto (primeiro mês)</span>
-              <span className="text-green-400">- R$ 19,90</span>
+              <span className="text-green-400">- R$ {finalPrice.toFixed(2).replace('.', ',')}</span>
             </div>
             <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-white">
               <span>Total hoje</span>
               <span>R$ 0,00</span>
             </div>
             <p className="text-xs text-[#CEEDB2] mt-2">
-              * Cobrança de R$ 19,90 a partir do dia {format(addMonths(new Date(), 1), 'dd/MM/yyyy')}
+              * Cobrança de R$ {finalPrice.toFixed(2).replace('.', ',')} a partir do dia {format(addMonths(new Date(), 1), 'dd/MM/yyyy')}
             </p>
           </div>
         </Card>
@@ -223,27 +286,27 @@ export default function Checkout() {
         {/* Método de Pagamento */}
         <Card className="glass-effect p-6 border-[#CEF17B]/20">
           <h3 className="font-bold text-white mb-4">Método de Pagamento</h3>
-          
+
           <div className="grid grid-cols-2 gap-3 mb-6">
             <Button
               type="button"
               onClick={() => setPaymentMethod("credit_card")}
               variant={paymentMethod === "credit_card" ? "default" : "outline"}
-              className={paymentMethod === "credit_card" 
-                ? "gradient-button text-[#084734]" 
+              className={paymentMethod === "credit_card"
+                ? "gradient-button text-[#084734]"
                 : "border-white/10 hover:bg-[#CEF17B]/10"
               }
             >
               <CreditCard className="w-4 h-4 mr-2" />
               Cartão de Crédito
             </Button>
-            
+
             <Button
               type="button"
               onClick={() => setPaymentMethod("pix")}
               variant={paymentMethod === "pix" ? "default" : "outline"}
-              className={paymentMethod === "pix" 
-                ? "gradient-button text-[#084734]" 
+              className={paymentMethod === "pix"
+                ? "gradient-button text-[#084734]"
                 : "border-white/10 hover:bg-[#CEF17B]/10"
               }
             >
@@ -261,7 +324,7 @@ export default function Checkout() {
                     placeholder="0000 0000 0000 0000"
                     value={formData.cardNumber}
                     onChange={(e) => setFormData({
-                      ...formData, 
+                      ...formData,
                       cardNumber: formatCardNumber(e.target.value)
                     })}
                     maxLength={19}
@@ -275,7 +338,7 @@ export default function Checkout() {
                     placeholder="NOME COMPLETO"
                     value={formData.cardName}
                     onChange={(e) => setFormData({
-                      ...formData, 
+                      ...formData,
                       cardName: e.target.value.toUpperCase()
                     })}
                     className="bg-white/5 border-white/10 text-white"
@@ -307,7 +370,7 @@ export default function Checkout() {
                       type="password"
                       value={formData.cvv}
                       onChange={(e) => setFormData({
-                        ...formData, 
+                        ...formData,
                         cvv: e.target.value.replace(/\D/g, '')
                       })}
                       maxLength={4}
@@ -354,7 +417,7 @@ export default function Checkout() {
                         <QrCode className="w-32 h-32 text-gray-600" />
                       </div>
                     </div>
-                    
+
                     <div>
                       <Label className="text-white">Código PIX Copia e Cola</Label>
                       <div className="flex gap-2">
