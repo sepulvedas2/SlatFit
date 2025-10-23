@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import { Camera, Upload, Sparkles, Loader2, Check, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import NutritionResults from "../components/scanner/NutritionResults";
 import MealTypeSelector from "../components/scanner/MealTypeSelector";
+import { useQuery } from '@tanstack/react-query';
+import PremiumFeatureLock from "../components/dashboard/PremiumFeatureLock";
 
 export default function FoodScanner() {
   const [user, setUser] = useState(null);
@@ -16,6 +19,7 @@ export default function FoodScanner() {
   const [error, setError] = useState(null);
   const [selectedMealType, setSelectedMealType] = useState("lunch");
   const [saving, setSaving] = useState(false);
+  const [dailyScans, setDailyScans] = useState(0);
   
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
@@ -34,6 +38,40 @@ export default function FoodScanner() {
     }
     return () => stopCamera();
   }, [showCamera]);
+
+  // Check subscription and daily scan limit
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const subs = await base44.entities.Subscription.filter({ user_email: user.email });
+      return subs[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
+  const { data: todayFoods } = useQuery({
+    queryKey: ['todayScans', user?.email],
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      return base44.entities.FoodLog.filter({ 
+        user_email: user.email, 
+        log_date: today 
+      });
+    },
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  useEffect(() => {
+    if (todayFoods) {
+      setDailyScans(todayFoods.length);
+    }
+  }, [todayFoods]);
+
+  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
+  const scanLimit = isPremium ? 999 : 5; // 999 for practical unlimited, 5 for free tier
+  const canScan = dailyScans < scanLimit;
 
   const startCamera = async () => {
     try {
@@ -87,6 +125,10 @@ export default function FoodScanner() {
   };
 
   const analyzeFood = async () => {
+    if (!canScan) {
+      setError(`Limite diário atingido (${scanLimit} scans). Assine Premium para scans ilimitados!`);
+      return;
+    }
     if (!selectedImage) return;
 
     setAnalyzing(true);
@@ -154,6 +196,8 @@ export default function FoodScanner() {
       setImagePreview(null);
       setNutritionData(null);
       setError(null);
+      // Optionally refetch todayFoods to update dailyScans count immediately
+      // queryClient.invalidateQueries(['todayScans', user?.email]);
     } catch (err) {
       setError("Erro ao salvar o alimento. Tente novamente.");
     }
@@ -171,17 +215,24 @@ export default function FoodScanner() {
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
         
-        {/* Header */}
+        {/* Header with scan counter */}
         <div className="text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full border border-blue-500/30 mb-4">
             <Sparkles className="w-4 h-4 text-blue-400" />
             <span className="text-sm font-semibold text-blue-300">Scanner IA</span>
+            {!isPremium && (
+              <span className="text-xs text-blue-400">
+                ({dailyScans}/{scanLimit} hoje)
+              </span>
+            )}
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
             Escanear Alimento
           </h1>
           <p className="text-gray-400 mt-2">
-            Tire uma foto ou faça upload para análise nutricional instantânea
+            {isPremium 
+              ? "Scans ilimitados com IA" 
+              : `${Math.max(0, scanLimit - dailyScans)} scans restantes hoje`}
           </p>
         </div>
 
@@ -191,146 +242,153 @@ export default function FoodScanner() {
           </Alert>
         )}
 
-        {/* Upload Area */}
-        {!showCamera && !imagePreview && (
-          <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-8">
-            <div className="space-y-4">
-              <Button
-                onClick={() => setShowCamera(true)}
-                className="w-full h-32 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-lg font-semibold"
-              >
-                <Camera className="w-8 h-8 mr-3" />
-                Abrir Câmera
-              </Button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-700"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-slate-900 text-gray-400">ou</span>
-                </div>
-              </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileSelect(e.target.files[0])}
-                className="hidden"
-              />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="w-full h-24 border-dashed border-2 border-gray-600 hover:border-blue-500 bg-transparent"
-              >
-                <Upload className="w-6 h-6 mr-3" />
-                Fazer Upload de Imagem
-              </Button>
-            </div>
-          </Card>
+        {!isPremium && dailyScans >= scanLimit && (
+          <PremiumFeatureLock featureName="Scanner Ilimitado" />
         )}
 
-        {/* Camera View */}
-        {showCamera && (
-          <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 overflow-hidden">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="w-full aspect-video object-cover"
-            />
-            <div className="p-4 flex gap-3">
-              <Button
-                onClick={capturePhoto}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600"
-              >
-                <Camera className="w-5 h-5 mr-2" />
-                Capturar
-              </Button>
-              <Button
-                onClick={() => setShowCamera(false)}
-                variant="outline"
-                className="border-white/10"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-          </Card>
-        )}
+        {(isPremium || dailyScans < scanLimit) && (
+          <>
+            {/* Upload Area */}
+            {!showCamera && !imagePreview && (
+              <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-8">
+                <div className="space-y-4">
+                  <Button
+                    onClick={() => setShowCamera(true)}
+                    className="w-full h-32 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-lg font-semibold"
+                  >
+                    <Camera className="w-8 h-8 mr-3" />
+                    Abrir Câmera
+                  </Button>
 
-        {/* Image Preview & Analysis */}
-        {imagePreview && (
-          <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 overflow-hidden">
-            <img
-              src={imagePreview}
-              alt="Food preview"
-              className="w-full aspect-video object-cover"
-            />
-            
-            <div className="p-6 space-y-4">
-              {!nutritionData && !analyzing && (
-                <>
-                  <MealTypeSelector 
-                    selected={selectedMealType}
-                    onChange={setSelectedMealType}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-700"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-4 bg-slate-900 text-gray-400">ou</span>
+                    </div>
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileSelect(e.target.files[0])}
+                    className="hidden"
                   />
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={analyzeFood}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                    >
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Analisar com IA
-                    </Button>
-                    <Button
-                      onClick={reset}
-                      variant="outline"
-                      className="border-white/10"
-                    >
-                      <X className="w-5 h-5" />
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {analyzing && (
-                <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                  <Loader2 className="w-12 h-12 animate-spin text-blue-400" />
-                  <p className="text-gray-300">Analisando nutrientes...</p>
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="outline"
+                    className="w-full h-24 border-dashed border-2 border-gray-600 hover:border-blue-500 bg-transparent"
+                  >
+                    <Upload className="w-6 h-6 mr-3" />
+                    Fazer Upload de Imagem
+                  </Button>
                 </div>
-              )}
+              </Card>
+            )}
 
-              {nutritionData && (
-                <>
-                  <NutritionResults data={nutritionData} />
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      onClick={saveFood}
-                      disabled={saving}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600"
-                    >
-                      {saving ? (
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      ) : (
-                        <Check className="w-5 h-5 mr-2" />
-                      )}
-                      Salvar no Diário
-                    </Button>
-                    <Button
-                      onClick={reset}
-                      variant="outline"
-                      className="border-white/10"
-                    >
-                      Nova Foto
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-          </Card>
+            {/* Camera View */}
+            {showCamera && (
+              <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 overflow-hidden">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full aspect-video object-cover"
+                />
+                <div className="p-4 flex gap-3">
+                  <Button
+                    onClick={capturePhoto}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600"
+                  >
+                    <Camera className="w-5 h-5 mr-2" />
+                    Capturar
+                  </Button>
+                  <Button
+                    onClick={() => setShowCamera(false)}
+                    variant="outline"
+                    className="border-white/10"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+              </Card>
+            )}
+
+            {/* Image Preview & Analysis */}
+            {imagePreview && (
+              <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 overflow-hidden">
+                <img
+                  src={imagePreview}
+                  alt="Food preview"
+                  className="w-full aspect-video object-cover"
+                />
+                
+                <div className="p-6 space-y-4">
+                  {!nutritionData && !analyzing && (
+                    <>
+                      <MealTypeSelector 
+                        selected={selectedMealType}
+                        onChange={setSelectedMealType}
+                      />
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={analyzeFood}
+                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                        >
+                          <Sparkles className="w-5 h-5 mr-2" />
+                          Analisar com IA
+                        </Button>
+                        <Button
+                          onClick={reset}
+                          variant="outline"
+                          className="border-white/10"
+                        >
+                          <X className="w-5 h-5" />
+                        </Button>
+                      </div>
+                    </>
+                  )}
+
+                  {analyzing && (
+                    <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                      <Loader2 className="w-12 h-12 animate-spin text-blue-400" />
+                      <p className="text-gray-300">Analisando nutrientes...</p>
+                    </div>
+                  )}
+
+                  {nutritionData && (
+                    <>
+                      <NutritionResults data={nutritionData} />
+                      <div className="flex gap-3 pt-4">
+                        <Button
+                          onClick={saveFood}
+                          disabled={saving}
+                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600"
+                        >
+                          {saving ? (
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          ) : (
+                            <Check className="w-5 h-5 mr-2" />
+                          )}
+                          Salvar no Diário
+                        </Button>
+                        <Button
+                          onClick={reset}
+                          variant="outline"
+                          className="border-white/10"
+                        >
+                          Nova Foto
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </Card>
+            )}
+          </>
         )}
-
       </div>
     </div>
   );

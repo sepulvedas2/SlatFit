@@ -1,84 +1,76 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dumbbell, Apple, Clock, Flame } from "lucide-react";
-import { format } from "date-fns";
+import { Calendar, Dumbbell, Apple } from "lucide-react";
+import { startOfWeek, addDays, format, isSameDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export default function WeeklyActivity({ workouts, foods }) {
+  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  const getActivityForDay = (date) => {
+    const hasWorkout = workouts.some(w => 
+      isSameDay(new Date(w.completed_date), date)
+    );
+    const hasFoodLog = foods.some(f => 
+      isSameDay(new Date(f.log_date), date)
+    );
+    
+    return { hasWorkout, hasFoodLog };
+  };
+
   return (
-    <div className="grid md:grid-cols-2 gap-6">
-      
-      {/* Recent Workouts */}
-      <Card className="glass-effect p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Dumbbell className="w-5 h-5 text-[#CEF17B]" />
-          <h3 className="font-bold text-white">Treinos Recentes</h3>
-        </div>
-        <div className="space-y-3">
-          {workouts.length === 0 ? (
-            <p className="text-sm text-white/60 text-center py-4">
-              Nenhum treino esta semana
-            </p>
-          ) : (
-            workouts.slice(0, 3).map((workout) => (
-              <div 
-                key={workout.id} 
-                className="flex items-center justify-between p-3 bg-white/10 rounded-lg"
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-white text-sm">{workout.workout_name}</p>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-white/60">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {workout.duration_minutes} min
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Flame className="w-3 h-3" />
-                      {workout.calories_burned} kcal
-                    </span>
+    <Card className="glass-effect p-6 border-[#CEF17B]/20">
+      <div className="flex items-center gap-2 mb-6">
+        <Calendar className="w-5 h-5 text-[#CEF17B]" />
+        <h3 className="font-bold text-white">Atividade da Semana</h3>
+      </div>
+
+      <div className="grid grid-cols-7 gap-2">
+        {weekDays.map((day, index) => {
+          const { hasWorkout, hasFoodLog } = getActivityForDay(day);
+          const isToday = isSameDay(day, new Date());
+          
+          return (
+            <div 
+              key={index}
+              className={`text-center p-3 rounded-lg ${
+                isToday ? 'bg-[#CEF17B]/20 border border-[#CEF17B]/30' : 'bg-white/5'
+              }`}
+            >
+              <p className="text-xs font-medium text-white/60 mb-2">
+                {format(day, 'EEE', { locale: ptBR }).toUpperCase()}
+              </p>
+              <p className="text-sm font-bold text-white mb-2">
+                {format(day, 'd')}
+              </p>
+              <div className="flex flex-col gap-1">
+                {hasWorkout && (
+                  <div className="w-6 h-6 rounded-full bg-[#CEF17B]/30 flex items-center justify-center mx-auto">
+                    <Dumbbell className="w-3 h-3 text-[#CEF17B]" />
                   </div>
-                </div>
-                <Badge variant="secondary" className="bg-[#CEF17B]/20 text-[#CEF17B] border-0">
-                  {format(new Date(workout.completed_date), 'dd/MM')}
-                </Badge>
+                )}
+                {hasFoodLog && (
+                  <div className="w-6 h-6 rounded-full bg-green-500/30 flex items-center justify-center mx-auto">
+                    <Apple className="w-3 h-3 text-green-400" />
+                  </div>
+                )}
               </div>
-            ))
-          )}
-        </div>
-      </Card>
+            </div>
+          );
+        })}
+      </div>
 
-      {/* Recent Foods */}
-      <Card className="glass-effect p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Apple className="w-5 h-5 text-[#CEF17B]" />
-          <h3 className="font-bold text-white">Alimentos de Hoje</h3>
+      <div className="flex items-center justify-center gap-6 mt-4 text-xs text-white/60">
+        <div className="flex items-center gap-2">
+          <Dumbbell className="w-3 h-3 text-[#CEF17B]" />
+          <span>Treino</span>
         </div>
-        <div className="space-y-3">
-          {foods.length === 0 ? (
-            <p className="text-sm text-white/60 text-center py-4">
-              Nenhum alimento registrado
-            </p>
-          ) : (
-            foods.slice(0, 3).map((food) => (
-              <div 
-                key={food.id} 
-                className="flex items-center justify-between p-3 bg-white/10 rounded-lg"
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-white text-sm">{food.food_name}</p>
-                  <p className="text-xs text-white/60">
-                    {Math.round(food.calories)} kcal • {Math.round(food.protein)}g proteína
-                  </p>
-                </div>
-                <Badge variant="secondary" className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
-                  {food.meal_type}
-                </Badge>
-              </div>
-            ))
-          )}
+        <div className="flex items-center gap-2">
+          <Apple className="w-3 h-3 text-green-400" />
+          <span>Alimentação</span>
         </div>
-      </Card>
-
-    </div>
+      </div>
+    </Card>
   );
 }

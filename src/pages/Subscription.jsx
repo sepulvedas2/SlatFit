@@ -4,11 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Check, Sparkles, Zap, Target, Trophy, ArrowLeft } from "lucide-react";
+import { Crown, Check, Sparkles, Zap, Target, Trophy, ArrowLeft, AlertCircle } from "lucide-react";
 import { differenceInDays, addMonths } from "date-fns";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Link } from "react-router-dom";
 
 export default function Subscription() {
   const [user, setUser] = useState(null);
@@ -49,11 +51,10 @@ export default function Subscription() {
     },
   });
 
-  const upgradeToPremiumMutation = useMutation({
+  const cancelSubscriptionMutation = useMutation({
     mutationFn: async () => {
       return base44.entities.Subscription.update(subscription.id, {
-        plan: "premium",
-        payment_method: "credit_card"
+        auto_renew: false
       });
     },
     onSuccess: () => {
@@ -68,11 +69,16 @@ export default function Subscription() {
     navigate(createPageUrl("Dashboard"));
   };
 
-  const handleUpgradeToPremium = async () => {
-    setProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    await upgradeToPremiumMutation.mutateAsync();
-    setProcessing(false);
+  const handleUpgrade = () => {
+    navigate(createPageUrl("Checkout"));
+  };
+
+  const handleCancelSubscription = async () => {
+    if (window.confirm("Tem certeza que deseja cancelar a renovação automática?")) {
+      setProcessing(true);
+      await cancelSubscriptionMutation.mutateAsync();
+      setProcessing(false);
+    }
   };
 
   const isPremium = subscription?.plan === "premium";
@@ -80,6 +86,7 @@ export default function Subscription() {
   const daysLeft = subscription?.end_date 
     ? differenceInDays(new Date(subscription.end_date), new Date())
     : 30;
+  const isExpiringSoon = daysLeft <= 7 && daysLeft > 0;
 
   const features = [
     { icon: Sparkles, text: "Scanner de alimentos ilimitado com IA" },
@@ -109,9 +116,19 @@ export default function Subscription() {
           </div>
         </div>
 
+        {/* Alerta de expiração */}
+        {isExpiringSoon && isFreeTrial && (
+          <Alert className="bg-yellow-500/20 border-yellow-500/30">
+            <AlertCircle className="w-4 h-4 text-yellow-400" />
+            <AlertDescription className="text-yellow-400">
+              Seu teste grátis expira em {daysLeft} dias! Assine agora para continuar aproveitando todos os benefícios.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {subscription && (
           <Card className="glass-effect p-6 border-[#CEF17B]/20">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-[#CEF17B]/20 flex items-center justify-center">
                   <Crown className="w-6 h-6 text-[#CEF17B]" />
@@ -121,14 +138,33 @@ export default function Subscription() {
                     {isPremium ? 'Plano Premium Ativo' : 'Teste Grátis Ativo'}
                   </h3>
                   <p className="text-sm text-[#CEEDB2]">
-                    {daysLeft} dias restantes
+                    {daysLeft > 0 ? `${daysLeft} dias restantes` : 'Expirou'}
                   </p>
+                  {subscription.auto_renew && isPremium && (
+                    <p className="text-xs text-[#CEEDB2] mt-1">
+                      Renovação automática: {format(new Date(subscription.end_date), 'dd/MM/yyyy')}
+                    </p>
+                  )}
                 </div>
               </div>
               <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-lg px-4 py-2">
                 {isPremium ? 'R$ 19,90/mês' : 'Grátis'}
               </Badge>
             </div>
+
+            {isPremium && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <Button
+                  onClick={handleCancelSubscription}
+                  variant="outline"
+                  size="sm"
+                  className="border-red-500/30 text-red-400 hover:bg-red-500/20"
+                  disabled={!subscription.auto_renew}
+                >
+                  {subscription.auto_renew ? 'Cancelar Renovação' : 'Renovação Cancelada'}
+                </Button>
+              </div>
+            )}
           </Card>
         )}
 
@@ -177,7 +213,7 @@ export default function Subscription() {
 
             {isFreeTrial && (
               <Button
-                onClick={handleUpgradeToPremium}
+                onClick={handleUpgrade}
                 disabled={processing}
                 className="w-full h-14 text-lg font-bold gradient-button text-[#084734] hover:opacity-90"
               >
@@ -185,7 +221,7 @@ export default function Subscription() {
               </Button>
             )}
 
-            {isPremium && (
+            {isPremium && subscription.auto_renew && (
               <div className="text-center">
                 <Badge className="bg-green-500/20 text-green-400 border-0 px-6 py-3">
                   ✓ Você já é Premium!
@@ -218,7 +254,14 @@ export default function Subscription() {
             <div>
               <p className="font-semibold text-white mb-1">Quais formas de pagamento aceitam?</p>
               <p className="text-sm text-[#CEEDB2]">
-                Aceitamos cartão de crédito, débito e PIX. Pagamento 100% seguro.
+                Aceitamos cartão de crédito e PIX. Pagamento 100% seguro com criptografia.
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-white mb-1">O que acontece após o teste grátis?</p>
+              <p className="text-sm text-[#CEEDB2]">
+                7 dias antes do fim do teste, você receberá um lembrete. Se não assinar, 
+                seu acesso às funcionalidades premium será bloqueado, mas seus dados serão mantidos.
               </p>
             </div>
           </div>

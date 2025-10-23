@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import QuickStats from "../components/dashboard/QuickStats";
 import MacroProgress from "../components/dashboard/MacroProgress";
 import WeeklyActivity from "../components/dashboard/WeeklyActivity";
 import Achievements from "../components/dashboard/Achievements";
+import SubscriptionStatus from "../components/dashboard/SubscriptionStatus";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -119,6 +121,8 @@ export default function Dashboard() {
             </Link>
           )}
         </div>
+
+        <SubscriptionStatus />
 
         <AIFitLensCoach 
           userName={user?.full_name?.split(' ')[0]}
