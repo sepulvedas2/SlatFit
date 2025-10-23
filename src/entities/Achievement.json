@@ -1,0 +1,43 @@
+{
+  "name": "Achievement",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "achievement_type": {
+      "type": "string",
+      "enum": [
+        "first_workout",
+        "streak_7",
+        "streak_30",
+        "100_workouts",
+        "1000_calories",
+        "perfect_week",
+        "early_bird",
+        "night_owl",
+        "protein_king",
+        "consistency_master"
+      ],
+      "description": "Tipo de conquista"
+    },
+    "unlocked_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de desbloqueio"
+    },
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo da conquista"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "user_email",
+    "achievement_type"
+  ]
+}

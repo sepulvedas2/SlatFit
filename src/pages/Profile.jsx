@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,8 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Target, Activity, LogOut, Save, Loader2 } from "lucide-react";
+import { User, Target, Activity, LogOut, Save, Loader2, Crown } from "lucide-react"; // Added Crown icon
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge"; // Added Badge component
+import { Link } from "react-router-dom"; // Assuming react-router-dom for navigation
+
+// Helper function to create page URLs. In a real app, this would likely be imported from a utility.
+const createPageUrl = (pageName) => {
+  switch (pageName) {
+    case "Subscription":
+      return "/subscription"; // Example path for the Subscription page
+    default:
+      return `/${pageName.toLowerCase()}`; // Generic fallback for other pages
+  }
+};
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -27,6 +40,17 @@ export default function Profile() {
       if (!user?.email) return null;
       const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
+  // NEW: Fetch subscription data
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const subs = await base44.entities.Subscription.filter({ user_email: user.email });
+      return subs[0] || null; // Assuming a user has at most one active subscription
     },
     enabled: !!user?.email,
   });
@@ -62,6 +86,8 @@ export default function Profile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      // Invalidate subscription query as well if profile save could affect it, or just for good measure.
+      // queryClient.invalidateQueries({ queryKey: ['subscription'] });
       setEditing(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -90,17 +116,31 @@ export default function Profile() {
     very_active: 'Muito Ativo'
   };
 
+  // NEW: Determine if the user is premium or on trial
+  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-3xl mx-auto space-y-6">
         
         {/* Header */}
         <div className="text-center">
-          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-            <User className="w-10 h-10 text-white" />
+          {/* Updated avatar styling */}
+          <div className="w-24 h-24 mx-auto mb-4 rounded-full gradient-primary flex items-center justify-center">
+            <User className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white">{user?.full_name}</h1>
-          <p className="text-gray-400 mt-1">{user?.email}</p>
+          <p className="text-white/70 mt-1">{user?.email}</p> {/* Updated text color */}
+          
+          {/* NEW: Premium/Trial Badge */}
+          {isPremium && (
+            <Link to={createPageUrl("Subscription")}>
+              <Badge className="mt-2 bg-[#CEF17B]/20 text-[#CEF17B] border-[#CEF17B]/30 hover:bg-[#CEF17B]/30 transition-colors cursor-pointer">
+                <Crown className="w-3 h-3 mr-1" />
+                {subscription.plan === "premium" ? "Premium" : "Teste Grátis"}
+              </Badge>
+            </Link>
+          )}
         </div>
 
         {success && (
@@ -301,7 +341,7 @@ export default function Profile() {
         <Button
           onClick={handleLogout}
           variant="outline"
-          className="w-full border-red-500/30 text-red-400 hover:bg-red-500/20"
+          className="w-full glass-effect border-red-500/30 text-red-400 hover:bg-red-500/20"
         >
           <LogOut className="w-5 h-5 mr-2" />
           Sair da Conta

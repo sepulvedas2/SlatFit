@@ -3,18 +3,20 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
-  Flame, Apple, Target, TrendingUp, Calendar, 
-  ChevronRight, Sparkles, Award, Clock
+  Flame, Target, TrendingUp, Calendar, Zap, Trophy,
+  Crown, Sparkles, Award, Clock, Apple
 } from "lucide-react";
-import { format, startOfWeek, endOfWeek } from "date-fns";
+import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import StatsCard from "../components/dashboard/StatsCard";
-import MacroChart from "../components/dashboard/MacroChart";
-import RecentActivity from "../components/dashboard/RecentActivity";
-import QuickActions from "../components/dashboard/QuickActions";
+import AIFitLensCoach from "../components/dashboard/AIFitLensCoach";
+import QuickStats from "../components/dashboard/QuickStats";
+import MacroProgress from "../components/dashboard/MacroProgress";
+import WeeklyActivity from "../components/dashboard/WeeklyActivity";
+import Achievements from "../components/dashboard/Achievements";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -29,6 +31,16 @@ export default function Dashboard() {
       if (!user?.email) return null;
       const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const subs = await base44.entities.Subscription.filter({ user_email: user.email });
+      return subs[0] || null;
     },
     enabled: !!user?.email,
   });
@@ -56,113 +68,130 @@ export default function Dashboard() {
     initialData: [],
   });
 
+  const { data: achievements } = useQuery({
+    queryKey: ['achievements', user?.email],
+    queryFn: () => base44.entities.Achievement.filter({ user_email: user.email }),
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
   const todayCalories = todayFoods.reduce((sum, food) => sum + (food.calories || 0), 0);
   const todayProtein = todayFoods.reduce((sum, food) => sum + (food.protein || 0), 0);
   const todayCarbs = todayFoods.reduce((sum, food) => sum + (food.carbs || 0), 0);
   const todayFats = todayFoods.reduce((sum, food) => sum + (food.fats || 0), 0);
 
   const calorieTarget = profile?.daily_calorie_target || 2000;
-  const calorieProgress = (todayCalories / calorieTarget) * 100;
+  const streakDays = weekWorkouts.length;
+
+  // Check subscription status
+  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
+  const isFreeTrial = subscription?.plan === "free_trial";
+  const daysLeft = subscription?.end_date 
+    ? differenceInDays(new Date(subscription.end_date), new Date())
+    : 30;
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold text-white">
               Olá, {user?.full_name?.split(' ')[0] || 'Atleta'}! 👋
             </h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-white/70 mt-1 text-sm md:text-base">
               {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500/20 to-pink-500/20 rounded-full border border-orange-500/30">
-            <Sparkles className="w-4 h-4 text-orange-400" />
-            <span className="text-sm font-semibold text-orange-300">Sequência: {weekWorkouts.length} dias</span>
-          </div>
+          
+          {/* Subscription Badge */}
+          {isPremium && (
+            <Link to={createPageUrl("Subscription")}>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
+                <Crown className="w-4 h-4 text-[#CEF17B]" />
+                <div className="text-xs">
+                  <div className="font-bold text-white">
+                    {isFreeTrial ? 'Teste Grátis' : 'Premium'}
+                  </div>
+                  <div className="text-white/60">
+                    {daysLeft} dias restantes
+                  </div>
+                </div>
+              </div>
+            </Link>
+          )}
         </div>
 
-        {/* Quick Actions */}
-        <QuickActions />
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatsCard
-            title="Calorias Hoje"
-            value={Math.round(todayCalories)}
-            target={calorieTarget}
-            icon={Flame}
-            color="from-orange-500 to-red-500"
-            suffix="kcal"
-          />
-          <StatsCard
-            title="Proteína"
-            value={Math.round(todayProtein)}
-            target={profile?.protein_target || 150}
-            icon={Apple}
-            color="from-green-500 to-emerald-500"
-            suffix="g"
-          />
-          <StatsCard
-            title="Treinos/Semana"
-            value={weekWorkouts.length}
-            target={5}
-            icon={Target}
-            color="from-purple-500 to-pink-500"
-            suffix=""
-          />
-          <StatsCard
-            title="Progresso"
-            value={profile?.current_weight || 0}
-            target={profile?.target_weight || 0}
-            icon={TrendingUp}
-            color="from-blue-500 to-cyan-500"
-            suffix="kg"
-          />
-        </div>
-
-        {/* Main Chart */}
-        <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-white">Macros de Hoje</h2>
-            <div className="text-sm text-gray-400">
-              {Math.round(calorieProgress)}% da meta
-            </div>
-          </div>
-          <MacroChart 
-            protein={todayProtein}
-            carbs={todayCarbs}
-            fats={todayFats}
-            proteinTarget={profile?.protein_target}
-            carbsTarget={profile?.carbs_target}
-            fatsTarget={profile?.fats_target}
-          />
-        </Card>
-
-        {/* Recent Activity */}
-        <RecentActivity 
-          recentFoods={todayFoods.slice(0, 3)}
-          recentWorkouts={weekWorkouts.slice(0, 3)}
+        {/* AI Coach */}
+        <AIFitLensCoach 
+          userName={user?.full_name?.split(' ')[0]}
+          streakDays={streakDays}
+          todayCalories={todayCalories}
+          calorieTarget={calorieTarget}
         />
 
-        {/* Motivational Card */}
-        <Card className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-purple-500/30 p-6">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-purple-500/20 rounded-xl">
-              <Award className="w-6 h-6 text-purple-400" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-white mb-1">Você está no caminho certo!</h3>
-              <p className="text-sm text-gray-300">
-                Continue assim e você alcançará seu objetivo em aproximadamente {
-                  Math.abs(((profile?.target_weight || 0) - (profile?.current_weight || 0)) * 7).toFixed(0)
-                } dias.
-              </p>
-            </div>
-          </div>
-        </Card>
+        {/* Quick Stats */}
+        <QuickStats
+          todayCalories={todayCalories}
+          calorieTarget={calorieTarget}
+          todayProtein={todayProtein}
+          proteinTarget={profile?.protein_target || 150}
+          weekWorkouts={weekWorkouts.length}
+          currentWeight={profile?.current_weight}
+          targetWeight={profile?.target_weight}
+        />
+
+        {/* Macro Progress */}
+        <MacroProgress
+          protein={todayProtein}
+          carbs={todayCarbs}
+          fats={todayFats}
+          proteinTarget={profile?.protein_target}
+          carbsTarget={profile?.carbs_target}
+          fatsTarget={profile?.fats_target}
+        />
+
+        {/* Weekly Activity */}
+        <WeeklyActivity workouts={weekWorkouts} foods={todayFoods} />
+
+        {/* Achievements */}
+        <Achievements achievements={achievements} />
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link to={createPageUrl("FoodScanner")}>
+            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer">
+              <Camera className="w-8 h-8 text-[#CEF17B] mb-2" />
+              <p className="text-sm font-semibold text-white">Escanear</p>
+              <p className="text-xs text-white/60">Alimento</p>
+            </Card>
+          </Link>
+          
+          <Link to={createPageUrl("Workouts")}>
+            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer">
+              <Dumbbell className="w-8 h-8 text-[#CEF17B] mb-2" />
+              <p className="text-sm font-semibold text-white">Novo</p>
+              <p className="text-xs text-white/60">Treino</p>
+            </Card>
+          </Link>
+          
+          <Link to={createPageUrl("MealPlans")}>
+            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer">
+              <Apple className="w-8 h-8 text-[#CEF17B] mb-2" />
+              <p className="text-sm font-semibold text-white">Ver</p>
+              <p className="text-xs text-white/60">Refeições</p>
+            </Card>
+          </Link>
+          
+          <Link to={createPageUrl("Profile")}>
+            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer">
+              <Target className="w-8 h-8 text-[#CEF17B] mb-2" />
+              <p className="text-sm font-semibold text-white">Meu</p>
+              <p className="text-xs text-white/60">Progresso</p>
+            </Card>
+          </Link>
+        </div>
 
       </div>
     </div>
