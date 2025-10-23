@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Home, Camera, Dumbbell, UtensilsCrossed, User, Crown } from "lucide-react";
+import { Home, Camera, Dumbbell, UtensilsCrossed, User } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
@@ -17,17 +17,9 @@ export default function Layout({ children, currentPageName }) {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="min-h-screen" style={{
-      background: 'linear-gradient(160deg, #084734 0%, #0a5a42 50%, #CEEDB2 100%)'
-    }}>
+    <div className="min-h-screen bg-[#084734]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
-        
-        :root {
-          --primary: #084734;
-          --secondary: #CEF17B;
-          --tertiary: #CEEDB2;
-        }
         
         * {
           font-family: 'Inter', sans-serif;
@@ -47,13 +39,13 @@ export default function Layout({ children, currentPageName }) {
         }
         
         .gradient-button {
-          background: linear-gradient(90deg, #084734, #CEF17B);
+          background: linear-gradient(90deg, #CEF17B, #CEEDB2);
         }
         
         .glass-effect {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(206, 237, 178, 0.1);
           backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(206, 241, 123, 0.2);
         }
       `}</style>
 
@@ -63,7 +55,7 @@ export default function Layout({ children, currentPageName }) {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 glass-effect z-50 border-t border-white/20">
+      <nav className="fixed bottom-0 left-0 right-0 glass-effect z-50 border-t border-[#CEF17B]/20">
         <div className="max-w-lg mx-auto px-2">
           <div className="flex justify-around items-center py-2">
             {navItems.map((item) => {
@@ -76,12 +68,12 @@ export default function Layout({ children, currentPageName }) {
                   to={item.path}
                   className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-300 ${
                     active 
-                      ? "bg-white/20 scale-110" 
-                      : "hover:bg-white/10"
+                      ? "bg-[#CEF17B]/20 scale-110" 
+                      : "hover:bg-[#CEF17B]/10"
                   }`}
                 >
                   <Icon className={`w-5 h-5 ${active ? 'text-[#CEF17B]' : 'text-white/70'}`} />
-                  <span className={`text-xs font-medium ${active ? 'text-white' : 'text-white/70'}`}>
+                  <span className={`text-xs font-medium ${active ? 'text-[#CEF17B]' : 'text-white/70'}`}>
                     {item.name}
                   </span>
                 </Link>

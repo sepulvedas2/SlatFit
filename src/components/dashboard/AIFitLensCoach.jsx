@@ -57,11 +57,10 @@ export default function AIFitLensCoach({ userName, streakDays, todayCalories, ca
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="relative overflow-hidden gradient-card border-0 p-6">
+      <Card className="relative overflow-hidden gradient-card border-0 p-6 shadow-xl">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
         
         <div className="flex items-start gap-4 relative z-10">
-          {/* AI Avatar */}
           <motion.div
             animate={{ 
               scale: [1, 1.05, 1],
@@ -74,14 +73,13 @@ export default function AIFitLensCoach({ userName, streakDays, todayCalories, ca
             }}
             className="flex-shrink-0"
           >
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#084734] to-[#CEF17B] p-1">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#084734] to-[#CEF17B] p-1 shadow-lg">
               <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
                 <div className="text-3xl">🤖</div>
               </div>
             </div>
           </motion.div>
 
-          {/* Message */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-[#084734]" />
@@ -93,7 +91,6 @@ export default function AIFitLensCoach({ userName, streakDays, todayCalories, ca
           </div>
         </div>
 
-        {/* Animated decoration */}
         <motion.div
           className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[#084734] to-[#CEF17B]"
           animate={{ 

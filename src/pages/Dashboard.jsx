@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -8,8 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
-  Flame, Target, TrendingUp, Calendar, Zap, Trophy,
-  Crown, Sparkles, Award, Clock, Apple, Camera, Dumbbell
+  Crown, Camera, Dumbbell, Apple, Target
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -84,7 +82,6 @@ export default function Dashboard() {
   const calorieTarget = profile?.daily_calorie_target || 2000;
   const streakDays = weekWorkouts.length;
 
-  // Check subscription status
   const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
   const isFreeTrial = subscription?.plan === "free_trial";
   const daysLeft = subscription?.end_date 
@@ -101,21 +98,20 @@ export default function Dashboard() {
             <h1 className="text-3xl md:text-4xl font-bold text-white">
               Olá, {user?.full_name?.split(' ')[0] || 'Atleta'}! 👋
             </h1>
-            <p className="text-white/70 mt-1 text-sm md:text-base">
+            <p className="text-[#CEEDB2] mt-1 text-sm md:text-base">
               {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
             </p>
           </div>
           
-          {/* Subscription Badge */}
           {isPremium && (
             <Link to={createPageUrl("Subscription")}>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full glass-effect cursor-pointer hover:scale-105 transition-transform">
                 <Crown className="w-4 h-4 text-[#CEF17B]" />
                 <div className="text-xs">
                   <div className="font-bold text-white">
                     {isFreeTrial ? 'Teste Grátis' : 'Premium'}
                   </div>
-                  <div className="text-white/60">
+                  <div className="text-[#CEEDB2]">
                     {daysLeft} dias restantes
                   </div>
                 </div>
@@ -124,7 +120,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* AI Coach */}
         <AIFitLensCoach 
           userName={user?.full_name?.split(' ')[0]}
           streakDays={streakDays}
@@ -132,7 +127,6 @@ export default function Dashboard() {
           calorieTarget={calorieTarget}
         />
 
-        {/* Quick Stats */}
         <QuickStats
           todayCalories={todayCalories}
           calorieTarget={calorieTarget}
@@ -143,7 +137,6 @@ export default function Dashboard() {
           targetWeight={profile?.target_weight}
         />
 
-        {/* Macro Progress */}
         <MacroProgress
           protein={todayProtein}
           carbs={todayCarbs}
@@ -153,43 +146,41 @@ export default function Dashboard() {
           fatsTarget={profile?.fats_target}
         />
 
-        {/* Weekly Activity */}
         <WeeklyActivity workouts={weekWorkouts} foods={todayFoods} />
 
-        {/* Achievements */}
         <Achievements achievements={achievements} />
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Link to={createPageUrl("FoodScanner")}>
-            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer">
+            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
               <Camera className="w-8 h-8 text-[#CEF17B] mb-2" />
               <p className="text-sm font-semibold text-white">Escanear</p>
-              <p className="text-xs text-white/60">Alimento</p>
+              <p className="text-xs text-[#CEEDB2]">Alimento</p>
             </Card>
           </Link>
           
           <Link to={createPageUrl("Workouts")}>
-            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer">
+            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
               <Dumbbell className="w-8 h-8 text-[#CEF17B] mb-2" />
               <p className="text-sm font-semibold text-white">Novo</p>
-              <p className="text-xs text-white/60">Treino</p>
+              <p className="text-xs text-[#CEEDB2]">Treino</p>
             </Card>
           </Link>
           
           <Link to={createPageUrl("MealPlans")}>
-            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer">
+            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
               <Apple className="w-8 h-8 text-[#CEF17B] mb-2" />
               <p className="text-sm font-semibold text-white">Ver</p>
-              <p className="text-xs text-white/60">Refeições</p>
+              <p className="text-xs text-[#CEEDB2]">Refeições</p>
             </Card>
           </Link>
           
           <Link to={createPageUrl("Profile")}>
-            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer">
+            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
               <Target className="w-8 h-8 text-[#CEF17B] mb-2" />
               <p className="text-sm font-semibold text-white">Meu</p>
-              <p className="text-xs text-white/60">Progresso</p>
+              <p className="text-xs text-[#CEEDB2]">Progresso</p>
             </Card>
           </Link>
         </div>

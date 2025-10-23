@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Crown, Check, Sparkles, Zap, Target, Trophy, ArrowLeft } from "lucide-react";
 import { differenceInDays, addMonths } from "date-fns";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -71,7 +70,6 @@ export default function Subscription() {
 
   const handleUpgradeToPremium = async () => {
     setProcessing(true);
-    // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000));
     await upgradeToPremiumMutation.mutateAsync();
     setProcessing(false);
@@ -96,25 +94,23 @@ export default function Subscription() {
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         
-        {/* Header */}
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
             size="icon"
             onClick={() => navigate(createPageUrl("Dashboard"))}
-            className="glass-effect border-white/20"
+            className="glass-effect border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-white">Assinatura Premium</h1>
-            <p className="text-white/70 mt-1">Evolua seu treino com FitLens IA</p>
+            <p className="text-[#CEEDB2] mt-1">Evolua seu treino com FitLens IA</p>
           </div>
         </div>
 
-        {/* Current Status */}
         {subscription && (
-          <Card className="glass-effect p-6">
+          <Card className="glass-effect p-6 border-[#CEF17B]/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-[#CEF17B]/20 flex items-center justify-center">
@@ -124,7 +120,7 @@ export default function Subscription() {
                   <h3 className="text-lg font-bold text-white">
                     {isPremium ? 'Plano Premium Ativo' : 'Teste Grátis Ativo'}
                   </h3>
-                  <p className="text-sm text-white/60">
+                  <p className="text-sm text-[#CEEDB2]">
                     {daysLeft} dias restantes
                   </p>
                 </div>
@@ -136,8 +132,7 @@ export default function Subscription() {
           </Card>
         )}
 
-        {/* Pricing Card */}
-        <Card className="relative overflow-hidden">
+        <Card className="relative overflow-hidden border-[#CEF17B]/20">
           <div className="absolute top-0 right-0 w-64 h-64 gradient-card rounded-full -mr-32 -mt-32 opacity-30" />
           
           <div className="relative z-10 p-8">
@@ -149,14 +144,13 @@ export default function Subscription() {
               
               <h2 className="text-5xl font-bold text-white mb-2">
                 R$ 19,90
-                <span className="text-lg text-white/60">/mês</span>
+                <span className="text-lg text-[#CEEDB2]">/mês</span>
               </h2>
-              <p className="text-white/70">
+              <p className="text-[#CEEDB2]">
                 {!subscription ? '1 mês grátis para começar' : 'Cancele quando quiser'}
               </p>
             </div>
 
-            {/* Features */}
             <div className="space-y-4 mb-8">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
@@ -171,12 +165,11 @@ export default function Subscription() {
               })}
             </div>
 
-            {/* CTA Button */}
             {!subscription && (
               <Button
                 onClick={handleStartTrial}
                 disabled={processing}
-                className="w-full h-14 text-lg font-bold gradient-button text-white hover:opacity-90"
+                className="w-full h-14 text-lg font-bold gradient-button text-[#084734] hover:opacity-90"
               >
                 {processing ? 'Ativando...' : 'Começar Teste Grátis'}
               </Button>
@@ -186,7 +179,7 @@ export default function Subscription() {
               <Button
                 onClick={handleUpgradeToPremium}
                 disabled={processing}
-                className="w-full h-14 text-lg font-bold gradient-button text-white hover:opacity-90"
+                className="w-full h-14 text-lg font-bold gradient-button text-[#084734] hover:opacity-90"
               >
                 {processing ? 'Processando...' : 'Assinar Agora'}
               </Button>
@@ -200,32 +193,31 @@ export default function Subscription() {
               </div>
             )}
 
-            <p className="text-center text-xs text-white/50 mt-4">
+            <p className="text-center text-xs text-[#CEEDB2] mt-4">
               Pagamento seguro • Cancele a qualquer momento
             </p>
           </div>
         </Card>
 
-        {/* FAQ */}
-        <Card className="glass-effect p-6">
+        <Card className="glass-effect p-6 border-[#CEF17B]/20">
           <h3 className="text-xl font-bold text-white mb-4">Perguntas Frequentes</h3>
           <div className="space-y-4">
             <div>
               <p className="font-semibold text-white mb-1">Como funciona o teste grátis?</p>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-[#CEEDB2]">
                 Você tem 30 dias para testar todas as funcionalidades Premium sem custo. 
                 Após esse período, será cobrado R$ 19,90/mês.
               </p>
             </div>
             <div>
               <p className="font-semibold text-white mb-1">Posso cancelar quando quiser?</p>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-[#CEEDB2]">
                 Sim! Você pode cancelar sua assinatura a qualquer momento sem multas ou taxas.
               </p>
             </div>
             <div>
               <p className="font-semibold text-white mb-1">Quais formas de pagamento aceitam?</p>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-[#CEEDB2]">
                 Aceitamos cartão de crédito, débito e PIX. Pagamento 100% seguro.
               </p>
             </div>
