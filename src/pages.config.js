@@ -7,6 +7,8 @@ import Subscription from './pages/Subscription';
 import Checkout from './pages/Checkout';
 import BillingHistory from './pages/BillingHistory';
 import CheckIn from './pages/CheckIn';
+import Challenges from './pages/Challenges';
+import Community from './pages/Community';
 import Layout from './Layout.jsx';
 
 
@@ -20,6 +22,8 @@ export const PAGES = {
     "Checkout": Checkout,
     "BillingHistory": BillingHistory,
     "CheckIn": CheckIn,
+    "Challenges": Challenges,
+    "Community": Community,
 }
 
 export const pagesConfig = {

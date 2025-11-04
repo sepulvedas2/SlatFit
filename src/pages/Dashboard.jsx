@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
-  Crown, Camera, Dumbbell, Apple, Target
+  Crown, Camera, Dumbbell, Apple, Target, 
+  CheckCircle, Zap, Trophy, Users
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -19,6 +20,7 @@ import WeeklyActivity from "../components/dashboard/WeeklyActivity";
 import Achievements from "../components/dashboard/Achievements";
 import SubscriptionStatus from "../components/dashboard/SubscriptionStatus";
 import WelcomeModal from "../components/onboarding/WelcomeModal";
+import DailyMissions from "../components/dashboard/DailyMissions";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -90,6 +92,29 @@ export default function Dashboard() {
     initialData: [],
   });
 
+  // NEW: Check-in status
+  const { data: todayCheckIn } = useQuery({
+    queryKey: ['checkIn', user?.email, today],
+    queryFn: async () => {
+      const checkIns = await base44.entities.DailyCheckIn.filter({
+        user_email: user.email,
+        check_in_date: today
+      });
+      return checkIns[0] || null;
+    },
+    enabled: !!user?.email
+  });
+
+  // NEW: User points
+  const { data: userPoints } = useQuery({
+    queryKey: ['userPoints', user?.email],
+    queryFn: async () => {
+      const points = await base44.entities.UserPoints.filter({ user_email: user.email });
+      return points[0] || null;
+    },
+    enabled: !!user?.email
+  });
+
   const todayCalories = todayFoods.reduce((sum, food) => sum + (food.calories || 0), 0);
   const todayProtein = todayFoods.reduce((sum, food) => sum + (food.protein || 0), 0);
   const todayCarbs = todayFoods.reduce((sum, food) => sum + (food.carbs || 0), 0);
@@ -119,21 +144,36 @@ export default function Dashboard() {
             </p>
           </div>
           
-          {isPremium && (
-            <Link to={createPageUrl("Subscription")}>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full glass-effect cursor-pointer hover:scale-105 transition-transform">
-                <Crown className="w-4 h-4 text-[#CEF17B]" />
-                <div className="text-xs">
-                  <div className="font-bold text-white">
-                    {isFreeTrial ? 'Teste Grátis' : 'Premium'}
-                  </div>
-                  <div className="text-[#CEEDB2]">
-                    {daysLeft} dias restantes
+          <div className="flex items-center gap-3">
+            {/* Level Badge */}
+            {userPoints && (
+              <div className="glass-effect px-4 py-2 rounded-full border border-[#CEF17B]/20">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-[#CEF17B]" />
+                  <div className="text-xs">
+                    <div className="font-bold text-white">Nível {userPoints.level}</div>
+                    <div className="text-[#CEEDB2]">{userPoints.xp_current}/{userPoints.xp_next_level} XP</div>
                   </div>
                 </div>
               </div>
-            </Link>
-          )}
+            )}
+
+            {isPremium && (
+              <Link to={createPageUrl("Subscription")}>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full glass-effect cursor-pointer hover:scale-105 transition-transform">
+                  <Crown className="w-4 h-4 text-[#CEF17B]" />
+                  <div className="text-xs">
+                    <div className="font-bold text-white">
+                      {isFreeTrial ? 'Teste Grátis' : 'Premium'}
+                    </div>
+                    <div className="text-[#CEEDB2]">
+                      {daysLeft} dias restantes
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
         </div>
 
         <SubscriptionStatus />
@@ -144,6 +184,35 @@ export default function Dashboard() {
             onClose={() => setShowWelcome(false)} 
           />
         )}
+
+        {/* NEW: Daily Check-in CTA */}
+        {!todayCheckIn && (
+          <Link to={createPageUrl("CheckIn")}>
+            <Card className="gradient-card border-0 p-6 cursor-pointer hover:scale-[1.02] transition-all shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-[#084734]/30 flex items-center justify-center">
+                    <CheckCircle className="w-8 h-8 text-[#084734]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-[#084734]">
+                      Faça seu Check-in Diário! 🎯
+                    </h3>
+                    <p className="text-[#084734]/70 text-sm mt-1">
+                      Como você está hoje? A IA vai ajustar seu treino! (+10 XP)
+                    </p>
+                  </div>
+                </div>
+                <Button className="bg-[#084734] text-[#CEF17B] hover:bg-[#084734]/90">
+                  Começar
+                </Button>
+              </div>
+            </Card>
+          </Link>
+        )}
+
+        {/* NEW: Daily Missions */}
+        <DailyMissions userEmail={user?.email} />
 
         <AIFitLensCoach 
           userName={user?.full_name?.split(' ')[0]}
@@ -193,19 +262,19 @@ export default function Dashboard() {
             </Card>
           </Link>
           
-          <Link to={createPageUrl("MealPlans")}>
+          <Link to={createPageUrl("Challenges")}>
             <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
-              <Apple className="w-8 h-8 text-[#CEF17B] mb-2" />
-              <p className="text-sm font-semibold text-white">Ver</p>
-              <p className="text-xs text-[#CEEDB2]">Refeições</p>
+              <Trophy className="w-8 h-8 text-[#CEF17B] mb-2" />
+              <p className="text-sm font-semibold text-white">Desafios</p>
+              <p className="text-xs text-[#CEEDB2]">Ativos</p>
             </Card>
           </Link>
           
-          <Link to={createPageUrl("Profile")}>
+          <Link to={createPageUrl("Community")}>
             <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
-              <Target className="w-8 h-8 text-[#CEF17B] mb-2" />
-              <p className="text-sm font-semibold text-white">Meu</p>
-              <p className="text-xs text-[#CEEDB2]">Progresso</p>
+              <Users className="w-8 h-8 text-[#CEF17B] mb-2" />
+              <p className="text-sm font-semibold text-white">Comunidade</p>
+              <p className="text-xs text-[#CEEDB2]">Rankings</p>
             </Card>
           </Link>
         </div>
