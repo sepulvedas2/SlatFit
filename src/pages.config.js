@@ -6,6 +6,7 @@ import Profile from './pages/Profile';
 import Subscription from './pages/Subscription';
 import Checkout from './pages/Checkout';
 import BillingHistory from './pages/BillingHistory';
+import CheckIn from './pages/CheckIn';
 import Layout from './Layout.jsx';
 
 
@@ -18,6 +19,7 @@ export const PAGES = {
     "Subscription": Subscription,
     "Checkout": Checkout,
     "BillingHistory": BillingHistory,
+    "CheckIn": CheckIn,
 }
 
 export const pagesConfig = {
