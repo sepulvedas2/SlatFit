@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Camera, Dumbbell, UtensilsCrossed, User } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import IAGOChatButton from "./components/chat/IAGOChatButton";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
 
   const navItems = [
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
@@ -53,6 +60,9 @@ export default function Layout({ children, currentPageName }) {
       <main className="pb-24 md:pb-8">
         {children}
       </main>
+
+      {/* IAGO Chat Button - aparece em todas as páginas */}
+      <IAGOChatButton user={user} />
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 glass-effect z-50 border-t border-[#CEF17B]/20">
