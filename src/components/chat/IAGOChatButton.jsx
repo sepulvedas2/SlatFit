@@ -20,11 +20,21 @@ export default function IAGOChatButton({ user }) {
     return () => clearInterval(interval);
   }, [isOpen]);
 
+  // Listen for custom event to open chat from dashboard
+  useEffect(() => {
+    const handleOpenChat = () => {
+      setIsOpen(true);
+    };
+
+    window.addEventListener('openIAGOChat', handleOpenChat);
+    return () => window.removeEventListener('openIAGOChat', handleOpenChat);
+  }, []);
+
   if (!user) return null;
 
   return (
     <>
-      {/* Botão Flutuante */}
+      {/* Botão Flutuante - moved to bottom-right corner */}
       <motion.div
         className="fixed bottom-24 right-6 z-40 md:bottom-8"
         initial={{ scale: 0 }}

@@ -9,11 +9,10 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Crown, Camera, Dumbbell, Apple, Target, 
-  CheckCircle, Zap, Trophy, Users
+  CheckCircle, Zap, Trophy, Users, MessageCircle, Sparkles
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import IAGOCoach from "../components/dashboard/IAGOCoach";
 import QuickStats from "../components/dashboard/QuickStats";
 import MacroProgress from "../components/dashboard/MacroProgress";
 import WeeklyActivity from "../components/dashboard/WeeklyActivity";
@@ -121,6 +120,14 @@ export default function Dashboard() {
     ? differenceInDays(new Date(subscription.end_date), new Date())
     : 30;
 
+  // Function to trigger IAGO chat from the banner
+  const openIAGOChat = () => {
+    // The button is handled by IAGOChatButton component in Layout
+    // We can dispatch a custom event or just let users click the floating button
+    const event = new CustomEvent('openIAGOChat');
+    window.dispatchEvent(event);
+  };
+
   return (
     <div className="min-h-screen p-4 md:p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -167,6 +174,37 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* NEW: IAGO Quick Access Banner */}
+        <Card 
+          onClick={openIAGOChat}
+          className="glass-effect border-[#CEF17B]/20 p-4 cursor-pointer hover:scale-[1.02] transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 p-1 flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+                  <span className="text-xl">🤖</span>
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-white">IAGO</h3>
+                  <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
+                    Seu Personal AI
+                  </Badge>
+                </div>
+                <p className="text-sm text-[#CEEDB2]">
+                  Tire dúvidas sobre treino, nutrição e recuperação
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#CEF17B]" />
+              <MessageCircle className="w-5 h-5 text-[#CEF17B]" />
+            </div>
+          </div>
+        </Card>
+
         <SubscriptionStatus />
 
         {showWelcome && user && (
@@ -202,17 +240,6 @@ export default function Dashboard() {
         )}
 
         <DailyMissions userEmail={user?.email} />
-
-        {/* IAGO Coach with full context */}
-        <IAGOCoach 
-          user={user}
-          profile={profile}
-          todayCheckIn={todayCheckIn}
-          weekWorkouts={weekWorkouts}
-          todayCalories={todayCalories}
-          calorieTarget={calorieTarget}
-          userPoints={userPoints}
-        />
 
         <QuickStats
           todayCalories={todayCalories}
