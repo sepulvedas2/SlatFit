@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import AIFitLensCoach from "../components/dashboard/AIFitLensCoach";
+import IAGOCoach from "../components/dashboard/IAGOCoach";
 import QuickStats from "../components/dashboard/QuickStats";
 import MacroProgress from "../components/dashboard/MacroProgress";
 import WeeklyActivity from "../components/dashboard/WeeklyActivity";
@@ -50,13 +50,7 @@ export default function Dashboard() {
     enabled: !!user?.email,
   });
 
-  // Check if user is new and needs welcome
   useEffect(() => {
-    // Only show welcome if user is loaded and subscription data is loaded,
-    // and if there's no subscription associated with the user.
-    // We also need to make sure `subscription` is explicitly `null` or `undefined`
-    // (not just an empty array or object if API returns that for no subscription).
-    // The queryFn already returns null if no subscription is found.
     if (user && subscription === null) {
       setShowWelcome(true);
     }
@@ -92,7 +86,6 @@ export default function Dashboard() {
     initialData: [],
   });
 
-  // NEW: Check-in status
   const { data: todayCheckIn } = useQuery({
     queryKey: ['checkIn', user?.email, today],
     queryFn: async () => {
@@ -105,7 +98,6 @@ export default function Dashboard() {
     enabled: !!user?.email
   });
 
-  // NEW: User points
   const { data: userPoints } = useQuery({
     queryKey: ['userPoints', user?.email],
     queryFn: async () => {
@@ -127,7 +119,7 @@ export default function Dashboard() {
   const isFreeTrial = subscription?.plan === "free_trial";
   const daysLeft = subscription?.end_date 
     ? differenceInDays(new Date(subscription.end_date), new Date())
-    : 30; // Default to 30 days if no subscription end date
+    : 30;
 
   return (
     <div className="min-h-screen p-4 md:p-6">
@@ -145,7 +137,6 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-3">
-            {/* Level Badge */}
             {userPoints && (
               <div className="glass-effect px-4 py-2 rounded-full border border-[#CEF17B]/20">
                 <div className="flex items-center gap-2">
@@ -185,7 +176,6 @@ export default function Dashboard() {
           />
         )}
 
-        {/* NEW: Daily Check-in CTA */}
         {!todayCheckIn && (
           <Link to={createPageUrl("CheckIn")}>
             <Card className="gradient-card border-0 p-6 cursor-pointer hover:scale-[1.02] transition-all shadow-lg">
@@ -211,14 +201,17 @@ export default function Dashboard() {
           </Link>
         )}
 
-        {/* NEW: Daily Missions */}
         <DailyMissions userEmail={user?.email} />
 
-        <AIFitLensCoach 
-          userName={user?.full_name?.split(' ')[0]}
-          streakDays={streakDays}
+        {/* IAGO Coach with full context */}
+        <IAGOCoach 
+          user={user}
+          profile={profile}
+          todayCheckIn={todayCheckIn}
+          weekWorkouts={weekWorkouts}
           todayCalories={todayCalories}
           calorieTarget={calorieTarget}
+          userPoints={userPoints}
         />
 
         <QuickStats
@@ -244,7 +237,6 @@ export default function Dashboard() {
 
         <Achievements achievements={achievements} />
 
-        {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Link to={createPageUrl("FoodScanner")}>
             <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
