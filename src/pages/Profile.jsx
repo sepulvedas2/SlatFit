@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { format } from 'date-fns'; // Added for date formatting
+import ThemeSelector from "../components/profile/ThemeSelector"; // NEW: Import ThemeSelector
 
 // Helper function to create page URLs. In a real app, this would likely be imported from a utility.
 const createPageUrl = (pageName) => {
@@ -74,7 +75,8 @@ export default function Profile() {
         daily_calorie_target: 2000,
         protein_target: 150,
         carbs_target: 200,
-        fats_target: 60
+        fats_target: 60,
+        theme_preference: 'default' // NEW: Initialize theme preference
       });
     }
   }, [profile, user]);
@@ -94,11 +96,24 @@ export default function Profile() {
       setEditing(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
+      
+      // NEW: Trigger theme change event
+      window.dispatchEvent(new CustomEvent('themeChanged', { 
+        detail: { theme: formData.theme_preference } 
+      }));
     },
   });
 
   const handleSave = () => {
     saveProfileMutation.mutate(formData);
+  };
+
+  // NEW: Handle theme change and save
+  const handleThemeChange = (themeId) => {
+    const updatedData = { ...formData, theme_preference: themeId };
+    setFormData(updatedData);
+    // Directly mutate with the updated data, no need to wait for edit mode
+    saveProfileMutation.mutate(updatedData);
   };
 
   const handleLogout = () => {
@@ -153,6 +168,13 @@ export default function Profile() {
             </AlertDescription>
           </Alert>
         )}
+
+        {/* NEW: Theme Selector */}
+        <ThemeSelector 
+          currentTheme={formData.theme_preference || 'default'}
+          onThemeChange={handleThemeChange}
+          isPremium={isPremium}
+        />
 
         {/* Stats Cards */}
         {profile && !editing && (
