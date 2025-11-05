@@ -84,7 +84,7 @@ export default function Layout({ children, currentPageName }) {
     },
     pink: {
       bg: "#ec4899",
-      gradient: "linear-gradient(135deg, #ec4899, #f472b6)",
+      gradient: "linear-linear-gradient(135deg, #ec4899, #f472b6)",
       cardGradient: "linear-gradient(180deg, #f472b6, #fb7185)",
       buttonGradient: "linear-gradient(90deg, #fb7185, #f472b6)",
     },
@@ -156,23 +156,24 @@ export default function Layout({ children, currentPageName }) {
           border: 1px solid rgba(206, 241, 123, 0.2);
         }
 
-        /* Garantir que a navegação fique sempre fixa */
-        nav.bottom-nav {
+        /* Garantir que a navegação fique sempre visível e fixa */
+        .bottom-navigation {
           position: fixed !important;
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          z-index: 9999 !important;
+          z-index: 99999 !important;
+          pointer-events: auto !important;
         }
       `}</style>
 
       {/* Main Content */}
-      <main className="pb-28 md:pb-8">
+      <main className="pb-28 md:pb-8 min-h-screen">
         {children}
       </main>
 
-      {/* Bottom Navigation - Fixa no fundo */}
-      <nav className="bottom-nav fixed bottom-0 left-0 right-0 glass-effect z-[9999] border-t border-[#CEF17B]/20">
+      {/* Bottom Navigation - Sempre visível e fixa */}
+      <nav className="bottom-navigation fixed bottom-0 left-0 right-0 glass-effect border-t border-[#CEF17B]/20">
         <div className="max-w-lg mx-auto px-2">
           <div className="flex justify-around items-center py-2">
             {navItems.map((item) => {
