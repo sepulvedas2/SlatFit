@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Camera, Dumbbell, UtensilsCrossed, User } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import IAGOChatButton from "./components/chat/IAGOChatButton";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
@@ -82,6 +81,30 @@ export default function Layout({ children, currentPageName }) {
       cardGradient: "linear-gradient(180deg, #3b82f6, #06b6d4)",
       buttonGradient: "linear-gradient(90deg, #06b6d4, #3b82f6)",
     },
+    pink: {
+      bg: "#ec4899",
+      gradient: "linear-gradient(135deg, #ec4899, #f472b6)",
+      cardGradient: "linear-gradient(180deg, #f472b6, #fb7185)",
+      buttonGradient: "linear-gradient(90deg, #fb7185, #f472b6)",
+    },
+    teal: {
+      bg: "#14b8a6",
+      gradient: "linear-gradient(135deg, #14b8a6, #2dd4bf)",
+      cardGradient: "linear-gradient(180deg, #2dd4bf, #5eead4)",
+      buttonGradient: "linear-gradient(90deg, #5eead4, #2dd4bf)",
+    },
+    indigo: {
+      bg: "#6366f1",
+      gradient: "linear-gradient(135deg, #6366f1, #818cf8)",
+      cardGradient: "linear-gradient(180deg, #818cf8, #a5b4fc)",
+      buttonGradient: "linear-gradient(90deg, #a5b4fc, #818cf8)",
+    },
+    emerald: {
+      bg: "#10b981",
+      gradient: "linear-gradient(135deg, #10b981, #34d399)",
+      cardGradient: "linear-gradient(180deg, #34d399, #6ee7b7)",
+      buttonGradient: "linear-gradient(90deg, #6ee7b7, #34d399)",
+    },
     dark: {
       bg: "#111827",
       gradient: "linear-gradient(135deg, #111827, #1f2937)",
@@ -137,9 +160,6 @@ export default function Layout({ children, currentPageName }) {
       <main className="pb-24 md:pb-8">
         {children}
       </main>
-
-      {/* IAGO Chat Button - aparece em todas as páginas */}
-      <IAGOChatButton user={user} />
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 glass-effect z-50 border-t border-[#CEF17B]/20">
