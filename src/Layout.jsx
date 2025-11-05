@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -154,15 +155,24 @@ export default function Layout({ children, currentPageName }) {
           backdrop-filter: blur(10px);
           border: 1px solid rgba(206, 241, 123, 0.2);
         }
+
+        /* Garantir que a navegação fique sempre fixa */
+        nav.bottom-nav {
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          z-index: 9999 !important;
+        }
       `}</style>
 
       {/* Main Content */}
-      <main className="pb-24 md:pb-8">
+      <main className="pb-28 md:pb-8">
         {children}
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 glass-effect z-50 border-t border-[#CEF17B]/20">
+      {/* Bottom Navigation - Fixa no fundo */}
+      <nav className="bottom-nav fixed bottom-0 left-0 right-0 glass-effect z-[9999] border-t border-[#CEF17B]/20">
         <div className="max-w-lg mx-auto px-2">
           <div className="flex justify-around items-center py-2">
             {navItems.map((item) => {
