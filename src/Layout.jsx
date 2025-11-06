@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Camera, Dumbbell, UtensilsCrossed, User } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import IAGOChatButton from "./components/chat/IAGOChatButton";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
@@ -171,6 +172,9 @@ export default function Layout({ children, currentPageName }) {
       <main className="pb-28 md:pb-8 min-h-screen">
         {children}
       </main>
+
+      {/* IAGO Chat Button - Now Working */}
+      <IAGOChatButton user={user} />
 
       {/* Bottom Navigation - Sempre visível e fixa */}
       <nav className="bottom-navigation fixed bottom-0 left-0 right-0 glass-effect border-t border-[#CEF17B]/20">
