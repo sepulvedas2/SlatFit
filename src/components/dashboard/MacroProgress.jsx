@@ -4,12 +4,12 @@ import { Progress } from "@/components/ui/progress";
 import { Beef, Wheat, Droplet } from "lucide-react";
 
 export default function MacroProgress({ 
-  protein = 0, 
-  carbs = 0, 
-  fats = 0, 
-  proteinTarget = 150, 
-  carbsTarget = 200, 
-  fatsTarget = 60 
+  protein, 
+  carbs, 
+  fats, 
+  proteinTarget, 
+  carbsTarget, 
+  fatsTarget 
 }) {
   const macros = [
     {

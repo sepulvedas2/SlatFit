@@ -4,16 +4,16 @@ import { Calendar, Dumbbell, Apple } from "lucide-react";
 import { startOfWeek, addDays, format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export default function WeeklyActivity({ workouts = [], foods = [] }) {
+export default function WeeklyActivity({ workouts, foods }) {
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const getActivityForDay = (date) => {
     const hasWorkout = workouts.some(w => 
-      w.completed_date && isSameDay(new Date(w.completed_date), date)
+      isSameDay(new Date(w.completed_date), date)
     );
     const hasFoodLog = foods.some(f => 
-      f.log_date && isSameDay(new Date(f.log_date), date)
+      isSameDay(new Date(f.log_date), date)
     );
     
     return { hasWorkout, hasFoodLog };

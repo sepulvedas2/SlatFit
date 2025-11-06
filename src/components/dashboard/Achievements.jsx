@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Award, Star, Zap, Target, Flame } from "lucide-react";
 
-export default function Achievements({ achievements = [] }) {
+export default function Achievements({ achievements }) {
   const allAchievements = [
     { 
       id: "first_workout", 

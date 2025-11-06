@@ -11,26 +11,20 @@ export default function DailyMissions({ userEmail }) {
 
   const { data: todayFoods } = useQuery({
     queryKey: ['todayFoods', userEmail, today],
-    queryFn: () => {
-      if (!userEmail) return [];
-      return base44.entities.FoodLog.filter({ 
-        user_email: userEmail, 
-        log_date: today 
-      });
-    },
+    queryFn: () => base44.entities.FoodLog.filter({ 
+      user_email: userEmail, 
+      log_date: today 
+    }),
     enabled: !!userEmail,
     initialData: [],
   });
 
   const { data: todayWorkouts } = useQuery({
     queryKey: ['todayWorkouts', userEmail, today],
-    queryFn: () => {
-      if (!userEmail) return [];
-      return base44.entities.WorkoutLog.filter({ 
-        user_email: userEmail, 
-        completed_date: today 
-      });
-    },
+    queryFn: () => base44.entities.WorkoutLog.filter({ 
+      user_email: userEmail, 
+      completed_date: today 
+    }),
     enabled: !!userEmail,
     initialData: [],
   });
@@ -38,7 +32,6 @@ export default function DailyMissions({ userEmail }) {
   const { data: todayCheckIn } = useQuery({
     queryKey: ['checkIn', userEmail, today],
     queryFn: async () => {
-      if (!userEmail) return null;
       const checkIns = await base44.entities.DailyCheckIn.filter({
         user_email: userEmail,
         check_in_date: today
@@ -47,10 +40,6 @@ export default function DailyMissions({ userEmail }) {
     },
     enabled: !!userEmail
   });
-
-  if (!userEmail) {
-    return null;
-  }
 
   const missions = [
     {
@@ -86,7 +75,7 @@ export default function DailyMissions({ userEmail }) {
       description: "Fique dentro do seu objetivo calórico",
       icon: Flame,
       xp: 40,
-      completed: false,
+      completed: false, // Would calculate from calorie target
       color: "text-orange-400"
     },
   ];
