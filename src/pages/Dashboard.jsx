@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +8,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Crown, Camera, Dumbbell, Apple, Target, 
-  CheckCircle, Zap, Trophy, Users, MessageCircle, Sparkles
+  CheckCircle, Zap, Trophy, Users, MessageCircle, Sparkles, Loader2
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -23,10 +22,14 @@ import DailyMissions from "../components/dashboard/DailyMissions";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me()
+      .then(setUser)
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   const { data: profile } = useQuery({
@@ -50,20 +53,23 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    if (user && subscription === null) {
+    if (user && subscription === null && !loading) {
       setShowWelcome(true);
     }
-  }, [user, subscription]);
+  }, [user, subscription, loading]);
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
 
   const { data: todayFoods } = useQuery({
     queryKey: ['todayFoods', user?.email, today],
-    queryFn: () => base44.entities.FoodLog.filter({ 
-      user_email: user.email, 
-      log_date: today 
-    }),
+    queryFn: () => {
+      if (!user?.email) return [];
+      return base44.entities.FoodLog.filter({ 
+        user_email: user.email, 
+        log_date: today 
+      });
+    },
     enabled: !!user?.email,
     initialData: [],
   });
@@ -71,6 +77,7 @@ export default function Dashboard() {
   const { data: weekWorkouts } = useQuery({
     queryKey: ['weekWorkouts', user?.email],
     queryFn: async () => {
+      if (!user?.email) return [];
       const logs = await base44.entities.WorkoutLog.filter({ user_email: user.email });
       return logs.filter(log => log.completed_date >= weekStart);
     },
@@ -80,7 +87,10 @@ export default function Dashboard() {
 
   const { data: achievements } = useQuery({
     queryKey: ['achievements', user?.email],
-    queryFn: () => base44.entities.Achievement.filter({ user_email: user.email }),
+    queryFn: () => {
+      if (!user?.email) return [];
+      return base44.entities.Achievement.filter({ user_email: user.email });
+    },
     enabled: !!user?.email,
     initialData: [],
   });
@@ -88,6 +98,7 @@ export default function Dashboard() {
   const { data: todayCheckIn } = useQuery({
     queryKey: ['checkIn', user?.email, today],
     queryFn: async () => {
+      if (!user?.email) return null;
       const checkIns = await base44.entities.DailyCheckIn.filter({
         user_email: user.email,
         check_in_date: today
@@ -100,11 +111,28 @@ export default function Dashboard() {
   const { data: userPoints } = useQuery({
     queryKey: ['userPoints', user?.email],
     queryFn: async () => {
+      if (!user?.email) return null;
       const points = await base44.entities.UserPoints.filter({ user_email: user.email });
       return points[0] || null;
     },
     enabled: !!user?.email
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-4 md:p-6 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#CEF17B]" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen p-4 md:p-6 flex items-center justify-center">
+        <p className="text-white">Erro ao carregar dados do usuário.</p>
+      </div>
+    );
+  }
 
   const todayCalories = todayFoods.reduce((sum, food) => sum + (food.calories || 0), 0);
   const todayProtein = todayFoods.reduce((sum, food) => sum + (food.protein || 0), 0);
@@ -120,10 +148,7 @@ export default function Dashboard() {
     ? differenceInDays(new Date(subscription.end_date), new Date())
     : 30;
 
-  // Function to trigger IAGO chat from the banner
   const openIAGOChat = () => {
-    // The button is handled by IAGOChatButton component in Layout
-    // We can dispatch a custom event or just let users click the floating button
     const event = new CustomEvent('openIAGOChat');
     window.dispatchEvent(event);
   };
@@ -174,7 +199,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* NEW: IAGO Quick Access Banner */}
+        {/* IAGO Quick Access Banner */}
         <Card 
           onClick={openIAGOChat}
           className="glass-effect border-[#CEF17B]/20 p-4 cursor-pointer hover:scale-[1.02] transition-all"

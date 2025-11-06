@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -13,38 +12,32 @@ import { createPageUrl } from "@/utils";
 export default function SubscriptionStatus() {
   const [user, setUser] = useState(null);
   const [dismissed, setDismissed] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(async (userData) => {
-      setUser(userData);
-      
-      // Send email notification if expiring soon (simulated)
-      if (userData?.email) {
-        const subs = await base44.entities.Subscription.filter({ user_email: userData.email });
-        const subscription = subs[0];
+    base44.auth.me()
+      .then(async (userData) => {
+        setUser(userData);
         
-        if (subscription && subscription.end_date) {
-          const daysLeft = differenceInDays(new Date(subscription.end_date), new Date());
-          
-          if (daysLeft === 7 || daysLeft === 3 || daysLeft === 1) {
-            // In production, would trigger email via SendEmail integration
-            console.log(`Email notification: ${daysLeft} days left in subscription for ${userData.email}`);
+        if (userData?.email) {
+          try {
+            const subs = await base44.entities.Subscription.filter({ user_email: userData.email });
+            const subscription = subs[0];
             
-            // Simulate sending email
-            /*
-            await base44.integrations.Core.SendEmail({
-              to: userData.email,
-              subject: `Seu ${subscription.plan === "free_trial" ? "teste grátis" : "plano"} expira em ${daysLeft} dias`,
-              body: `Olá! Seu acesso Premium expira em ${daysLeft} dias. Renove agora para continuar aproveitando todos os benefícios do FitLens AI!`
-            });
-            */
+            if (subscription && subscription.end_date) {
+              const daysLeft = differenceInDays(new Date(subscription.end_date), new Date());
+              
+              if (daysLeft === 7 || daysLeft === 3 || daysLeft === 1) {
+                console.log(`Email notification: ${daysLeft} days left in subscription for ${userData.email}`);
+              }
+            }
+          } catch (error) {
+            console.error("Error checking subscription:", error);
           }
         }
-      }
-    }).catch(() => {
-      // Handle error if user is not authenticated or other issues
-      setUser(null); 
-    });
+      })
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   const { data: subscription } = useQuery({
@@ -57,7 +50,7 @@ export default function SubscriptionStatus() {
     enabled: !!user?.email,
   });
 
-  if (!subscription || dismissed || !subscription.end_date) return null;
+  if (loading || !subscription || dismissed || !subscription.end_date) return null;
 
   const daysLeft = differenceInDays(new Date(subscription.end_date), new Date());
   const isExpiringSoon = daysLeft <= 7 && daysLeft > 0;
