@@ -22,6 +22,10 @@ export default function EnergyMoodLog({ userEmail, today }) {
 
   const updateMutation = useMutation({
     mutationFn: async (updates) => {
+      if (!userEmail) {
+        throw new Error("User email is required");
+      }
+      
       if (nutritionData) {
         return base44.entities.NutritionData.update(nutritionData.id, updates);
       } else {
@@ -36,6 +40,14 @@ export default function EnergyMoodLog({ userEmail, today }) {
       queryClient.invalidateQueries(['nutritionData']);
     },
   });
+
+  if (!userEmail) {
+    return (
+      <Card className="glass-effect p-6 border-[#CEF17B]/20">
+        <p className="text-white text-center">Carregando...</p>
+      </Card>
+    );
+  }
 
   const moods = [
     { value: 'great', label: 'Ótimo', icon: Smile, color: 'text-green-400' },
@@ -57,6 +69,7 @@ export default function EnergyMoodLog({ userEmail, today }) {
           <button
             key={level}
             onClick={() => updateMutation.mutate({ energy_level: level })}
+            disabled={!userEmail}
             className={`py-3 rounded-lg transition-all ${
               nutritionData?.energy_level === level
                 ? 'bg-[#CEF17B] text-[#084734] scale-110'
@@ -77,6 +90,7 @@ export default function EnergyMoodLog({ userEmail, today }) {
               <button
                 key={mood.value}
                 onClick={() => updateMutation.mutate({ mood: mood.value })}
+                disabled={!userEmail}
                 className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all ${
                   nutritionData?.mood === mood.value
                     ? 'bg-[#CEF17B]/20 border-2 border-[#CEF17B]'

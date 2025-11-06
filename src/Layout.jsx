@@ -17,12 +17,18 @@ export default function Layout({ children, currentPageName }) {
       
       // Load user theme preference
       if (userData?.email) {
-        const profiles = await base44.entities.UserProfile.filter({ user_email: userData.email });
-        if (profiles[0]?.theme_preference) {
-          setTheme(profiles[0].theme_preference);
+        try {
+          const profiles = await base44.entities.UserProfile.filter({ user_email: userData.email });
+          if (profiles[0]?.theme_preference) {
+            setTheme(profiles[0].theme_preference);
+          }
+        } catch (error) {
+          console.error("Error loading theme:", error);
         }
       }
-    }).catch(() => {});
+    }).catch(() => {
+      setUser(null);
+    });
   }, []);
 
   // Listen for theme changes
@@ -39,7 +45,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
     { name: "Scanner", icon: Camera, path: createPageUrl("FoodScanner") },
     { name: "Treinos", icon: Dumbbell, path: createPageUrl("Workouts") },
-    { name: "Refeições", icon: UtensilsCrossed, path: createPageUrl("MealPlans") },
+    { name: "Nutrição", icon: UtensilsCrossed, path: createPageUrl("SmartNutrition") },
     { name: "Perfil", icon: User, path: createPageUrl("Profile") },
   ];
 

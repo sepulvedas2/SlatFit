@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Check } from "lucide-react";
 import { format, subDays } from "date-fns";
@@ -24,7 +23,6 @@ export default function RoutineConsistency({ userEmail }) {
     enabled: !!userEmail,
   });
 
-  // Get last 7 days data
   const { data: weekData } = useQuery({
     queryKey: ['weekNutritionData', userEmail],
     queryFn: async () => {
@@ -41,6 +39,10 @@ export default function RoutineConsistency({ userEmail }) {
 
   const updateRoutineMutation = useMutation({
     mutationFn: async (updates) => {
+      if (!userEmail) {
+        throw new Error("User email is required");
+      }
+      
       if (nutritionData) {
         const score = calculateScore({...nutritionData, ...updates});
         return base44.entities.NutritionData.update(nutritionData.id, {
@@ -73,6 +75,14 @@ export default function RoutineConsistency({ userEmail }) {
     return score;
   };
 
+  if (!userEmail) {
+    return (
+      <Card className="glass-effect p-6 border-[#CEF17B]/20">
+        <p className="text-white text-center">Carregando...</p>
+      </Card>
+    );
+  }
+
   const currentScore = nutritionData?.consistency_score || 0;
   const weekAverage = weekData.length > 0
     ? Math.round(weekData.reduce((sum, d) => sum + (d.consistency_score || 0), 0) / weekData.length)
@@ -103,6 +113,7 @@ export default function RoutineConsistency({ userEmail }) {
           <button
             key={habit.key}
             onClick={() => updateRoutineMutation.mutate({ [habit.key]: !habit.value })}
+            disabled={!userEmail}
             className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
               habit.value
                 ? 'bg-green-500/20 border border-green-500/30'

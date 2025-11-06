@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
   Droplet, Clock, Zap, Lightbulb, BookOpen, 
-  Brain, TrendingUp, Trophy, MessageCircle
+  Brain, TrendingUp, Trophy, MessageCircle, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import HydrationTracker from "../components/nutrition/HydrationTracker";
@@ -17,45 +16,36 @@ import LearningCards from "../components/nutrition/LearningCards";
 
 export default function SmartNutrition() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const today = format(new Date(), 'yyyy-MM-dd');
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me()
+      .then(setUser)
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
-  const queryClient = useQueryClient();
-
-  // Check if nutrition data exists
-  const { data: todayNutrition } = useQuery({
-    queryKey: ['nutritionData', user?.email, today],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      const data = await base44.entities.NutritionData.filter({
-        user_email: user.email,
-        log_date: today
-      });
-      return data[0] || null;
-    },
-    enabled: !!user?.email,
-  });
-
-  // Get IAGO daily tip
   const { data: iagoTip, isLoading: iagoLoading } = useQuery({
     queryKey: ['iagoTip', user?.email, today],
     queryFn: async () => {
-      const tip = await base44.integrations.Core.InvokeLLM({
-        prompt: `Como IAGO, o personal AI do FitLens, dê UMA dica curta e motivadora sobre nutrição inteligente para hoje.
-        
-        Seja empático, humano e focado em educação (não em dieta).
-        Máximo 2 linhas.
-        
-        Exemplos:
-        - "Beba água antes do treino — pequenos hábitos, grandes resultados."
-        - "Seu corpo não precisa de perfeição, ele precisa de constância."
-        - "Perceba como você se sente depois de cada refeição. Esse é o melhor feedback."`,
-        add_context_from_internet: false
-      });
-      return tip;
+      try {
+        const tip = await base44.integrations.Core.InvokeLLM({
+          prompt: `Como IAGO, o personal AI do FitLens, dê UMA dica curta e motivadora sobre nutrição inteligente para hoje.
+          
+          Seja empático, humano e focado em educação (não em dieta).
+          Máximo 2 linhas.
+          
+          Exemplos:
+          - "Beba água antes do treino — pequenos hábitos, grandes resultados."
+          - "Seu corpo não precisa de perfeição, ele precisa de constância."
+          - "Perceba como você se sente depois de cada refeição. Esse é o melhor feedback."`,
+          add_context_from_internet: false
+        });
+        return tip;
+      } catch (error) {
+        return "Lembre-se: seu corpo não precisa de perfeição, ele precisa de constância. 💚";
+      }
     },
     enabled: !!user?.email,
   });
@@ -64,6 +54,22 @@ export default function SmartNutrition() {
     const event = new CustomEvent('openIAGOChat');
     window.dispatchEvent(event);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#CEF17B]" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
+        <p className="text-white">Erro ao carregar dados do usuário.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -119,12 +125,12 @@ export default function SmartNutrition() {
 
         {/* Dashboard Cards */}
         <div className="grid md:grid-cols-2 gap-6">
-          <HydrationTracker userEmail={user?.email} today={today} />
-          <RoutineConsistency userEmail={user?.email} />
+          <HydrationTracker userEmail={user.email} today={today} />
+          <RoutineConsistency userEmail={user.email} />
         </div>
 
         {/* Energy & Mood Log */}
-        <EnergyMoodLog userEmail={user?.email} today={today} />
+        <EnergyMoodLog userEmail={user.email} today={today} />
 
         {/* Learning Section */}
         <LearningCards />
