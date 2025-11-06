@@ -4,13 +4,13 @@ import { Progress } from "@/components/ui/progress";
 import { Flame, Apple, Target, TrendingUp } from "lucide-react";
 
 export default function QuickStats({ 
-  todayCalories, 
-  calorieTarget, 
-  todayProtein, 
-  proteinTarget,
-  weekWorkouts,
-  currentWeight,
-  targetWeight
+  todayCalories = 0, 
+  calorieTarget = 2000, 
+  todayProtein = 0, 
+  proteinTarget = 150,
+  weekWorkouts = 0,
+  currentWeight = 0,
+  targetWeight = 0
 }) {
   const stats = [
     {
