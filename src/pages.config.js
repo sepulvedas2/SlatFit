@@ -10,6 +10,7 @@ import CheckIn from './pages/CheckIn';
 import Challenges from './pages/Challenges';
 import Community from './pages/Community';
 import SmartNutrition from './pages/SmartNutrition';
+import Agenda from './pages/Agenda';
 import Layout from './Layout.jsx';
 
 
@@ -26,6 +27,7 @@ export const PAGES = {
     "Challenges": Challenges,
     "Community": Community,
     "SmartNutrition": SmartNutrition,
+    "Agenda": Agenda,
 }
 
 export const pagesConfig = {

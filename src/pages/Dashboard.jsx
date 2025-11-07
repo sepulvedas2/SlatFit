@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Crown, Camera, Dumbbell, Apple, Target, 
-  CheckCircle, Zap, Trophy, Users, MessageCircle, Sparkles, Droplet
+  CheckCircle, Zap, Trophy, Users, MessageCircle, Sparkles
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -226,43 +226,6 @@ export default function Dashboard() {
         )}
 
         <DailyMissions userEmail={user?.email} />
-
-        {/* NEW: Quick Hydration Card */}
-        <Link to={createPageUrl("SmartNutrition")}>
-          <Card className="glass-effect border-[#CEF17B]/20 p-4 hover:scale-[1.02] transition-all cursor-pointer">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Droplet className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white">Hidratação Hoje</h3>
-                  <p className="text-sm text-[#CEEDB2]">
-                    {waterIntake}ml / {waterGoal}ml
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-blue-400">
-                  {Math.round(waterProgress)}%
-                </div>
-                {waterIntake >= waterGoal && (
-                  <Badge className="bg-green-500/20 text-green-400 border-0 text-xs">
-                    ✓ Meta Atingida
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <div className="mt-3">
-              <div className="w-full bg-white/10 rounded-full h-2">
-                <div 
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(waterProgress, 100)}%` }}
-                />
-              </div>
-            </div>
-          </Card>
-        </Link>
 
         <QuickStats
           todayCalories={todayCalories}

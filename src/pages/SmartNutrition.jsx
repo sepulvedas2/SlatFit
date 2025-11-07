@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Droplet, Clock, Zap, Lightbulb, BookOpen, 
+  Clock, Zap, Lightbulb, BookOpen, 
   Brain, TrendingUp, Trophy, MessageCircle, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
-import HydrationTracker from "../components/nutrition/HydrationTracker"; 
 import RoutineConsistency from "../components/nutrition/RoutineConsistency";
 import EnergyMoodLog from "../components/nutrition/EnergyMoodLog";
 import LearningCards from "../components/nutrition/LearningCards";
@@ -131,9 +130,6 @@ export default function SmartNutrition() {
             </div>
           </div>
         </Card>
-
-        {/* Hydration Tracker - RE-ADDED */}
-        <HydrationTracker userEmail={user.email} today={today} />
 
         {/* Dashboard Cards */}
         <RoutineConsistency userEmail={user.email} />

@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Home, Camera, Dumbbell, UtensilsCrossed, User } from "lucide-react";
+import { Home, Camera, Dumbbell, UtensilsCrossed, User, CalendarDays } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function Layout({ children, currentPageName }) {
@@ -47,6 +48,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Scanner", icon: Camera, path: createPageUrl("FoodScanner") },
     { name: "Treinos", icon: Dumbbell, path: createPageUrl("Workouts") },
     { name: "Nutrição", icon: UtensilsCrossed, path: createPageUrl("SmartNutrition") },
+    { name: "Agenda", icon: CalendarDays, path: createPageUrl("Agenda") },
     { name: "Perfil", icon: User, path: createPageUrl("Profile") },
   ];
 
