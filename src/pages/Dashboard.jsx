@@ -69,7 +69,7 @@ export default function Dashboard() {
   });
 
   const { data: weekWorkouts } = useQuery({
-    queryKey: ['weekWorkouts', user?.email],
+    queryKey: ['weekWorkouts', user?.email, weekStart], // Changed here
     queryFn: async () => {
       const logs = await base44.entities.WorkoutLog.filter({ user_email: user.email });
       return logs.filter(log => log.completed_date >= weekStart);
