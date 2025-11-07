@@ -174,37 +174,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* NEW: Seu Personal AI Quick Access Banner */}
-        <Card 
-          onClick={openPersonalAIChat}
-          className="glass-effect border-[#CEF17B]/20 p-4 cursor-pointer hover:scale-[1.02] transition-all"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 p-1 flex items-center justify-center">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <span className="text-xl">🤖</span>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-white">Seu Personal IA</h3>
-                  <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
-                    Online
-                  </Badge>
-                </div>
-                <p className="text-sm text-[#CEEDB2]">
-                  Tire dúvidas sobre treino, nutrição e recuperação
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#CEF17B]" />
-              <MessageCircle className="w-5 h-5 text-[#CEF17B]" />
-            </div>
-          </div>
-        </Card>
-
         <SubscriptionStatus />
 
         {showWelcome && user && (
