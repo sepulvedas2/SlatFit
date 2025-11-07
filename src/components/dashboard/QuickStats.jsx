@@ -22,7 +22,7 @@ export default function QuickStats({
       target: calorieTarget,
       unit: "kcal",
       color: "#FF6B6B",
-      link: createPageUrl("SmartNutrition")
+      link: createPageUrl("FoodScanner") + "?mode=manual"
     },
     {
       icon: Apple,
@@ -31,7 +31,7 @@ export default function QuickStats({
       target: proteinTarget,
       unit: "g",
       color: "#51CF66",
-      link: createPageUrl("SmartNutrition")
+      link: createPageUrl("FoodScanner") + "?mode=manual"
     },
     {
       icon: Target,

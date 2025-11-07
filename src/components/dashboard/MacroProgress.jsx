@@ -38,7 +38,7 @@ export default function MacroProgress({
   ];
 
   return (
-    <Link to={createPageUrl("SmartNutrition")}>
+    <Link to={createPageUrl("FoodScanner") + "?mode=manual"}>
       <Card className="glass-effect p-6 hover:scale-[1.02] transition-all cursor-pointer border-[#CEF17B]/20">
         <h2 className="text-xl font-bold text-white mb-6">Macros de Hoje</h2>
         <div className="space-y-6">

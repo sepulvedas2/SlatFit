@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,13 @@ import { Badge } from "@/components/ui/badge";
 
 export default function FoodScanner() {
   const [user, setUser] = useState(null);
-  const [mode, setMode] = useState("scan"); // "scan" or "manual"
+  
+  // Check URL params for mode
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlMode = urlParams.get('mode');
+  
+  const [mode, setMode] = useState(urlMode === "manual" ? "manual" : "scan");
+  
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -547,7 +554,7 @@ Exemplo de resposta precisa:
                           variant="outline"
                           className="border-white/10"
                         >
-                          <X className="w-5 h-5" />
+                          Nova Foto
                         </Button>
                       </div>
                     </>
