@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Droplet, Plus, Check, Edit3, Trophy, Calendar } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Droplet, Plus, Check, Edit3, Trophy, Calendar, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
@@ -16,6 +17,8 @@ export default function HydrationTracker({ userEmail, today }) {
   const [customAmount, setCustomAmount] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
 
   const { data: nutritionData } = useQuery({
     queryKey: ['nutritionData', userEmail, today],
@@ -30,31 +33,7 @@ export default function HydrationTracker({ userEmail, today }) {
     enabled: !!userEmail && !!today,
   });
 
-  const { data: profile } = useQuery({
-    queryKey: ['userProfile', userEmail],
-    queryFn: async () => {
-      if (!userEmail) return null;
-      const profiles = await base44.entities.UserProfile.filter({ user_email: userEmail });
-      return profiles[0] || null;
-    },
-    enabled: !!userEmail,
-  });
-
-  // Calculate water goal based on body type and weight
-  const calculateWaterGoal = () => {
-    if (!profile?.current_weight) return 2000;
-    
-    const bodyTypeMultiplier = {
-      ectomorph: 45,
-      mesomorph: 40,
-      endomorph: 35
-    };
-    
-    const multiplier = bodyTypeMultiplier[profile.body_type] || 40;
-    return Math.round(profile.current_weight * multiplier);
-  };
-
-  const waterGoal = calculateWaterGoal();
+  const waterGoal = nutritionData?.water_goal_ml || 2000;
   const waterIntake = nutritionData?.water_intake_ml || 0;
   const progress = (waterIntake / waterGoal) * 100;
   const wasGoalReached = nutritionData?.water_goal_reached || false;
@@ -79,7 +58,6 @@ export default function HydrationTracker({ userEmail, today }) {
       if (nutritionData) {
         return base44.entities.NutritionData.update(nutritionData.id, {
           water_intake_ml: newIntake,
-          water_goal_ml: waterGoal,
           water_goal_reached: goalReached
         });
       } else {
@@ -99,10 +77,41 @@ export default function HydrationTracker({ userEmail, today }) {
     },
   });
 
+  const updateGoalMutation = useMutation({
+    mutationFn: async (newGoal) => {
+      if (!userEmail) throw new Error("User email is required");
+      
+      if (nutritionData) {
+        return base44.entities.NutritionData.update(nutritionData.id, {
+          water_goal_ml: newGoal
+        });
+      } else {
+        return base44.entities.NutritionData.create({
+          user_email: userEmail,
+          log_date: today,
+          water_goal_ml: newGoal,
+          water_intake_ml: 0
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['nutritionData']);
+      setEditingGoal(false);
+      setGoalInput("");
+    },
+  });
+
   const handleCustomAdd = () => {
     const amount = parseInt(customAmount);
     if (amount > 0 && amount <= 5000) {
       updateHydrationMutation.mutate(amount);
+    }
+  };
+
+  const handleGoalUpdate = () => {
+    const newGoal = parseInt(goalInput);
+    if (newGoal > 0 && newGoal <= 10000) {
+      updateGoalMutation.mutate(newGoal);
     }
   };
 
@@ -113,36 +122,6 @@ export default function HydrationTracker({ userEmail, today }) {
       </Card>
     );
   }
-
-  const getBodyTypeTip = () => {
-    if (!profile?.body_type) {
-      return "💡 Configure seu biotipo no perfil para dicas personalizadas!";
-    }
-
-    const tips = {
-      ectomorph: "🏃 Ectomorfo: Metabolismo acelerado precisa de mais líquidos — mantenha o corpo sempre hidratado!",
-      mesomorph: "💪 Mesomorfo: Equilíbrio é tudo — hidratação constante garante força e definição!",
-      endomorph: "🔥 Endomorfo: A água é essencial para o metabolismo e controle de apetite. Mantenha o ritmo!"
-    };
-
-    return tips[profile.body_type];
-  };
-
-  const getProgressTip = () => {
-    const remaining = waterGoal - waterIntake;
-    
-    if (isGoalReached) {
-      return "🏆 Missão cumprida! Seu corpo está 100% hidratado hoje. Continue firme!";
-    } else if (remaining <= 250) {
-      return "🎯 Você está quase lá! Complete sua meta e garanta o selo do dia!";
-    } else if (remaining <= 500) {
-      return "💪 Falta pouco! Que tal um copo de 250 ml agora?";
-    } else if (waterIntake === 0) {
-      return "🌅 Beba seu primeiro copo de água logo pela manhã — isso desperta seu metabolismo!";
-    } else {
-      return "Continue bebendo aos poucos! A hidratação é o combustível da performance.";
-    }
-  };
 
   return (
     <Card className="glass-effect p-6 border-[#CEF17B]/20 relative overflow-hidden">
@@ -210,7 +189,41 @@ export default function HydrationTracker({ userEmail, today }) {
           </div>
           <div className="text-right">
             <p className="text-xs text-white/60">Meta</p>
-            <p className="text-2xl font-semibold text-white">{waterGoal}ml</p>
+            {!editingGoal ? (
+              <div className="flex items-center gap-2">
+                <p className="text-2xl font-semibold text-white">{waterGoal}ml</p>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditingGoal(true);
+                    setGoalInput(waterGoal.toString());
+                  }}
+                  className="h-6 w-6 text-white/60 hover:text-white"
+                >
+                  <Edit3 className="w-3 h-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={goalInput}
+                  onChange={(e) => setGoalInput(e.target.value)}
+                  className="w-24 h-8 bg-white/5 border-white/10 text-white text-right"
+                  min="100"
+                  max="10000"
+                />
+                <Button
+                  size="icon"
+                  onClick={handleGoalUpdate}
+                  disabled={!goalInput || updateGoalMutation.isPending}
+                  className="h-6 w-6 bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734]"
+                >
+                  <Check className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
         <Progress value={Math.min(progress, 100)} className="h-3 bg-white/10" />
@@ -299,21 +312,6 @@ export default function HydrationTracker({ userEmail, today }) {
           </Button>
         </div>
       )}
-
-      {/* Tips */}
-      <div className="mt-4 space-y-2">
-        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-          <p className="text-xs text-blue-300 text-center">
-            {getProgressTip()}
-          </p>
-        </div>
-        
-        <div className="p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
-          <p className="text-xs text-purple-300 text-center">
-            {getBodyTypeTip()}
-          </p>
-        </div>
-      </div>
 
       {/* Status Badge */}
       <div className="mt-4 text-center">
