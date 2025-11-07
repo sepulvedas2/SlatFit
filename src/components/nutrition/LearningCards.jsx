@@ -82,7 +82,7 @@ O que fazer:
 ✓ Pratique mindfulness
 ✓ Exercite-se regularmente
 
-💬 IAGO diz: "Estresse crônico saboa seus objetivos. Cuide da mente para cuidar do corpo."`,
+💬 IAGO diz: "Estresse crônico sabota seus objetivos. Cuide da mente para cuidar do corpo."`,
       duration: "4 min"
     },
     {

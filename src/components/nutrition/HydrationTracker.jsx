@@ -4,11 +4,14 @@ import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Droplet, Plus, Check } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Droplet, Plus, Check, Edit3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function HydrationTracker({ userEmail, today }) {
   const queryClient = useQueryClient();
+  const [customAmount, setCustomAmount] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const { data: nutritionData } = useQuery({
     queryKey: ['nutritionData', userEmail, today],
@@ -44,8 +47,17 @@ export default function HydrationTracker({ userEmail, today }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['nutritionData']);
+      setCustomAmount("");
+      setShowCustomInput(false);
     },
   });
+
+  const handleCustomAdd = () => {
+    const amount = parseInt(customAmount);
+    if (amount > 0 && amount <= 5000) {
+      updateHydrationMutation.mutate(amount);
+    }
+  };
 
   if (!userEmail) {
     return (
@@ -88,13 +100,13 @@ export default function HydrationTracker({ userEmail, today }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2 mb-3">
         <Button
           onClick={() => updateHydrationMutation.mutate(250)}
           disabled={updateHydrationMutation.isPending}
           size="sm"
           variant="outline"
-          className="border-blue-500/30 hover:bg-blue-500/20"
+          className="border-blue-500/30 hover:bg-blue-500/20 text-white"
         >
           <Plus className="w-4 h-4 mr-1" />
           250ml
@@ -104,7 +116,7 @@ export default function HydrationTracker({ userEmail, today }) {
           disabled={updateHydrationMutation.isPending}
           size="sm"
           variant="outline"
-          className="border-blue-500/30 hover:bg-blue-500/20"
+          className="border-blue-500/30 hover:bg-blue-500/20 text-white"
         >
           <Plus className="w-4 h-4 mr-1" />
           500ml
@@ -114,12 +126,57 @@ export default function HydrationTracker({ userEmail, today }) {
           disabled={updateHydrationMutation.isPending}
           size="sm"
           variant="outline"
-          className="border-blue-500/30 hover:bg-blue-500/20"
+          className="border-blue-500/30 hover:bg-blue-500/20 text-white"
         >
           <Plus className="w-4 h-4 mr-1" />
           750ml
         </Button>
       </div>
+
+      {/* Custom Amount Section */}
+      {!showCustomInput ? (
+        <Button
+          onClick={() => setShowCustomInput(true)}
+          variant="outline"
+          size="sm"
+          className="w-full border-[#CEF17B]/20 hover:bg-[#CEF17B]/10 text-white"
+        >
+          <Edit3 className="w-4 h-4 mr-2" />
+          Adicionar Quantidade Personalizada
+        </Button>
+      ) : (
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              placeholder="Ex: 300"
+              value={customAmount}
+              onChange={(e) => setCustomAmount(e.target.value)}
+              className="flex-1 bg-white/5 border-blue-500/30 text-white"
+              min="1"
+              max="5000"
+            />
+            <Button
+              onClick={handleCustomAdd}
+              disabled={!customAmount || updateHydrationMutation.isPending}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+          <Button
+            onClick={() => {
+              setShowCustomInput(false);
+              setCustomAmount("");
+            }}
+            variant="ghost"
+            size="sm"
+            className="w-full text-xs text-white/60 hover:text-white"
+          >
+            Cancelar
+          </Button>
+        </div>
+      )}
 
       <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
         <p className="text-xs text-blue-300 text-center">
