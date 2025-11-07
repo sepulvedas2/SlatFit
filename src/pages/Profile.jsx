@@ -11,8 +11,8 @@ import { User, Target, Activity, LogOut, Save, Loader2, Crown } from "lucide-rea
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { format } from 'date-fns'; // Added for date formatting
-import ThemeSelector from "../components/profile/ThemeSelector"; // NEW: Import ThemeSelector
+import { format } from 'date-fns';
+import ThemeSelector from "../components/profile/ThemeSelector";
 
 // Helper function to create page URLs. In a real app, this would likely be imported from a utility.
 const createPageUrl = (pageName) => {
@@ -72,6 +72,7 @@ export default function Profile() {
         activity_level: 'moderate',
         gender: 'male',
         age: 25,
+        body_type: 'mesomorph', // NEW: Default body type
         daily_calorie_target: 2000,
         protein_target: 150,
         carbs_target: 200,
@@ -132,6 +133,12 @@ export default function Profile() {
     moderate: 'Moderado',
     active: 'Ativo',
     very_active: 'Muito Ativo'
+  };
+
+  const bodyTypeLabels = {
+    ectomorph: 'Ectomorfo (Metabolismo Rápido)',
+    mesomorph: 'Mesomorfo (Equilibrado)',
+    endomorph: 'Endomorfo (Ganha Peso Fácil)'
   };
 
   // NEW: Determine if the user is premium or on trial
@@ -368,6 +375,28 @@ export default function Profile() {
                     <SelectItem value="maintenance">Manutenção</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* NEW: Body Type Selector */}
+              <div className="md:col-span-2">
+                <Label className="text-gray-300">🧬 Seu Biotipo Corporal</Label>
+                <Select
+                  value={formData.body_type}
+                  onValueChange={(value) => setFormData({...formData, body_type: value})}
+                  disabled={!editing}
+                >
+                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ectomorph">Ectomorfo (Metabolismo Rápido)</SelectItem>
+                    <SelectItem value="mesomorph">Mesomorfo (Equilibrado)</SelectItem>
+                    <SelectItem value="endomorph">Endomorfo (Ganha Peso Fácil)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-400 mt-2">
+                  Seu biotipo ajuda a calcular sua meta de hidratação diária personalizada
+                </p>
               </div>
 
               <div className="md:col-span-2">
