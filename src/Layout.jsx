@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -16,12 +17,18 @@ export default function Layout({ children, currentPageName }) {
       
       // Load user theme preference
       if (userData?.email) {
-        const profiles = await base44.entities.UserProfile.filter({ user_email: userData.email });
-        if (profiles[0]?.theme_preference) {
-          setTheme(profiles[0].theme_preference);
+        try {
+          const profiles = await base44.entities.UserProfile.filter({ user_email: userData.email });
+          if (profiles[0]?.theme_preference) {
+            setTheme(profiles[0].theme_preference);
+          }
+        } catch (error) {
+          console.error("Error loading theme:", error);
         }
       }
-    }).catch(() => {});
+    }).catch(() => {
+      setUser(null);
+    });
   }, []);
 
   // Listen for theme changes
@@ -84,7 +91,7 @@ export default function Layout({ children, currentPageName }) {
     },
     pink: {
       bg: "#ec4899",
-      gradient: "linear-gradient(135deg, #ec4899, #f472b6)",
+      gradient: "linear-linear-gradient(135deg, #ec4899, #f472b6)",
       cardGradient: "linear-gradient(180deg, #f472b6, #fb7185)",
       buttonGradient: "linear-gradient(90deg, #fb7185, #f472b6)",
     },
@@ -162,7 +169,7 @@ export default function Layout({ children, currentPageName }) {
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          z-index: 9999 !important;
+          z-index: 99999 !important;
           pointer-events: auto !important;
         }
       `}</style>
@@ -172,8 +179,8 @@ export default function Layout({ children, currentPageName }) {
         {children}
       </main>
 
-      {/* IAGO Chat Button */}
-      {user && <IAGOChatButton user={user} />}
+      {/* IAGO Chat Button - Now Working */}
+      <IAGOChatButton user={user} />
 
       {/* Bottom Navigation - Sempre visível e fixa */}
       <nav className="bottom-navigation fixed bottom-0 left-0 right-0 glass-effect border-t border-[#CEF17B]/20">
