@@ -5,11 +5,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Droplet, Plus, Check, Edit3, Trophy, Calendar, Target } from "lucide-react";
+import { Droplet, Plus, Check, Edit3, Trophy, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default function HydrationTracker({ userEmail, today }) {
@@ -19,6 +18,8 @@ export default function HydrationTracker({ userEmail, today }) {
   const [showCelebration, setShowCelebration] = useState(false);
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState("");
+
+  const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
 
   const { data: nutritionData } = useQuery({
     queryKey: ['nutritionData', userEmail, today],
@@ -33,13 +34,25 @@ export default function HydrationTracker({ userEmail, today }) {
     enabled: !!userEmail && !!today,
   });
 
+  const { data: yesterdayData } = useQuery({
+    queryKey: ['nutritionData', userEmail, yesterday],
+    queryFn: async () => {
+      if (!userEmail) return null;
+      const data = await base44.entities.NutritionData.filter({
+        user_email: userEmail,
+        log_date: yesterday
+      });
+      return data[0] || null;
+    },
+    enabled: !!userEmail,
+  });
+
   const waterGoal = nutritionData?.water_goal_ml || 2000;
   const waterIntake = nutritionData?.water_intake_ml || 0;
   const progress = (waterIntake / waterGoal) * 100;
   const wasGoalReached = nutritionData?.water_goal_reached || false;
   const isGoalReached = waterIntake >= waterGoal;
 
-  // Show celebration when goal is reached for the first time
   useEffect(() => {
     if (isGoalReached && !wasGoalReached) {
       setShowCelebration(true);
@@ -155,7 +168,7 @@ export default function HydrationTracker({ userEmail, today }) {
               transition={{ delay: 0.5 }}
               className="text-[#084734] text-center px-4"
             >
-              Excelente! Seu corpo agradece — manter a constância é o segredo.
+              Parabéns! Continue assim!
             </motion.p>
           </motion.div>
         )}
@@ -165,11 +178,11 @@ export default function HydrationTracker({ userEmail, today }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Droplet className="w-5 h-5 text-blue-400" />
-          <h3 className="font-bold text-white">Hidratação Diária</h3>
+          <h3 className="font-bold text-white">Hidratação</h3>
         </div>
         <div className="flex items-center gap-2 text-xs text-[#CEEDB2]">
           <Calendar className="w-3 h-3" />
-          <span>{format(new Date(), "dd/MM/yyyy", { locale: ptBR })}</span>
+          <span>Meta de hoje - {format(new Date(), "dd/MM/yyyy", { locale: ptBR })}</span>
         </div>
       </div>
 
@@ -210,6 +223,7 @@ export default function HydrationTracker({ userEmail, today }) {
                   type="number"
                   value={goalInput}
                   onChange={(e) => setGoalInput(e.target.value)}
+                  placeholder="Ex: 2000"
                   className="w-24 h-8 bg-white/5 border-white/10 text-white text-right"
                   min="100"
                   max="10000"
@@ -230,7 +244,7 @@ export default function HydrationTracker({ userEmail, today }) {
         <p className="text-xs text-center text-[#CEEDB2] mt-2">
           {isGoalReached 
             ? "🎉 Parabéns! Continue assim!"
-            : `Faltam ${waterGoal - waterIntake}ml para sua meta diária`}
+            : `Faltam ${waterGoal - waterIntake}ml para sua meta`}
         </p>
       </div>
 
@@ -310,6 +324,23 @@ export default function HydrationTracker({ userEmail, today }) {
           >
             Cancelar
           </Button>
+        </div>
+      )}
+
+      {/* Yesterday's History */}
+      {yesterdayData && (
+        <div className="mt-4 pt-4 border-t border-white/10">
+          <p className="text-xs text-white/60 mb-2">Histórico da última meta:</p>
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[#CEEDB2]" />
+              <span className="text-sm text-white">{format(subDays(new Date(), 1), "dd/MM/yyyy")}</span>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-semibold text-white">{yesterdayData.water_intake_ml || 0}ml</p>
+              <p className="text-xs text-white/60">de {yesterdayData.water_goal_ml || 2000}ml</p>
+            </div>
+          </div>
         </div>
       )}
 
