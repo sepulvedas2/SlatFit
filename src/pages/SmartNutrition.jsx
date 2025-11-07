@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,10 +15,12 @@ import HydrationTracker from "../components/nutrition/HydrationTracker";
 import RoutineConsistency from "../components/nutrition/RoutineConsistency";
 import EnergyMoodLog from "../components/nutrition/EnergyMoodLog";
 import LearningCards from "../components/nutrition/LearningCards";
+import PersonalAIChatModal from "../components/chat/PersonalAIChatModal";
 
 export default function SmartNutrition() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showChat, setShowChat] = useState(false);
   const today = format(new Date(), 'yyyy-MM-dd');
 
   useEffect(() => {
@@ -29,20 +32,21 @@ export default function SmartNutrition() {
 
   const queryClient = useQueryClient();
 
-  // Get IAGO daily tip
-  const { data: iagoTip, isLoading: iagoLoading } = useQuery({
-    queryKey: ['iagoTip', user?.email, today],
+  // Get daily tip from Seu Personal IA
+  const { data: personalAITip, isLoading: tipLoading } = useQuery({
+    queryKey: ['personalAITip', user?.email, today],
     queryFn: async () => {
       const tip = await base44.integrations.Core.InvokeLLM({
-        prompt: `Como IAGO, o personal AI do FitLens, dê UMA dica curta e motivadora sobre nutrição inteligente para hoje.
+        prompt: `Você é "Seu Personal IA", o assistente de fitness e nutrição do FitLens. Dê UMA dica curta e prática sobre nutrição inteligente para hoje.
         
-        Seja empático, humano e focado em educação (não em dieta).
+        Seja empático, direto e educativo (não prescritivo).
         Máximo 2 linhas.
+        Foque em educação nutricional, não em dietas restritivas.
         
         Exemplos:
-        - "Beba água antes do treino — pequenos hábitos, grandes resultados."
-        - "Seu corpo não precisa de perfeição, ele precisa de constância."
-        - "Perceba como você se sente depois de cada refeição. Esse é o melhor feedback."`,
+        - "Escolha sempre cores no seu prato — cada cor traz nutrientes diferentes que seu corpo precisa."
+        - "Equilíbrio é a base de tudo. Proteínas constroem, carboidratos sustentam e gorduras boas protegem."
+        - "Antes do treino, 300-500ml de água ajudam na performance muscular."`,
         add_context_from_internet: false
       });
       return tip;
@@ -50,10 +54,11 @@ export default function SmartNutrition() {
     enabled: !!user?.email,
   });
 
-  const openIAGOChat = () => {
-    const event = new CustomEvent('openIAGOChat');
-    window.dispatchEvent(event);
-  };
+  useEffect(() => {
+    const handleOpen = () => setShowChat(true);
+    window.addEventListener('openPersonalAIChat', handleOpen);
+    return () => window.removeEventListener('openPersonalAIChat', handleOpen);
+  }, []);
 
   // Show loading state
   if (loading) {
@@ -93,7 +98,7 @@ export default function SmartNutrition() {
           </p>
         </div>
 
-        {/* IAGO Daily Tip */}
+        {/* Seu Personal IA Daily Tip */}
         <Card className="glass-effect p-6 border-[#CEF17B]/20 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#CEF17B]/20 to-transparent rounded-full -mr-16 -mt-16" />
           <div className="relative z-10 flex items-start gap-4">
@@ -104,24 +109,24 @@ export default function SmartNutrition() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-bold text-white">Dica do IAGO</h3>
+                <h3 className="font-bold text-white">Dica do Seu Personal IA</h3>
                 <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
                   Hoje
                 </Badge>
               </div>
-              {iagoLoading ? (
+              {tipLoading ? (
                 <p className="text-[#CEEDB2] text-sm animate-pulse">Pensando...</p>
               ) : (
-                <p className="text-[#CEEDB2] leading-relaxed">{iagoTip || "Mantenha o foco e a constância!"}</p>
+                <p className="text-[#CEEDB2] leading-relaxed">{personalAITip || "Mantenha o foco e a constância!"}</p>
               )}
               <Button
-                onClick={openIAGOChat}
+                onClick={() => setShowChat(true)}
                 variant="outline"
                 size="sm"
                 className="mt-3 border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
-                Conversar com IAGO
+                Conversar com Seu Personal IA
               </Button>
             </div>
           </div>
@@ -173,6 +178,14 @@ export default function SmartNutrition() {
         </Card>
 
       </div>
+
+      {/* Personal AI Chat Modal */}
+      {showChat && (
+        <PersonalAIChatModal
+          user={user}
+          onClose={() => setShowChat(false)}
+        />
+      )}
     </div>
   );
 }

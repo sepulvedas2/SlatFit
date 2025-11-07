@@ -120,11 +120,11 @@ export default function Dashboard() {
     ? differenceInDays(new Date(subscription.end_date), new Date())
     : 30;
 
-  // Function to trigger IAGO chat from the banner
-  const openIAGOChat = () => {
+  // Function to trigger Personal AI chat
+  const openPersonalAIChat = () => {
     // The button is handled by IAGOChatButton component in Layout
     // We can dispatch a custom event or just let users click the floating button
-    const event = new CustomEvent('openIAGOChat');
+    const event = new CustomEvent('openPersonalAIChat');
     window.dispatchEvent(event);
   };
 
@@ -174,9 +174,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* NEW: IAGO Quick Access Banner */}
+        {/* NEW: Seu Personal AI Quick Access Banner */}
         <Card 
-          onClick={openIAGOChat}
+          onClick={openPersonalAIChat}
           className="glass-effect border-[#CEF17B]/20 p-4 cursor-pointer hover:scale-[1.02] transition-all"
         >
           <div className="flex items-center justify-between">
@@ -188,9 +188,9 @@ export default function Dashboard() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-white">IAGO</h3>
+                  <h3 className="font-bold text-white">Seu Personal IA</h3>
                   <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
-                    Seu Personal AI
+                    Online
                   </Badge>
                 </div>
                 <p className="text-sm text-[#CEEDB2]">
