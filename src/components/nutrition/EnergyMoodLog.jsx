@@ -17,14 +17,12 @@ export default function EnergyMoodLog({ userEmail, today }) {
       });
       return data[0] || null;
     },
-    enabled: !!userEmail,
+    enabled: !!userEmail && !!today,
   });
 
   const updateMutation = useMutation({
     mutationFn: async (updates) => {
-      if (!userEmail) {
-        throw new Error("User email is required");
-      }
+      if (!userEmail) throw new Error("User email is required");
       
       if (nutritionData) {
         return base44.entities.NutritionData.update(nutritionData.id, updates);
@@ -44,7 +42,7 @@ export default function EnergyMoodLog({ userEmail, today }) {
   if (!userEmail) {
     return (
       <Card className="glass-effect p-6 border-[#CEF17B]/20">
-        <p className="text-white text-center">Carregando...</p>
+        <p className="text-white/60 text-center">Carregando...</p>
       </Card>
     );
   }
@@ -69,7 +67,7 @@ export default function EnergyMoodLog({ userEmail, today }) {
           <button
             key={level}
             onClick={() => updateMutation.mutate({ energy_level: level })}
-            disabled={!userEmail}
+            disabled={updateMutation.isPending}
             className={`py-3 rounded-lg transition-all ${
               nutritionData?.energy_level === level
                 ? 'bg-[#CEF17B] text-[#084734] scale-110'
@@ -90,7 +88,7 @@ export default function EnergyMoodLog({ userEmail, today }) {
               <button
                 key={mood.value}
                 onClick={() => updateMutation.mutate({ mood: mood.value })}
-                disabled={!userEmail}
+                disabled={updateMutation.isPending}
                 className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all ${
                   nutritionData?.mood === mood.value
                     ? 'bg-[#CEF17B]/20 border-2 border-[#CEF17B]'

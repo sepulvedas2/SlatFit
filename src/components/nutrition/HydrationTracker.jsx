@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
@@ -20,14 +20,12 @@ export default function HydrationTracker({ userEmail, today }) {
       });
       return data[0] || null;
     },
-    enabled: !!userEmail,
+    enabled: !!userEmail && !!today,
   });
 
   const updateHydrationMutation = useMutation({
     mutationFn: async (amount) => {
-      if (!userEmail) {
-        throw new Error("User email is required");
-      }
+      if (!userEmail) throw new Error("User email is required");
       
       const currentIntake = nutritionData?.water_intake_ml || 0;
       const newIntake = currentIntake + amount;
@@ -52,7 +50,7 @@ export default function HydrationTracker({ userEmail, today }) {
   if (!userEmail) {
     return (
       <Card className="glass-effect p-6 border-[#CEF17B]/20">
-        <p className="text-white text-center">Carregando...</p>
+        <p className="text-white/60 text-center">Carregando...</p>
       </Card>
     );
   }
@@ -93,7 +91,7 @@ export default function HydrationTracker({ userEmail, today }) {
       <div className="grid grid-cols-3 gap-2">
         <Button
           onClick={() => updateHydrationMutation.mutate(250)}
-          disabled={updateHydrationMutation.isPending || !userEmail}
+          disabled={updateHydrationMutation.isPending}
           size="sm"
           variant="outline"
           className="border-blue-500/30 hover:bg-blue-500/20"
@@ -103,7 +101,7 @@ export default function HydrationTracker({ userEmail, today }) {
         </Button>
         <Button
           onClick={() => updateHydrationMutation.mutate(500)}
-          disabled={updateHydrationMutation.isPending || !userEmail}
+          disabled={updateHydrationMutation.isPending}
           size="sm"
           variant="outline"
           className="border-blue-500/30 hover:bg-blue-500/20"
@@ -113,7 +111,7 @@ export default function HydrationTracker({ userEmail, today }) {
         </Button>
         <Button
           onClick={() => updateHydrationMutation.mutate(750)}
-          disabled={updateHydrationMutation.isPending || !userEmail}
+          disabled={updateHydrationMutation.isPending}
           size="sm"
           variant="outline"
           className="border-blue-500/30 hover:bg-blue-500/20"

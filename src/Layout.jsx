@@ -1,14 +1,15 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Camera, Dumbbell, UtensilsCrossed, User } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import IAGOChatButton from "./components/chat/IAGOChatButton";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState("default");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     base44.auth.me().then(async (userData) => {
@@ -16,12 +17,20 @@ export default function Layout({ children, currentPageName }) {
       
       // Load user theme preference
       if (userData?.email) {
-        const profiles = await base44.entities.UserProfile.filter({ user_email: userData.email });
-        if (profiles[0]?.theme_preference) {
-          setTheme(profiles[0].theme_preference);
+        try {
+          const profiles = await base44.entities.UserProfile.filter({ user_email: userData.email });
+          if (profiles[0]?.theme_preference) {
+            setTheme(profiles[0].theme_preference);
+          }
+        } catch (err) {
+          console.error("Error loading theme:", err);
         }
       }
-    }).catch(() => {});
+    }).catch(() => {
+      setUser(null);
+    }).finally(() => {
+      setLoading(false);
+    });
   }, []);
 
   // Listen for theme changes
@@ -38,7 +47,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
     { name: "Scanner", icon: Camera, path: createPageUrl("FoodScanner") },
     { name: "Treinos", icon: Dumbbell, path: createPageUrl("Workouts") },
-    { name: "Refeições", icon: UtensilsCrossed, path: createPageUrl("MealPlans") },
+    { name: "Nutrição", icon: UtensilsCrossed, path: createPageUrl("SmartNutrition") },
     { name: "Perfil", icon: User, path: createPageUrl("Profile") },
   ];
 
@@ -84,7 +93,7 @@ export default function Layout({ children, currentPageName }) {
     },
     pink: {
       bg: "#ec4899",
-      gradient: "linear-linear-gradient(135deg, #ec4899, #f472b6)",
+      gradient: "linear-gradient(135deg, #ec4899, #f472b6)",
       cardGradient: "linear-gradient(180deg, #f472b6, #fb7185)",
       buttonGradient: "linear-gradient(90deg, #fb7185, #f472b6)",
     },
@@ -156,7 +165,6 @@ export default function Layout({ children, currentPageName }) {
           border: 1px solid rgba(206, 241, 123, 0.2);
         }
 
-        /* Garantir que a navegação fique sempre visível e fixa */
         .bottom-navigation {
           position: fixed !important;
           bottom: 0 !important;
@@ -172,7 +180,10 @@ export default function Layout({ children, currentPageName }) {
         {children}
       </main>
 
-      {/* Bottom Navigation - Sempre visível e fixa */}
+      {/* IAGO Chat Button - Only show if user is loaded */}
+      {!loading && user && <IAGOChatButton user={user} />}
+
+      {/* Bottom Navigation */}
       <nav className="bottom-navigation fixed bottom-0 left-0 right-0 glass-effect border-t border-[#CEF17B]/20">
         <div className="max-w-lg mx-auto px-2">
           <div className="flex justify-around items-center py-2">

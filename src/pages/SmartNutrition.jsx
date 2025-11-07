@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   Droplet, Clock, Zap, Lightbulb, BookOpen, 
   Brain, TrendingUp, Trophy, MessageCircle, Loader2
@@ -22,30 +23,29 @@ export default function SmartNutrition() {
   useEffect(() => {
     base44.auth.me()
       .then(setUser)
-      .catch(() => setUser(null))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
+  const queryClient = useQueryClient();
+
+  // Get IAGO daily tip
   const { data: iagoTip, isLoading: iagoLoading } = useQuery({
     queryKey: ['iagoTip', user?.email, today],
     queryFn: async () => {
-      try {
-        const tip = await base44.integrations.Core.InvokeLLM({
-          prompt: `Como IAGO, o personal AI do FitLens, dê UMA dica curta e motivadora sobre nutrição inteligente para hoje.
-          
-          Seja empático, humano e focado em educação (não em dieta).
-          Máximo 2 linhas.
-          
-          Exemplos:
-          - "Beba água antes do treino — pequenos hábitos, grandes resultados."
-          - "Seu corpo não precisa de perfeição, ele precisa de constância."
-          - "Perceba como você se sente depois de cada refeição. Esse é o melhor feedback."`,
-          add_context_from_internet: false
-        });
-        return tip;
-      } catch (error) {
-        return "Lembre-se: seu corpo não precisa de perfeição, ele precisa de constância. 💚";
-      }
+      const tip = await base44.integrations.Core.InvokeLLM({
+        prompt: `Como IAGO, o personal AI do FitLens, dê UMA dica curta e motivadora sobre nutrição inteligente para hoje.
+        
+        Seja empático, humano e focado em educação (não em dieta).
+        Máximo 2 linhas.
+        
+        Exemplos:
+        - "Beba água antes do treino — pequenos hábitos, grandes resultados."
+        - "Seu corpo não precisa de perfeição, ele precisa de constância."
+        - "Perceba como você se sente depois de cada refeição. Esse é o melhor feedback."`,
+        add_context_from_internet: false
+      });
+      return tip;
     },
     enabled: !!user?.email,
   });
@@ -55,6 +55,7 @@ export default function SmartNutrition() {
     window.dispatchEvent(event);
   };
 
+  // Show loading state
   if (loading) {
     return (
       <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
@@ -63,10 +64,13 @@ export default function SmartNutrition() {
     );
   }
 
+  // Show message if user is not logged in
   if (!user) {
     return (
       <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
-        <p className="text-white">Erro ao carregar dados do usuário.</p>
+        <Card className="glass-effect p-6 border-[#CEF17B]/20 text-center">
+          <p className="text-white">Por favor, faça login para acessar esta página.</p>
+        </Card>
       </div>
     );
   }
@@ -108,7 +112,7 @@ export default function SmartNutrition() {
               {iagoLoading ? (
                 <p className="text-[#CEEDB2] text-sm animate-pulse">Pensando...</p>
               ) : (
-                <p className="text-[#CEEDB2] leading-relaxed">{iagoTip}</p>
+                <p className="text-[#CEEDB2] leading-relaxed">{iagoTip || "Mantenha o foco e a constância!"}</p>
               )}
               <Button
                 onClick={openIAGOChat}

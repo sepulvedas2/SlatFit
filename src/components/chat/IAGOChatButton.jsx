@@ -8,6 +8,11 @@ export default function IAGOChatButton({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const [pulse, setPulse] = useState(false);
 
+  // Only render if user exists
+  if (!user || !user.email) {
+    return null;
+  }
+
   // Pulsar a cada 5 minutos para lembrar o usuário
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,11 +35,9 @@ export default function IAGOChatButton({ user }) {
     return () => window.removeEventListener('openIAGOChat', handleOpenChat);
   }, []);
 
-  if (!user) return null;
-
   return (
     <>
-      {/* Botão Flutuante - moved to bottom-right corner */}
+      {/* Botão Flutuante */}
       <motion.div
         className="fixed bottom-24 right-6 z-40 md:bottom-8"
         initial={{ scale: 0 }}
@@ -77,7 +80,6 @@ export default function IAGOChatButton({ user }) {
                   className="relative"
                 >
                   <MessageCircle className="w-6 h-6 text-[#084734]" />
-                  {/* Badge de notificação (placeholder) */}
                   <motion.div
                     className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
                     initial={{ scale: 0 }}
@@ -88,7 +90,6 @@ export default function IAGOChatButton({ user }) {
               )}
             </AnimatePresence>
 
-            {/* Efeito de ondas */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#CEF17B] to-[#CEEDB2] opacity-0 group-hover:opacity-20 transition-opacity" />
           </Button>
         </motion.div>
