@@ -11,7 +11,7 @@ import {
   Brain, TrendingUp, Trophy, MessageCircle, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
-import HydrationTracker from "../components/nutrition/HydrationTracker"; // This import is no longer needed but kept for safety if other files still use it, though best practice would be to remove unused imports. For this task, I'll keep it as the instruction didn't specify removing unused imports.
+import HydrationTracker from "../components/nutrition/HydrationTracker"; 
 import RoutineConsistency from "../components/nutrition/RoutineConsistency";
 import EnergyMoodLog from "../components/nutrition/EnergyMoodLog";
 import LearningCards from "../components/nutrition/LearningCards";
@@ -132,7 +132,10 @@ export default function SmartNutrition() {
           </div>
         </Card>
 
-        {/* Dashboard Cards - Removed HydrationTracker */}
+        {/* Hydration Tracker - RE-ADDED */}
+        <HydrationTracker userEmail={user.email} today={today} />
+
+        {/* Dashboard Cards */}
         <RoutineConsistency userEmail={user.email} />
 
         {/* Energy & Mood Log */}

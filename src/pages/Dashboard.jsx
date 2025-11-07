@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Crown, Camera, Dumbbell, Apple, Target, 
-  CheckCircle, Zap, Trophy, Users, MessageCircle, Sparkles
+  CheckCircle, Zap, Trophy, Users, MessageCircle, Sparkles, Droplet
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -106,6 +106,19 @@ export default function Dashboard() {
     enabled: !!user?.email
   });
 
+  const { data: nutritionData } = useQuery({
+    queryKey: ['nutritionData', user?.email, today],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const data = await base44.entities.NutritionData.filter({
+        user_email: user.email,
+        log_date: today
+      });
+      return data[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
   const todayCalories = todayFoods.reduce((sum, food) => sum + (food.calories || 0), 0);
   const todayProtein = todayFoods.reduce((sum, food) => sum + (food.protein || 0), 0);
   const todayCarbs = todayFoods.reduce((sum, food) => sum + (food.carbs || 0), 0);
@@ -119,6 +132,10 @@ export default function Dashboard() {
   const daysLeft = subscription?.end_date 
     ? differenceInDays(new Date(subscription.end_date), new Date())
     : 30;
+
+  const waterIntake = nutritionData?.water_intake_ml || 0;
+  const waterGoal = nutritionData?.water_goal_ml || 2000;
+  const waterProgress = (waterIntake / waterGoal) * 100;
 
   // Function to trigger Personal AI chat
   const openPersonalAIChat = () => {
@@ -209,6 +226,43 @@ export default function Dashboard() {
         )}
 
         <DailyMissions userEmail={user?.email} />
+
+        {/* NEW: Quick Hydration Card */}
+        <Link to={createPageUrl("SmartNutrition")}>
+          <Card className="glass-effect border-[#CEF17B]/20 p-4 hover:scale-[1.02] transition-all cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <Droplet className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Hidratação Hoje</h3>
+                  <p className="text-sm text-[#CEEDB2]">
+                    {waterIntake}ml / {waterGoal}ml
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-blue-400">
+                  {Math.round(waterProgress)}%
+                </div>
+                {waterIntake >= waterGoal && (
+                  <Badge className="bg-green-500/20 text-green-400 border-0 text-xs">
+                    ✓ Meta Atingida
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="w-full bg-white/10 rounded-full h-2">
+                <div 
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(waterProgress, 100)}%` }}
+                />
+              </div>
+            </div>
+          </Card>
+        </Link>
 
         <QuickStats
           todayCalories={todayCalories}
