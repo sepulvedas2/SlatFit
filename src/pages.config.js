@@ -9,7 +9,6 @@ import BillingHistory from './pages/BillingHistory';
 import CheckIn from './pages/CheckIn';
 import Challenges from './pages/Challenges';
 import Community from './pages/Community';
-import SmartNutrition from './pages/SmartNutrition';
 import Layout from './Layout.jsx';
 
 
@@ -25,7 +24,6 @@ export const PAGES = {
     "CheckIn": CheckIn,
     "Challenges": Challenges,
     "Community": Community,
-    "SmartNutrition": SmartNutrition,
 }
 
 export const pagesConfig = {
