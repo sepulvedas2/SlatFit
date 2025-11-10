@@ -27,6 +27,13 @@ export default function Workouts() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
+  // Fetch all exercises from database
+  const { data: exercises = [] } = useQuery({
+    queryKey: ['exercises'],
+    queryFn: () => base44.entities.Exercise.list(),
+    initialData: [],
+  });
+
   const hiitWorkout = {
     title: "HIIT para Emagrecimento",
     description: "Treino intervalado de alta intensidade focado em queima de gordura",
@@ -204,7 +211,10 @@ export default function Workouts() {
             onTimeUpdate={setTotalTime}
           />
 
-          <ExerciseBlock block={hiitWorkout.blocks[currentBlockIndex]} />
+          <ExerciseBlock 
+            block={hiitWorkout.blocks[currentBlockIndex]} 
+            exercises={exercises}
+          />
 
         </div>
       </div>
@@ -228,6 +238,9 @@ export default function Workouts() {
           <h1 className="text-4xl font-bold text-white mb-2">Treinos HIIT</h1>
           <p className="text-[#CEEDB2] text-lg">
             Escolha qual bloco você quer treinar hoje 💪
+          </p>
+          <p className="text-white/60 text-sm mt-2">
+            💡 Clique em qualquer exercício para ver a demonstração
           </p>
         </div>
 
@@ -310,6 +323,7 @@ export default function Workouts() {
             <li>• Foque na execução correta dos movimentos</li>
             <li>• Ajuste a intensidade ao seu condicionamento físico</li>
             <li>• Use um tapete ou colchonete para exercícios no chão</li>
+            <li>• Clique em cada exercício para ver a demonstração visual</li>
           </ul>
         </Card>
 
