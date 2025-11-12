@@ -5,10 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Play, Pause, RotateCcw, Flame, Clock, 
-  Target, CheckCircle, Zap, Trophy, ArrowLeft
+  Play, Flame, Trophy, ArrowLeft, Sparkles
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import HIITTimer from "../components/workouts/HIITTimer";
 import ExerciseBlock from "../components/workouts/ExerciseBlock";
 import WorkoutSummary from "../components/workouts/WorkoutSummary";
@@ -27,7 +26,6 @@ export default function Workouts() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  // Fetch all exercises from database
   const { data: exercises = [] } = useQuery({
     queryKey: ['exercises'],
     queryFn: () => base44.entities.Exercise.list(),
@@ -119,7 +117,6 @@ export default function Workouts() {
     onSuccess: () => {
       queryClient.invalidateQueries(['weekWorkouts']);
       
-      // Award points
       if (user?.email) {
         base44.entities.UserPoints.filter({ user_email: user.email })
           .then(points => {
@@ -136,14 +133,9 @@ export default function Workouts() {
 
   const handleCompleteWorkout = () => {
     const caloriesBurned = Math.round(250 + (totalTime / 60) * 10);
-    
     setWorkoutCompleted(true);
-    
     if (user) {
-      saveWorkoutMutation.mutate({
-        totalTime,
-        calories: caloriesBurned
-      });
+      saveWorkoutMutation.mutate({ totalTime, calories: caloriesBurned });
     }
   };
 
@@ -163,21 +155,13 @@ export default function Workouts() {
   };
 
   if (workoutCompleted) {
-    return (
-      <WorkoutSummary
-        totalTime={totalTime}
-        blocksCompleted={1}
-        caloriesBurned={Math.round(250 + (totalTime / 60) * 10)}
-        onRestart={handleRestart}
-      />
-    );
+    return <WorkoutSummary totalTime={totalTime} blocksCompleted={1} caloriesBurned={Math.round(250 + (totalTime / 60) * 10)} onRestart={handleRestart} />;
   }
 
   if (workoutStarted) {
     return (
-      <div className="min-h-screen p-4 md:p-8">
+      <div className="min-h-screen bg-white p-4 md:p-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
@@ -187,17 +171,15 @@ export default function Workouts() {
                   handleRestart();
                 }
               }}
-              className="glass-effect border-[#CEF17B]/20"
+              className="border-gray-200"
             >
-              <ArrowLeft className="w-5 h-5 text-white" />
+              <ArrowLeft className="w-5 h-5 text-[#09142D]" />
             </Button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-white">HIIT em Progresso</h1>
-              <p className="text-[#CEEDB2] text-sm">
-                {hiitWorkout.blocks[currentBlockIndex].title}
-              </p>
+              <h1 className="text-2xl font-bold text-[#09142D]">HIIT em Progresso</h1>
+              <p className="text-[#3B5EED] text-sm">{hiitWorkout.blocks[currentBlockIndex].title}</p>
             </div>
-            <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 px-4 py-2">
+            <Badge className="bg-gradient-to-r from-[#0E9E4D] to-[#59F394] text-white border-0 px-4 py-2">
               <Flame className="w-4 h-4 mr-1" />
               Alta Intensidade
             </Badge>
@@ -211,90 +193,79 @@ export default function Workouts() {
             onTimeUpdate={setTotalTime}
           />
 
-          <ExerciseBlock 
-            block={hiitWorkout.blocks[currentBlockIndex]} 
-            exercises={exercises}
-          />
-
+          <ExerciseBlock block={hiitWorkout.blocks[currentBlockIndex]} exercises={exercises} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-white p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="text-center">
+        <div className="text-center space-y-4">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
-            className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center"
+            className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#0E9E4D] to-[#59F394] flex items-center justify-center shadow-lg"
           >
             <Flame className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-4xl font-bold text-white mb-2">Treinos HIIT</h1>
-          <p className="text-[#CEEDB2] text-lg">
-            Escolha qual bloco você quer treinar hoje 💪
-          </p>
-          <p className="text-white/60 text-sm mt-2">
-            💡 Clique em qualquer exercício para ver a demonstração
-          </p>
+          
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold text-[#09142D] mb-2">
+              Treinos HIIT
+            </h1>
+            <p className="text-[#3B5EED] text-lg max-w-2xl mx-auto">
+              Escolha qual bloco você quer treinar hoje 💪
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <Sparkles className="w-4 h-4 text-[#0E9E4D]" />
+            <span>Clique em qualquer exercício para ver a demonstração animada</span>
+          </div>
         </div>
 
-        {/* Workout Blocks Grid */}
-        <div className="grid md:grid-cols-2 gap-4">
+        {/* Workout Blocks */}
+        <div className="space-y-8">
           {hiitWorkout.blocks.map((block, index) => (
             <motion.div
               key={block.id}
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="glass-effect border-[#CEF17B]/20 p-6 hover:scale-[1.02] transition-all cursor-pointer">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-[#CEF17B]/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#CEF17B] font-bold text-xl">{block.id}</span>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0E9E4D] to-[#59F394] flex items-center justify-center shadow-md">
+                    <span className="text-white font-bold text-xl">{block.id}</span>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-white mb-2">
-                      {block.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-sm text-[#CEEDB2]">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>{block.exercises.length} exercícios</span>
-                    </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-[#09142D]">{block.title}</h2>
+                    <p className="text-sm text-gray-500">{block.exercises.length} exercícios</p>
                   </div>
                 </div>
-
-                <div className="space-y-2 mb-4">
-                  {block.exercises.map((exercise, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#CEF17B]" />
-                      <span className="text-[#CEEDB2]">{exercise.name}</span>
-                      <span className="text-white/60 text-xs ml-auto">{exercise.reps}</span>
-                    </div>
-                  ))}
-                </div>
-
                 <Button
                   onClick={() => startSelectedBlock(block.id)}
-                  className="w-full gradient-button text-[#084734] font-bold"
+                  className="bg-gradient-to-r from-[#0E9E4D] to-[#59F394] text-white shadow-lg hover:shadow-xl transition-all"
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Iniciar Bloco {block.id}
+                  Iniciar Bloco
                 </Button>
-              </Card>
+              </div>
+              
+              <ExerciseBlock block={block} exercises={exercises} />
             </motion.div>
           ))}
         </div>
 
         {/* Benefits */}
-        <Card className="glass-effect p-6 border-[#CEF17B]/20">
-          <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-[#CEF17B]" />
+        <Card className="bg-gradient-to-br from-[#0E9E4D]/5 to-[#59F394]/5 border-[#0E9E4D]/20 p-8 rounded-2xl">
+          <h3 className="font-bold text-[#09142D] text-xl mb-6 flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-[#0E9E4D]" />
             Benefícios do HIIT
           </h3>
           <div className="grid md:grid-cols-2 gap-4">
@@ -306,24 +277,42 @@ export default function Workouts() {
               "🏃 Melhora da capacidade aeróbica",
               "💪 Preserva massa muscular"
             ].map((benefit, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#CEF17B]" />
-                <p className="text-[#CEEDB2] text-sm">{benefit}</p>
+              <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-xl">
+                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#0E9E4D] to-[#59F394]" />
+                <p className="text-[#09142D] text-sm font-medium">{benefit}</p>
               </div>
             ))}
           </div>
         </Card>
 
         {/* Tips */}
-        <Card className="glass-effect p-6 border-[#CEF17B]/20">
-          <h3 className="font-bold text-white mb-3">💡 Dicas para o Treino</h3>
-          <ul className="space-y-2 text-sm text-[#CEEDB2]">
-            <li>• Mantenha uma garrafa de água por perto</li>
-            <li>• Respeite os intervalos de descanso (10s entre exercícios)</li>
-            <li>• Foque na execução correta dos movimentos</li>
-            <li>• Ajuste a intensidade ao seu condicionamento físico</li>
-            <li>• Use um tapete ou colchonete para exercícios no chão</li>
-            <li>• Clique em cada exercício para ver a demonstração visual</li>
+        <Card className="bg-white border-gray-200 p-8 rounded-2xl shadow-sm">
+          <h3 className="font-bold text-[#09142D] text-xl mb-4">💡 Dicas para o Treino</h3>
+          <ul className="space-y-3 text-sm text-[#3B5EED]">
+            <li className="flex items-start gap-2">
+              <span className="text-[#0E9E4D] font-bold">•</span>
+              <span>Mantenha uma garrafa de água por perto</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#0E9E4D] font-bold">•</span>
+              <span>Respeite os intervalos de descanso (10s entre exercícios)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#0E9E4D] font-bold">•</span>
+              <span>Foque na execução correta dos movimentos</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#0E9E4D] font-bold">•</span>
+              <span>Ajuste a intensidade ao seu condicionamento físico</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#0E9E4D] font-bold">•</span>
+              <span>Use um tapete ou colchonete para exercícios no chão</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#0E9E4D] font-bold">•</span>
+              <span>Clique em cada exercício para ver a demonstração visual animada</span>
+            </li>
           </ul>
         </Card>
 

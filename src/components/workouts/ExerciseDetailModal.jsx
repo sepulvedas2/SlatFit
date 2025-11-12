@@ -12,11 +12,12 @@ import {
 } from "@/components/ui/dialog";
 import { 
   Upload, X, Loader2, Image as ImageIcon, 
-  Info, Zap, Target, Check
+  Info, Zap, Target, Check, Film, Sparkles
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import LottieAnimation from "./LottieAnimation";
 
 export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin }) {
   const [uploading, setUploading] = useState(false);
@@ -27,42 +28,57 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
   const [formData, setFormData] = useState({
     name: exercise?.name || "",
     description: exercise?.description || "",
+    short_description: exercise?.short_description || "",
     image_url: exercise?.image_url || "",
+    lottie_url: exercise?.lottie_url || "",
+    gif_url: exercise?.gif_url || "",
+    video_url: exercise?.video_url || "",
     reps_suggestion: exercise?.reps_suggestion || exercise?.reps || "",
+    series_suggestion: exercise?.series_suggestion || "",
     duration_seconds: exercise?.duration_seconds || exercise?.duration || 30,
     difficulty: exercise?.difficulty || "intermediario",
-    category: exercise?.category || "cardio"
+    category: exercise?.category || "cardio",
+    instructions: exercise?.instructions || ""
   });
   
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
 
-  // Check if exercise exists in DB when modal opens
   useEffect(() => {
     if (isOpen && exercise) {
-      // If exercise has an ID, it's from the database
       if (exercise.id) {
         setCurrentExercise(exercise);
         setFormData({
           name: exercise.name,
           description: exercise.description || "",
+          short_description: exercise.short_description || "",
           image_url: exercise.image_url || "",
+          lottie_url: exercise.lottie_url || "",
+          gif_url: exercise.gif_url || "",
+          video_url: exercise.video_url || "",
           reps_suggestion: exercise.reps_suggestion,
+          series_suggestion: exercise.series_suggestion || "",
           duration_seconds: exercise.duration_seconds,
           difficulty: exercise.difficulty || "intermediario",
-          category: exercise.category || "cardio"
+          category: exercise.category || "cardio",
+          instructions: exercise.instructions || ""
         });
       } else {
-        // Exercise from hardcoded data, create it first
         setCurrentExercise(null);
         setFormData({
           name: exercise.name,
           description: exercise.description || "",
+          short_description: exercise.short_description || "",
           image_url: exercise.image_url || "",
+          lottie_url: exercise.lottie_url || "",
+          gif_url: exercise.gif_url || "",
+          video_url: exercise.video_url || "",
           reps_suggestion: exercise.reps || "",
+          series_suggestion: "",
           duration_seconds: exercise.duration || 30,
           difficulty: "intermediario",
-          category: "cardio"
+          category: "cardio",
+          instructions: ""
         });
       }
     }
@@ -96,22 +112,12 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
     setError(null);
     
     try {
-      // Upload the file first
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      
-      // Update form data
-      const updatedData = { 
-        ...formData, 
-        image_url: file_url 
-      };
+      const updatedData = { ...formData, image_url: file_url };
       setFormData(updatedData);
-      
-      // Save to database
-      const result = await createOrUpdateExerciseMutation.mutateAsync(updatedData);
-      
+      await createOrUpdateExerciseMutation.mutateAsync(updatedData);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-      
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
       setError("Erro ao fazer upload da imagem. Tente novamente.");
@@ -127,24 +133,24 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
   };
 
   const difficultyColors = {
-    iniciante: "bg-green-500/20 text-green-400 border-green-500/30",
-    intermediario: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    avancado: "bg-red-500/20 text-red-400 border-red-500/30"
+    iniciante: "bg-green-500/20 text-green-600 border-green-500/30",
+    intermediario: "bg-yellow-500/20 text-yellow-600 border-yellow-500/30",
+    avancado: "bg-red-500/20 text-red-600 border-red-500/30"
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#084734] border-[#CEF17B]/20 max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-white border-gray-200 max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-white text-xl">
+            <DialogTitle className="text-[#09142D] text-2xl font-bold">
               {formData.name || "Novo Exercício"}
             </DialogTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="text-white/60 hover:text-white"
+              className="text-gray-400 hover:text-[#09142D]"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -153,144 +159,172 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
 
         <div className="space-y-6 mt-4">
           
-          {/* Success/Error Messages */}
           {success && (
-            <Alert className="bg-green-500/20 border-green-500/30">
-              <Check className="w-4 h-4 text-green-400" />
-              <AlertDescription className="text-green-400">
+            <Alert className="bg-green-50 border-green-200">
+              <Check className="w-4 h-4 text-green-600" />
+              <AlertDescription className="text-green-700">
                 Exercício salvo com sucesso!
               </AlertDescription>
             </Alert>
           )}
 
           {error && (
-            <Alert className="bg-red-500/20 border-red-500/30">
-              <AlertDescription className="text-red-400">
+            <Alert className="bg-red-50 border-red-200">
+              <AlertDescription className="text-red-700">
                 {error}
               </AlertDescription>
             </Alert>
           )}
           
-          {/* Image Section */}
-          <div className="space-y-3">
-            <Label className="text-white">Imagem Demonstrativa (300x400px)</Label>
-            
-            {formData.image_url ? (
-              <div className="relative w-full aspect-[3/4] max-w-[300px] mx-auto rounded-lg overflow-hidden border-2 border-[#CEF17B]/30">
-                <img
-                  src={formData.image_url}
-                  alt={formData.name}
-                  className="w-full h-full object-cover"
-                />
-                {isAdmin && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <Button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90"
-                    >
-                      {uploading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Enviando...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Trocar Imagem
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div 
-                className="w-full aspect-[3/4] max-w-[300px] mx-auto rounded-lg border-2 border-dashed border-[#CEF17B]/30 flex flex-col items-center justify-center bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
-                onClick={() => isAdmin && fileInputRef.current?.click()}
-              >
-                <ImageIcon className="w-12 h-12 text-white/40 mb-2" />
-                <p className="text-white/60 text-sm text-center px-4">
-                  {isAdmin ? "Clique para adicionar uma imagem" : "Sem imagem disponível"}
-                </p>
-                <p className="text-white/40 text-xs mt-1">Recomendado: 300x400px</p>
-                {isAdmin && (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                    disabled={uploading}
-                    className="mt-4 bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90"
-                  >
-                    {uploading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Enviando...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Selecionar Imagem
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-            )}
+          {/* Animation Preview */}
+          {(formData.lottie_url || formData.gif_url) && !editing && (
+            <div className="flex justify-center p-6 bg-gradient-to-br from-[#0E9E4D]/5 to-[#59F394]/5 rounded-2xl">
+              {formData.lottie_url ? (
+                <LottieAnimation url={formData.lottie_url} className="w-40 h-40" />
+              ) : formData.gif_url ? (
+                <img src={formData.gif_url} alt={formData.name} className="w-40 h-40 object-contain" />
+              ) : null}
+            </div>
+          )}
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleImageUpload(e.target.files[0])}
-              className="hidden"
-            />
-          </div>
+          {/* Editing Mode: Animation URLs */}
+          {editing && isAdmin && (
+            <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-[#0E9E4D]" />
+                <Label className="text-[#09142D] font-semibold">Animações</Label>
+              </div>
+              
+              <div>
+                <Label className="text-gray-700">URL Animação Lottie (.json)</Label>
+                <Input
+                  value={formData.lottie_url}
+                  onChange={(e) => setFormData({...formData, lottie_url: e.target.value})}
+                  placeholder="https://assets.lottiefiles.com/..."
+                  className="bg-white border-gray-200 text-[#09142D]"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Ex: https://assets2.lottiefiles.com/packages/lf20_ynbm5x3d.json
+                </p>
+              </div>
+
+              <div>
+                <Label className="text-gray-700">URL GIF Animado</Label>
+                <Input
+                  value={formData.gif_url}
+                  onChange={(e) => setFormData({...formData, gif_url: e.target.value})}
+                  placeholder="https://exemplo.com/exercise.gif"
+                  className="bg-white border-gray-200 text-[#09142D]"
+                />
+              </div>
+
+              <div>
+                <Label className="text-gray-700">URL Vídeo Completo</Label>
+                <Input
+                  value={formData.video_url}
+                  onChange={(e) => setFormData({...formData, video_url: e.target.value})}
+                  placeholder="https://youtube.com/watch?v=..."
+                  className="bg-white border-gray-200 text-[#09142D]"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Exercise Info */}
           <div className="space-y-4">
             {editing && isAdmin ? (
               <>
                 <div>
-                  <Label className="text-white">Nome do Exercício</Label>
+                  <Label className="text-[#09142D]">Nome do Exercício</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-white border-gray-200 text-[#09142D]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-white">Descrição</Label>
+                  <Label className="text-[#09142D]">Descrição Curta (para o card)</Label>
+                  <Input
+                    value={formData.short_description}
+                    onChange={(e) => setFormData({...formData, short_description: e.target.value})}
+                    placeholder="3 séries de 12 repetições — mantenha a postura ereta"
+                    className="bg-white border-gray-200 text-[#09142D]"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-[#09142D]">Descrição Completa</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     placeholder="Como executar este exercício..."
-                    className="bg-white/5 border-white/10 text-white min-h-[100px]"
+                    className="bg-white border-gray-200 text-[#09142D] min-h-[100px]"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-[#09142D]">Instruções Passo a Passo</Label>
+                  <Textarea
+                    value={formData.instructions}
+                    onChange={(e) => setFormData({...formData, instructions: e.target.value})}
+                    placeholder="1. Posicione os pés na largura dos ombros...&#10;2. Desça controladamente..."
+                    className="bg-white border-gray-200 text-[#09142D] min-h-[120px]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white">Repetições</Label>
+                    <Label className="text-[#09142D]">Sugestão de Séries</Label>
                     <Input
-                      value={formData.reps_suggestion}
-                      onChange={(e) => setFormData({...formData, reps_suggestion: e.target.value})}
-                      placeholder="Ex: 10x, 8/8"
-                      className="bg-white/5 border-white/10 text-white"
+                      value={formData.series_suggestion}
+                      onChange={(e) => setFormData({...formData, series_suggestion: e.target.value})}
+                      placeholder="3 séries de 12 repetições"
+                      className="bg-white border-gray-200 text-[#09142D]"
                     />
                   </div>
 
                   <div>
-                    <Label className="text-white">Duração (segundos)</Label>
+                    <Label className="text-[#09142D]">Repetições</Label>
                     <Input
-                      type="number"
-                      value={formData.duration_seconds}
-                      onChange={(e) => setFormData({...formData, duration_seconds: parseInt(e.target.value)})}
-                      className="bg-white/5 border-white/10 text-white"
+                      value={formData.reps_suggestion}
+                      onChange={(e) => setFormData({...formData, reps_suggestion: e.target.value})}
+                      placeholder="Ex: 10x, 8/8"
+                      className="bg-white border-gray-200 text-[#09142D]"
                     />
                   </div>
+                </div>
+
+                {/* Image Upload */}
+                <div>
+                  <Label className="text-[#09142D]">Imagem Demonstrativa</Label>
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                      placeholder="URL da imagem ou faça upload"
+                      className="bg-white border-gray-200 text-[#09142D]"
+                    />
+                    <Button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      variant="outline"
+                      className="border-gray-200"
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e.target.files[0])}
+                    className="hidden"
+                  />
                 </div>
               </>
             ) : (
@@ -299,53 +333,85 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                   <Badge className={difficultyColors[formData.difficulty]}>
                     {formData.difficulty}
                   </Badge>
-                  <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0">
+                  <Badge className="bg-gradient-to-r from-[#0E9E4D]/10 to-[#59F394]/10 text-[#0E9E4D] border-0">
                     {formData.category}
                   </Badge>
                 </div>
 
                 {formData.description && (
-                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <div className="flex items-center gap-2 mb-2">
-                      <Info className="w-4 h-4 text-[#CEF17B]" />
-                      <p className="text-white font-semibold text-sm">Como Executar</p>
+                      <Info className="w-4 h-4 text-[#0E9E4D]" />
+                      <p className="text-[#09142D] font-semibold text-sm">Como Executar</p>
                     </div>
-                    <p className="text-[#CEEDB2] text-sm leading-relaxed">
+                    <p className="text-[#3B5EED] text-sm leading-relaxed">
                       {formData.description}
                     </p>
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Target className="w-4 h-4 text-[#CEF17B]" />
-                      <p className="text-white/60 text-xs">Repetições</p>
+                {formData.instructions && (
+                  <div className="p-4 bg-gradient-to-br from-[#0E9E4D]/5 to-[#59F394]/5 rounded-xl border border-[#0E9E4D]/20">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Target className="w-4 h-4 text-[#0E9E4D]" />
+                      <p className="text-[#09142D] font-semibold text-sm">Instruções</p>
                     </div>
-                    <p className="text-white font-bold text-lg">{formData.reps_suggestion}</p>
+                    <div className="text-[#3B5EED] text-sm leading-relaxed whitespace-pre-line">
+                      {formData.instructions}
+                    </div>
+                  </div>
+                )}
+
+                {formData.video_url && (
+                  <Button
+                    onClick={() => window.open(formData.video_url, '_blank')}
+                    className="w-full bg-gradient-to-r from-[#0E9E4D] to-[#59F394] text-white"
+                  >
+                    <Film className="w-4 h-4 mr-2" />
+                    Assistir Vídeo Completo
+                  </Button>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Target className="w-4 h-4 text-[#0E9E4D]" />
+                      <p className="text-gray-500 text-xs">Repetições</p>
+                    </div>
+                    <p className="text-[#09142D] font-bold text-lg">{formData.reps_suggestion}</p>
                   </div>
 
-                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <div className="flex items-center gap-2 mb-1">
-                      <Zap className="w-4 h-4 text-[#CEF17B]" />
-                      <p className="text-white/60 text-xs">Duração</p>
+                      <Zap className="w-4 h-4 text-[#0E9E4D]" />
+                      <p className="text-gray-500 text-xs">Duração</p>
                     </div>
-                    <p className="text-white font-bold text-lg">{formData.duration_seconds}s</p>
+                    <p className="text-[#09142D] font-bold text-lg">{formData.duration_seconds}s</p>
                   </div>
                 </div>
+
+                {formData.image_url && (
+                  <div className="rounded-xl overflow-hidden border border-gray-100">
+                    <img
+                      src={formData.image_url}
+                      alt={formData.name}
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                )}
               </>
             )}
           </div>
 
           {/* Actions */}
           {isAdmin && (
-            <div className="flex gap-3 pt-4 border-t border-white/10">
+            <div className="flex gap-3 pt-4 border-t border-gray-100">
               {editing ? (
                 <>
                   <Button
                     onClick={handleSave}
                     disabled={createOrUpdateExerciseMutation.isPending || !formData.name}
-                    className="flex-1 bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90"
+                    className="flex-1 bg-gradient-to-r from-[#0E9E4D] to-[#59F394] text-white"
                   >
                     {createOrUpdateExerciseMutation.isPending ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -354,20 +420,9 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                     )}
                   </Button>
                   <Button
-                    onClick={() => {
-                      setEditing(false);
-                      setFormData({
-                        name: currentExercise?.name || exercise?.name || "",
-                        description: currentExercise?.description || exercise?.description || "",
-                        image_url: currentExercise?.image_url || exercise?.image_url || "",
-                        reps_suggestion: currentExercise?.reps_suggestion || exercise?.reps || "",
-                        duration_seconds: currentExercise?.duration_seconds || exercise?.duration || 30,
-                        difficulty: currentExercise?.difficulty || "intermediario",
-                        category: currentExercise?.category || "cardio"
-                      });
-                    }}
+                    onClick={() => setEditing(false)}
                     variant="outline"
-                    className="border-white/10 hover:bg-white/5"
+                    className="border-gray-200"
                   >
                     Cancelar
                   </Button>
@@ -376,7 +431,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                 <Button
                   onClick={() => setEditing(true)}
                   variant="outline"
-                  className="w-full border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
+                  className="w-full border-[#0E9E4D]/20 hover:bg-[#0E9E4D]/5 text-[#0E9E4D]"
                 >
                   Editar Exercício
                 </Button>
