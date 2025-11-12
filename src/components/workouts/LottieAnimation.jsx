@@ -1,32 +1,53 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function LottieAnimation({ url, className = "w-32 h-32" }) {
   const containerRef = useRef(null);
   const animationRef = useRef(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!url || !containerRef.current) return;
 
-    const loadLottie = async () => {
+    const loadLottie = () => {
       try {
-        // Dynamically import lottie-web
-        const lottie = await import('lottie-web');
-        
-        // Clear previous animation
-        if (animationRef.current) {
-          animationRef.current.destroy();
-        }
+        // Check if lottie is already loaded
+        if (window.lottie) {
+          if (animationRef.current) {
+            animationRef.current.destroy();
+          }
 
-        // Load animation
-        animationRef.current = lottie.default.loadAnimation({
-          container: containerRef.current,
-          renderer: 'svg',
-          loop: true,
-          autoplay: true,
-          path: url
-        });
+          animationRef.current = window.lottie.loadAnimation({
+            container: containerRef.current,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: url
+          });
+        } else {
+          // Load lottie from CDN
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js';
+          script.async = true;
+          script.onload = () => {
+            if (window.lottie && containerRef.current) {
+              animationRef.current = window.lottie.loadAnimation({
+                container: containerRef.current,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: url
+              });
+            }
+          };
+          script.onerror = () => {
+            console.error("Failed to load Lottie library");
+            setError(true);
+          };
+          document.head.appendChild(script);
+        }
       } catch (error) {
         console.error("Error loading Lottie animation:", error);
+        setError(true);
       }
     };
 
@@ -34,12 +55,16 @@ export default function LottieAnimation({ url, className = "w-32 h-32" }) {
 
     return () => {
       if (animationRef.current) {
-        animationRef.current.destroy();
+        try {
+          animationRef.current.destroy();
+        } catch (e) {
+          console.error("Error destroying animation:", e);
+        }
       }
     };
   }, [url]);
 
-  if (!url) return null;
+  if (!url || error) return null;
 
   return <div ref={containerRef} className={className} />;
 }
