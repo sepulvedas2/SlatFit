@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,20 +12,24 @@ import {
 } from "@/components/ui/dialog";
 import { 
   Upload, X, Loader2, Image as ImageIcon, 
-  Info, Zap, Target 
+  Info, Zap, Target, Check
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin }) {
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentExercise, setCurrentExercise] = useState(null);
   const [formData, setFormData] = useState({
     name: exercise?.name || "",
     description: exercise?.description || "",
     image_url: exercise?.image_url || "",
-    reps_suggestion: exercise?.reps_suggestion || "",
-    duration_seconds: exercise?.duration_seconds || 30,
+    reps_suggestion: exercise?.reps_suggestion || exercise?.reps || "",
+    duration_seconds: exercise?.duration_seconds || exercise?.duration || 30,
     difficulty: exercise?.difficulty || "intermediario",
     category: exercise?.category || "cardio"
   });
@@ -33,42 +37,93 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
 
-  const updateExerciseMutation = useMutation({
+  // Check if exercise exists in DB when modal opens
+  useEffect(() => {
+    if (isOpen && exercise) {
+      // If exercise has an ID, it's from the database
+      if (exercise.id) {
+        setCurrentExercise(exercise);
+        setFormData({
+          name: exercise.name,
+          description: exercise.description || "",
+          image_url: exercise.image_url || "",
+          reps_suggestion: exercise.reps_suggestion,
+          duration_seconds: exercise.duration_seconds,
+          difficulty: exercise.difficulty || "intermediario",
+          category: exercise.category || "cardio"
+        });
+      } else {
+        // Exercise from hardcoded data, create it first
+        setCurrentExercise(null);
+        setFormData({
+          name: exercise.name,
+          description: exercise.description || "",
+          image_url: exercise.image_url || "",
+          reps_suggestion: exercise.reps || "",
+          duration_seconds: exercise.duration || 30,
+          difficulty: "intermediario",
+          category: "cardio"
+        });
+      }
+    }
+  }, [isOpen, exercise]);
+
+  const createOrUpdateExerciseMutation = useMutation({
     mutationFn: async (data) => {
-      if (exercise?.id) {
-        return base44.entities.Exercise.update(exercise.id, data);
+      if (currentExercise?.id) {
+        return base44.entities.Exercise.update(currentExercise.id, data);
       } else {
         return base44.entities.Exercise.create(data);
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries(['exercises']);
+      setCurrentExercise(result);
       setEditing(false);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     },
+    onError: (err) => {
+      setError("Erro ao salvar exercício. Tente novamente.");
+      setTimeout(() => setError(null), 5000);
+    }
   });
 
   const handleImageUpload = async (file) => {
     if (!file) return;
 
     setUploading(true);
+    setError(null);
+    
     try {
-      // Resize image to 300x400 (would need a canvas/library in production)
+      // Upload the file first
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       
-      const updatedData = { ...formData, image_url: file_url };
+      // Update form data
+      const updatedData = { 
+        ...formData, 
+        image_url: file_url 
+      };
       setFormData(updatedData);
       
-      if (exercise?.id) {
-        await updateExerciseMutation.mutateAsync(updatedData);
-      }
+      // Save to database
+      const result = await createOrUpdateExerciseMutation.mutateAsync(updatedData);
+      
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+      
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
+      setError("Erro ao fazer upload da imagem. Tente novamente.");
+      setTimeout(() => setError(null), 5000);
     }
+    
     setUploading(false);
   };
 
-  const handleSave = () => {
-    updateExerciseMutation.mutate(formData);
+  const handleSave = async () => {
+    setError(null);
+    createOrUpdateExerciseMutation.mutate(formData);
   };
 
   const difficultyColors = {
@@ -83,7 +138,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-white text-xl">
-              {exercise?.name || "Novo Exercício"}
+              {formData.name || "Novo Exercício"}
             </DialogTitle>
             <Button
               variant="ghost"
@@ -98,9 +153,27 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
 
         <div className="space-y-6 mt-4">
           
+          {/* Success/Error Messages */}
+          {success && (
+            <Alert className="bg-green-500/20 border-green-500/30">
+              <Check className="w-4 h-4 text-green-400" />
+              <AlertDescription className="text-green-400">
+                Exercício salvo com sucesso!
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {error && (
+            <Alert className="bg-red-500/20 border-red-500/30">
+              <AlertDescription className="text-red-400">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Image Section */}
           <div className="space-y-3">
-            <Label className="text-white">Imagem Demonstrativa</Label>
+            <Label className="text-white">Imagem Demonstrativa (300x400px)</Label>
             
             {formData.image_url ? (
               <div className="relative w-full aspect-[3/4] max-w-[300px] mx-auto rounded-lg overflow-hidden border-2 border-[#CEF17B]/30">
@@ -109,8 +182,8 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                   alt={formData.name}
                   className="w-full h-full object-cover"
                 />
-                {isAdmin && editing && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                {isAdmin && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                     <Button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
@@ -132,14 +205,37 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                 )}
               </div>
             ) : (
-              <div className="w-full aspect-[3/4] max-w-[300px] mx-auto rounded-lg border-2 border-dashed border-[#CEF17B]/30 flex flex-col items-center justify-center bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
-                   onClick={() => isAdmin && editing && fileInputRef.current?.click()}
+              <div 
+                className="w-full aspect-[3/4] max-w-[300px] mx-auto rounded-lg border-2 border-dashed border-[#CEF17B]/30 flex flex-col items-center justify-center bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                onClick={() => isAdmin && fileInputRef.current?.click()}
               >
                 <ImageIcon className="w-12 h-12 text-white/40 mb-2" />
                 <p className="text-white/60 text-sm text-center px-4">
-                  {isAdmin && editing ? "Clique para adicionar uma imagem" : "Sem imagem disponível"}
+                  {isAdmin ? "Clique para adicionar uma imagem" : "Sem imagem disponível"}
                 </p>
                 <p className="text-white/40 text-xs mt-1">Recomendado: 300x400px</p>
+                {isAdmin && (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                    disabled={uploading}
+                    className="mt-4 bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Selecionar Imagem
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             )}
 
@@ -150,20 +246,6 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
               onChange={(e) => handleImageUpload(e.target.files[0])}
               className="hidden"
             />
-
-            {isAdmin && !editing && !formData.image_url && (
-              <Button
-                onClick={() => {
-                  setEditing(true);
-                  fileInputRef.current?.click();
-                }}
-                variant="outline"
-                className="w-full border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Adicionar Imagem
-              </Button>
-            )}
           </div>
 
           {/* Exercise Info */}
@@ -262,10 +344,10 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                 <>
                   <Button
                     onClick={handleSave}
-                    disabled={updateExerciseMutation.isPending}
+                    disabled={createOrUpdateExerciseMutation.isPending || !formData.name}
                     className="flex-1 bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90"
                   >
-                    {updateExerciseMutation.isPending ? (
+                    {createOrUpdateExerciseMutation.isPending ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
                       "Salvar Alterações"
@@ -275,13 +357,13 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                     onClick={() => {
                       setEditing(false);
                       setFormData({
-                        name: exercise?.name || "",
-                        description: exercise?.description || "",
-                        image_url: exercise?.image_url || "",
-                        reps_suggestion: exercise?.reps_suggestion || "",
-                        duration_seconds: exercise?.duration_seconds || 30,
-                        difficulty: exercise?.difficulty || "intermediario",
-                        category: exercise?.category || "cardio"
+                        name: currentExercise?.name || exercise?.name || "",
+                        description: currentExercise?.description || exercise?.description || "",
+                        image_url: currentExercise?.image_url || exercise?.image_url || "",
+                        reps_suggestion: currentExercise?.reps_suggestion || exercise?.reps || "",
+                        duration_seconds: currentExercise?.duration_seconds || exercise?.duration || 30,
+                        difficulty: currentExercise?.difficulty || "intermediario",
+                        category: currentExercise?.category || "cardio"
                       });
                     }}
                     variant="outline"
