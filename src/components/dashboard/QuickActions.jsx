@@ -1,49 +1,58 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Camera, Dumbbell, Trophy, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Camera, Dumbbell, UtensilsCrossed, Plus } from "lucide-react";
 
 export default function QuickActions() {
   const actions = [
     {
-      title: "Escanear Alimento",
       icon: Camera,
-      color: "from-blue-500 to-cyan-500",
-      path: createPageUrl("FoodScanner")
+      label: "Escanear",
+      sublabel: "Alimento",
+      link: "FoodScanner",
+      gradient: "from-blue-500/20 to-cyan-500/20"
     },
     {
-      title: "Novo Treino",
       icon: Dumbbell,
-      color: "from-purple-500 to-pink-500",
-      path: createPageUrl("Workouts")
+      label: "Novo",
+      sublabel: "Treino",
+      link: "Workouts",
+      gradient: "from-orange-500/20 to-red-500/20"
     },
     {
-      title: "Ver Refeições",
-      icon: UtensilsCrossed,
-      color: "from-orange-500 to-red-500",
-      path: createPageUrl("MealPlans")
+      icon: Trophy,
+      label: "Desafios",
+      sublabel: "Ativos",
+      link: "Challenges",
+      gradient: "from-purple-500/20 to-pink-500/20"
     },
+    {
+      icon: Calendar,
+      label: "Agenda",
+      sublabel: "Tarefas",
+      link: "Agenda",
+      gradient: "from-green-500/20 to-emerald-500/20"
+    }
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-3">
-      {actions.map((action) => {
-        const Icon = action.icon;
-        return (
-          <Link key={action.title} to={action.path}>
-            <Button
-              variant="outline"
-              className="w-full h-auto flex-col gap-2 p-4 bg-slate-900/50 backdrop-blur-xl border-white/10 hover:bg-slate-800/50 hover:scale-105 transition-all duration-300"
-            >
-              <div className={`p-3 rounded-xl bg-gradient-to-br ${action.color} bg-opacity-20`}>
-                <Icon className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xs font-medium text-white">{action.title}</span>
-            </Button>
-          </Link>
-        );
-      })}
+    <div>
+      <h3 className="text-lg font-bold text-white mb-4">Ações Rápidas</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {actions.map((action, index) => {
+          const Icon = action.icon;
+          return (
+            <Link key={index} to={createPageUrl(action.link)}>
+              <Card className={`glass-effect border-[#CEF17B]/20 p-6 hover:scale-105 transition-all cursor-pointer bg-gradient-to-br ${action.gradient}`}>
+                <Icon className="w-10 h-10 text-[#CEF17B] mb-3" />
+                <p className="text-base font-bold text-white">{action.label}</p>
+                <p className="text-xs text-[#CEEDB2]">{action.sublabel}</p>
+              </Card>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

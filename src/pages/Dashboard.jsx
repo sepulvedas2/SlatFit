@@ -1,25 +1,21 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
-  Crown, Camera, Dumbbell, Apple, Target, 
-  CheckCircle, Zap, Trophy, Users, MessageCircle, Sparkles
+  CheckCircle, Crown
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import QuickStats from "../components/dashboard/QuickStats";
-import MacroProgress from "../components/dashboard/MacroProgress";
-import WeeklyActivity from "../components/dashboard/WeeklyActivity";
-import Achievements from "../components/dashboard/Achievements";
-import SubscriptionStatus from "../components/dashboard/SubscriptionStatus";
-import WelcomeModal from "../components/onboarding/WelcomeModal";
+import UserGreeting from "../components/dashboard/UserGreeting";
 import DailyMissions from "../components/dashboard/DailyMissions";
+import PointsCard from "../components/dashboard/PointsCard";
+import WeeklyGoals from "../components/dashboard/WeeklyGoals";
+import Achievements from "../components/dashboard/Achievements";
+import QuickActions from "../components/dashboard/QuickActions";
+import WelcomeModal from "../components/onboarding/WelcomeModal";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -133,65 +129,29 @@ export default function Dashboard() {
     ? differenceInDays(new Date(subscription.end_date), new Date())
     : 30;
 
-  const waterIntake = nutritionData?.water_intake_ml || 0;
-  const waterGoal = nutritionData?.water_goal_ml || 2000;
-  const waterProgress = (waterIntake / waterGoal) * 100;
+  // Calculate weekly stats for goals
+  const { data: weekNutrition = [] } = useQuery({
+    queryKey: ['weekNutrition', user?.email, weekStart],
+    queryFn: async () => {
+      if (!user?.email) return [];
+      const data = await base44.entities.NutritionData.filter({ user_email: user.email });
+      return data.filter(d => d.log_date >= weekStart);
+    },
+    enabled: !!user?.email,
+    initialData: [],
+  });
 
-  // Function to trigger Personal AI chat
-  const openPersonalAIChat = () => {
-    // The button is handled by IAGOChatButton component in Layout
-    // We can dispatch a custom event or just let users click the floating button
-    const event = new CustomEvent('openPersonalAIChat');
-    window.dispatchEvent(event);
-  };
+  const waterDaysCompleted = weekNutrition.filter(d => d.water_goal_reached).length;
+  const proteinDaysCompleted = weekNutrition.filter(d => {
+    const dailyProtein = todayFoods
+      .filter(f => f.log_date === d.log_date)
+      .reduce((sum, f) => sum + (f.protein || 0), 0);
+    return dailyProtein >= (profile?.protein_target || 150) * 0.9;
+  }).length;
 
   return (
-    <div className="min-h-screen p-4 md:p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">
-              Olá, {user?.full_name?.split(' ')[0] || 'Atleta'}! 👋
-            </h1>
-            <p className="text-[#CEEDB2] mt-1 text-sm md:text-base">
-              {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {userPoints && (
-              <div className="glass-effect px-4 py-2 rounded-full border border-[#CEF17B]/20">
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-[#CEF17B]" />
-                  <div className="text-xs">
-                    <div className="font-bold text-white">Nível {userPoints.level}</div>
-                    <div className="text-[#CEEDB2]">{userPoints.xp_current}/{userPoints.xp_next_level} XP</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {isPremium && (
-              <Link to={createPageUrl("Subscription")}>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full glass-effect cursor-pointer hover:scale-105 transition-transform">
-                  <Crown className="w-4 h-4 text-[#CEF17B]" />
-                  <div className="text-xs">
-                    <div className="font-bold text-white">
-                      {isFreeTrial ? 'Teste Grátis' : 'Premium'}
-                    </div>
-                    <div className="text-[#CEEDB2]">
-                      {daysLeft} dias restantes
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            )}
-          </div>
-        </div>
-
-        <SubscriptionStatus />
+    <div className="min-h-screen p-4 md:p-6 pb-24">
+      <div className="max-w-4xl mx-auto space-y-6">
 
         {showWelcome && user && (
           <WelcomeModal 
@@ -200,24 +160,47 @@ export default function Dashboard() {
           />
         )}
 
+        {/* Premium Badge (Top Right) */}
+        {isPremium && (
+          <div className="flex justify-end">
+            <Link to={createPageUrl("Subscription")}>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full glass-effect cursor-pointer hover:scale-105 transition-transform border border-[#CEF17B]/20">
+                <Crown className="w-4 h-4 text-[#CEF17B]" />
+                <div className="text-xs">
+                  <div className="font-bold text-white">
+                    {isFreeTrial ? 'Teste Grátis' : 'Premium'}
+                  </div>
+                  <div className="text-[#CEEDB2]">
+                    {daysLeft} dias
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        )}
+
+        {/* 1. User Greeting */}
+        <UserGreeting userName={user?.full_name?.split(' ')[0] || 'Atleta'} />
+
+        {/* Check-in Reminder */}
         {!todayCheckIn && (
           <Link to={createPageUrl("CheckIn")}>
-            <Card className="gradient-card border-0 p-6 cursor-pointer hover:scale-[1.02] transition-all shadow-lg">
+            <Card className="gradient-card border-0 p-5 cursor-pointer hover:scale-[1.02] transition-all shadow-lg">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-[#084734]/30 flex items-center justify-center">
-                    <CheckCircle className="w-8 h-8 text-[#084734]" />
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[#084734]/30 flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-[#084734]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-[#084734]">
+                    <h3 className="text-lg font-bold text-[#084734]">
                       Faça seu Check-in Diário! 🎯
                     </h3>
-                    <p className="text-[#084734]/70 text-sm mt-1">
-                      Como você está hoje? A IA vai ajustar seu treino! (+10 XP)
+                    <p className="text-[#084734]/70 text-xs mt-0.5">
+                      A IA vai ajustar seu treino! (+10 XP)
                     </p>
                   </div>
                 </div>
-                <Button className="bg-[#084734] text-[#CEF17B] hover:bg-[#084734]/90">
+                <Button className="bg-[#084734] text-[#CEF17B] hover:bg-[#084734]/90 text-sm">
                   Começar
                 </Button>
               </div>
@@ -225,64 +208,24 @@ export default function Dashboard() {
           </Link>
         )}
 
+        {/* 2. Daily Mission */}
         <DailyMissions userEmail={user?.email} />
 
-        <QuickStats
-          todayCalories={todayCalories}
-          calorieTarget={calorieTarget}
-          todayProtein={todayProtein}
-          proteinTarget={profile?.protein_target || 150}
+        {/* 3. Points Card */}
+        <PointsCard userPoints={userPoints} />
+
+        {/* 4. Weekly Goals */}
+        <WeeklyGoals 
           weekWorkouts={weekWorkouts.length}
-          currentWeight={profile?.current_weight}
-          targetWeight={profile?.target_weight}
+          waterDays={waterDaysCompleted}
+          proteinDays={proteinDaysCompleted}
         />
 
-        <MacroProgress
-          protein={todayProtein}
-          carbs={todayCarbs}
-          fats={todayFats}
-          proteinTarget={profile?.protein_target}
-          carbsTarget={profile?.carbs_target}
-          fatsTarget={profile?.fats_target}
-        />
-
-        <WeeklyActivity workouts={weekWorkouts} foods={todayFoods} />
-
+        {/* 5. Achievements */}
         <Achievements achievements={achievements} />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Link to={createPageUrl("FoodScanner")}>
-            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
-              <Camera className="w-8 h-8 text-[#CEF17B] mb-2" />
-              <p className="text-sm font-semibold text-white">Escanear</p>
-              <p className="text-xs text-[#CEEDB2]">Alimento</p>
-            </Card>
-          </Link>
-          
-          <Link to={createPageUrl("Workouts")}>
-            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
-              <Dumbbell className="w-8 h-8 text-[#CEF17B] mb-2" />
-              <p className="text-sm font-semibold text-white">Novo</p>
-              <p className="text-xs text-[#CEEDB2]">Treino</p>
-            </Card>
-          </Link>
-          
-          <Link to={createPageUrl("Challenges")}>
-            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
-              <Trophy className="w-8 h-8 text-[#CEF17B] mb-2" />
-              <p className="text-sm font-semibold text-white">Desafios</p>
-              <p className="text-xs text-[#CEEDB2]">Ativos</p>
-            </Card>
-          </Link>
-          
-          <Link to={createPageUrl("Community")}>
-            <Card className="glass-effect p-4 hover:scale-105 transition-all cursor-pointer border-[#CEF17B]/20">
-              <Users className="w-8 h-8 text-[#CEF17B] mb-2" />
-              <p className="text-sm font-semibold text-white">Comunidade</p>
-              <p className="text-xs text-[#CEEDB2]">Rankings</p>
-            </Card>
-          </Link>
-        </div>
+        {/* 6. Quick Actions */}
+        <QuickActions />
 
       </div>
     </div>
