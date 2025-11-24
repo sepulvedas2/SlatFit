@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -169,8 +168,8 @@ export default function Subscription() {
           </Card>
         )}
 
-        <Card className="relative overflow-hidden border-[#CEF17B]/20">
-          <div className="absolute top-0 right-0 w-64 h-64 gradient-card rounded-full -mr-32 -mt-32 opacity-30" />
+        <Card className="relative overflow-hidden glass-effect border-[#CEF17B]/20">
+          <div className="absolute top-0 right-0 w-64 h-64 gradient-card rounded-full -mr-32 -mt-32 opacity-20" />
           
           <div className="relative z-10 p-8">
             <div className="text-center mb-8">
