@@ -10,36 +10,280 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
   const [logModal, setLogModal] = useState({ open: false, exercise: null, day: null });
   const weekPlans = {
     1: {
-      segunda: { muscle: "Peito", exercises: ["Flexão", "Supino", "Crucifixo"] },
-      terca: { muscle: "Costas", exercises: ["Remada", "Puxada", "Levantamento terra"] },
-      quarta: { muscle: "Bíceps", exercises: ["Rosca direta", "Rosca martelo", "Concentrada"] },
-      quinta: { muscle: "Tríceps", exercises: ["Tríceps testa", "Francês", "Mergulho"] },
-      sexta: { muscle: "Ombro", exercises: ["Desenvolvimento", "Elevação lateral", "Remada alta"] },
-      sabado: { muscle: "Perna", exercises: ["Agachamento", "Leg press", "Panturrilha"] }
+      segunda: { 
+        muscle: "Peito / Tríceps", 
+        exercises: [
+          "Supino reto 4x8-12",
+          "Supino inclinado 3x10-15",
+          "Supino banco 3x12-15",
+          "Tríceps pulley 3x12-15",
+          "Tríceps barra reta 3x10-12",
+          "Tríceps corda 3x12-15"
+        ] 
+      },
+      terca: { 
+        muscle: "Costas / Bíceps", 
+        exercises: [
+          "Remada baixa 4x8-12",
+          "Remada alta 3x10-15",
+          "Puxada alta 3x8-12",
+          "Bíceps barra reta 3x10-12",
+          "Bíceps alternado 3x12-15",
+          "Bíceps martelo 3x10-12"
+        ] 
+      },
+      quarta: { 
+        muscle: "Perna", 
+        exercises: [
+          "Agachamento 4x8-12",
+          "Leg press 3x10-15",
+          "Cadeira extensora 3x10-12",
+          "Cadeira flexora 3x10-12",
+          "Agachamento sumo 3x10-12",
+          "Panturrilha 3x12-15"
+        ] 
+      },
+      quinta: { 
+        muscle: "Costas / Bíceps", 
+        exercises: [
+          "Remada baixa 4x8-12",
+          "Remada alta 3x10-15",
+          "Puxada alta 3x8-12",
+          "Bíceps barra reta 3x10-12",
+          "Bíceps alternado 3x12-15",
+          "Bíceps martelo 3x10-12"
+        ] 
+      },
+      sexta: { 
+        muscle: "Peito / Tríceps", 
+        exercises: [
+          "Supino reto 4x8-12",
+          "Supino inclinado 3x10-15",
+          "Supino banco 3x12-15",
+          "Tríceps pulley 3x12-15",
+          "Tríceps barra reta 3x10-12",
+          "Tríceps corda 3x12-15"
+        ] 
+      },
+      sabado: { 
+        muscle: "Ombro / Abdômen", 
+        exercises: [
+          "Elevação lateral 3x10-12",
+          "Elevação frontal 3x10-12",
+          "Rotação de ombro 3x12-15",
+          "Prancha 3x30-60s",
+          "Abdominal infra 3x12-15",
+          "Abdominal reto 3x10-12"
+        ] 
+      }
     },
     2: {
-      segunda: { muscle: "Peito + Tríceps", exercises: ["Supino reto", "Inclinado", "Tríceps corda"] },
-      terca: { muscle: "Costas + Bíceps", exercises: ["Barra fixa", "Remada curvada", "Rosca 21"] },
-      quarta: { muscle: "Perna", exercises: ["Agachamento livre", "Stiff", "Cadeira extensora"] },
-      quinta: { muscle: "Ombro + Abdômen", exercises: ["Arnold press", "Elevações", "Prancha"] },
-      sexta: { muscle: "Cardio HIIT", exercises: ["Burpees", "Mountain climbers", "Jumping jacks"] },
-      sabado: { muscle: "Full Body", exercises: ["Circuito funcional completo"] }
+      segunda: { 
+        muscle: "Costas / Bíceps", 
+        exercises: [
+          "Remada baixa 4x8-12",
+          "Remada alta 3x10-15",
+          "Puxada alta 3x8-12",
+          "Bíceps martelo 3x10-12",
+          "Bíceps alternado 3x12-15",
+          "Bíceps barra reta 3x10-12"
+        ] 
+      },
+      terca: { 
+        muscle: "Perna", 
+        exercises: [
+          "Agachamento livre 4x8-12",
+          "Leg press 3x10-15",
+          "Cadeira extensora 3x10-12",
+          "Cadeira flexora 3x10-12",
+          "Agachamento sumo 3x10-12",
+          "Panturrilha 3x10"
+        ] 
+      },
+      quarta: { 
+        muscle: "Peito / Tríceps", 
+        exercises: [
+          "Supino inclinado 3x10-15",
+          "Supino reto 4x8-12",
+          "Supino banco 3x12-15",
+          "Tríceps corda 3x12-15",
+          "Tríceps pulley 3x12-15",
+          "Tríceps barra reta 3x10-12"
+        ] 
+      },
+      quinta: { 
+        muscle: "Perna", 
+        exercises: [
+          "Agachamento livre 4x8-12",
+          "Leg press 3x10-15",
+          "Cadeira extensora 3x10-12",
+          "Cadeira flexora 3x10-12",
+          "Agachamento sumo 3x10-12",
+          "Panturrilha 3x10"
+        ] 
+      },
+      sexta: { 
+        muscle: "Peito / Tríceps", 
+        exercises: [
+          "Supino inclinado 3x10-15",
+          "Supino reto 4x8-12",
+          "Supino banco 3x12-15",
+          "Tríceps corda 3x12-15",
+          "Tríceps pulley 3x12-15",
+          "Tríceps barra reta 3x10-12"
+        ] 
+      },
+      sabado: { 
+        muscle: "Costas / Bíceps", 
+        exercises: [
+          "Remada baixa 4x8-12",
+          "Remada alta 3x10-15",
+          "Puxada alta 3x8-12",
+          "Bíceps martelo 3x10-12",
+          "Bíceps alternado 3x12-15",
+          "Bíceps barra reta 3x10-12"
+        ] 
+      }
     },
     3: {
-      segunda: { muscle: "Peito Intenso", exercises: ["Drop sets", "Super sets", "Isometria"] },
-      terca: { muscle: "Costas Intenso", exercises: ["Remadas pesadas", "Pulley", "Deadlift"] },
-      quarta: { muscle: "Perna Pesada", exercises: ["Agachamento 5x5", "Leg press máximo", "Afundo"] },
-      quinta: { muscle: "Ombro + Core", exercises: ["Militar", "Laterais pesadas", "Abs pesados"] },
-      sexta: { muscle: "Braços Completo", exercises: ["Bíceps + Tríceps super sets"] },
-      sabado: { muscle: "Cardio + Mobilidade", exercises: ["HIIT avançado", "Alongamento"] }
+      segunda: { 
+        muscle: "Perna / Ombro", 
+        exercises: [
+          "Leg press 4x10-12",
+          "Agachamento livre 3x10-12",
+          "Cadeira extensora 3x12-15",
+          "Avanço 3x10/10",
+          "Cadeira abdutora 3x10-15",
+          "Elevação lateral 4x10-12",
+          "Elevação frontal 3x10-12",
+          "Desenvolvimento máquina 3x10-12"
+        ] 
+      },
+      terca: { 
+        muscle: "Peito / Tríceps", 
+        exercises: [
+          "Supino reto 4x8-12",
+          "Supino inclinado 4x10-12",
+          "Crossover 3x12-15",
+          "Tríceps francês 3x10-12",
+          "Tríceps corda 3x12-15",
+          "Tríceps banco 3x10-12"
+        ] 
+      },
+      quarta: { 
+        muscle: "Costas / Bíceps", 
+        exercises: [
+          "Puxada frontal 4x8-12",
+          "Remada curvada 4x10-12",
+          "Remada unilateral 3x10-12",
+          "Bíceps Scott 3x10-12",
+          "Bíceps concentrado 3x12-15",
+          "Bíceps 21 3x7-7-7"
+        ] 
+      },
+      quinta: { 
+        muscle: "Peito / Tríceps", 
+        exercises: [
+          "Supino reto 4x8-12",
+          "Supino inclinado 4x10-12",
+          "Crossover 3x12-15",
+          "Tríceps francês 3x10-12",
+          "Tríceps corda 3x12-15",
+          "Tríceps banco 3x10-12"
+        ] 
+      },
+      sexta: { 
+        muscle: "Costas / Bíceps", 
+        exercises: [
+          "Puxada frontal 4x8-12",
+          "Remada curvada 4x10-12",
+          "Remada unilateral 3x10-12",
+          "Bíceps Scott 3x10-12",
+          "Bíceps concentrado 3x12-15",
+          "Bíceps 21 3x7-7-7"
+        ] 
+      },
+      sabado: { 
+        muscle: "Perna / Ombro", 
+        exercises: [
+          "Leg press 4x10-12",
+          "Agachamento livre 3x10-12",
+          "Cadeira extensora 3x12-15",
+          "Avanço 3x10/10",
+          "Elevação lateral 4x10-12",
+          "Desenvolvimento máquina 3x10-12"
+        ] 
+      }
     },
     4: {
-      segunda: { muscle: "Push (Peito/Ombro/Tríceps)", exercises: ["Compostos + isolados"] },
-      terca: { muscle: "Pull (Costas/Bíceps)", exercises: ["Puxadas + Remadas"] },
-      quarta: { muscle: "Legs (Perna completa)", exercises: ["Agachamento + acessórios"] },
-      quinta: { muscle: "Upper Body", exercises: ["Parte superior completa"] },
-      sexta: { muscle: "Lower Body", exercises: ["Parte inferior completa"] },
-      sabado: { muscle: "Athletic Performance", exercises: ["Explosão + Resistência"] }
+      segunda: { 
+        muscle: "Peito / Tríceps", 
+        exercises: [
+          "Supino reto 5x5",
+          "Supino inclinado 4x8-10",
+          "Fly máquina 3x12-15",
+          "Mergulho paralelas 3x8-12",
+          "Tríceps testa 4x10-12",
+          "Tríceps kickback 3x12-15"
+        ] 
+      },
+      terca: { 
+        muscle: "Costas / Bíceps", 
+        exercises: [
+          "Barra fixa 4x6-10",
+          "Remada T 4x8-12",
+          "Pulldown 3x10-12",
+          "Remada máquina 3x12-15",
+          "Bíceps barra W 4x10-12",
+          "Bíceps cabo 3x12-15"
+        ] 
+      },
+      quarta: { 
+        muscle: "Perna / Ombro", 
+        exercises: [
+          "Agachamento 5x5",
+          "Hack squat 4x10-12",
+          "Stiff 3x10-12",
+          "Leg curl deitado 3x12-15",
+          "Desenvolvimento 4x8-12",
+          "Arnold press 3x10-12",
+          "Face pull 3x15"
+        ] 
+      },
+      quinta: { 
+        muscle: "Costas / Bíceps", 
+        exercises: [
+          "Barra fixa 4x6-10",
+          "Remada T 4x8-12",
+          "Pulldown 3x10-12",
+          "Remada máquina 3x12-15",
+          "Bíceps barra W 4x10-12",
+          "Bíceps cabo 3x12-15"
+        ] 
+      },
+      sexta: { 
+        muscle: "Perna / Ombro", 
+        exercises: [
+          "Agachamento 5x5",
+          "Hack squat 4x10-12",
+          "Stiff 3x10-12",
+          "Leg curl deitado 3x12-15",
+          "Desenvolvimento 4x8-12",
+          "Arnold press 3x10-12",
+          "Face pull 3x15"
+        ] 
+      },
+      sabado: { 
+        muscle: "Peito / Tríceps", 
+        exercises: [
+          "Supino reto 5x5",
+          "Supino inclinado 4x8-10",
+          "Fly máquina 3x12-15",
+          "Mergulho paralelas 3x8-12",
+          "Tríceps testa 4x10-12",
+          "Tríceps kickback 3x12-15"
+        ] 
+      }
     }
   };
 
