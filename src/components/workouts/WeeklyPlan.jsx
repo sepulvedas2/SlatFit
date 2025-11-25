@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, Dumbbell, Play } from "lucide-react";
+import { CheckCircle, Play, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";
+import ExerciseLogModal from "./ExerciseLogModal";
 
-export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout }) {
+export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, userEmail }) {
+  const [logModal, setLogModal] = useState({ open: false, exercise: null, day: null });
   const weekPlans = {
     1: {
       segunda: { muscle: "Peito", exercises: ["Flexão", "Supino", "Crucifixo"] },
@@ -118,11 +120,19 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                       )}
                     </div>
                     <p className="text-sm text-[#CEF17B] font-semibold mb-2">{dayPlan.muscle}</p>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2 mt-2">
                       {dayPlan.exercises.map((ex, i) => (
-                        <span key={i} className="text-xs text-[#CEEDB2]">
-                          {ex}{i < dayPlan.exercises.length - 1 ? ' •' : ''}
-                        </span>
+                        <button
+                          key={i}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLogModal({ open: true, exercise: ex, day: day });
+                          }}
+                          className="text-xs text-[#CEEDB2] bg-white/5 px-2 py-1 rounded-full hover:bg-[#CEF17B]/20 hover:text-[#CEF17B] transition-all flex items-center gap-1"
+                        >
+                          <ClipboardList className="w-3 h-3" />
+                          {ex}
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -154,6 +164,15 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
           </motion.div>
         );
       })}
+      {/* Exercise Log Modal */}
+      <ExerciseLogModal
+        isOpen={logModal.open}
+        onClose={() => setLogModal({ open: false, exercise: null, day: null })}
+        exerciseName={logModal.exercise}
+        userEmail={userEmail}
+        weekNumber={weekNumber}
+        workoutDay={logModal.day}
+      />
     </div>
   );
 }
