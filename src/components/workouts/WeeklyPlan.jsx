@@ -1,12 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Image } from "lucide-react";
+import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Image, Upload, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { base44 } from "@/api/base44Client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
   const [expandedDay, setExpandedDay] = useState(null);
+  const [exerciseImages, setExerciseImages] = useState({});
+  const [uploadingExercise, setUploadingExercise] = useState(null);
+  const [selectedExercise, setSelectedExercise] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = async (file, exerciseKey) => {
+    if (!file) return;
+    
+    setUploadingExercise(exerciseKey);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setExerciseImages(prev => ({
+        ...prev,
+        [exerciseKey]: file_url
+      }));
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+    }
+    setUploadingExercise(null);
+  };
+
+  const triggerFileInput = (exerciseKey) => {
+    setSelectedExercise(exerciseKey);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file && selectedExercise) {
+      handleImageUpload(file, selectedExercise);
+    }
+    e.target.value = '';
+  };
+
+  const removeImage = (exerciseKey) => {
+    setExerciseImages(prev => {
+      const newImages = { ...prev };
+      delete newImages[exerciseKey];
+      return newImages;
+    });
+  };
+
+  const getExerciseKey = (day, exerciseIndex) => {
+    return `week${weekNumber}_${day}_${exerciseIndex}`;
+  };
 
   // Definição dos treinos por semana
   const weekPlans = {
@@ -385,6 +432,15 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   return (
     <div className="space-y-4">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-white">{currentWeekInfo.title}</h2>
@@ -467,28 +523,68 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                   >
                     <div className="px-6 pb-6 border-t border-white/10 pt-4">
                       <div className="space-y-3">
-                        {dayPlan.exercises.map((exercise, i) => (
-                          <div 
-                            key={i} 
-                            className="flex items-center gap-4 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
-                          >
-                            {/* Placeholder para imagem */}
-                            <div className="w-14 h-14 rounded-lg bg-[#CEF17B]/10 flex items-center justify-center flex-shrink-0 border border-[#CEF17B]/20">
-                              <Image className="w-6 h-6 text-[#CEF17B]/50" />
+                        {dayPlan.exercises.map((exercise, i) => {
+                          const exerciseKey = getExerciseKey(day, i);
+                          const hasImage = exerciseImages[exerciseKey];
+                          const isUploading = uploadingExercise === exerciseKey;
+
+                          return (
+                            <div 
+                              key={i} 
+                              className="flex items-center gap-4 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                            >
+                              {/* Imagem do exercício */}
+                              <div className="relative group">
+                                {hasImage ? (
+                                  <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img 
+                                      src={hasImage} 
+                                      alt={exercise.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                      <button
+                                        onClick={() => triggerFileInput(exerciseKey)}
+                                        className="p-1 bg-white/20 rounded hover:bg-white/30"
+                                      >
+                                        <Upload className="w-3 h-3 text-white" />
+                                      </button>
+                                      <button
+                                        onClick={() => removeImage(exerciseKey)}
+                                        className="p-1 bg-red-500/50 rounded hover:bg-red-500/70"
+                                      >
+                                        <X className="w-3 h-3 text-white" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => triggerFileInput(exerciseKey)}
+                                    disabled={isUploading}
+                                    className="w-14 h-14 rounded-lg bg-[#CEF17B]/10 flex items-center justify-center flex-shrink-0 border border-dashed border-[#CEF17B]/30 hover:border-[#CEF17B] hover:bg-[#CEF17B]/20 transition-all cursor-pointer"
+                                  >
+                                    {isUploading ? (
+                                      <Loader2 className="w-5 h-5 text-[#CEF17B] animate-spin" />
+                                    ) : (
+                                      <Upload className="w-5 h-5 text-[#CEF17B]/50" />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                              
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-white">{exercise.name}</h4>
+                                <p className="text-sm text-[#CEEDB2]">
+                                  {exercise.sets} {exercise.reps}
+                                </p>
+                              </div>
+                              
+                              <Badge className="bg-[#CEF17B]/10 text-[#CEF17B] border-0 text-xs">
+                                {exercise.sets}
+                              </Badge>
                             </div>
-                            
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-white">{exercise.name}</h4>
-                              <p className="text-sm text-[#CEEDB2]">
-                                {exercise.sets} {exercise.reps}
-                              </p>
-                            </div>
-                            
-                            <Badge className="bg-[#CEF17B]/10 text-[#CEF17B] border-0 text-xs">
-                              {exercise.sets}
-                            </Badge>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       <div className="mt-4 p-3 bg-[#CEF17B]/10 rounded-lg">
