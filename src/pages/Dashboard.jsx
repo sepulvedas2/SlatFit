@@ -12,7 +12,6 @@ import { format, startOfWeek, differenceInDays } from "date-fns";
 import UserGreeting from "../components/dashboard/UserGreeting";
 import DailyMissions from "../components/dashboard/DailyMissions";
 import PointsCard from "../components/dashboard/PointsCard";
-import WaterTracker from "../components/dashboard/WaterTracker";
 import WeeklyGoals from "../components/dashboard/WeeklyGoals";
 import Achievements from "../components/dashboard/Achievements";
 import QuickActions from "../components/dashboard/QuickActions";
@@ -214,9 +213,6 @@ export default function Dashboard() {
 
         {/* 3. Points Card */}
         <PointsCard userPoints={userPoints} />
-
-        {/* 3.5 Water Tracker */}
-        <WaterTracker userEmail={user?.email} />
 
         {/* 4. Weekly Goals */}
         <WeeklyGoals 
