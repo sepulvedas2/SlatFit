@@ -308,7 +308,6 @@ export default function Workouts() {
             weekNumber={selectedWeek}
             dailyWorkouts={dailyWorkouts}
             onStartWorkout={handleStartWorkout}
-            userEmail={user?.email}
           />
         </div>
       </div>

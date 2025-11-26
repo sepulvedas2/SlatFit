@@ -2,15 +2,15 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle } from "lucide-react";
+import { Trophy, CheckCircle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function WeekSelector({ currentWeek, onSelectWeek, weekProgress = [] }) {
   const weeks = [
-    { number: 1, title: "Iniciante", subtitle: "Adaptação e Fundamentos", emoji: "🌱" },
-    { number: 2, title: "Intermediário", subtitle: "Construção Muscular", emoji: "💪" },
-    { number: 3, title: "Avançado", subtitle: "Intensificação", emoji: "🔥" },
-    { number: 4, title: "Elite", subtitle: "Performance Máxima", emoji: "🏆" },
+    { number: 1, title: "Semana 1", subtitle: "Adaptação e Fundamentos", unlocked: true },
+    { number: 2, title: "Semana 2", subtitle: "Construção Muscular", unlocked: currentWeek >= 2 },
+    { number: 3, title: "Semana 3", subtitle: "Intensificação", unlocked: currentWeek >= 3 },
+    { number: 4, title: "Semana 4", subtitle: "Performance Máxima", unlocked: currentWeek >= 4 },
   ];
 
   const getWeekProgress = (weekNumber) => {
@@ -32,15 +32,21 @@ export default function WeekSelector({ currentWeek, onSelectWeek, weekProgress =
             transition={{ delay: index * 0.1 }}
           >
             <Card
-              onClick={() => onSelectWeek(week.number)}
-              className={`glass-effect border-[#CEF17B]/20 p-6 transition-all cursor-pointer hover:scale-[1.02] ${
-                isActive ? 'ring-2 ring-[#CEF17B]' : ''
-              }`}
+              onClick={() => week.unlocked && onSelectWeek(week.number)}
+              className={`glass-effect border-[#CEF17B]/20 p-6 transition-all cursor-pointer ${
+                week.unlocked ? 'hover:scale-[1.02]' : 'opacity-50 cursor-not-allowed'
+              } ${isActive ? 'ring-2 ring-[#CEF17B]' : ''}`}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#CEF17B]/20 flex items-center justify-center">
-                    <span className="text-2xl">{week.emoji}</span>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    week.unlocked ? 'bg-[#CEF17B]/20' : 'bg-white/5'
+                  }`}>
+                    {week.unlocked ? (
+                      <span className="text-[#CEF17B] font-bold text-xl">{week.number}</span>
+                    ) : (
+                      <Lock className="w-5 h-5 text-white/40" />
+                    )}
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-white">{week.title}</h3>
@@ -55,16 +61,26 @@ export default function WeekSelector({ currentWeek, onSelectWeek, weekProgress =
                 )}
               </div>
 
-              <Progress value={progress} className="h-2 mb-2" />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-[#CEEDB2]">{Math.round(progress)}% completo</span>
-                {progress === 100 && (
-                  <div className="flex items-center gap-1 text-green-400">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Concluído</span>
+              {week.unlocked && (
+                <>
+                  <Progress value={progress} className="h-2 mb-2" />
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[#CEEDB2]">{Math.round(progress)}% completo</span>
+                    {progress === 100 && (
+                      <div className="flex items-center gap-1 text-green-400">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Concluído</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </>
+              )}
+
+              {!week.unlocked && (
+                <p className="text-xs text-white/60 mt-2">
+                  Complete a semana anterior para desbloquear
+                </p>
+              )}
             </Card>
           </motion.div>
         );
