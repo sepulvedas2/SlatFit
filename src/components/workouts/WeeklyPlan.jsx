@@ -8,8 +8,10 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
   const [expandedDay, setExpandedDay] = useState(null);
 
-  // Semana 1 - Nível Iniciante (Treino Completo com exercícios detalhados)
-  const weekPlan = {
+  // Definição dos treinos por semana
+  const weekPlans = {
+    // Semana 1 - Nível Iniciante
+    1: {
     segunda: { 
       muscle: "Peito / Tríceps", 
       icon: "💪",
@@ -88,7 +90,99 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         { name: "Abdominal reto", sets: "3x", reps: "10-12", image_placeholder: "abdominal_reto" }
       ]
     }
+  },
+
+  // Semana 2 - Nível Intermediário
+  2: {
+    segunda: { 
+      muscle: "Costas / Bíceps", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
+        { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
+        { name: "Puxada alta", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
+        { name: "Bíceps martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" },
+        { name: "Bíceps alternado", sets: "3x", reps: "12-15", image_placeholder: "biceps_alternado" },
+        { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" }
+      ]
+    },
+    terca: { 
+      muscle: "Pernas", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Agachamento livre", sets: "4x", reps: "8-12", image_placeholder: "agachamento" },
+        { name: "Leg press", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
+        { name: "Cadeira extensora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_extensora" },
+        { name: "Cadeira flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
+        { name: "Agachamento sumo", sets: "3x", reps: "10-12", image_placeholder: "agachamento_sumo" },
+        { name: "Panturrilha", sets: "3x", reps: "10-15", image_placeholder: "panturrilha" }
+      ]
+    },
+    quarta: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
+        { name: "Supino reto", sets: "4x", reps: "8-12", image_placeholder: "supino_reto" },
+        { name: "Supino no banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
+        { name: "Tríceps corda", sets: "3x", reps: "12-15", image_placeholder: "triceps_corda" },
+        { name: "Tríceps pulley", sets: "3x", reps: "12-15", image_placeholder: "triceps_pulley" },
+        { name: "Tríceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "triceps_barra" }
+      ]
+    },
+    quinta: { 
+      muscle: "Pernas", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Agachamento livre", sets: "4x", reps: "8-12", image_placeholder: "agachamento" },
+        { name: "Leg press", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
+        { name: "Cadeira extensora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_extensora" },
+        { name: "Cadeira flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
+        { name: "Agachamento sumo", sets: "3x", reps: "10-12", image_placeholder: "agachamento_sumo" },
+        { name: "Panturrilha", sets: "3x", reps: "10-15", image_placeholder: "panturrilha" }
+      ]
+    },
+    sexta: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
+        { name: "Supino reto", sets: "4x", reps: "8-12", image_placeholder: "supino_reto" },
+        { name: "Supino no banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
+        { name: "Tríceps corda", sets: "3x", reps: "12-15", image_placeholder: "triceps_corda" },
+        { name: "Tríceps pulley", sets: "3x", reps: "12-15", image_placeholder: "triceps_pulley" },
+        { name: "Tríceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "triceps_barra" }
+      ]
+    },
+    sabado: { 
+      muscle: "Costas / Bíceps", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
+        { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
+        { name: "Puxada alta", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
+        { name: "Bíceps martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" },
+        { name: "Bíceps alternado", sets: "3x", reps: "12-15", image_placeholder: "biceps_alternado" },
+        { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" }
+      ]
+    }
+  }
   };
+
+  const weekPlan = weekPlans[weekNumber] || weekPlans[1];
+
+  const weekTitles = {
+    1: { title: "Semana 1 - Nível Iniciante", subtitle: "Treino completo com foco em fundamentos" },
+    2: { title: "Semana 2 - Nível Intermediário", subtitle: "Evolução com treinos mais intensos" }
+  };
+
+  const currentWeekInfo = weekTitles[weekNumber] || weekTitles[1];
 
   const days = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
   const dayLabels = {
@@ -113,8 +207,8 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-white">Semana 1 - Nível Iniciante</h2>
-          <p className="text-[#CEEDB2]">Treino completo com foco em fundamentos</p>
+          <h2 className="text-2xl font-bold text-white">{currentWeekInfo.title}</h2>
+          <p className="text-[#CEEDB2]">{currentWeekInfo.subtitle}</p>
         </div>
         <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 px-4 py-2">
           {dailyWorkouts.filter(d => d.completed).length}/6 concluídos
