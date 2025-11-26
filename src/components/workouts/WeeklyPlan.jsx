@@ -172,6 +172,96 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" }
       ]
     }
+  },
+
+  // Semana 3 - Nível Avançado
+  3: {
+    segunda: { 
+      muscle: "Perna / Ombro", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Leg Press", sets: "4x", reps: "10-12", image_placeholder: "leg_press" },
+        { name: "Agachamento Livre", sets: "3x", reps: "10-12", image_placeholder: "agachamento" },
+        { name: "Cadeira Extensora", sets: "3x", reps: "12-15", image_placeholder: "cadeira_extensora" },
+        { name: "Avanço", sets: "3x", reps: "10/10", image_placeholder: "avanco" },
+        { name: "Cadeira Abdutora", sets: "3x", reps: "10-15", image_placeholder: "abdutora" },
+        { name: "Elevação Lateral", sets: "4x", reps: "10-12", image_placeholder: "elevacao_lateral" },
+        { name: "Elevação Frontal", sets: "3x", reps: "10-12", image_placeholder: "elevacao_frontal" },
+        { name: "Desenvolvimento Máquina", sets: "3x", reps: "10-12", image_placeholder: "desenvolvimento_maquina" }
+      ]
+    },
+    terca: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino Reto", sets: "4x", reps: "10-12", image_placeholder: "supino_reto" },
+        { name: "Supino Inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
+        { name: "Supino na Polia", sets: "3x", reps: "8-10", image_placeholder: "supino_polia" },
+        { name: "Crucifixo Polia", sets: "3x", reps: "10-12", image_placeholder: "crucifixo_polia" },
+        { name: "Tríceps Mergulho", sets: "3x", reps: "10-12", image_placeholder: "triceps_mergulho" },
+        { name: "Tríceps Coice", sets: "3x", reps: "8-10", image_placeholder: "triceps_coice" },
+        { name: "Tríceps Corda", sets: "4x", reps: "10-12", image_placeholder: "triceps_corda" }
+      ]
+    },
+    quarta: { 
+      muscle: "Costas / Bíceps", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Puxada no TRX", sets: "4x", reps: "10", image_placeholder: "puxada_trx" },
+        { name: "Remada Baixa Unilateral", sets: "3x", reps: "8-10", image_placeholder: "remada_unilateral" },
+        { name: "Remada Baixa Barra", sets: "3x", reps: "10-15", image_placeholder: "remada_baixa" },
+        { name: "Puxada Alta Fechada", sets: "4x", reps: "10-12", image_placeholder: "puxada_fechada" },
+        { name: "Bíceps na Barra", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" },
+        { name: "Bíceps Alternado com Peso", sets: "3x", reps: "10-12", image_placeholder: "biceps_alternado" },
+        { name: "Rosca Scott Máquina", sets: "3x", reps: "10-12", image_placeholder: "rosca_scott" }
+      ]
+    },
+    quinta: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino Reto", sets: "4x", reps: "10-12", image_placeholder: "supino_reto" },
+        { name: "Supino Inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
+        { name: "Supino na Polia", sets: "3x", reps: "8-10", image_placeholder: "supino_polia" },
+        { name: "Crucifixo Polia", sets: "3x", reps: "10-12", image_placeholder: "crucifixo_polia" },
+        { name: "Tríceps Mergulho", sets: "3x", reps: "10-12", image_placeholder: "triceps_mergulho" },
+        { name: "Tríceps Coice", sets: "3x", reps: "8-10", image_placeholder: "triceps_coice" },
+        { name: "Tríceps Corda", sets: "4x", reps: "10-12", image_placeholder: "triceps_corda" }
+      ]
+    },
+    sexta: { 
+      muscle: "Costas / Bíceps", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Puxada no TRX", sets: "4x", reps: "10", image_placeholder: "puxada_trx" },
+        { name: "Remada Baixa Unilateral", sets: "3x", reps: "8-10", image_placeholder: "remada_unilateral" },
+        { name: "Remada Baixa Barra", sets: "3x", reps: "10-15", image_placeholder: "remada_baixa" },
+        { name: "Puxada Alta Fechada", sets: "4x", reps: "10-12", image_placeholder: "puxada_fechada" },
+        { name: "Bíceps na Barra", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" },
+        { name: "Bíceps Alternado com Peso", sets: "3x", reps: "10-12", image_placeholder: "biceps_alternado" },
+        { name: "Rosca Scott Máquina", sets: "3x", reps: "10-12", image_placeholder: "rosca_scott" }
+      ]
+    },
+    sabado: { 
+      muscle: "Perna / Ombro", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Agachamento", sets: "4x", reps: "10-12", image_placeholder: "agachamento" },
+        { name: "Stiff", sets: "3x", reps: "12-15", image_placeholder: "stiff" },
+        { name: "Mesa Flexora", sets: "3x", reps: "10-12", image_placeholder: "mesa_flexora" },
+        { name: "Cadeira Flexora Unilateral", sets: "3x", reps: "10/10", image_placeholder: "flexora_unilateral" },
+        { name: "Panturrilha", sets: "4x", reps: "10", image_placeholder: "panturrilha" },
+        { name: "Elevação Lateral", sets: "4x", reps: "8-10", image_placeholder: "elevacao_lateral" },
+        { name: "Elevação Frontal", sets: "3x", reps: "10-12", image_placeholder: "elevacao_frontal" },
+        { name: "Desenvolvimento Máquina", sets: "3x", reps: "10-12", image_placeholder: "desenvolvimento_maquina" }
+      ]
+    }
   }
   };
 
@@ -179,7 +269,8 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   const weekTitles = {
     1: { title: "Semana 1 - Nível Iniciante", subtitle: "Treino completo com foco em fundamentos" },
-    2: { title: "Semana 2 - Nível Intermediário", subtitle: "Evolução com treinos mais intensos" }
+    2: { title: "Semana 2 - Nível Intermediário", subtitle: "Evolução com treinos mais intensos" },
+    3: { title: "Semana 3 - Nível Avançado", subtitle: "Alta intensidade e volume aumentado" }
   };
 
   const currentWeekInfo = weekTitles[weekNumber] || weekTitles[1];
