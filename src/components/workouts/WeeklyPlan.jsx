@@ -1,71 +1,120 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, Dumbbell, Play } from "lucide-react";
-import { motion } from "framer-motion";
+import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Image } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout }) {
-  const weekPlans = {
-    1: {
-      segunda: { muscle: "Peito", exercises: ["Flexão", "Supino", "Crucifixo"] },
-      terca: { muscle: "Costas", exercises: ["Remada", "Puxada", "Levantamento terra"] },
-      quarta: { muscle: "Bíceps", exercises: ["Rosca direta", "Rosca martelo", "Concentrada"] },
-      quinta: { muscle: "Tríceps", exercises: ["Tríceps testa", "Francês", "Mergulho"] },
-      sexta: { muscle: "Ombro", exercises: ["Desenvolvimento", "Elevação lateral", "Remada alta"] },
-      sabado: { muscle: "Perna", exercises: ["Agachamento", "Leg press", "Panturrilha"] }
+export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
+  const [expandedDay, setExpandedDay] = useState(null);
+
+  // Semana 1 - Nível Iniciante (Treino Completo com exercícios detalhados)
+  const weekPlan = {
+    segunda: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino reto", sets: "4x", reps: "8-12", image_placeholder: "supino_reto" },
+        { name: "Supino inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
+        { name: "Supino no banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
+        { name: "Tríceps pulley", sets: "3x", reps: "12-15", image_placeholder: "triceps_pulley" },
+        { name: "Tríceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "triceps_barra" },
+        { name: "Tríceps corda", sets: "3x", reps: "12-15", image_placeholder: "triceps_corda" }
+      ]
     },
-    2: {
-      segunda: { muscle: "Peito + Tríceps", exercises: ["Supino reto", "Inclinado", "Tríceps corda"] },
-      terca: { muscle: "Costas + Bíceps", exercises: ["Barra fixa", "Remada curvada", "Rosca 21"] },
-      quarta: { muscle: "Perna", exercises: ["Agachamento livre", "Stiff", "Cadeira extensora"] },
-      quinta: { muscle: "Ombro + Abdômen", exercises: ["Arnold press", "Elevações", "Prancha"] },
-      sexta: { muscle: "Cardio HIIT", exercises: ["Burpees", "Mountain climbers", "Jumping jacks"] },
-      sabado: { muscle: "Full Body", exercises: ["Circuito funcional completo"] }
+    terca: { 
+      muscle: "Costas / Bíceps", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
+        { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
+        { name: "Puxada alta", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
+        { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" },
+        { name: "Bíceps alternado", sets: "3x", reps: "12-15", image_placeholder: "biceps_alternado" },
+        { name: "Bíceps martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" }
+      ]
     },
-    3: {
-      segunda: { muscle: "Peito Intenso", exercises: ["Drop sets", "Super sets", "Isometria"] },
-      terca: { muscle: "Costas Intenso", exercises: ["Remadas pesadas", "Pulley", "Deadlift"] },
-      quarta: { muscle: "Perna Pesada", exercises: ["Agachamento 5x5", "Leg press máximo", "Afundo"] },
-      quinta: { muscle: "Ombro + Core", exercises: ["Militar", "Laterais pesadas", "Abs pesados"] },
-      sexta: { muscle: "Braços Completo", exercises: ["Bíceps + Tríceps super sets"] },
-      sabado: { muscle: "Cardio + Mobilidade", exercises: ["HIIT avançado", "Alongamento"] }
+    quarta: { 
+      muscle: "Pernas", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Agachamento", sets: "4x", reps: "8-12", image_placeholder: "agachamento" },
+        { name: "Leg press", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
+        { name: "Cadeira extensora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_extensora" },
+        { name: "Cadeira flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
+        { name: "Agachamento sumo", sets: "3x", reps: "10-12", image_placeholder: "agachamento_sumo" },
+        { name: "Panturrilha", sets: "3x", reps: "12-15", image_placeholder: "panturrilha" }
+      ]
     },
-    4: {
-      segunda: { muscle: "Push (Peito/Ombro/Tríceps)", exercises: ["Compostos + isolados"] },
-      terca: { muscle: "Pull (Costas/Bíceps)", exercises: ["Puxadas + Remadas"] },
-      quarta: { muscle: "Legs (Perna completa)", exercises: ["Agachamento + acessórios"] },
-      quinta: { muscle: "Upper Body", exercises: ["Parte superior completa"] },
-      sexta: { muscle: "Lower Body", exercises: ["Parte inferior completa"] },
-      sabado: { muscle: "Athletic Performance", exercises: ["Explosão + Resistência"] }
+    quinta: { 
+      muscle: "Costas / Bíceps", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
+        { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
+        { name: "Puxada alta", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
+        { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" },
+        { name: "Bíceps alternado", sets: "3x", reps: "12-15", image_placeholder: "biceps_alternado" },
+        { name: "Bíceps martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" }
+      ]
+    },
+    sexta: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino reto", sets: "4x", reps: "8-12", image_placeholder: "supino_reto" },
+        { name: "Supino inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
+        { name: "Supino no banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
+        { name: "Tríceps pulley", sets: "3x", reps: "12-15", image_placeholder: "triceps_pulley" },
+        { name: "Tríceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "triceps_barra" },
+        { name: "Tríceps corda", sets: "3x", reps: "12-15", image_placeholder: "triceps_corda" }
+      ]
+    },
+    sabado: { 
+      muscle: "Ombro / Abdômen", 
+      icon: "🏋️",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Elevação lateral", sets: "3x", reps: "10-12", image_placeholder: "elevacao_lateral" },
+        { name: "Elevação frontal", sets: "3x", reps: "10-12", image_placeholder: "elevacao_frontal" },
+        { name: "Rotação de ombro", sets: "3x", reps: "12-15", image_placeholder: "rotacao_ombro" },
+        { name: "Prancha", sets: "3x", reps: "30-60s", image_placeholder: "prancha" },
+        { name: "Abdominal infra", sets: "3x", reps: "12-15", image_placeholder: "abdominal_infra" },
+        { name: "Abdominal reto", sets: "3x", reps: "10-12", image_placeholder: "abdominal_reto" }
+      ]
     }
   };
 
-  const currentPlan = weekPlans[weekNumber] || weekPlans[1];
   const days = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+  const dayLabels = {
+    segunda: "Segunda-feira",
+    terca: "Terça-feira",
+    quarta: "Quarta-feira",
+    quinta: "Quinta-feira",
+    sexta: "Sexta-feira",
+    sabado: "Sábado"
+  };
 
   const getDayStatus = (day) => {
     const workout = dailyWorkouts.find(w => w.day_of_week === day);
     return workout?.completed || false;
   };
 
-  const muscleIcons = {
-    "Peito": "💪",
-    "Costas": "🦾",
-    "Bíceps": "💪",
-    "Tríceps": "💪",
-    "Ombro": "🏋️",
-    "Perna": "🦵",
-    "Cardio": "🔥",
-    "Full": "⚡"
+  const toggleExpand = (day) => {
+    setExpandedDay(expandedDay === day ? null : day);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-white">Semana {weekNumber}</h2>
-          <p className="text-[#CEEDB2]">Seu plano de treino semanal</p>
+          <h2 className="text-2xl font-bold text-white">Semana 1 - Nível Iniciante</h2>
+          <p className="text-[#CEEDB2]">Treino completo com foco em fundamentos</p>
         </div>
         <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 px-4 py-2">
           {dailyWorkouts.filter(d => d.completed).length}/6 concluídos
@@ -73,18 +122,9 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       </div>
 
       {days.map((day, index) => {
-        const dayPlan = currentPlan[day];
+        const dayPlan = weekPlan[day];
         const isCompleted = getDayStatus(day);
-        const dayLabel = {
-          segunda: "Segunda-feira",
-          terca: "Terça-feira",
-          quarta: "Quarta-feira",
-          quinta: "Quinta-feira",
-          sexta: "Sexta-feira",
-          sabado: "Sábado"
-        }[day];
-
-        const icon = muscleIcons[dayPlan.muscle.split(' ')[0]] || "💪";
+        const isExpanded = expandedDay === day;
 
         return (
           <motion.div
@@ -93,63 +133,121 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Card className={`glass-effect p-6 transition-all hover:scale-[1.01] ${
+            <Card className={`glass-effect overflow-hidden transition-all ${
               isCompleted ? 'border-green-500/30' : 'border-[#CEF17B]/20'
             }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    isCompleted ? 'bg-green-500/20' : 'bg-[#CEF17B]/20'
-                  }`}>
-                    {isCompleted ? (
-                      <CheckCircle className="w-6 h-6 text-green-400" />
-                    ) : (
-                      <span className="text-2xl">{icon}</span>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-white">{dayLabel}</h3>
-                      {isCompleted && (
-                        <Badge className="bg-green-500/20 text-green-400 border-0 text-xs">
-                          Concluído ✓
-                        </Badge>
+              {/* Header */}
+              <div 
+                className="p-6 cursor-pointer"
+                onClick={() => toggleExpand(day)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      isCompleted ? 'bg-green-500/20' : 'bg-[#CEF17B]/20'
+                    }`}>
+                      {isCompleted ? (
+                        <CheckCircle className="w-6 h-6 text-green-400" />
+                      ) : (
+                        <span className="text-2xl">{dayPlan.icon}</span>
                       )}
                     </div>
-                    <p className="text-sm text-[#CEF17B] font-semibold mb-2">{dayPlan.muscle}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {dayPlan.exercises.map((ex, i) => (
-                        <span key={i} className="text-xs text-[#CEEDB2]">
-                          {ex}{i < dayPlan.exercises.length - 1 ? ' •' : ''}
-                        </span>
-                      ))}
+
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-white">{dayLabels[day]}</h3>
+                        {isCompleted && (
+                          <Badge className="bg-green-500/20 text-green-400 border-0 text-xs">
+                            Concluído ✓
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-[#CEF17B] font-semibold">{dayPlan.muscle}</p>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-[#CEEDB2]">
+                        <Clock className="w-3 h-3" />
+                        <span>Descanso: {dayPlan.restTime}</span>
+                        <span>•</span>
+                        <span>{dayPlan.exercises.length} exercícios</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <Button
-                  onClick={() => onStartWorkout(weekNumber, day)}
-                  disabled={isCompleted}
-                  className={`${
-                    isCompleted 
-                      ? 'bg-white/5 text-white/40 cursor-not-allowed' 
-                      : 'gradient-button text-[#084734] hover:opacity-90'
-                  }`}
-                >
-                  {isCompleted ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Feito
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4 mr-2" />
-                      Iniciar
-                    </>
-                  )}
-                </Button>
+                  <div className="flex items-center gap-2">
+                    {isExpanded ? (
+                      <ChevronUp className="w-5 h-5 text-[#CEF17B]" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-[#CEF17B]" />
+                    )}
+                  </div>
+                </div>
               </div>
+
+              {/* Expanded Content */}
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="px-6 pb-6 border-t border-white/10 pt-4">
+                      <div className="space-y-3">
+                        {dayPlan.exercises.map((exercise, i) => (
+                          <div 
+                            key={i} 
+                            className="flex items-center gap-4 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                          >
+                            {/* Placeholder para imagem */}
+                            <div className="w-14 h-14 rounded-lg bg-[#CEF17B]/10 flex items-center justify-center flex-shrink-0 border border-[#CEF17B]/20">
+                              <Image className="w-6 h-6 text-[#CEF17B]/50" />
+                            </div>
+                            
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-white">{exercise.name}</h4>
+                              <p className="text-sm text-[#CEEDB2]">
+                                {exercise.sets} {exercise.reps}
+                              </p>
+                            </div>
+                            
+                            <Badge className="bg-[#CEF17B]/10 text-[#CEF17B] border-0 text-xs">
+                              {exercise.sets}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-4 p-3 bg-[#CEF17B]/10 rounded-lg">
+                        <p className="text-sm text-[#CEF17B] text-center">
+                          ⏱️ Descanso entre séries: <strong>{dayPlan.restTime}</strong>
+                        </p>
+                      </div>
+
+                      <Button
+                        onClick={() => onCompleteDay ? onCompleteDay(weekNumber, day) : onStartWorkout(weekNumber, day)}
+                        disabled={isCompleted}
+                        className={`w-full mt-4 ${
+                          isCompleted 
+                            ? 'bg-white/5 text-white/40 cursor-not-allowed' 
+                            : 'gradient-button text-[#084734] hover:opacity-90'
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Treino Concluído
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-4 h-4 mr-2" />
+                            Marcar como Concluído
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Card>
           </motion.div>
         );

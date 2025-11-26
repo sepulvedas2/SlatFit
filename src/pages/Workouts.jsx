@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Play, Pause, RotateCcw, Flame, Clock, 
-  Target, CheckCircle, Zap, Trophy, ArrowLeft, TrendingUp, Calendar
+  Target, CheckCircle, Zap, Trophy, ArrowLeft, TrendingUp, Calendar, Dumbbell
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -14,13 +14,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import HIITTimer from "../components/workouts/HIITTimer";
 import ExerciseBlock from "../components/workouts/ExerciseBlock";
 import WorkoutSummary from "../components/workouts/WorkoutSummary";
-import WeekSelector from "../components/workouts/WeekSelector";
 import WeeklyPlan from "../components/workouts/WeeklyPlan";
 
 export default function Workouts() {
   const [user, setUser] = useState(null);
-  const [view, setView] = useState("weeks"); // "weeks", "plan", "hiit", "workout"
-  const [selectedWeek, setSelectedWeek] = useState(1);
+  const [view, setView] = useState("plan"); // "plan", "hiit", "workout"
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
   const [selectedBlockId, setSelectedBlockId] = useState(null);
@@ -40,26 +38,16 @@ export default function Workouts() {
     initialData: [],
   });
 
-  // Fetch weekly progress
-  const { data: weeklyProgress = [] } = useQuery({
-    queryKey: ['weeklyProgress', user?.email],
-    queryFn: () => base44.entities.WeeklyProgress.filter({ user_email: user.email }),
-    enabled: !!user?.email,
-    initialData: [],
-  });
-
   // Fetch daily workouts
   const { data: dailyWorkouts = [] } = useQuery({
-    queryKey: ['dailyWorkouts', user?.email, selectedWeek],
+    queryKey: ['dailyWorkouts', user?.email],
     queryFn: () => base44.entities.DailyWorkout.filter({ 
       user_email: user.email,
-      week_number: selectedWeek 
+      week_number: 1 
     }),
     enabled: !!user?.email,
     initialData: [],
   });
-
-  const currentWeek = weeklyProgress.find(w => w.current_week)?.week_number || 1;
 
   const hiitWorkout = {
     title: "HIIT para Emagrecimento",
@@ -191,17 +179,39 @@ export default function Workouts() {
   };
 
   const handleStartWorkout = (weekNumber, dayOfWeek) => {
-    setSelectedWeek(weekNumber);
     setView("hiit");
   };
 
-  const handleSelectWeek = (weekNumber) => {
-    setSelectedWeek(weekNumber);
-    setView("plan");
+  const completeDayMutation = useMutation({
+    mutationFn: async ({ weekNumber, dayOfWeek }) => {
+      // Check if already exists
+      const existing = dailyWorkouts.find(w => w.day_of_week === dayOfWeek);
+      if (existing) {
+        return base44.entities.DailyWorkout.update(existing.id, { completed: true, completed_date: new Date().toISOString().split('T')[0] });
+      }
+      return base44.entities.DailyWorkout.create({
+        user_email: user.email,
+        week_number: weekNumber,
+        day_of_week: dayOfWeek,
+        muscle_group: "treino",
+        completed: true,
+        completed_date: new Date().toISOString().split('T')[0]
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['dailyWorkouts']);
+      queryClient.invalidateQueries(['weekWorkouts']);
+    }
+  });
+
+  const handleCompleteDay = (weekNumber, dayOfWeek) => {
+    if (user) {
+      completeDayMutation.mutate({ weekNumber, dayOfWeek });
+    }
   };
 
-  const handleBackToWeeks = () => {
-    setView("weeks");
+  const handleBackToPlan = () => {
+    setView("plan");
     setWorkoutStarted(false);
   };
 
@@ -216,17 +226,16 @@ export default function Workouts() {
     );
   }
 
-  // Week Selection View
-  if (view === "weeks") {
+  // Weekly Plan View (Main View)
+  if (view === "plan") {
     return (
       <div className="min-h-screen p-4 md:p-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">Programa de Treinos</h1>
-              <p className="text-[#CEEDB2] text-lg">
-                4 Semanas de Evolução Progressiva 🚀
+              <h1 className="text-3xl font-bold text-white mb-2">Treinos da Semana</h1>
+              <p className="text-[#CEEDB2]">
+                Nível Iniciante - Fundamentos 💪
               </p>
             </div>
             <Link to={createPageUrl("WorkoutProgress")}>
@@ -237,78 +246,41 @@ export default function Workouts() {
             </Link>
           </div>
 
-          <WeekSelector 
-            currentWeek={currentWeek}
-            onSelectWeek={handleSelectWeek}
-            weekProgress={weeklyProgress}
-          />
-
-          <Card className="glass-effect border-[#CEF17B]/20 p-6">
-            <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#CEF17B]" />
-              Como Funciona
-            </h3>
-            <ul className="space-y-2 text-sm text-[#CEEDB2]">
-              <li>• Cada semana tem 6 dias de treino (Segunda a Sábado)</li>
-              <li>• Domingo é descanso ativo e recuperação</li>
-              <li>• Complete 100% da semana para desbloquear a próxima</li>
-              <li>• Clique nos exercícios para ver demonstrações com fotos</li>
-              <li>• Acompanhe seu progresso em tempo real</li>
-            </ul>
-          </Card>
-
           {/* HIIT Quick Access */}
-          <Card className="glass-effect border-[#CEF17B]/20 p-6">
+          <Card className="glass-effect border-[#CEF17B]/20 p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white mb-1">Treino HIIT Rápido</h3>
-                <p className="text-sm text-[#CEEDB2]">Treino de alta intensidade sem estrutura semanal</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
+                  <Flame className="w-5 h-5 text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Treino HIIT Rápido</h3>
+                  <p className="text-xs text-[#CEEDB2]">Alta intensidade • Queima de gordura</p>
+                </div>
               </div>
               <Button 
                 onClick={() => setView("hiit")}
+                size="sm"
                 className="bg-orange-500 hover:bg-orange-600"
               >
-                <Flame className="w-4 h-4 mr-2" />
-                Acessar HIIT
+                <Flame className="w-4 h-4 mr-1" />
+                HIIT
               </Button>
             </div>
           </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // Weekly Plan View
-  if (view === "plan") {
-    return (
-      <div className="min-h-screen p-4 md:p-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleBackToWeeks}
-              className="glass-effect border-[#CEF17B]/20"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </Button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-white">Semana {selectedWeek}</h1>
-              <p className="text-[#CEEDB2]">Escolha o dia para treinar</p>
-            </div>
-            <Link to={createPageUrl("WorkoutProgress")}>
-              <Button variant="outline" className="border-[#CEF17B]/20 hover:bg-[#CEF17B]/10">
-                <TrendingUp className="w-4 h-4 mr-2 text-[#CEF17B]" />
-                Progresso
-              </Button>
-            </Link>
-          </div>
 
           <WeeklyPlan 
-            weekNumber={selectedWeek}
+            weekNumber={1}
             dailyWorkouts={dailyWorkouts}
             onStartWorkout={handleStartWorkout}
+            onCompleteDay={handleCompleteDay}
           />
+
+          <Card className="glass-effect border-[#CEF17B]/20 p-4">
+            <p className="text-sm text-[#CEEDB2] text-center">
+              💡 Clique em cada dia para ver todos os exercícios detalhados
+            </p>
+          </Card>
         </div>
       </div>
     );
@@ -327,7 +299,7 @@ export default function Workouts() {
               onClick={() => {
                 if (window.confirm("Deseja sair do treino? Seu progresso será perdido.")) {
                   handleRestart();
-                  setView("hiit");
+                  setView("plan");
                 }
               }}
               className="glass-effect border-[#CEF17B]/20"
@@ -373,7 +345,7 @@ export default function Workouts() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setView("weeks")}
+            onClick={handleBackToPlan}
             className="glass-effect border-[#CEF17B]/20"
           >
             <ArrowLeft className="w-5 h-5 text-white" />
