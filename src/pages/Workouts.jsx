@@ -19,6 +19,7 @@ import WeeklyPlan from "../components/workouts/WeeklyPlan";
 export default function Workouts() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState("plan"); // "plan", "hiit", "workout"
+  const [selectedWeek, setSelectedWeek] = useState(1);
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
   const [selectedBlockId, setSelectedBlockId] = useState(null);
@@ -40,10 +41,10 @@ export default function Workouts() {
 
   // Fetch daily workouts
   const { data: dailyWorkouts = [] } = useQuery({
-    queryKey: ['dailyWorkouts', user?.email],
+    queryKey: ['dailyWorkouts', user?.email, selectedWeek],
     queryFn: () => base44.entities.DailyWorkout.filter({ 
       user_email: user.email,
-      week_number: 1 
+      week_number: selectedWeek 
     }),
     enabled: !!user?.email,
     initialData: [],
@@ -228,14 +229,19 @@ export default function Workouts() {
 
   // Weekly Plan View (Main View)
   if (view === "plan") {
+    const weekOptions = [
+      { number: 1, title: "Semana 1", subtitle: "Iniciante" },
+      { number: 2, title: "Semana 2", subtitle: "Intermediário" }
+    ];
+
     return (
       <div className="min-h-screen p-4 md:p-8">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Treinos da Semana</h1>
+              <h1 className="text-3xl font-bold text-white mb-2">Programa de Treinos</h1>
               <p className="text-[#CEEDB2]">
-                Nível Iniciante - Fundamentos 💪
+                Escolha sua semana e evolua! 💪
               </p>
             </div>
             <Link to={createPageUrl("WorkoutProgress")}>
@@ -244,6 +250,33 @@ export default function Workouts() {
                 Meu Progresso
               </Button>
             </Link>
+          </div>
+
+          {/* Week Selector */}
+          <div className="grid grid-cols-2 gap-3">
+            {weekOptions.map((week) => (
+              <Card 
+                key={week.number}
+                onClick={() => setSelectedWeek(week.number)}
+                className={`p-4 cursor-pointer transition-all hover:scale-[1.02] ${
+                  selectedWeek === week.number 
+                    ? 'glass-effect border-[#CEF17B] ring-2 ring-[#CEF17B]' 
+                    : 'glass-effect border-[#CEF17B]/20'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    selectedWeek === week.number ? 'bg-[#CEF17B]/30' : 'bg-[#CEF17B]/10'
+                  }`}>
+                    <span className="text-[#CEF17B] font-bold">{week.number}</span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white">{week.title}</h3>
+                    <p className="text-xs text-[#CEEDB2]">{week.subtitle}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
 
           {/* HIIT Quick Access */}
@@ -270,7 +303,7 @@ export default function Workouts() {
           </Card>
 
           <WeeklyPlan 
-            weekNumber={1}
+            weekNumber={selectedWeek}
             dailyWorkouts={dailyWorkouts}
             onStartWorkout={handleStartWorkout}
             onCompleteDay={handleCompleteDay}
