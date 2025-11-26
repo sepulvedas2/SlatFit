@@ -174,6 +174,94 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     }
   },
 
+  // Semana 4 - Nível Expert
+  4: {
+    segunda: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino Livre com Halteres", sets: "4x", reps: "10-12", image_placeholder: "supino_halteres" },
+        { name: "Supino Livre com Barra", sets: "3x", reps: "12-15", image_placeholder: "supino_barra" },
+        { name: "Crucifixo com Halteres", sets: "3x", reps: "12-15", image_placeholder: "crucifixo_halteres" },
+        { name: "Supino Unilateral no Banco", sets: "3x", reps: "12-15", image_placeholder: "supino_unilateral" },
+        { name: "Tríceps Mergulho", sets: "3x", reps: "10-12", image_placeholder: "triceps_mergulho" },
+        { name: "Tríceps Testa na Polia", sets: "3x", reps: "10-12", image_placeholder: "triceps_testa" },
+        { name: "Tríceps Barra Invertida", sets: "3x", reps: "10-12", image_placeholder: "triceps_invertida" }
+      ]
+    },
+    terca: { 
+      muscle: "Costas / Bíceps", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Remada Livre no Banco", sets: "4x", reps: "10-12", image_placeholder: "remada_banco" },
+        { name: "Puxada Aberta na Polia", sets: "3x", reps: "8-10", image_placeholder: "puxada_aberta" },
+        { name: "Puxada Fechada Triângulo", sets: "3x", reps: "8-10", image_placeholder: "puxada_triangulo" },
+        { name: "Pullover na Polia com Corda", sets: "3x", reps: "8-10", image_placeholder: "pullover_polia" },
+        { name: "Rosca Direta Barra", sets: "3x", reps: "10-12", image_placeholder: "rosca_direta" },
+        { name: "Bíceps Martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" },
+        { name: "Rosca Scott", sets: "3x", reps: "10-12", image_placeholder: "rosca_scott" }
+      ]
+    },
+    quarta: { 
+      muscle: "Perna / Ombro", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Agachamento com Salto", sets: "3x", reps: "8-12", image_placeholder: "agachamento_salto" },
+        { name: "Leg Press com Impulso", sets: "3x", reps: "12-15", image_placeholder: "leg_press_impulso" },
+        { name: "Cadeira Extensora", sets: "3x", reps: "12-15", image_placeholder: "cadeira_extensora" },
+        { name: "Mesa Flexora", sets: "3x", reps: "10-12", image_placeholder: "mesa_flexora" },
+        { name: "Desenvolvimento com Halteres", sets: "3x", reps: "10", image_placeholder: "desenvolvimento_halteres" },
+        { name: "Remada Alta", sets: "3x", reps: "10", image_placeholder: "remada_alta" },
+        { name: "Elevação Unilateral na Polia", sets: "3x", reps: "10", image_placeholder: "elevacao_polia" }
+      ]
+    },
+    quinta: { 
+      muscle: "Costas / Bíceps", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Remada Livre no Banco", sets: "4x", reps: "10-12", image_placeholder: "remada_banco" },
+        { name: "Puxada Aberta na Polia", sets: "3x", reps: "8-10", image_placeholder: "puxada_aberta" },
+        { name: "Puxada Fechada Triângulo", sets: "3x", reps: "8-10", image_placeholder: "puxada_triangulo" },
+        { name: "Pullover na Polia com Corda", sets: "3x", reps: "8-10", image_placeholder: "pullover_polia" },
+        { name: "Rosca Direta Barra", sets: "3x", reps: "10-12", image_placeholder: "rosca_direta" },
+        { name: "Bíceps Martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" },
+        { name: "Rosca Scott", sets: "3x", reps: "10-12", image_placeholder: "rosca_scott" }
+      ]
+    },
+    sexta: { 
+      muscle: "Perna / Ombro", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Agachamento Lateral", sets: "3x", reps: "10-12", image_placeholder: "agachamento_lateral" },
+        { name: "Leg Press Unilateral", sets: "3x", reps: "10-15", image_placeholder: "leg_press_unilateral" },
+        { name: "Cadeira Extensora Unilateral", sets: "3x", reps: "10-15", image_placeholder: "extensora_unilateral" },
+        { name: "Cadeira Flexora Unilateral", sets: "3x", reps: "10-12", image_placeholder: "flexora_unilateral" },
+        { name: "Elevação Lateral", sets: "4x", reps: "8-12", image_placeholder: "elevacao_lateral" },
+        { name: "Remada Alta", sets: "3x", reps: "10", image_placeholder: "remada_alta" },
+        { name: "Desenvolvimento Máquina", sets: "3x", reps: "10-12", image_placeholder: "desenvolvimento_maquina" }
+      ]
+    },
+    sabado: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino Livre com Halteres", sets: "4x", reps: "10-12", image_placeholder: "supino_halteres" },
+        { name: "Supino Livre com Barra", sets: "3x", reps: "12-15", image_placeholder: "supino_barra" },
+        { name: "Crucifixo com Halteres", sets: "3x", reps: "12-15", image_placeholder: "crucifixo_halteres" },
+        { name: "Supino Unilateral no Banco", sets: "3x", reps: "12-15", image_placeholder: "supino_unilateral" },
+        { name: "Tríceps Mergulho", sets: "3x", reps: "10-12", image_placeholder: "triceps_mergulho" },
+        { name: "Tríceps Testa na Polia", sets: "3x", reps: "10-12", image_placeholder: "triceps_testa" },
+        { name: "Tríceps Barra Invertida", sets: "3x", reps: "10-12", image_placeholder: "triceps_invertida" }
+      ]
+    }
+  },
+
   // Semana 3 - Nível Avançado
   3: {
     segunda: { 
@@ -270,7 +358,8 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
   const weekTitles = {
     1: { title: "Semana 1 - Nível Iniciante", subtitle: "Treino completo com foco em fundamentos" },
     2: { title: "Semana 2 - Nível Intermediário", subtitle: "Evolução com treinos mais intensos" },
-    3: { title: "Semana 3 - Nível Avançado", subtitle: "Alta intensidade e volume aumentado" }
+    3: { title: "Semana 3 - Nível Avançado", subtitle: "Alta intensidade e volume aumentado" },
+    4: { title: "Semana 4 - Nível Expert", subtitle: "Máxima performance e técnicas avançadas" }
   };
 
   const currentWeekInfo = weekTitles[weekNumber] || weekTitles[1];

@@ -232,7 +232,8 @@ export default function Workouts() {
     const weekOptions = [
       { number: 1, title: "Semana 1", subtitle: "Iniciante" },
       { number: 2, title: "Semana 2", subtitle: "Intermediário" },
-      { number: 3, title: "Semana 3", subtitle: "Avançado" }
+      { number: 3, title: "Semana 3", subtitle: "Avançado" },
+      { number: 4, title: "Semana 4", subtitle: "Expert" }
     ];
 
     return (
@@ -254,7 +255,7 @@ export default function Workouts() {
           </div>
 
           {/* Week Selector */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {weekOptions.map((week) => (
               <Card 
                 key={week.number}
