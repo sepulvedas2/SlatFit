@@ -12,7 +12,6 @@ import Community from './pages/Community';
 import SmartNutrition from './pages/SmartNutrition';
 import Agenda from './pages/Agenda';
 import WorkoutProgress from './pages/WorkoutProgress';
-import Welcome from './pages/Welcome';
 import __Layout from './Layout.jsx';
 
 
@@ -31,7 +30,6 @@ export const PAGES = {
     "SmartNutrition": SmartNutrition,
     "Agenda": Agenda,
     "WorkoutProgress": WorkoutProgress,
-    "Welcome": Welcome,
 }
 
 export const pagesConfig = {
