@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,32 +6,63 @@ import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Ima
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
   const [expandedDay, setExpandedDay] = useState(null);
-  const [exerciseImages, setExerciseImages] = useState({});
   const [uploadingExercise, setUploadingExercise] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const fileInputRef = useRef(null);
+  const queryClient = useQueryClient();
 
-  const handleImageUpload = async (file, exerciseKey) => {
+  // Fetch all exercises from database to get saved images
+  const { data: savedExercises = [] } = useQuery({
+    queryKey: ['exercises'],
+    queryFn: () => base44.entities.Exercise.list(),
+  });
+
+  // Create a map of exercise names to their data (including image_url)
+  const exerciseImageMap = savedExercises.reduce((acc, ex) => {
+    if (ex.image_url) {
+      acc[ex.name] = ex.image_url;
+    }
+    return acc;
+  }, {});
+
+  const handleImageUpload = async (file, exerciseName) => {
     if (!file) return;
     
-    setUploadingExercise(exerciseKey);
+    setUploadingExercise(exerciseName);
     try {
+      // Upload the file
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setExerciseImages(prev => ({
-        ...prev,
-        [exerciseKey]: file_url
-      }));
+      
+      // Check if exercise already exists in DB
+      const existingExercises = await base44.entities.Exercise.filter({ name: exerciseName });
+      
+      if (existingExercises && existingExercises.length > 0) {
+        // Update existing exercise
+        await base44.entities.Exercise.update(existingExercises[0].id, { image_url: file_url });
+      } else {
+        // Create new exercise record
+        await base44.entities.Exercise.create({
+          name: exerciseName,
+          image_url: file_url,
+          reps_suggestion: "3x10",
+          duration_seconds: 30
+        });
+      }
+      
+      // Refresh exercises list
+      queryClient.invalidateQueries(['exercises']);
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
     }
     setUploadingExercise(null);
   };
 
-  const triggerFileInput = (exerciseKey) => {
-    setSelectedExercise(exerciseKey);
+  const triggerFileInput = (exerciseName) => {
+    setSelectedExercise(exerciseName);
     fileInputRef.current?.click();
   };
 
@@ -43,16 +74,16 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     e.target.value = '';
   };
 
-  const removeImage = (exerciseKey) => {
-    setExerciseImages(prev => {
-      const newImages = { ...prev };
-      delete newImages[exerciseKey];
-      return newImages;
-    });
-  };
-
-  const getExerciseKey = (day, exerciseIndex) => {
-    return `week${weekNumber}_${day}_${exerciseIndex}`;
+  const removeImage = async (exerciseName) => {
+    try {
+      const existingExercises = await base44.entities.Exercise.filter({ name: exerciseName });
+      if (existingExercises && existingExercises.length > 0) {
+        await base44.entities.Exercise.update(existingExercises[0].id, { image_url: "" });
+        queryClient.invalidateQueries(['exercises']);
+      }
+    } catch (error) {
+      console.error("Erro ao remover imagem:", error);
+    }
   };
 
   // Definição dos treinos por semana
@@ -524,9 +555,8 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                     <div className="px-6 pb-6 border-t border-white/10 pt-4">
                       <div className="space-y-3">
                         {dayPlan.exercises.map((exercise, i) => {
-                          const exerciseKey = getExerciseKey(day, i);
-                          const hasImage = exerciseImages[exerciseKey];
-                          const isUploading = uploadingExercise === exerciseKey;
+                          const hasImage = exerciseImageMap[exercise.name];
+                          const isUploading = uploadingExercise === exercise.name;
 
                           return (
                             <div 
@@ -544,13 +574,13 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                                     />
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                                       <button
-                                        onClick={() => triggerFileInput(exerciseKey)}
+                                        onClick={() => triggerFileInput(exercise.name)}
                                         className="p-1 bg-white/20 rounded hover:bg-white/30"
                                       >
                                         <Upload className="w-3 h-3 text-white" />
                                       </button>
                                       <button
-                                        onClick={() => removeImage(exerciseKey)}
+                                        onClick={() => removeImage(exercise.name)}
                                         className="p-1 bg-red-500/50 rounded hover:bg-red-500/70"
                                       >
                                         <X className="w-3 h-3 text-white" />
@@ -559,7 +589,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                                   </div>
                                 ) : (
                                   <button
-                                    onClick={() => triggerFileInput(exerciseKey)}
+                                    onClick={() => triggerFileInput(exercise.name)}
                                     disabled={isUploading}
                                     className="w-14 h-14 rounded-lg bg-[#CEF17B]/10 flex items-center justify-center flex-shrink-0 border border-dashed border-[#CEF17B]/30 hover:border-[#CEF17B] hover:bg-[#CEF17B]/20 transition-all cursor-pointer"
                                   >
