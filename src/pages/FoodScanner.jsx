@@ -280,58 +280,60 @@ Exemplo de resposta precisa:
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: '#054D3B' }}>
-      <div className="max-w-2xl mx-auto space-y-6">
+    <div className="min-h-screen p-3 md:p-8 pb-24" style={{ backgroundColor: '#054D3B' }}>
+      <div className="max-w-2xl mx-auto space-y-4">
         
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4" style={{ background: 'linear-gradient(90deg, rgba(255,122,0,0.2), rgba(11,107,84,0.2))', border: '1px solid rgba(255,122,0,0.3)' }}>
-            <Sparkles className="w-5 h-5" style={{ color: '#FF7A00' }} />
-            <span className="text-sm font-semibold text-white">Scanner Nutricional IA</span>
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-3" style={{ background: 'linear-gradient(90deg, rgba(255,122,0,0.2), rgba(11,107,84,0.2))', border: '1px solid rgba(255,122,0,0.3)' }}>
+            <Sparkles className="w-4 h-4" style={{ color: '#FF7A00' }} />
+            <span className="text-xs font-semibold text-white">Scanner Nutricional IA</span>
             {!isPremium && (
               <span className="text-xs" style={{ color: '#FF7A00' }}>
-                ({dailyScans}/{scanLimit} hoje)
+                ({dailyScans}/{scanLimit})
               </span>
             )}
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
             Scanner Nutricional IA
           </h1>
-          <p className="text-lg" style={{ color: 'rgba(255,255,255,0.7)' }}>
+          <p className="text-sm md:text-lg px-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
             Calorias precisas com IA + ajuste de porção
           </p>
           {isPremium && (
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              Identificação automática • Base de dados TACO/USDA
+            <p className="text-xs md:text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Identificação automática • Base TACO/USDA
             </p>
           )}
         </div>
 
-        {/* Mode Selector - Orange & Green */}
-        <div className="flex gap-3">
+        {/* Mode Selector - Mobile Optimized */}
+        <div className="grid grid-cols-2 gap-2">
           <Button
             onClick={() => setMode("scan")}
-            className={`flex-1 h-14 text-base font-semibold rounded-2xl transition-all ${
+            className={`h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl transition-all ${
               mode === "scan" 
                 ? "text-white shadow-lg" 
-                : "bg-white text-[#0B6B54] border-2 hover:scale-105"
+                : "bg-white text-[#0B6B54] border-2"
             }`}
             style={mode === "scan" ? { backgroundColor: '#FF7A00' } : { borderColor: '#0B6B54' }}
           >
-            <Camera className="w-5 h-5 mr-2" />
-            Escanear com IA
+            <Camera className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
+            <span className="hidden md:inline">Escanear com IA</span>
+            <span className="md:hidden ml-1 text-xs">Escanear</span>
           </Button>
           <Button
             onClick={() => setMode("manual")}
-            className={`flex-1 h-14 text-base font-semibold rounded-2xl transition-all ${
+            className={`h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl transition-all ${
               mode === "manual" 
                 ? "text-white shadow-lg" 
-                : "bg-white border-2 hover:scale-105"
+                : "bg-white border-2"
             }`}
             style={mode === "manual" ? { backgroundColor: '#FF7A00', color: 'white' } : { borderColor: '#FF7A00', color: '#FF7A00' }}
           >
-            <Edit className="w-5 h-5 mr-2" />
-            Inserir Manualmente
+            <Edit className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
+            <span className="hidden md:inline">Inserir Manualmente</span>
+            <span className="md:hidden ml-1 text-xs">Manual</span>
           </Button>
         </div>
 
@@ -462,15 +464,15 @@ Exemplo de resposta precisa:
         {mode === "scan" && (isPremium || dailyScans < scanLimit) && (
           <>
             {!showCamera && !imagePreview && (
-              <Card className="p-8 rounded-3xl" style={{ background: 'linear-gradient(135deg, #0B6B54 0%, rgba(255,122,0,0.3) 100%)', border: '1px solid rgba(255,122,0,0.2)' }}>
-                <div className="space-y-6">
+              <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl" style={{ background: 'linear-gradient(135deg, #0B6B54 0%, rgba(255,122,0,0.3) 100%)', border: '1px solid rgba(255,122,0,0.2)' }}>
+                <div className="space-y-4 md:space-y-6">
                   {/* Main Camera Button */}
                   <Button
                     onClick={() => setShowCamera(true)}
-                    className="w-full h-40 text-xl font-bold rounded-3xl flex flex-col items-center justify-center gap-3 shadow-xl hover:scale-105 transition-all"
+                    className="w-full h-32 md:h-40 text-lg md:text-xl font-bold rounded-2xl md:rounded-3xl flex flex-col items-center justify-center gap-2 md:gap-3 shadow-xl active:scale-95 md:hover:scale-105 transition-all"
                     style={{ backgroundColor: '#FF7A00' }}
                   >
-                    <Camera className="w-12 h-12" />
+                    <Camera className="w-10 h-10 md:w-12 md:h-12" />
                     Abrir Câmera
                   </Button>
 
@@ -480,7 +482,7 @@ Exemplo de resposta precisa:
                       <div className="w-full" style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-4 text-base font-semibold" style={{ backgroundColor: '#0B6B54', color: 'rgba(255,122,0,0.8)' }}>
+                      <span className="px-3 md:px-4 text-sm md:text-base font-semibold" style={{ backgroundColor: '#0B6B54', color: 'rgba(255,122,0,0.8)' }}>
                         OU
                       </span>
                     </div>
@@ -496,18 +498,18 @@ Exemplo de resposta precisa:
                   />
                   <Button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-28 border-dashed border-2 rounded-3xl bg-transparent hover:scale-105 transition-all"
+                    className="w-full h-24 md:h-28 border-dashed border-2 rounded-2xl md:rounded-3xl bg-transparent active:scale-95 md:hover:scale-105 transition-all flex-col md:flex-row gap-2"
                     style={{ borderColor: '#FF7A00', color: 'white' }}
                   >
-                    <Upload className="w-8 h-8 mr-3" style={{ color: '#FF7A00' }} />
-                    <span className="text-lg font-semibold">Fazer Upload de Imagem</span>
+                    <Upload className="w-7 h-7 md:w-8 md:h-8 md:mr-3" style={{ color: '#FF7A00' }} />
+                    <span className="text-base md:text-lg font-semibold">Fazer Upload de Imagem</span>
                   </Button>
 
                   {/* Tip Card */}
-                  <div className="p-4 rounded-2xl flex items-start gap-3" style={{ backgroundColor: 'rgba(255,122,0,0.15)', border: '1px solid rgba(255,122,0,0.3)' }}>
-                    <div className="text-2xl">💡</div>
+                  <div className="p-3 md:p-4 rounded-xl md:rounded-2xl flex items-start gap-2 md:gap-3" style={{ backgroundColor: 'rgba(255,122,0,0.15)', border: '1px solid rgba(255,122,0,0.3)' }}>
+                    <div className="text-xl md:text-2xl flex-shrink-0">💡</div>
                     <div>
-                      <p className="text-sm font-semibold text-white mb-1">Dica de Uso:</p>
+                      <p className="text-xs md:text-sm font-semibold text-white mb-1">Dica de Uso:</p>
                       <p className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>
                         Para maior precisão, fotografe o alimento de cima, com boa iluminação.
                       </p>
@@ -518,60 +520,60 @@ Exemplo de resposta precisa:
             )}
 
             {showCamera && (
-              <Card className="overflow-hidden rounded-3xl" style={{ backgroundColor: '#0B6B54', border: '2px solid #FF7A00' }}>
+              <Card className="overflow-hidden rounded-2xl md:rounded-3xl" style={{ backgroundColor: '#0B6B54', border: '2px solid #FF7A00' }}>
                 <video
                   ref={videoRef}
                   autoPlay
                   playsInline
                   className="w-full aspect-video object-cover"
                 />
-                <div className="p-4 flex gap-3">
+                <div className="p-3 md:p-4 flex gap-2 md:gap-3">
                   <Button
                     onClick={capturePhoto}
-                    className="flex-1 h-14 text-base font-semibold rounded-2xl"
+                    className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl"
                     style={{ backgroundColor: '#FF7A00' }}
                   >
-                    <Camera className="w-5 h-5 mr-2" />
-                    Capturar Foto
+                    <Camera className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                    Capturar
                   </Button>
                   <Button
                     onClick={() => setShowCamera(false)}
-                    className="h-14 px-6 rounded-2xl bg-white"
+                    className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white"
                     style={{ color: '#054D3B' }}
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4 md:w-5 md:h-5" />
                   </Button>
                 </div>
               </Card>
             )}
 
             {imagePreview && (
-              <Card className="overflow-hidden rounded-3xl" style={{ backgroundColor: '#0B6B54', border: '2px solid rgba(255,122,0,0.4)' }}>
+              <Card className="overflow-hidden rounded-2xl md:rounded-3xl" style={{ backgroundColor: '#0B6B54', border: '2px solid rgba(255,122,0,0.4)' }}>
                 <img
                   src={imagePreview}
                   alt="Food preview"
                   className="w-full aspect-video object-cover"
                 />
                 
-                <div className="p-6 space-y-4">
+                <div className="p-4 md:p-6 space-y-3 md:space-y-4">
                   {!nutritionData && !analyzing && (
                     <>
                       <MealTypeSelector 
                         selected={selectedMealType}
                         onChange={setSelectedMealType}
                       />
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                         <Button
                           onClick={analyzeFood}
-                          className="flex-1 h-14 text-base font-semibold rounded-2xl shadow-lg hover:scale-105 transition-all"
+                          className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl shadow-lg active:scale-95 md:hover:scale-105 transition-all"
                           style={{ backgroundColor: '#FF7A00' }}
                         >
-                          <Sparkles className="w-5 h-5 mr-2" />
+                          <Sparkles className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                           Analisar com IA
                         </Button>
                         <Button
                           onClick={reset}
-                          className="h-14 px-6 rounded-2xl bg-white border-2"
+                          className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white border-2"
                           style={{ color: '#FF7A00', borderColor: '#FF7A00' }}
                         >
                           Nova Foto
@@ -581,42 +583,42 @@ Exemplo de resposta precisa:
                   )}
 
                   {analyzing && (
-                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                      <Loader2 className="w-16 h-16 animate-spin" style={{ color: '#FF7A00' }} />
-                      <p className="text-white font-semibold text-lg">Analisando com IA...</p>
-                      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>Consultando base TACO/USDA</p>
+                    <div className="flex flex-col items-center justify-center py-8 md:py-12 space-y-3 md:space-y-4">
+                      <Loader2 className="w-12 h-12 md:w-16 md:h-16 animate-spin" style={{ color: '#FF7A00' }} />
+                      <p className="text-white font-semibold text-base md:text-lg">Analisando com IA...</p>
+                      <p className="text-xs md:text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>Consultando base TACO/USDA</p>
                     </div>
                   )}
 
                   {nutritionData && (
                     <>
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge className="px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(255,122,0,0.2)', color: '#FF7A00', border: '1px solid #FF7A00' }}>
+                        <Badge className="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs" style={{ backgroundColor: 'rgba(255,122,0,0.2)', color: '#FF7A00', border: '1px solid #FF7A00' }}>
                           <Check className="w-3 h-3 mr-1" />
                           Análise Completa
                         </Badge>
                       </div>
                       <NutritionResults data={nutritionData} />
-                      <div className="flex gap-3 pt-4">
+                      <div className="flex flex-col sm:flex-row gap-2 md:gap-3 pt-3 md:pt-4">
                         <Button
                           onClick={() => saveFood(nutritionData)}
                           disabled={saving}
-                          className="flex-1 h-14 text-base font-semibold rounded-2xl"
+                          className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl"
                           style={{ backgroundColor: '#FF7A00' }}
                         >
                           {saving ? (
-                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            <Loader2 className="w-4 h-4 md:w-5 md:h-5 mr-2 animate-spin" />
                           ) : (
-                            <Check className="w-5 h-5 mr-2" />
+                            <Check className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                           )}
-                          Adicionar à Refeição
+                          Adicionar
                         </Button>
                         <Button
                           onClick={reset}
-                          className="h-14 px-6 rounded-2xl bg-white border-2"
+                          className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white border-2"
                           style={{ color: '#0B6B54', borderColor: '#0B6B54' }}
                         >
-                          Outro Alimento
+                          Outro
                         </Button>
                       </div>
                     </>
