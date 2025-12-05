@@ -48,19 +48,14 @@ export default function Dashboard() {
     enabled: !!user?.email,
   });
 
-  // Show onboarding first if user doesn't have a profile yet
+  // Show onboarding if user doesn't have a profile yet
   useEffect(() => {
-    if (user && profile === null && !showOnboarding) {
+    if (user && profile === null) {
       setShowOnboarding(true);
-    }
-  }, [user, profile]);
-
-  // Show welcome modal only after profile exists and no subscription
-  useEffect(() => {
-    if (user && profile && subscription === null && !showOnboarding) {
+    } else if (user && profile && subscription === null) {
       setShowWelcome(true);
     }
-  }, [user, profile, subscription, showOnboarding]);
+  }, [user, profile, subscription]);
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
