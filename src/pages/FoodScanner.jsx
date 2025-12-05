@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -281,51 +280,58 @@ Exemplo de resposta precisa:
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: '#054D3B' }}>
       <div className="max-w-2xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full border border-blue-500/30 mb-4">
-            <Sparkles className="w-4 h-4 text-blue-400" />
-            <span className="text-sm font-semibold text-blue-300">Scanner Nutricional IA</span>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4" style={{ background: 'linear-gradient(90deg, rgba(255,122,0,0.2), rgba(11,107,84,0.2))', border: '1px solid rgba(255,122,0,0.3)' }}>
+            <Sparkles className="w-5 h-5" style={{ color: '#FF7A00' }} />
+            <span className="text-sm font-semibold text-white">Scanner Nutricional IA</span>
             {!isPremium && (
-              <span className="text-xs text-blue-400">
+              <span className="text-xs" style={{ color: '#FF7A00' }}>
                 ({dailyScans}/{scanLimit} hoje)
               </span>
             )}
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            Análise Nutricional
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Scanner Nutricional IA
           </h1>
-          <p className="text-gray-400 mt-2">
-            {isPremium 
-              ? "Precisão de 95%+ com IA avançada" 
-              : `${Math.max(0, scanLimit - dailyScans)} scans restantes hoje`}
+          <p className="text-lg" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            Calorias precisas com IA + ajuste de porção
           </p>
+          {isPremium && (
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Identificação automática • Base de dados TACO/USDA
+            </p>
+          )}
         </div>
 
-        {/* Mode Selector */}
-        <div className="flex gap-2">
+        {/* Mode Selector - Orange & Green */}
+        <div className="flex gap-3">
           <Button
             onClick={() => setMode("scan")}
-            variant={mode === "scan" ? "default" : "outline"}
-            className={`flex-1 ${mode === "scan" 
-              ? "bg-gradient-to-r from-blue-600 to-cyan-600" 
-              : "border-white/10 hover:bg-white/5"}`}
+            className={`flex-1 h-14 text-base font-semibold rounded-2xl transition-all ${
+              mode === "scan" 
+                ? "text-white shadow-lg" 
+                : "bg-white text-[#0B6B54] border-2 hover:scale-105"
+            }`}
+            style={mode === "scan" ? { backgroundColor: '#FF7A00' } : { borderColor: '#0B6B54' }}
           >
-            <Camera className="w-4 h-4 mr-2" />
+            <Camera className="w-5 h-5 mr-2" />
             Escanear com IA
           </Button>
           <Button
             onClick={() => setMode("manual")}
-            variant={mode === "manual" ? "default" : "outline"}
-            className={`flex-1 ${mode === "manual" 
-              ? "bg-gradient-to-r from-purple-600 to-pink-600" 
-              : "border-white/10 hover:bg-white/5"}`}
+            className={`flex-1 h-14 text-base font-semibold rounded-2xl transition-all ${
+              mode === "manual" 
+                ? "text-white shadow-lg" 
+                : "bg-white border-2 hover:scale-105"
+            }`}
+            style={mode === "manual" ? { backgroundColor: '#FF7A00', color: 'white' } : { borderColor: '#FF7A00', color: '#FF7A00' }}
           >
-            <Edit className="w-4 h-4 mr-2" />
-            Inserir Manual
+            <Edit className="w-5 h-5 mr-2" />
+            Inserir Manualmente
           </Button>
         </div>
 
@@ -341,11 +347,11 @@ Exemplo de resposta precisa:
 
         {/* Manual Entry Mode */}
         {mode === "manual" && (
-          <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-6">
+          <Card className="p-6 rounded-3xl" style={{ backgroundColor: '#0B6B54', border: '1px solid rgba(255,122,0,0.2)' }}>
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
-                <Calculator className="w-5 h-5 text-purple-400" />
-                <h3 className="font-bold text-white">Inserir Dados Manualmente</h3>
+                <Calculator className="w-5 h-5" style={{ color: '#FF7A00' }} />
+                <h3 className="font-bold text-white text-lg">Inserir Dados Manualmente</h3>
               </div>
 
               <MealTypeSelector 
@@ -429,7 +435,8 @@ Exemplo de resposta precisa:
                 <Button
                   onClick={handleManualSave}
                   disabled={saving || !manualData.food_name || !manualData.calories}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600"
+                  className="w-full h-14 text-base font-semibold rounded-2xl"
+                  style={{ backgroundColor: '#FF7A00' }}
                 >
                   {saving ? (
                     <>
@@ -443,7 +450,7 @@ Exemplo de resposta precisa:
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-gray-400 text-center mt-2">
+                <p className="text-xs text-center mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
                   * Campos obrigatórios
                 </p>
               </div>
@@ -455,25 +462,31 @@ Exemplo de resposta precisa:
         {mode === "scan" && (isPremium || dailyScans < scanLimit) && (
           <>
             {!showCamera && !imagePreview && (
-              <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-8">
-                <div className="space-y-4">
+              <Card className="p-8 rounded-3xl" style={{ background: 'linear-gradient(135deg, #0B6B54 0%, rgba(255,122,0,0.3) 100%)', border: '1px solid rgba(255,122,0,0.2)' }}>
+                <div className="space-y-6">
+                  {/* Main Camera Button */}
                   <Button
                     onClick={() => setShowCamera(true)}
-                    className="w-full h-32 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-lg font-semibold"
+                    className="w-full h-40 text-xl font-bold rounded-3xl flex flex-col items-center justify-center gap-3 shadow-xl hover:scale-105 transition-all"
+                    style={{ backgroundColor: '#FF7A00' }}
                   >
-                    <Camera className="w-8 h-8 mr-3" />
+                    <Camera className="w-12 h-12" />
                     Abrir Câmera
                   </Button>
 
+                  {/* Divider */}
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-700"></div>
+                      <div className="w-full" style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-slate-900 text-gray-400">ou</span>
+                      <span className="px-4 text-base font-semibold" style={{ backgroundColor: '#0B6B54', color: 'rgba(255,122,0,0.8)' }}>
+                        OU
+                      </span>
                     </div>
                   </div>
 
+                  {/* Upload Button */}
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -483,24 +496,29 @@ Exemplo de resposta precisa:
                   />
                   <Button
                     onClick={() => fileInputRef.current?.click()}
-                    variant="outline"
-                    className="w-full h-24 border-dashed border-2 border-gray-600 hover:border-blue-500 bg-transparent"
+                    className="w-full h-28 border-dashed border-2 rounded-3xl bg-transparent hover:scale-105 transition-all"
+                    style={{ borderColor: '#FF7A00', color: 'white' }}
                   >
-                    <Upload className="w-6 h-6 mr-3" />
-                    Fazer Upload de Imagem
+                    <Upload className="w-8 h-8 mr-3" style={{ color: '#FF7A00' }} />
+                    <span className="text-lg font-semibold">Fazer Upload de Imagem</span>
                   </Button>
 
-                  <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                    <p className="text-xs text-blue-300 text-center">
-                      💡 Dica: Para melhor precisão, fotografe o alimento de cima, com boa iluminação
-                    </p>
+                  {/* Tip Card */}
+                  <div className="p-4 rounded-2xl flex items-start gap-3" style={{ backgroundColor: 'rgba(255,122,0,0.15)', border: '1px solid rgba(255,122,0,0.3)' }}>
+                    <div className="text-2xl">💡</div>
+                    <div>
+                      <p className="text-sm font-semibold text-white mb-1">Dica de Uso:</p>
+                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                        Para maior precisão, fotografe o alimento de cima, com boa iluminação.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </Card>
             )}
 
             {showCamera && (
-              <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 overflow-hidden">
+              <Card className="overflow-hidden rounded-3xl" style={{ backgroundColor: '#0B6B54', border: '2px solid #FF7A00' }}>
                 <video
                   ref={videoRef}
                   autoPlay
@@ -510,15 +528,16 @@ Exemplo de resposta precisa:
                 <div className="p-4 flex gap-3">
                   <Button
                     onClick={capturePhoto}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600"
+                    className="flex-1 h-14 text-base font-semibold rounded-2xl"
+                    style={{ backgroundColor: '#FF7A00' }}
                   >
                     <Camera className="w-5 h-5 mr-2" />
-                    Capturar
+                    Capturar Foto
                   </Button>
                   <Button
                     onClick={() => setShowCamera(false)}
-                    variant="outline"
-                    className="border-white/10"
+                    className="h-14 px-6 rounded-2xl bg-white"
+                    style={{ color: '#054D3B' }}
                   >
                     <X className="w-5 h-5" />
                   </Button>
@@ -527,7 +546,7 @@ Exemplo de resposta precisa:
             )}
 
             {imagePreview && (
-              <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 overflow-hidden">
+              <Card className="overflow-hidden rounded-3xl" style={{ backgroundColor: '#0B6B54', border: '2px solid rgba(255,122,0,0.4)' }}>
                 <img
                   src={imagePreview}
                   alt="Food preview"
@@ -544,15 +563,16 @@ Exemplo de resposta precisa:
                       <div className="flex gap-3">
                         <Button
                           onClick={analyzeFood}
-                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                          className="flex-1 h-14 text-base font-semibold rounded-2xl shadow-lg hover:scale-105 transition-all"
+                          style={{ backgroundColor: '#FF7A00' }}
                         >
                           <Sparkles className="w-5 h-5 mr-2" />
                           Analisar com IA
                         </Button>
                         <Button
                           onClick={reset}
-                          variant="outline"
-                          className="border-white/10"
+                          className="h-14 px-6 rounded-2xl bg-white border-2"
+                          style={{ color: '#FF7A00', borderColor: '#FF7A00' }}
                         >
                           Nova Foto
                         </Button>
@@ -561,17 +581,17 @@ Exemplo de resposta precisa:
                   )}
 
                   {analyzing && (
-                    <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                      <Loader2 className="w-12 h-12 animate-spin text-blue-400" />
-                      <p className="text-gray-300">Analisando com IA de precisão...</p>
-                      <p className="text-xs text-gray-400">Consultando base nutricional</p>
+                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                      <Loader2 className="w-16 h-16 animate-spin" style={{ color: '#FF7A00' }} />
+                      <p className="text-white font-semibold text-lg">Analisando com IA...</p>
+                      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>Consultando base TACO/USDA</p>
                     </div>
                   )}
 
                   {nutritionData && (
                     <>
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <Badge className="px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(255,122,0,0.2)', color: '#FF7A00', border: '1px solid #FF7A00' }}>
                           <Check className="w-3 h-3 mr-1" />
                           Análise Completa
                         </Badge>
@@ -581,21 +601,22 @@ Exemplo de resposta precisa:
                         <Button
                           onClick={() => saveFood(nutritionData)}
                           disabled={saving}
-                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600"
+                          className="flex-1 h-14 text-base font-semibold rounded-2xl"
+                          style={{ backgroundColor: '#FF7A00' }}
                         >
                           {saving ? (
                             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                           ) : (
                             <Check className="w-5 h-5 mr-2" />
                           )}
-                          Salvar no Diário
+                          Adicionar à Refeição
                         </Button>
                         <Button
                           onClick={reset}
-                          variant="outline"
-                          className="border-white/10"
+                          className="h-14 px-6 rounded-2xl bg-white border-2"
+                          style={{ color: '#0B6B54', borderColor: '#0B6B54' }}
                         >
-                          Nova Foto
+                          Outro Alimento
                         </Button>
                       </div>
                     </>
