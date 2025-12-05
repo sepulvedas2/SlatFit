@@ -39,33 +39,58 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
 
   // Check if exercise exists in DB when modal opens
   useEffect(() => {
-    if (isOpen && exercise) {
-      // If exercise has an ID, it's from the database
-      if (exercise.id) {
-        setCurrentExercise(exercise);
-        setFormData({
-          name: exercise.name,
-          description: exercise.description || "",
-          image_url: exercise.image_url || "",
-          reps_suggestion: exercise.reps_suggestion,
-          duration_seconds: exercise.duration_seconds,
-          difficulty: exercise.difficulty || "intermediario",
-          category: exercise.category || "cardio"
-        });
-      } else {
-        // Exercise from hardcoded data, create it first
-        setCurrentExercise(null);
-        setFormData({
-          name: exercise.name,
-          description: exercise.description || "",
-          image_url: exercise.image_url || "",
-          reps_suggestion: exercise.reps || "",
-          duration_seconds: exercise.duration || 30,
-          difficulty: "intermediario",
-          category: "cardio"
-        });
+    const loadExercise = async () => {
+      if (isOpen && exercise) {
+        // First, check if this exercise already exists in DB by name
+        try {
+          const existingExercises = await base44.entities.Exercise.filter({ name: exercise.name });
+          if (existingExercises && existingExercises.length > 0) {
+            const dbExercise = existingExercises[0];
+            setCurrentExercise(dbExercise);
+            setFormData({
+              name: dbExercise.name,
+              description: dbExercise.description || "",
+              image_url: dbExercise.image_url || "",
+              reps_suggestion: dbExercise.reps_suggestion || exercise.reps || "",
+              duration_seconds: dbExercise.duration_seconds || exercise.duration || 30,
+              difficulty: dbExercise.difficulty || "intermediario",
+              category: dbExercise.category || "cardio"
+            });
+            return;
+          }
+        } catch (err) {
+          console.error("Error loading exercise:", err);
+        }
+
+        // If exercise has an ID, it's from the database
+        if (exercise.id) {
+          setCurrentExercise(exercise);
+          setFormData({
+            name: exercise.name,
+            description: exercise.description || "",
+            image_url: exercise.image_url || "",
+            reps_suggestion: exercise.reps_suggestion,
+            duration_seconds: exercise.duration_seconds,
+            difficulty: exercise.difficulty || "intermediario",
+            category: exercise.category || "cardio"
+          });
+        } else {
+          // Exercise from hardcoded data
+          setCurrentExercise(null);
+          setFormData({
+            name: exercise.name,
+            description: exercise.description || "",
+            image_url: exercise.image_url || "",
+            reps_suggestion: exercise.reps || "",
+            duration_seconds: exercise.duration || 30,
+            difficulty: "intermediario",
+            category: "cardio"
+          });
+        }
       }
-    }
+    };
+    
+    loadExercise();
   }, [isOpen, exercise]);
 
   const createOrUpdateExerciseMutation = useMutation({
@@ -79,6 +104,15 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
     onSuccess: (result) => {
       queryClient.invalidateQueries(['exercises']);
       setCurrentExercise(result);
+      setFormData({
+        name: result.name,
+        description: result.description || "",
+        image_url: result.image_url || "",
+        reps_suggestion: result.reps_suggestion || "",
+        duration_seconds: result.duration_seconds || 30,
+        difficulty: result.difficulty || "intermediario",
+        category: result.category || "cardio"
+      });
       setEditing(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
