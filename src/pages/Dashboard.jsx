@@ -16,10 +16,13 @@ import WeeklyGoals from "../components/dashboard/WeeklyGoals";
 import Achievements from "../components/dashboard/Achievements";
 import QuickActions from "../components/dashboard/QuickActions";
 import WelcomeModal from "../components/onboarding/WelcomeModal";
+import OnboardingModal from "../components/onboarding/OnboardingModal";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -45,11 +48,21 @@ export default function Dashboard() {
     enabled: !!user?.email,
   });
 
+  // Show onboarding if user doesn't have a profile yet
   useEffect(() => {
-    if (user && subscription === null) {
+    if (user && profile === null) {
+      setShowOnboarding(true);
+    } else if (user && profile && subscription === null) {
       setShowWelcome(true);
     }
-  }, [user, subscription]);
+  }, [user, profile, subscription]);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    queryClient.invalidateQueries(['userProfile']);
+    // After profile is created, show welcome modal for subscription
+    setTimeout(() => setShowWelcome(true), 500);
+  };
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
@@ -153,7 +166,15 @@ export default function Dashboard() {
     <div className="min-h-screen p-4 md:p-6 pb-24">
       <div className="max-w-4xl mx-auto space-y-6">
 
-        {showWelcome && user && (
+        {showOnboarding && user && (
+          <OnboardingModal 
+            user={user}
+            isOpen={showOnboarding}
+            onComplete={handleOnboardingComplete}
+          />
+        )}
+
+        {showWelcome && user && !showOnboarding && (
           <WelcomeModal 
             user={user} 
             onClose={() => setShowWelcome(false)} 
