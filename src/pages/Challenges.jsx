@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
   Trophy, Target, Flame, Heart, Brain,
-  ArrowLeft, Check, Plus, Calendar, Award
+  ArrowLeft, Check, Plus, Calendar, Award, Zap, Star, Crown, TrendingUp
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -18,6 +18,19 @@ export default function Challenges() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const LEVEL_RANKS = [
+    { level: 1, name: "Iniciante", xpRequired: 0, xpNext: 100, color: "bg-gray-500/20 text-gray-400 border-gray-500/30", icon: Zap },
+    { level: 2, name: "Aprendiz", xpRequired: 100, xpNext: 250, color: "bg-green-500/20 text-green-400 border-green-500/30", icon: Star },
+    { level: 3, name: "Praticante", xpRequired: 250, xpNext: 500, color: "bg-blue-500/20 text-blue-400 border-blue-500/30", icon: Award },
+    { level: 4, name: "Dedicado", xpRequired: 500, xpNext: 1000, color: "bg-purple-500/20 text-purple-400 border-purple-500/30", icon: Flame },
+    { level: 5, name: "Expert", xpRequired: 1000, xpNext: 2000, color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", icon: Trophy },
+    { level: 6, name: "Mestre", xpRequired: 2000, xpNext: 3500, color: "bg-orange-500/20 text-orange-400 border-orange-500/30", icon: Crown },
+    { level: 7, name: "Elite", xpRequired: 3500, xpNext: 5500, color: "bg-red-500/20 text-red-400 border-red-500/30", icon: Crown },
+    { level: 8, name: "Lenda", xpRequired: 5500, xpNext: 8000, color: "bg-pink-500/20 text-pink-400 border-pink-500/30", icon: Crown },
+    { level: 9, name: "Titã", xpRequired: 8000, xpNext: 11000, color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30", icon: Crown },
+    { level: 10, name: "Imortal", xpRequired: 11000, xpNext: 15000, color: "bg-[#CEF17B]/30 text-[#CEF17B] border-[#CEF17B]/30", icon: Crown }
+  ];
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -34,6 +47,15 @@ export default function Challenges() {
     queryFn: () => base44.entities.UserChallenge.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
+  });
+
+  const { data: userPoints } = useQuery({
+    queryKey: ['userPoints', user?.email],
+    queryFn: async () => {
+      const points = await base44.entities.UserPoints.filter({ user_email: user.email });
+      return points[0] || null;
+    },
+    enabled: !!user?.email
   });
 
   const joinChallengeMutation = useMutation({
@@ -104,6 +126,15 @@ export default function Challenges() {
     return !userChallenge.completed_days?.includes(today);
   };
 
+  const totalXP = userPoints?.total_points || 0;
+  let currentRank = LEVEL_RANKS[0];
+  for (let i = LEVEL_RANKS.length - 1; i >= 0; i--) {
+    if (totalXP >= LEVEL_RANKS[i].xpRequired) {
+      currentRank = LEVEL_RANKS[i];
+      break;
+    }
+  }
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -132,6 +163,94 @@ export default function Challenges() {
             </div>
           </div>
         </div>
+
+        {/* Ranking System */}
+        <Card className="glass-effect border-[#CEF17B]/20 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
+                <TrendingUp className="w-6 h-6 text-[#CEF17B]" />
+                Sistema de Ranking
+              </h2>
+              <p className="text-sm text-[#CEEDB2]">Evolua completando desafios e acumulando XP</p>
+            </div>
+            {userPoints && (
+              <Badge className={`${currentRank.color} border px-4 py-2 text-lg`}>
+                <Trophy className="w-4 h-4 mr-2" />
+                {currentRank.name}
+              </Badge>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {LEVEL_RANKS.map((rank) => {
+              const RankIcon = rank.icon;
+              const isCurrentLevel = userPoints && totalXP >= rank.xpRequired && totalXP < rank.xpNext;
+              const isUnlocked = userPoints && totalXP >= rank.xpRequired;
+              const isLocked = !isUnlocked;
+
+              return (
+                <Card 
+                  key={rank.level}
+                  className={`p-4 transition-all ${
+                    isCurrentLevel 
+                      ? `${rank.color} border-2 scale-105 shadow-lg` 
+                      : isUnlocked
+                      ? 'glass-effect border-[#CEF17B]/20 opacity-70'
+                      : 'glass-effect border-white/10 opacity-40 grayscale'
+                  }`}
+                >
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-12 h-12 rounded-full ${
+                      isLocked ? 'bg-white/5' : rank.color
+                    } flex items-center justify-center mb-2 border-2 ${
+                      isLocked ? 'border-white/10' : 'border-current'
+                    }`}>
+                      <RankIcon className={`w-6 h-6 ${
+                        isLocked ? 'text-white/20' : ''
+                      }`} />
+                    </div>
+                    <p className={`text-xs font-bold mb-1 ${
+                      isLocked ? 'text-white/40' : 'text-white'
+                    }`}>
+                      Nível {rank.level}
+                    </p>
+                    <p className={`text-sm font-bold mb-2 ${
+                      isLocked ? 'text-white/30' : ''
+                    }`}>
+                      {rank.name}
+                    </p>
+                    <Badge variant="outline" className={`text-xs ${
+                      isLocked 
+                        ? 'bg-white/5 border-white/10 text-white/30' 
+                        : 'bg-white/10 border-white/20'
+                    }`}>
+                      {rank.xpRequired} XP
+                    </Badge>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+
+          {userPoints && (
+            <div className="mt-6 p-4 bg-white/5 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-[#CEEDB2]">Seu Progresso</p>
+                <p className="text-sm font-bold text-white">
+                  {totalXP - currentRank.xpRequired}/{currentRank.xpNext - currentRank.xpRequired} XP
+                </p>
+              </div>
+              <Progress 
+                value={((totalXP - currentRank.xpRequired) / (currentRank.xpNext - currentRank.xpRequired)) * 100} 
+                className="h-2"
+              />
+              <p className="text-xs text-white/60 mt-2 text-center">
+                Faltam {currentRank.xpNext - totalXP} XP para o próximo nível!
+              </p>
+            </div>
+          )}
+        </Card>
 
         {/* Active Challenges */}
         {activeChallenges.length > 0 && (
