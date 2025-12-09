@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
-  CheckCircle, Crown
+  CheckCircle, Crown, Flame
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import UserGreeting from "../components/dashboard/UserGreeting";
@@ -78,10 +78,23 @@ export default function Dashboard() {
   });
 
   const { data: weekWorkouts } = useQuery({
-    queryKey: ['weekWorkouts', user?.email, weekStart], // Changed here
+    queryKey: ['weekWorkouts', user?.email, weekStart],
     queryFn: async () => {
       const logs = await base44.entities.WorkoutLog.filter({ user_email: user.email });
       return logs.filter(log => log.completed_date >= weekStart);
+    },
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  const { data: todayWorkouts } = useQuery({
+    queryKey: ['todayWorkouts', user?.email, today],
+    queryFn: async () => {
+      const logs = await base44.entities.WorkoutLog.filter({ 
+        user_email: user.email,
+        completed_date: today
+      });
+      return logs;
     },
     enabled: !!user?.email,
     initialData: [],
@@ -132,6 +145,7 @@ export default function Dashboard() {
   const todayProtein = todayFoods.reduce((sum, food) => sum + (food.protein || 0), 0);
   const todayCarbs = todayFoods.reduce((sum, food) => sum + (food.carbs || 0), 0);
   const todayFats = todayFoods.reduce((sum, food) => sum + (food.fats || 0), 0);
+  const todayCaloriesBurned = todayWorkouts.reduce((sum, workout) => sum + (workout.calories_burned || 0), 0);
 
   const calorieTarget = profile?.daily_calorie_target || 2000;
   const streakDays = weekWorkouts.length;
@@ -231,6 +245,35 @@ export default function Dashboard() {
 
         {/* 2. Daily Mission */}
         <DailyMissions userEmail={user?.email} />
+
+        {/* Calories Burned Today */}
+        <Card className="glass-effect border-orange-500/30 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center">
+                <Flame className="w-8 h-8 text-orange-400" />
+              </div>
+              <div>
+                <p className="text-white/60 text-sm mb-1">Calorias Queimadas Hoje</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold text-white">{todayCaloriesBurned}</p>
+                  <p className="text-orange-400 text-sm">kcal</p>
+                </div>
+              </div>
+            </div>
+            {todayCaloriesBurned > 0 && (
+              <div className="text-right">
+                <p className="text-xs text-white/60 mb-1">Treinos hoje</p>
+                <p className="text-2xl font-bold text-[#CEF17B]">{todayWorkouts.length}</p>
+              </div>
+            )}
+          </div>
+          {todayCaloriesBurned === 0 && (
+            <p className="text-center text-white/40 text-sm mt-4">
+              Comece um treino HIIT para queimar calorias! 🔥
+            </p>
+          )}
+        </Card>
 
         {/* 3. Points Card */}
         <PointsCard userPoints={userPoints} />
