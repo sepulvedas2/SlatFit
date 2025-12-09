@@ -374,7 +374,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
           </div>
 
           {/* Actions */}
-          {isAdmin && (
+          {isAdmin && !isHIIT && (
             <div className="flex gap-3 pt-4 border-t border-white/10">
               {editing ? (
                 <>
