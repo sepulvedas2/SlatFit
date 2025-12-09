@@ -84,7 +84,8 @@ export default function ExerciseBlock({ block, exercises = [] }) {
             setShowModal(false);
             setSelectedExercise(null);
           }}
-          isAdmin={true} // You can make this dynamic based on user role
+          isAdmin={true}
+          isHIIT={true}
         />
       )}
     </>
