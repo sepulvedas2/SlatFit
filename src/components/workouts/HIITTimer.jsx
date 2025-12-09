@@ -88,11 +88,11 @@ export default function HIITTimer({ block, blockIndex, totalBlocks, onBlockCompl
   };
 
   return (
-    <Card className="relative overflow-hidden border-[#CEF17B]/20">
+    <Card className="relative overflow-hidden border-[#CEF17B]/20" style={{ backgroundColor: '#054D3B' }}>
       <div className={`absolute inset-0 transition-all duration-500 ${
         isExerciseTime 
-          ? 'bg-gradient-to-br from-red-500/20 to-orange-500/20' 
-          : 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20'
+          ? 'bg-gradient-to-br from-[#084734]/40 to-[#0B6B54]/40' 
+          : 'bg-gradient-to-br from-[#054D3B]/40 to-[#084734]/40'
       }`} />
       
       <div className="relative z-10 p-8">
