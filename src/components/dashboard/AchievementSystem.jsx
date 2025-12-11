@@ -320,21 +320,45 @@ export default function AchievementSystem({
 
   const unlockedIds = achievements.map(a => a.achievement_type);
 
+  // Mostrar apenas primeiras 10 conquistas, ou todas se as primeiras 10 foram completadas
+  const first10Achievements = ACHIEVEMENTS.slice(0, 10);
+  const remaining15Achievements = ACHIEVEMENTS.slice(10);
+  
+  const first10Unlocked = first10Achievements.filter(a => unlockedIds.includes(a.id)).length;
+  const showAdvancedAchievements = first10Unlocked >= 10;
+  
+  const visibleAchievements = showAdvancedAchievements 
+    ? ACHIEVEMENTS 
+    : first10Achievements;
+
   return (
     <Card className="glass-effect border-[#CEF17B]/20 p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-white flex items-center gap-2">
           <Trophy className="w-5 h-5 text-[#CEF17B]" />
           Conquistas
+          {showAdvancedAchievements && (
+            <Badge className="bg-purple-500/20 text-purple-400 border-0 text-xs">
+              Nível Avançado
+            </Badge>
+          )}
         </h3>
         <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0">
-          {unlockedIds.length}/{ACHIEVEMENTS.length}
+          {unlockedIds.length}/{visibleAchievements.length}
         </Badge>
       </div>
 
+      {!showAdvancedAchievements && first10Unlocked > 5 && (
+        <div className="mb-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
+          <p className="text-xs text-purple-300 text-center">
+            🔒 Complete todas as conquistas básicas para desbloquear 15 conquistas avançadas!
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-5 gap-3">
         <AnimatePresence>
-          {ACHIEVEMENTS.map((achievement) => {
+          {visibleAchievements.map((achievement) => {
             const Icon = achievement.icon;
             const isUnlocked = unlockedIds.includes(achievement.id);
 
