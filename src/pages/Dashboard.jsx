@@ -13,7 +13,7 @@ import UserGreeting from "../components/dashboard/UserGreeting";
 import DailyMissions from "../components/dashboard/DailyMissions";
 import PointsCard from "../components/dashboard/PointsCard";
 import WeeklyGoals from "../components/dashboard/WeeklyGoals";
-import Achievements from "../components/dashboard/Achievements";
+import AchievementSystem from "../components/dashboard/AchievementSystem";
 import QuickActions from "../components/dashboard/QuickActions";
 import WelcomeModal from "../components/onboarding/WelcomeModal";
 import OnboardingModal from "../components/onboarding/OnboardingModal";
@@ -106,6 +106,57 @@ export default function Dashboard() {
     enabled: !!user?.email,
     initialData: [],
   });
+
+  const { data: allWorkoutLogs } = useQuery({
+    queryKey: ['allWorkoutLogs', user?.email],
+    queryFn: () => base44.entities.WorkoutLog.filter({ user_email: user.email }),
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  const { data: allFoodLogs } = useQuery({
+    queryKey: ['allFoodLogs', user?.email],
+    queryFn: () => base44.entities.FoodLog.filter({ user_email: user.email }),
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  const { data: completedChallenges } = useQuery({
+    queryKey: ['completedChallenges', user?.email],
+    queryFn: async () => {
+      const challenges = await base44.entities.UserChallenge.filter({ 
+        user_email: user.email,
+        status: 'completed'
+      });
+      return challenges.length;
+    },
+    enabled: !!user?.email,
+    initialData: 0,
+  });
+
+  const totalCaloriesBurned = allWorkoutLogs.reduce((sum, log) => sum + (log.calories_burned || 0), 0);
+  
+  const calculateStreak = () => {
+    if (allWorkoutLogs.length === 0) return 0;
+    
+    const sortedDates = [...new Set(allWorkoutLogs.map(log => log.completed_date))].sort().reverse();
+    let streak = 0;
+    const today = new Date();
+    
+    for (let i = 0; i < sortedDates.length; i++) {
+      const logDate = new Date(sortedDates[i]);
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - i);
+      
+      if (logDate.toDateString() === expectedDate.toDateString()) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  };
 
   const { data: todayCheckIn } = useQuery({
     queryKey: ['checkIn', user?.email, today],
@@ -304,7 +355,18 @@ export default function Dashboard() {
         />
 
         {/* 5. Achievements */}
-        <Achievements achievements={achievements} />
+        <AchievementSystem
+          userEmail={user?.email}
+          achievements={achievements}
+          workoutCount={allWorkoutLogs.length}
+          streak={calculateStreak()}
+          totalCalories={totalCaloriesBurned}
+          foodLogCount={allFoodLogs.length}
+          userLevel={userPoints?.level || 1}
+          completedChallenges={completedChallenges}
+          proteinDaysCount={proteinDaysCompleted}
+          waterDaysCount={waterDaysCompleted}
+        />
 
         {/* 6. Quick Actions */}
         <QuickActions />
