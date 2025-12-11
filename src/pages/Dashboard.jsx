@@ -168,13 +168,31 @@ export default function Dashboard() {
     initialData: [],
   });
 
-  const waterDaysCompleted = weekNutrition.filter(d => d.water_goal_reached).length;
-  const proteinDaysCompleted = weekNutrition.filter(d => {
-    const dailyProtein = todayFoods
-      .filter(f => f.log_date === d.log_date)
-      .reduce((sum, f) => sum + (f.protein || 0), 0);
-    return dailyProtein >= (profile?.protein_target || 150) * 0.9;
-  }).length;
+  const { data: weekFoodLogs = [] } = useQuery({
+    queryKey: ['weekFoodLogs', user?.email, weekStart],
+    queryFn: async () => {
+      if (!user?.email) return [];
+      const logs = await base44.entities.FoodLog.filter({ user_email: user.email });
+      return logs.filter(log => log.log_date >= weekStart);
+    },
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  const waterDaysCompleted = weekNutrition.filter(d => d.water_goal_reached === true).length;
+  
+  const proteinDaysCompleted = (() => {
+    const daysByDate = {};
+    weekFoodLogs.forEach(food => {
+      if (!daysByDate[food.log_date]) {
+        daysByDate[food.log_date] = 0;
+      }
+      daysByDate[food.log_date] += food.protein || 0;
+    });
+    
+    const proteinTarget = profile?.protein_target || 150;
+    return Object.values(daysByDate).filter(total => total >= proteinTarget * 0.9).length;
+  })();
 
   return (
     <div className="min-h-screen p-4 md:p-6 pb-24">
