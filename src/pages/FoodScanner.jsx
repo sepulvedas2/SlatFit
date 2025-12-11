@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 export default function FoodScanner() {
   const [user, setUser] = useState(null);
   
-  // Check URL params for mode
   const urlParams = new URLSearchParams(window.location.search);
   const urlMode = urlParams.get('mode');
   
@@ -30,7 +29,6 @@ export default function FoodScanner() {
   const [saving, setSaving] = useState(false);
   const [dailyScans, setDailyScans] = useState(0);
   
-  // Manual entry state
   const [manualData, setManualData] = useState({
     food_name: "",
     portion_size: "",
@@ -176,17 +174,7 @@ REGRAS CRÍTICAS:
 - Use dados de tabelas nutricionais oficiais (USDA, TACO)
 - Seja conservador na estimativa de porção (melhor subestimar que superestimar)
 - Se não conseguir identificar com 95% de certeza, informe "Não identificado" no food_name
-- NUNCA invente valores - use dados reais de bases científicas
-
-Exemplo de resposta precisa:
-{
-  "food_name": "Arroz branco cozido com feijão preto",
-  "portion_size": "1 prato médio (300g arroz + 100g feijão)",
-  "calories": 445,
-  "protein": 13.2,
-  "carbs": 82.5,
-  "fats": 3.8
-}`,
+- NUNCA invente valores - use dados reais de bases científicas`,
         file_urls: [file_url],
         response_json_schema: {
           type: "object",
@@ -228,7 +216,6 @@ Exemplo de resposta precisa:
         log_date: new Date().toISOString().split('T')[0]
       });
 
-      // Invalidate queries to update dashboard
       queryClient.invalidateQueries(['todayScans']);
       queryClient.invalidateQueries(['todayFoods']);
 
@@ -246,7 +233,6 @@ Exemplo de resposta precisa:
       setError(null);
       setMode("scan");
       
-      // Show success message
       setError(null);
     } catch (err) {
       setError("Erro ao salvar o alimento. Tente novamente.");
@@ -255,7 +241,6 @@ Exemplo de resposta precisa:
   };
 
   const handleManualSave = () => {
-    // Validate manual data
     if (!manualData.food_name || !manualData.calories) {
       setError("Por favor, preencha pelo menos o nome do alimento e as calorias.");
       return;
@@ -283,13 +268,12 @@ Exemplo de resposta precisa:
     <div className="min-h-screen p-3 md:p-8 pb-24 bg-[#054D3B] dark:bg-slate-900">
       <div className="max-w-2xl mx-auto space-y-4">
         
-        {/* Header */}
         <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-3 bg-orange-500/20 border border-orange-500/30 dark:bg-orange-600/20 dark:border-orange-600/30">
-            <Sparkles className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-3 bg-orange-500/20 border border-orange-500/30">
+            <Sparkles className="w-4 h-4 text-orange-500" />
             <span className="text-xs font-semibold text-white">Scanner Nutricional IA</span>
             {!isPremium && (
-              <span className="text-xs text-orange-500 dark:text-orange-400">
+              <span className="text-xs text-orange-500">
                 ({dailyScans}/{scanLimit})
               </span>
             )}
@@ -297,23 +281,22 @@ Exemplo de resposta precisa:
           <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
             Scanner Nutricional IA
           </h1>
-          <p className="text-sm md:text-lg px-2 text-white/70 dark:text-gray-300">
+          <p className="text-sm md:text-lg px-2 text-white/70">
             Calorias precisas com IA + ajuste de porção
           </p>
           {isPremium && (
-            <p className="text-xs md:text-sm mt-1 text-white/60 dark:text-gray-400">
+            <p className="text-xs md:text-sm mt-1 text-white/60">
               Identificação automática • Base TACO/USDA
             </p>
           )}
         </div>
 
-        {/* Mode Selector - Mobile Optimized */}
         <div className="grid grid-cols-2 gap-2">
           <Button
             onClick={() => setMode("scan")}
             className={`h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl transition-all ${
               mode === "scan" 
-                ? "bg-orange-500 text-white shadow-lg dark:bg-orange-600" 
+                ? "bg-orange-500 text-white shadow-lg" 
                 : "bg-white text-[#0B6B54] border-2 border-[#0B6B54] dark:bg-slate-800 dark:text-[#CEF17B] dark:border-[#CEF17B]/20"
             }`}
           >
@@ -325,7 +308,7 @@ Exemplo de resposta precisa:
             onClick={() => setMode("manual")}
             className={`h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl transition-all ${
               mode === "manual" 
-                ? "bg-orange-500 text-white shadow-lg dark:bg-orange-600" 
+                ? "bg-orange-500 text-white shadow-lg" 
                 : "bg-white text-orange-500 border-2 border-orange-500 dark:bg-slate-800 dark:text-orange-400 dark:border-orange-400/20"
             }`}
           >
@@ -345,12 +328,11 @@ Exemplo de resposta precisa:
           <PremiumFeatureLock featureName="Scanner Ilimitado" />
         )}
 
-        {/* Manual Entry Mode */}
         {mode === "manual" && (
-          <Card className="p-6 rounded-3xl glass-effect border-[#CEF17B]/20 dark:border-slate-700/20">
+          <Card className="p-6 rounded-3xl glass-effect border-[#CEF17B]/20">
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
-                <Calculator className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+                <Calculator className="w-5 h-5 text-orange-500" />
                 <h3 className="font-bold text-white text-lg">Inserir Dados Manualmente</h3>
               </div>
 
@@ -366,7 +348,7 @@ Exemplo de resposta precisa:
                     placeholder="Ex: Arroz com feijão"
                     value={manualData.food_name}
                     onChange={(e) => setManualData({...manualData, food_name: e.target.value})}
-                    className="bg-slate-800/50 border-white/10 text-white dark:bg-slate-700 dark:border-slate-600"
+                    className="bg-slate-800/50 border-white/10 text-white"
                   />
                 </div>
 
@@ -376,7 +358,7 @@ Exemplo de resposta precisa:
                     placeholder="Ex: 1 prato médio (300g)"
                     value={manualData.portion_size}
                     onChange={(e) => setManualData({...manualData, portion_size: e.target.value})}
-                    className="bg-slate-800/50 border-white/10 text-white dark:bg-slate-700 dark:border-slate-600"
+                    className="bg-slate-800/50 border-white/10 text-white"
                   />
                 </div>
 
@@ -389,7 +371,7 @@ Exemplo de resposta precisa:
                       placeholder="0"
                       value={manualData.calories}
                       onChange={(e) => setManualData({...manualData, calories: e.target.value})}
-                      className="bg-slate-800/50 border-white/10 text-white dark:bg-slate-700 dark:border-slate-600"
+                      className="bg-slate-800/50 border-white/10 text-white"
                     />
                   </div>
 
@@ -401,7 +383,7 @@ Exemplo de resposta precisa:
                       placeholder="0"
                       value={manualData.protein}
                       onChange={(e) => setManualData({...manualData, protein: e.target.value})}
-                      className="bg-slate-800/50 border-white/10 text-white dark:bg-slate-700 dark:border-slate-600"
+                      className="bg-slate-800/50 border-white/10 text-white"
                     />
                   </div>
 
@@ -413,7 +395,7 @@ Exemplo de resposta precisa:
                       placeholder="0"
                       value={manualData.carbs}
                       onChange={(e) => setManualData({...manualData, carbs: e.target.value})}
-                      className="bg-slate-800/50 border-white/10 text-white dark:bg-slate-700 dark:border-slate-600"
+                      className="bg-slate-800/50 border-white/10 text-white"
                     />
                   </div>
 
@@ -425,7 +407,7 @@ Exemplo de resposta precisa:
                       placeholder="0"
                       value={manualData.fats}
                       onChange={(e) => setManualData({...manualData, fats: e.target.value})}
-                      className="bg-slate-800/50 border-white/10 text-white dark:bg-slate-700 dark:border-slate-600"
+                      className="bg-slate-800/50 border-white/10 text-white"
                     />
                   </div>
                 </div>
@@ -435,7 +417,7 @@ Exemplo de resposta precisa:
                 <Button
                   onClick={handleManualSave}
                   disabled={saving || !manualData.food_name || !manualData.calories}
-                  className="w-full h-14 text-base font-semibold rounded-2xl bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700"
+                  className="w-full h-14 text-base font-semibold rounded-2xl bg-orange-500 hover:bg-orange-600"
                 >
                   {saving ? (
                     <>
@@ -449,7 +431,7 @@ Exemplo de resposta precisa:
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-center mt-2 text-white/60 dark:text-gray-400">
+                <p className="text-xs text-center mt-2 text-white/60">
                   * Campos obrigatórios
                 </p>
               </div>
@@ -457,34 +439,30 @@ Exemplo de resposta precisa:
           </Card>
         )}
 
-        {/* Scan Mode */}
         {mode === "scan" && (isPremium || dailyScans < scanLimit) && (
           <>
             {!showCamera && !imagePreview && (
-              <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-[#0B6B54] to-orange-500/30 border border-orange-500/20 dark:from-slate-800 dark:to-slate-700/30 dark:border-slate-700/20">
+              <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-[#0B6B54] to-orange-500/30 border border-orange-500/20 dark:from-slate-800 dark:to-slate-700 dark:border-slate-700/20">
                 <div className="space-y-4 md:space-y-6">
-                  {/* Main Camera Button */}
                   <Button
                     onClick={() => setShowCamera(true)}
-                    className="w-full h-32 md:h-40 text-lg md:text-xl font-bold rounded-2xl md:rounded-3xl flex flex-col items-center justify-center gap-2 md:gap-3 shadow-xl active:scale-95 md:hover:scale-105 transition-all bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700"
+                    className="w-full h-32 md:h-40 text-lg md:text-xl font-bold rounded-2xl md:rounded-3xl flex flex-col items-center justify-center gap-2 md:gap-3 shadow-xl active:scale-95 md:hover:scale-105 transition-all bg-orange-500 hover:bg-orange-600"
                   >
                     <Camera className="w-10 h-10 md:w-12 md:h-12" />
                     Abrir Câmera
                   </Button>
 
-                  {/* Divider */}
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/20 dark:border-gray-600"></div>
+                      <div className="w-full border-t border-white/20"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-3 md:px-4 text-sm md:text-base font-semibold bg-[#0B6B54] text-orange-500 dark:bg-slate-900 dark:text-orange-400">
+                      <span className="px-3 md:px-4 text-sm md:text-base font-semibold bg-[#0B6B54] text-orange-500 dark:bg-slate-800 dark:text-orange-400">
                         OU
                       </span>
                     </div>
                   </div>
 
-                  {/* Upload Button */}
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -494,18 +472,17 @@ Exemplo de resposta precisa:
                   />
                   <Button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-24 md:h-28 border-dashed border-2 rounded-2xl md:rounded-3xl bg-transparent active:scale-95 md:hover:scale-105 transition-all flex-col md:flex-row gap-2 border-orange-500 text-white dark:border-orange-400 dark:text-orange-400 dark:hover:bg-slate-700"
+                    className="w-full h-24 md:h-28 border-dashed border-2 rounded-2xl md:rounded-3xl bg-transparent active:scale-95 md:hover:scale-105 transition-all flex-col md:flex-row gap-2 border-orange-500 text-white hover:bg-white/5"
                   >
-                    <Upload className="w-7 h-7 md:w-8 md:h-8 md:mr-3 text-orange-500 dark:text-orange-400" />
+                    <Upload className="w-7 h-7 md:w-8 md:h-8 md:mr-3 text-orange-500" />
                     <span className="text-base md:text-lg font-semibold">Fazer Upload de Imagem</span>
                   </Button>
 
-                  {/* Tip Card */}
-                  <div className="p-3 md:p-4 rounded-xl md:rounded-2xl flex items-start gap-2 md:gap-3 bg-orange-500/15 border border-orange-500/30 dark:bg-orange-600/15 dark:border-orange-600/30">
+                  <div className="p-3 md:p-4 rounded-xl md:rounded-2xl flex items-start gap-2 md:gap-3 bg-orange-500/15 border border-orange-500/30">
                     <div className="text-xl md:text-2xl flex-shrink-0">💡</div>
                     <div>
                       <p className="text-xs md:text-sm font-semibold text-white mb-1">Dica de Uso:</p>
-                      <p className="text-xs text-white/80 dark:text-gray-300">
+                      <p className="text-xs text-white/80">
                         Para maior precisão, fotografe o alimento de cima, com boa iluminação.
                       </p>
                     </div>
@@ -525,14 +502,14 @@ Exemplo de resposta precisa:
                 <div className="p-3 md:p-4 flex gap-2 md:gap-3">
                   <Button
                     onClick={capturePhoto}
-                    className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700"
+                    className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl bg-orange-500 hover:bg-orange-600"
                   >
                     <Camera className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                     Capturar
                   </Button>
                   <Button
                     onClick={() => setShowCamera(false)}
-                    className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white text-[#054D3B] dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                    className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white text-[#054D3B] hover:bg-gray-100 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
                   >
                     <X className="w-4 h-4 md:w-5 md:h-5" />
                   </Button>
@@ -558,14 +535,14 @@ Exemplo de resposta precisa:
                       <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                         <Button
                           onClick={analyzeFood}
-                          className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl shadow-lg active:scale-95 md:hover:scale-105 transition-all bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700"
+                          className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl shadow-lg active:scale-95 md:hover:scale-105 transition-all bg-orange-500 hover:bg-orange-600"
                         >
                           <Sparkles className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                           Analisar com IA
                         </Button>
                         <Button
                           onClick={reset}
-                          className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white border-2 border-orange-500 text-orange-500 dark:bg-slate-700 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-slate-600"
+                          className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white border-2 border-orange-500 text-orange-500 hover:bg-gray-50 dark:bg-slate-700 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-slate-600"
                         >
                           Nova Foto
                         </Button>
@@ -575,16 +552,16 @@ Exemplo de resposta precisa:
 
                   {analyzing && (
                     <div className="flex flex-col items-center justify-center py-8 md:py-12 space-y-3 md:space-y-4">
-                      <Loader2 className="w-12 h-12 md:w-16 md:h-16 animate-spin text-orange-500 dark:text-orange-400" />
+                      <Loader2 className="w-12 h-12 md:w-16 md:h-16 animate-spin text-orange-500" />
                       <p className="text-white font-semibold text-base md:text-lg">Analisando com IA...</p>
-                      <p className="text-xs md:text-sm text-white/70 dark:text-gray-300">Consultando base TACO/USDA</p>
+                      <p className="text-xs md:text-sm text-white/70">Consultando base TACO/USDA</p>
                     </div>
                   )}
 
                   {nutritionData && (
                     <>
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge className="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs bg-orange-500/20 text-orange-500 border border-orange-500 dark:bg-orange-600/20 dark:text-orange-400 dark:border-orange-400">
+                        <Badge className="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs bg-orange-500/20 text-orange-500 border border-orange-500">
                           <Check className="w-3 h-3 mr-1" />
                           Análise Completa
                         </Badge>
@@ -594,7 +571,7 @@ Exemplo de resposta precisa:
                         <Button
                           onClick={() => saveFood(nutritionData)}
                           disabled={saving}
-                          className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700"
+                          className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl bg-orange-500 hover:bg-orange-600"
                         >
                           {saving ? (
                             <Loader2 className="w-4 h-4 md:w-5 md:h-5 mr-2 animate-spin" />
@@ -605,7 +582,7 @@ Exemplo de resposta precisa:
                         </Button>
                         <Button
                           onClick={reset}
-                          className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white border-2 border-[#0B6B54] text-[#0B6B54] dark:bg-slate-700 dark:border-[#CEF17B]/20 dark:text-[#CEF17B] dark:hover:bg-slate-600"
+                          className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white border-2 border-[#0B6B54] text-[#0B6B54] hover:bg-gray-50 dark:bg-slate-700 dark:border-[#CEF17B]/20 dark:text-[#CEF17B] dark:hover:bg-slate-600"
                         >
                           Outro
                         </Button>
