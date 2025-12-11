@@ -128,7 +128,7 @@ export default function Agenda() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 pb-24">
+    <div className="min-h-screen p-4 md:p-8 pb-24 bg-[#054D3B] dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <div className="max-w-3xl mx-auto space-y-4">
         
         {/* Header - Compact Date Display */}
