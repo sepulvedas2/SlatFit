@@ -246,7 +246,7 @@ export default function Dashboard() {
   })();
 
   return (
-    <div className="min-h-screen p-4 md:p-6 pb-24 dark:bg-gradient-to-br dark:from-black dark:via-slate-950 dark:to-[#062A1F]">
+    <div className="min-h-screen p-4 md:p-6 pb-24">
       <div className="max-w-4xl mx-auto space-y-6">
 
         {showOnboarding && user && (
