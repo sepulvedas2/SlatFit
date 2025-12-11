@@ -155,7 +155,11 @@ export default function SmartNutrition() {
         </Card>
 
         {/* Water Goal Tracker */}
-        <WaterGoalTracker userEmail={user.email} nutritionData={nutritionData} />
+        <WaterGoalTracker 
+          userEmail={user.email} 
+          nutritionData={nutritionData}
+          userProfile={userProfile}
+        />
 
         {/* Dashboard Cards */}
         <RoutineConsistency userEmail={user.email} />
