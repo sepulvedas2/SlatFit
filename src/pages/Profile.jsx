@@ -28,8 +28,18 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [success, setSuccess] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('app-theme') || 'light';
+  });
   
   const queryClient = useQueryClient();
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('app-theme', newTheme);
+    window.location.reload(); // Recarregar para aplicar o tema
+  };
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -156,6 +166,28 @@ export default function Profile() {
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Theme Toggle Card */}
+        <Card className="glass-effect p-6 border-[#CEF17B]/20">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-white mb-1">Tema do Aplicativo</h3>
+              <p className="text-sm text-[#CEEDB2]">
+                {theme === 'dark' ? 'Modo Escuro Ativado' : 'Modo Claro Ativado'}
+              </p>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className="w-16 h-16 rounded-full glass-effect flex items-center justify-center hover:scale-110 transition-transform border-2 border-[#CEF17B]/30"
+            >
+              {theme === 'dark' ? (
+                <span className="text-3xl">☀️</span>
+              ) : (
+                <span className="text-3xl">🌙</span>
+              )}
+            </button>
+          </div>
+        </Card>
 
         {/* Stats Cards */}
         {profile && !editing && (

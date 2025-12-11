@@ -83,18 +83,6 @@ export default function Layout({ children, currentPageName }) {
         {children}
       </main>
 
-      {/* Theme Toggle Button */}
-      <button
-        onClick={toggleTheme}
-        className="fixed top-4 right-4 z-50 w-12 h-12 rounded-full glass-effect flex items-center justify-center hover:scale-110 transition-transform"
-      >
-        {isDark ? (
-          <span className="text-2xl">☀️</span>
-        ) : (
-          <span className="text-2xl">🌙</span>
-        )}
-      </button>
-
       {/* Bottom Navigation */}
       <nav className={`bottom-navigation fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t ${
         isDark ? 'bg-slate-950/90 border-slate-800' : 'bg-[#084734]/90 border-[#CEF17B]/20'
