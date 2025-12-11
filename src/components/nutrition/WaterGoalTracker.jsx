@@ -12,17 +12,48 @@ import { toast } from "sonner";
 import WaterGoalModal from "./WaterGoalModal";
 import WaterIntakeModal from "./WaterIntakeModal";
 
-export default function WaterGoalTracker({ userEmail, nutritionData }) {
+// Calcular meta de água baseada no biotipo
+const calculateWaterGoalByBodyType = (bodyType, weight = 70) => {
+  const baseWater = weight * 35; // ml por kg
+  
+  const multipliers = {
+    ectomorph: 1.15,  // Metabolismo rápido, precisa mais água
+    mesomorph: 1.0,   // Equilibrado
+    endomorph: 0.95   // Metabolismo lento, retém mais líquidos
+  };
+  
+  return Math.round(baseWater * (multipliers[bodyType] || 1.0));
+};
+
+export default function WaterGoalTracker({ userEmail, nutritionData, userProfile }) {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
   const [celebrateGoal, setCelebrateGoal] = useState(false);
   const queryClient = useQueryClient();
   const today = format(new Date(), 'yyyy-MM-dd');
 
+  // Calcular meta personalizada baseada no biotipo
+  const defaultGoal = userProfile?.body_type 
+    ? calculateWaterGoalByBodyType(userProfile.body_type, userProfile.current_weight)
+    : 2000;
+  
   const currentIntake = nutritionData?.water_intake_ml || 0;
-  const goalAmount = nutritionData?.water_goal_ml || 2000;
+  const goalAmount = nutritionData?.water_goal_ml || defaultGoal;
   const percentage = Math.min((currentIntake / goalAmount) * 100, 100);
   const isGoalReached = percentage >= 100;
+  
+  // Mensagem personalizada baseada no biotipo
+  const getBodyTypeMessage = () => {
+    if (!userProfile?.body_type) return null;
+    
+    const messages = {
+      ectomorph: "💧 Seu metabolismo rápido exige mais hidratação",
+      mesomorph: "💧 Meta equilibrada para seu biotipo",
+      endomorph: "💧 Hidratação ajustada para seu metabolismo"
+    };
+    
+    return messages[userProfile.body_type];
+  };
 
   const updateWaterMutation = useMutation({
     mutationFn: async (newIntake) => {
@@ -200,7 +231,7 @@ export default function WaterGoalTracker({ userEmail, nutritionData }) {
 
         <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
           <p className="text-xs text-blue-300 text-center">
-            💡 Beba água regularmente ao longo do dia para melhores resultados
+            {getBodyTypeMessage() || "💡 Beba água regularmente ao longo do dia para melhores resultados"}
           </p>
         </div>
       </Card>

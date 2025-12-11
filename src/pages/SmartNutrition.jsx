@@ -44,6 +44,16 @@ export default function SmartNutrition() {
     enabled: !!user?.email,
   });
 
+  const { data: userProfile } = useQuery({
+    queryKey: ['userProfile', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      return profiles[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
   // Get daily tip from Seu Personal IA
   const { data: personalAITip, isLoading: tipLoading } = useQuery({
     queryKey: ['personalAITip', user?.email, today],
