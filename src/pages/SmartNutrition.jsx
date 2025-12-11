@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +14,7 @@ import RoutineConsistency from "../components/nutrition/RoutineConsistency";
 import EnergyMoodLog from "../components/nutrition/EnergyMoodLog";
 import LearningCards from "../components/nutrition/LearningCards";
 import PersonalAIChatModal from "../components/chat/PersonalAIChatModal";
+import WaterGoalTracker from "../components/nutrition/WaterGoalTracker";
 
 export default function SmartNutrition() {
   const [user, setUser] = useState(null);
@@ -30,6 +30,19 @@ export default function SmartNutrition() {
   }, []);
 
   const queryClient = useQueryClient();
+
+  const { data: nutritionData } = useQuery({
+    queryKey: ['nutritionData', user?.email, today],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const data = await base44.entities.NutritionData.filter({
+        user_email: user.email,
+        log_date: today
+      });
+      return data[0] || null;
+    },
+    enabled: !!user?.email,
+  });
 
   // Get daily tip from Seu Personal IA
   const { data: personalAITip, isLoading: tipLoading } = useQuery({
@@ -130,6 +143,9 @@ export default function SmartNutrition() {
             </div>
           </div>
         </Card>
+
+        {/* Water Goal Tracker */}
+        <WaterGoalTracker userEmail={user.email} nutritionData={nutritionData} />
 
         {/* Dashboard Cards */}
         <RoutineConsistency userEmail={user.email} />
