@@ -296,8 +296,8 @@ REGRAS CRÍTICAS:
             onClick={() => setMode("scan")}
             className={`h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl transition-all ${
               mode === "scan" 
-                ? "bg-orange-500 text-white shadow-lg" 
-                : "bg-white text-[#0B6B54] border-2 border-[#0B6B54] dark:bg-slate-800 dark:text-[#CEF17B] dark:border-[#CEF17B]/20"
+                ? "bg-orange-500 text-white shadow-lg hover:bg-orange-600" 
+                : "bg-white text-[#0B6B54] border-2 border-[#0B6B54] hover:bg-gray-50 dark:bg-slate-700 dark:text-white dark:border-slate-600 dark:hover:bg-slate-600"
             }`}
           >
             <Camera className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
@@ -308,8 +308,8 @@ REGRAS CRÍTICAS:
             onClick={() => setMode("manual")}
             className={`h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl transition-all ${
               mode === "manual" 
-                ? "bg-orange-500 text-white shadow-lg" 
-                : "bg-white text-orange-500 border-2 border-orange-500 dark:bg-slate-800 dark:text-orange-400 dark:border-orange-400/20"
+                ? "bg-orange-500 text-white shadow-lg hover:bg-orange-600" 
+                : "bg-white text-orange-500 border-2 border-orange-500 hover:bg-gray-50 dark:bg-slate-700 dark:text-white dark:border-slate-600 dark:hover:bg-slate-600"
             }`}
           >
             <Edit className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
@@ -442,7 +442,7 @@ REGRAS CRÍTICAS:
         {mode === "scan" && (isPremium || dailyScans < scanLimit) && (
           <>
             {!showCamera && !imagePreview && (
-              <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-[#0B6B54] to-orange-500/30 border border-orange-500/20 dark:from-slate-800 dark:to-slate-700 dark:border-slate-700/20">
+              <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-[#0B6B54] to-orange-500/30 border border-orange-500/20 dark:from-slate-800 dark:to-slate-900 dark:border-slate-700/20">
                 <div className="space-y-4 md:space-y-6">
                   <Button
                     onClick={() => setShowCamera(true)}
@@ -457,7 +457,7 @@ REGRAS CRÍTICAS:
                       <div className="w-full border-t border-white/20"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-3 md:px-4 text-sm md:text-base font-semibold bg-[#0B6B54] text-orange-500 dark:bg-slate-800 dark:text-orange-400">
+                      <span className="px-3 md:px-4 text-sm md:text-base font-semibold bg-[#0B6B54] text-orange-500 dark:bg-slate-900 dark:text-orange-400">
                         OU
                       </span>
                     </div>
@@ -472,17 +472,17 @@ REGRAS CRÍTICAS:
                   />
                   <Button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-24 md:h-28 border-dashed border-2 rounded-2xl md:rounded-3xl bg-transparent active:scale-95 md:hover:scale-105 transition-all flex-col md:flex-row gap-2 border-orange-500 text-white hover:bg-white/5"
+                    className="w-full h-24 md:h-28 border-dashed border-2 rounded-2xl md:rounded-3xl bg-transparent active:scale-95 md:hover:scale-105 transition-all flex-col md:flex-row gap-2 border-orange-500 text-white hover:bg-white/5 dark:border-orange-400 dark:hover:bg-slate-800/50"
                   >
-                    <Upload className="w-7 h-7 md:w-8 md:h-8 md:mr-3 text-orange-500" />
+                    <Upload className="w-7 h-7 md:w-8 md:h-8 md:mr-3 text-orange-500 dark:text-orange-400" />
                     <span className="text-base md:text-lg font-semibold">Fazer Upload de Imagem</span>
                   </Button>
 
-                  <div className="p-3 md:p-4 rounded-xl md:rounded-2xl flex items-start gap-2 md:gap-3 bg-orange-500/15 border border-orange-500/30">
+                  <div className="p-3 md:p-4 rounded-xl md:rounded-2xl flex items-start gap-2 md:gap-3 bg-orange-500/15 border border-orange-500/30 dark:bg-orange-600/20 dark:border-orange-600/30">
                     <div className="text-xl md:text-2xl flex-shrink-0">💡</div>
                     <div>
                       <p className="text-xs md:text-sm font-semibold text-white mb-1">Dica de Uso:</p>
-                      <p className="text-xs text-white/80">
+                      <p className="text-xs text-white/80 dark:text-gray-300">
                         Para maior precisão, fotografe o alimento de cima, com boa iluminação.
                       </p>
                     </div>
@@ -492,7 +492,7 @@ REGRAS CRÍTICAS:
             )}
 
             {showCamera && (
-              <Card className="overflow-hidden rounded-2xl md:rounded-3xl bg-[#0B6B54] border-2 border-orange-500 dark:bg-slate-800 dark:border-orange-400">
+              <Card className="overflow-hidden rounded-2xl md:rounded-3xl bg-[#0B6B54] border-2 border-orange-500 dark:bg-slate-900 dark:border-orange-400">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -518,7 +518,7 @@ REGRAS CRÍTICAS:
             )}
 
             {imagePreview && (
-              <Card className="overflow-hidden rounded-2xl md:rounded-3xl bg-[#0B6B54] border-2 border-orange-500/40 dark:bg-slate-800 dark:border-orange-400/40">
+              <Card className="overflow-hidden rounded-2xl md:rounded-3xl bg-[#0B6B54] border-2 border-orange-500/40 dark:bg-slate-900 dark:border-orange-400/40">
                 <img
                   src={imagePreview}
                   alt="Food preview"
