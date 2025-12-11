@@ -136,7 +136,7 @@ export default function Profile() {
   const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8 dark:bg-gradient-to-br dark:from-black dark:via-slate-950 dark:to-[#062A1F]">
       <div className="max-w-3xl mx-auto space-y-6">
         
         {/* Header */}
@@ -179,7 +179,7 @@ export default function Profile() {
               <div>
                 <h3 className="font-bold text-white">Tema do Aplicativo</h3>
                 <p className="text-sm text-[#CEEDB2]">
-                  {theme === 'dark' ? 'Modo Escuro Ativado' : 'Modo Claro Ativado'}
+                  {theme === 'dark' ? 'Modo Escuro' : 'Modo Claro'}
                 </p>
               </div>
             </div>

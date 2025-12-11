@@ -41,7 +41,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
-      isDark ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-[#084734]'
+      isDark ? 'dark bg-gradient-to-br from-black via-slate-950 to-[#062A1F]' : 'bg-[#084734]'
     }`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');

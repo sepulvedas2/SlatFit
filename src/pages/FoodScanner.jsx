@@ -265,7 +265,7 @@ REGRAS CRÍTICAS:
   };
 
   return (
-    <div className="min-h-screen p-3 md:p-8 pb-24 bg-[#054D3B] dark:bg-slate-900">
+    <div className="min-h-screen p-3 md:p-8 pb-24 bg-[#054D3B] dark:bg-gradient-to-br dark:from-black dark:via-slate-950 dark:to-[#062A1F]">
       <div className="max-w-2xl mx-auto space-y-4">
         
         <div className="text-center mb-4">
