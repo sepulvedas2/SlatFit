@@ -15,11 +15,16 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('app-theme', newTheme);
-  };
+  // Listen for theme changes from Profile page
+  useEffect(() => {
+    const handleThemeChange = () => {
+      const newTheme = localStorage.getItem('app-theme') || 'light';
+      setTheme(newTheme);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange);
+    return () => window.removeEventListener('themeChanged', handleThemeChange);
+  }, []);
 
   const isDark = theme === 'dark';
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Target, Activity, LogOut, Save, Loader2, Crown } from "lucide-react";
+import { User, Target, Activity, LogOut, Save, Loader2, Crown, Moon, Sun } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -38,7 +38,7 @@ export default function Profile() {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('app-theme', newTheme);
-    window.location.reload(); // Recarregar para aplicar o tema
+    window.dispatchEvent(new Event('themeChanged'));
   };
 
   useEffect(() => {
@@ -167,25 +167,38 @@ export default function Profile() {
           </Alert>
         )}
 
-        {/* Theme Toggle Card */}
+        {/* Theme Toggle */}
         <Card className="glass-effect p-6 border-[#CEF17B]/20">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-white mb-1">Tema do Aplicativo</h3>
-              <p className="text-sm text-[#CEEDB2]">
-                {theme === 'dark' ? 'Modo Escuro Ativado' : 'Modo Claro Ativado'}
-              </p>
+            <div className="flex items-center gap-3">
+              {theme === 'dark' ? (
+                <Moon className="w-5 h-5 text-[#CEF17B]" />
+              ) : (
+                <Sun className="w-5 h-5 text-[#CEF17B]" />
+              )}
+              <div>
+                <h3 className="font-bold text-white">Tema do Aplicativo</h3>
+                <p className="text-sm text-[#CEEDB2]">
+                  {theme === 'dark' ? 'Modo Escuro' : 'Modo Claro'}
+                </p>
+              </div>
             </div>
-            <button
+            <Button
               onClick={toggleTheme}
-              className="w-16 h-16 rounded-full glass-effect flex items-center justify-center hover:scale-110 transition-transform border-2 border-[#CEF17B]/30"
+              className="bg-[#CEF17B]/20 hover:bg-[#CEF17B]/30 text-[#CEF17B] border border-[#CEF17B]/30"
             >
               {theme === 'dark' ? (
-                <span className="text-3xl">☀️</span>
+                <>
+                  <Sun className="w-4 h-4 mr-2" />
+                  Claro
+                </>
               ) : (
-                <span className="text-3xl">🌙</span>
+                <>
+                  <Moon className="w-4 h-4 mr-2" />
+                  Escuro
+                </>
               )}
-            </button>
+            </Button>
           </div>
         </Card>
 
