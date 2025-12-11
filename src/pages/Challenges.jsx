@@ -151,7 +151,7 @@ export default function Challenges() {
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-white">Desafios FitLens</h1>
-            <p className="text-[#CEEDB2] mt-1">Supere seus limites e ganhe recompensas!</p>
+            <p className="text-[#CEEDB2] mt-1">Supere seus limites!</p>
           </div>
           <div className="glass-effect px-4 py-2 rounded-full border border-[#CEF17B]/20">
             <div className="flex items-center gap-2">
