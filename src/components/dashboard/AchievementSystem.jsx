@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ACHIEVEMENTS = [
+  // Nível Iniciante
   {
     id: "first_workout",
     icon: Zap,
@@ -27,26 +28,17 @@ const ACHIEVEMENTS = [
     requirement: { type: "streak", count: 7 }
   },
   {
-    id: "perfect_month",
-    icon: Star,
-    title: "Mês Completo",
-    description: "30 dias consecutivos treinando",
-    color: "text-purple-400",
-    bgColor: "bg-purple-400/20",
-    requirement: { type: "streak", count: 30 }
-  },
-  {
-    id: "workout_milestone_100",
-    icon: Trophy,
-    title: "Centenário",
-    description: "100 treinos completados",
-    color: "text-yellow-500",
-    bgColor: "bg-yellow-500/20",
-    requirement: { type: "workouts", count: 100 }
-  },
-  {
     id: "water_master",
     icon: Droplet,
+    title: "Hidratação Perfeita",
+    description: "7 dias batendo meta de água",
+    color: "text-blue-400",
+    bgColor: "bg-blue-400/20",
+    requirement: { type: "water_days", count: 7 }
+  },
+  {
+    id: "protein_king",
+    icon: Utensils,
     title: "Rei da Proteína",
     description: "7 dias batendo meta proteica",
     color: "text-red-400",
@@ -54,13 +46,33 @@ const ACHIEVEMENTS = [
     requirement: { type: "protein_days", count: 7 }
   },
   {
-    id: "hydration_master",
-    icon: Droplet,
-    title: "Hidratação Perfeita",
-    description: "7 dias batendo meta de água",
-    color: "text-blue-400",
-    bgColor: "bg-blue-400/20",
-    requirement: { type: "water_days", count: 7 }
+    id: "food_logger",
+    icon: Utensils,
+    title: "Nutricionista",
+    description: "Registre 50 refeições",
+    color: "text-green-400",
+    bgColor: "bg-green-400/20",
+    requirement: { type: "food_logs", count: 50 }
+  },
+
+  // Nível Intermediário
+  {
+    id: "workout_25",
+    icon: Target,
+    title: "Dedicado",
+    description: "25 treinos completados",
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/20",
+    requirement: { type: "workouts", count: 25 }
+  },
+  {
+    id: "streak_14",
+    icon: Flame,
+    title: "Duas Semanas",
+    description: "14 dias consecutivos treinando",
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/20",
+    requirement: { type: "streak", count: 14 }
   },
   {
     id: "calorie_burner",
@@ -72,13 +84,60 @@ const ACHIEVEMENTS = [
     requirement: { type: "calories", count: 5000 }
   },
   {
-    id: "food_logger",
+    id: "challenge_3",
+    icon: Award,
+    title: "Desafiador",
+    description: "Complete 3 desafios",
+    color: "text-purple-400",
+    bgColor: "bg-purple-400/20",
+    requirement: { type: "challenges", count: 3 }
+  },
+  {
+    id: "level_3",
+    icon: TrendingUp,
+    title: "Praticante",
+    description: "Alcance o nível 3",
+    color: "text-blue-400",
+    bgColor: "bg-blue-400/20",
+    requirement: { type: "level", count: 3 }
+  },
+
+  // Nível Avançado
+  {
+    id: "workout_50",
+    icon: Trophy,
+    title: "Meio Centenário",
+    description: "50 treinos completados",
+    color: "text-yellow-400",
+    bgColor: "bg-yellow-400/20",
+    requirement: { type: "workouts", count: 50 }
+  },
+  {
+    id: "perfect_month",
+    icon: Star,
+    title: "Mês Completo",
+    description: "30 dias consecutivos treinando",
+    color: "text-purple-400",
+    bgColor: "bg-purple-400/20",
+    requirement: { type: "streak", count: 30 }
+  },
+  {
+    id: "calorie_burner_10k",
+    icon: Flame,
+    title: "Incinerador",
+    description: "Queime 10.000 calorias totais",
+    color: "text-red-500",
+    bgColor: "bg-red-500/20",
+    requirement: { type: "calories", count: 10000 }
+  },
+  {
+    id: "food_logger_100",
     icon: Utensils,
-    title: "Nutricionista",
-    description: "Registre 50 refeições",
-    color: "text-green-400",
-    bgColor: "bg-green-400/20",
-    requirement: { type: "food_logs", count: 50 }
+    title: "Chef da Nutrição",
+    description: "Registre 100 refeições",
+    color: "text-green-500",
+    bgColor: "bg-green-500/20",
+    requirement: { type: "food_logs", count: 100 }
   },
   {
     id: "level_5",
@@ -89,14 +148,99 @@ const ACHIEVEMENTS = [
     bgColor: "bg-yellow-400/20",
     requirement: { type: "level", count: 5 }
   },
+
+  // Nível Elite
+  {
+    id: "workout_milestone_100",
+    icon: Trophy,
+    title: "Centenário",
+    description: "100 treinos completados",
+    color: "text-yellow-500",
+    bgColor: "bg-yellow-500/20",
+    requirement: { type: "workouts", count: 100 }
+  },
+  {
+    id: "streak_60",
+    icon: Flame,
+    title: "Dois Meses",
+    description: "60 dias consecutivos treinando",
+    color: "text-orange-600",
+    bgColor: "bg-orange-600/20",
+    requirement: { type: "streak", count: 60 }
+  },
   {
     id: "challenge_master",
     icon: Award,
     title: "Mestre dos Desafios",
-    description: "Complete 5 desafios",
+    description: "Complete 10 desafios",
     color: "text-purple-500",
     bgColor: "bg-purple-500/20",
-    requirement: { type: "challenges", count: 5 }
+    requirement: { type: "challenges", count: 10 }
+  },
+  {
+    id: "calorie_burner_25k",
+    icon: Flame,
+    title: "Fornalha",
+    description: "Queime 25.000 calorias totais",
+    color: "text-red-600",
+    bgColor: "bg-red-600/20",
+    requirement: { type: "calories", count: 25000 }
+  },
+  {
+    id: "level_8",
+    icon: Crown,
+    title: "Lenda",
+    description: "Alcance o nível 8",
+    color: "text-pink-400",
+    bgColor: "bg-pink-400/20",
+    requirement: { type: "level", count: 8 }
+  },
+
+  // Nível Lendário
+  {
+    id: "workout_200",
+    icon: Trophy,
+    title: "Bicentenário",
+    description: "200 treinos completados",
+    color: "text-yellow-600",
+    bgColor: "bg-yellow-600/20",
+    requirement: { type: "workouts", count: 200 }
+  },
+  {
+    id: "streak_100",
+    icon: Flame,
+    title: "Centenário da Constância",
+    description: "100 dias consecutivos treinando",
+    color: "text-red-700",
+    bgColor: "bg-red-700/20",
+    requirement: { type: "streak", count: 100 }
+  },
+  {
+    id: "calorie_burner_50k",
+    icon: Flame,
+    title: "Vulcão",
+    description: "Queime 50.000 calorias totais",
+    color: "text-orange-700",
+    bgColor: "bg-orange-700/20",
+    requirement: { type: "calories", count: 50000 }
+  },
+  {
+    id: "food_logger_250",
+    icon: Utensils,
+    title: "Mestre Nutricional",
+    description: "Registre 250 refeições",
+    color: "text-green-600",
+    bgColor: "bg-green-600/20",
+    requirement: { type: "food_logs", count: 250 }
+  },
+  {
+    id: "level_10",
+    icon: Crown,
+    title: "Imortal",
+    description: "Alcance o nível 10",
+    color: "text-[#CEF17B]",
+    bgColor: "bg-[#CEF17B]/20",
+    requirement: { type: "level", count: 10 }
   }
 ];
 
