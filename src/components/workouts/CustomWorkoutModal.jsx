@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Loader2, GripVertical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
+export default function CustomWorkoutModal({ isOpen, onClose, userEmail, editingWorkout = null, existingExercises = [] }) {
   const [workoutData, setWorkoutData] = useState({
     nome_treino: "",
     dia_semana: "segunda",
@@ -23,22 +23,58 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
   });
 
   const [exercises, setExercises] = useState([
-    { exercise_name: "", series: "3", repeticoes: "10", descanso: "60s", observacoes: "" }
+    { exercise_name: "", series: "3", repeticoes: "10", observacoes: "" }
   ]);
+
+  useEffect(() => {
+    if (editingWorkout) {
+      setWorkoutData({
+        nome_treino: editingWorkout.nome_treino,
+        dia_semana: editingWorkout.dia_semana,
+        observacoes: editingWorkout.observacoes || ""
+      });
+      
+      if (existingExercises.length > 0) {
+        setExercises(existingExercises.map(ex => ({
+          id: ex.id,
+          exercise_name: ex.exercise_name,
+          series: ex.series,
+          repeticoes: ex.repeticoes,
+          observacoes: ex.observacoes || ""
+        })));
+      }
+    }
+  }, [editingWorkout, existingExercises]);
 
   const queryClient = useQueryClient();
 
-  const createWorkoutMutation = useMutation({
+  const saveWorkoutMutation = useMutation({
     mutationFn: async (data) => {
-      const workout = await base44.entities.CustomWorkout.create({
-        user_email: userEmail,
-        ...data.workout
-      });
+      let workout;
+      
+      if (editingWorkout) {
+        // Update existing workout
+        workout = await base44.entities.CustomWorkout.update(editingWorkout.id, data.workout);
+        
+        // Delete old exercises
+        const oldExercises = existingExercises;
+        await Promise.all(oldExercises.map(ex => base44.entities.CustomWorkoutExercise.delete(ex.id)));
+      } else {
+        // Create new workout
+        workout = await base44.entities.CustomWorkout.create({
+          user_email: userEmail,
+          ...data.workout
+        });
+      }
 
+      // Create new exercises
       const exercisePromises = data.exercises.map((exercise, index) =>
         base44.entities.CustomWorkoutExercise.create({
-          custom_workout_id: workout.id,
-          ...exercise,
+          custom_workout_id: editingWorkout ? editingWorkout.id : workout.id,
+          exercise_name: exercise.exercise_name,
+          series: exercise.series,
+          repeticoes: exercise.repeticoes,
+          observacoes: exercise.observacoes,
           ordem: index
         })
       );
@@ -48,6 +84,7 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['customWorkouts']);
+      queryClient.invalidateQueries(['customWorkoutExercises']);
       onClose();
       resetForm();
     },
@@ -60,12 +97,12 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
       observacoes: ""
     });
     setExercises([
-      { exercise_name: "", series: "3", repeticoes: "10", descanso: "60s", observacoes: "" }
+      { exercise_name: "", series: "3", repeticoes: "10", observacoes: "" }
     ]);
   };
 
   const addExercise = () => {
-    setExercises([...exercises, { exercise_name: "", series: "3", repeticoes: "10", descanso: "60s", observacoes: "" }]);
+    setExercises([...exercises, { exercise_name: "", series: "3", repeticoes: "10", observacoes: "" }]);
   };
 
   const removeExercise = (index) => {
@@ -84,7 +121,7 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
     
     if (!workoutData.nome_treino || validExercises.length === 0) return;
 
-    createWorkoutMutation.mutate({
+    saveWorkoutMutation.mutate({
       workout: workoutData,
       exercises: validExercises
     });
@@ -104,7 +141,9 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-gradient-to-br from-[#084734] to-[#062A1F] border-[#CEF17B]/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Criar Treino Personalizado</DialogTitle>
+          <DialogTitle className="text-2xl">
+            {editingWorkout ? "Editar Treino" : "Criar Treino Personalizado"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
@@ -187,7 +226,7 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
                     required
                   />
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <Input
                       placeholder="Séries"
                       value={exercise.series}
@@ -198,12 +237,6 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
                       placeholder="Reps"
                       value={exercise.repeticoes}
                       onChange={(e) => updateExercise(index, 'repeticoes', e.target.value)}
-                      className="bg-white/10 border-[#CEF17B]/20 text-white"
-                    />
-                    <Input
-                      placeholder="Descanso"
-                      value={exercise.descanso}
-                      onChange={(e) => updateExercise(index, 'descanso', e.target.value)}
                       className="bg-white/10 border-[#CEF17B]/20 text-white"
                     />
                   </div>
@@ -222,15 +255,15 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail }) {
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={createWorkoutMutation.isPending || !workoutData.nome_treino}
+              disabled={saveWorkoutMutation.isPending || !workoutData.nome_treino}
               className="flex-1 bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold"
             >
-              {createWorkoutMutation.isPending ? (
+              {saveWorkoutMutation.isPending ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Plus className="w-4 h-4 mr-2" />
               )}
-              Criar Treino
+              {editingWorkout ? "Salvar Alterações" : "Criar Treino"}
             </Button>
             <Button
               type="button"

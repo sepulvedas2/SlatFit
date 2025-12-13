@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Dumbbell, Trophy, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Dumbbell, Trophy, Trash2, ChevronDown, ChevronUp, Edit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomWorkoutModal from "./CustomWorkoutModal";
 import PRModal from "./PRModal";
@@ -14,6 +14,8 @@ export default function MyWorkouts({ userEmail }) {
   const [prModalOpen, setPrModalOpen] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [expandedWorkout, setExpandedWorkout] = useState(null);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editingExercises, setEditingExercises] = useState([]);
 
   const queryClient = useQueryClient();
 
@@ -73,6 +75,22 @@ export default function MyWorkouts({ userEmail }) {
     if (window.confirm("Deseja excluir este treino?")) {
       deleteWorkoutMutation.mutate(workoutId);
     }
+  };
+
+  const handleEditWorkout = (e, workout) => {
+    e.stopPropagation();
+    const exercises = workoutExercises
+      .filter(ex => ex.custom_workout_id === workout.id)
+      .sort((a, b) => a.ordem - b.ordem);
+    setEditingWorkout(workout);
+    setEditingExercises(exercises);
+    setCreateModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setCreateModalOpen(false);
+    setEditingWorkout(null);
+    setEditingExercises([]);
   };
 
   const dayLabels = {
@@ -173,6 +191,14 @@ export default function MyWorkouts({ userEmail }) {
                               <Button
                                 size="sm"
                                 variant="ghost"
+                                onClick={(e) => handleEditWorkout(e, workout)}
+                                className="text-[#CEF17B] hover:text-[#CEF17B]/80 hover:bg-[#CEF17B]/10"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleDeleteWorkout(workout.id);
@@ -216,8 +242,6 @@ export default function MyWorkouts({ userEmail }) {
                                             <span>{exercise.series} séries</span>
                                             <span>•</span>
                                             <span>{exercise.repeticoes} reps</span>
-                                            <span>•</span>
-                                            <span>Descanso: {exercise.descanso}</span>
                                           </div>
                                           {latestPR && (
                                             <p className="text-xs text-[#CEF17B] mt-1 flex items-center gap-1">
@@ -259,8 +283,10 @@ export default function MyWorkouts({ userEmail }) {
 
       <CustomWorkoutModal
         isOpen={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
+        onClose={handleCloseModal}
         userEmail={userEmail}
+        editingWorkout={editingWorkout}
+        existingExercises={editingExercises}
       />
 
       {prModalOpen && selectedExercise && (
