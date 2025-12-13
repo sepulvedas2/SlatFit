@@ -15,10 +15,13 @@ import HIITTimer from "../components/workouts/HIITTimer";
 import ExerciseBlock from "../components/workouts/ExerciseBlock";
 import WorkoutSummary from "../components/workouts/WorkoutSummary";
 import WeeklyPlan from "../components/workouts/WeeklyPlan";
+import MyWorkouts from "../components/workouts/MyWorkouts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Workouts() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState("plan"); // "plan", "hiit", "workout"
+  const [activeTab, setActiveTab] = useState("app-workouts");
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
@@ -241,9 +244,9 @@ export default function Workouts() {
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Programa de Treinos</h1>
+              <h1 className="text-3xl font-bold text-white mb-2">Treinos</h1>
               <p className="text-[#CEEDB2]">
-                Escolha sua semana e evolua! 💪
+                Treinos prontos ou crie os seus! 💪
               </p>
             </div>
             <Link to={createPageUrl("WorkoutProgress")}>
@@ -253,6 +256,18 @@ export default function Workouts() {
               </Button>
             </Link>
           </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-[#CEF17B]/20">
+              <TabsTrigger value="app-workouts" className="data-[state=active]:bg-[#CEF17B]/20 data-[state=active]:text-[#CEF17B]">
+                Treinos do App
+              </TabsTrigger>
+              <TabsTrigger value="my-workouts" className="data-[state=active]:bg-[#CEF17B]/20 data-[state=active]:text-[#CEF17B]">
+                Meus Treinos
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="app-workouts" className="space-y-6 mt-6">
 
           {/* Week Selector */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -316,6 +331,12 @@ export default function Workouts() {
               💡 Clique em cada dia para ver todos os exercícios detalhados
             </p>
           </Card>
+            </TabsContent>
+
+            <TabsContent value="my-workouts" className="mt-6">
+              <MyWorkouts userEmail={user?.email} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     );
