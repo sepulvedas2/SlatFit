@@ -2,18 +2,26 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Image, Upload, Loader2, X } from "lucide-react";
+import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Image, Upload, Loader2, X, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import PRModal from "./PRModal";
 
 export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
   const [expandedDay, setExpandedDay] = useState(null);
   const [uploadingExercise, setUploadingExercise] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [prModalOpen, setPRModalOpen] = useState(false);
+  const [selectedPRExercise, setSelectedPRExercise] = useState(null);
+  const [user, setUser] = useState(null);
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
 
   // Fetch all exercises from database to get saved images
   const { data: savedExercises = [] } = useQuery({
@@ -21,10 +29,26 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     queryFn: () => base44.entities.Exercise.list(),
   });
 
+  // Fetch all PR records for current user
+  const { data: prRecords = [] } = useQuery({
+    queryKey: ['prRecords', user?.email],
+    queryFn: () => base44.entities.PRRecord.filter({ user_email: user.email }),
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
   // Create a map of exercise names to their data (including image_url)
   const exerciseImageMap = savedExercises.reduce((acc, ex) => {
     if (ex.image_url) {
       acc[ex.name] = ex.image_url;
+    }
+    return acc;
+  }, {});
+
+  // Create a map of exercise names to their latest PR
+  const prMap = prRecords.reduce((acc, pr) => {
+    if (!acc[pr.exercise_name] || new Date(pr.pr_date) > new Date(acc[pr.exercise_name].pr_date)) {
+      acc[pr.exercise_name] = pr;
     }
     return acc;
   }, {});
@@ -461,6 +485,31 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     setExpandedDay(expandedDay === day ? null : day);
   };
 
+  const openPRModal = (exerciseName) => {
+    setSelectedPRExercise(exerciseName);
+    setPRModalOpen(true);
+  };
+
+  const savePRMutation = useMutation({
+    mutationFn: async (prData) => {
+      return base44.entities.PRRecord.create({
+        user_email: user.email,
+        exercise_name: selectedPRExercise,
+        weight_kg: parseFloat(prData.weight_kg),
+        reps: parseInt(prData.reps),
+        notes: prData.notes || "",
+        pr_date: prData.pr_date
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['prRecords']);
+    },
+  });
+
+  const handleSavePR = async (prData) => {
+    await savePRMutation.mutateAsync(prData);
+  };
+
   return (
     <div className="space-y-4">
       {/* Hidden file input */}
@@ -470,6 +519,15 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         accept="image/*"
         onChange={handleFileChange}
         className="hidden"
+      />
+
+      {/* PR Modal */}
+      <PRModal
+        isOpen={prModalOpen}
+        onClose={() => setPRModalOpen(false)}
+        exerciseName={selectedPRExercise}
+        onSave={handleSavePR}
+        currentPR={selectedPRExercise ? prMap[selectedPRExercise] : null}
       />
 
       <div className="flex items-center justify-between mb-6">
@@ -557,6 +615,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                         {dayPlan.exercises.map((exercise, i) => {
                           const hasImage = exerciseImageMap[exercise.name];
                           const isUploading = uploadingExercise === exercise.name;
+                          const currentPR = prMap[exercise.name];
 
                           return (
                             <div 
@@ -607,7 +666,22 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                                 <p className="text-sm text-[#CEEDB2]">
                                   {exercise.sets} {exercise.reps}
                                 </p>
+                                {currentPR && (
+                                  <p className="text-xs text-orange-400 mt-0.5 flex items-center gap-1">
+                                    <Trophy className="w-3 h-3" />
+                                    PR: {currentPR.weight_kg}kg x {currentPR.reps} reps
+                                  </p>
+                                )}
                               </div>
+                              
+                              <Button
+                                onClick={() => openPRModal(exercise.name)}
+                                size="sm"
+                                className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 h-8 px-3 text-xs"
+                              >
+                                <Trophy className="w-3 h-3 mr-1" />
+                                PR
+                              </Button>
                               
                               <Badge className="bg-[#CEF17B]/10 text-[#CEF17B] border-0 text-xs">
                                 {exercise.sets}
