@@ -156,14 +156,14 @@ export default function Workouts() {
   const handleCompleteWorkout = () => {
     const caloriesBurned = Math.round(250 + (totalTime / 60) * 10);
     
-    setWorkoutCompleted(true);
-    
     if (user) {
       saveWorkoutMutation.mutate({
         totalTime,
         calories: caloriesBurned
       });
     }
+    
+    setWorkoutCompleted(true);
   };
 
   const handleRestart = () => {
