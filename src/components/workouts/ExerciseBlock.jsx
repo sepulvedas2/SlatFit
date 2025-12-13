@@ -1,12 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, CheckCircle, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Clock, CheckCircle, ChevronRight, Trophy } from "lucide-react";
 import ExerciseDetailModal from "./ExerciseDetailModal";
+import PRModal from "./PRModal";
 
 export default function ExerciseBlock({ block, exercises = [] }) {
+  const [user, setUser] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [prModalOpen, setPrModalOpen] = useState(false);
+  const [selectedExerciseForPR, setSelectedExerciseForPR] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
+
+  const { data: prRecords = [] } = useQuery({
+    queryKey: ['prRecords', user?.email],
+    queryFn: () => base44.entities.PRRecord.filter({ user_email: user.email }),
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  const getLatestPR = (exerciseName) => {
+    const exercisePRs = prRecords.filter(pr => pr.exercise_name === exerciseName);
+    if (exercisePRs.length === 0) return null;
+    return exercisePRs.sort((a, b) => new Date(b.data_pr) - new Date(a.data_pr))[0];
+  };
+
+  const handleOpenPRModal = (e, exercise) => {
+    e.stopPropagation();
+    setSelectedExerciseForPR(exercise);
+    setPrModalOpen(true);
+  };
 
   const handleExerciseClick = (exerciseData) => {
     setSelectedExercise(exerciseData);
@@ -24,17 +54,19 @@ export default function ExerciseBlock({ block, exercises = [] }) {
 
         <div className="space-y-3">
           {block.exercises.map((exercise, index) => {
-            // Try to find matching exercise data from database
             const exerciseData = exercises.find(e => e.name === exercise.name) || exercise;
+            const latestPR = getLatestPR(exercise.name);
             
             return (
-              <button
+              <div
                 key={index}
-                onClick={() => handleExerciseClick(exerciseData)}
-                className="w-full text-left p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all border border-white/10 hover:border-[#CEF17B]/30 cursor-pointer group"
+                className="p-4 rounded-lg bg-white/5 border border-white/10 hover:border-[#CEF17B]/30 transition-all"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => handleExerciseClick(exerciseData)}
+                    className="flex items-center gap-3 flex-1 text-left group"
+                  >
                     <div className="w-8 h-8 rounded-full bg-[#CEF17B]/20 flex items-center justify-center flex-shrink-0">
                       <span className="text-[#CEF17B] font-bold text-sm">
                         {index + 1}
@@ -58,12 +90,27 @@ export default function ExerciseBlock({ block, exercises = [] }) {
                           </>
                         )}
                       </div>
+                      {latestPR && (
+                        <p className="text-xs text-[#CEF17B] mt-1 flex items-center gap-1">
+                          <Trophy className="w-3 h-3" />
+                          Último PR: {latestPR.peso_kg}kg x {latestPR.repeticoes} reps
+                        </p>
+                      )}
                     </div>
-                  </div>
 
-                  <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-[#CEF17B] transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-[#CEF17B] transition-colors" />
+                  </button>
+
+                  <Button
+                    size="sm"
+                    onClick={(e) => handleOpenPRModal(e, { id: `ex_${index}`, name: exercise.name })}
+                    className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 text-xs h-8 px-3 flex-shrink-0"
+                  >
+                    <Trophy className="w-3 h-3 mr-1" />
+                    PR
+                  </Button>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -86,6 +133,18 @@ export default function ExerciseBlock({ block, exercises = [] }) {
           }}
           isAdmin={true}
           isHIIT={true}
+        />
+      )}
+
+      {prModalOpen && selectedExerciseForPR && (
+        <PRModal
+          isOpen={prModalOpen}
+          onClose={() => {
+            setPrModalOpen(false);
+            setSelectedExerciseForPR(null);
+          }}
+          exercise={selectedExerciseForPR}
+          userEmail={user?.email}
         />
       )}
     </>
