@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
   Clock, Zap, Lightbulb, BookOpen, 
-  Brain, TrendingUp, Trophy, MessageCircle, Loader2
+  Brain, TrendingUp, Trophy, MessageCircle, Loader2, RefreshCw
 } from "lucide-react";
 import { format } from "date-fns";
 import RoutineConsistency from "../components/nutrition/RoutineConsistency";
@@ -54,26 +54,66 @@ export default function SmartNutrition() {
     enabled: !!user?.email,
   });
 
-  // Get daily tip from Seu Personal IA
-  const { data: personalAITip, isLoading: tipLoading } = useQuery({
+  const { data: trainingProfile } = useQuery({
+    queryKey: ['trainingProfile', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const profiles = await base44.entities.TrainingProfile.filter({ user_email: user.email });
+      return profiles[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
+  const { data: todayWorkouts = [] } = useQuery({
+    queryKey: ['todayWorkouts', user?.email, today],
+    queryFn: async () => {
+      const logs = await base44.entities.WorkoutLog.filter({ 
+        user_email: user.email,
+        completed_date: today
+      });
+      return logs;
+    },
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  // Get personalized daily tip from Personal IA
+  const { data: personalAITip, isLoading: tipLoading, refetch: refetchTip } = useQuery({
     queryKey: ['personalAITip', user?.email, today],
     queryFn: async () => {
+      const userContext = {
+        objetivo: userProfile?.goal === 'weight_loss' ? 'Emagrecimento' : userProfile?.goal === 'muscle_gain' ? 'Hipertrofia' : 'Manutenção',
+        nivel: userProfile?.fitness_level || 'Iniciante',
+        aguaHoje: nutritionData?.water_intake_ml || 0,
+        metaAgua: nutritionData?.water_goal_ml || 2000,
+        treinouHoje: todayWorkouts.length > 0,
+        ultimoTreino: todayWorkouts[0]?.workout_name,
+        divisaoTreino: trainingProfile?.divisao_treino
+      };
+
       const tip = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é "Seu Personal IA", o assistente de fitness e nutrição do FitLens. Dê UMA dica curta e prática sobre nutrição inteligente para hoje.
-        
-        Seja empático, direto e educativo (não prescritivo).
-        Máximo 2 linhas.
-        Foque em educação nutricional, não em dietas restritivas.
-        
-        Exemplos:
-        - "Escolha sempre cores no seu prato — cada cor traz nutrientes diferentes que seu corpo precisa."
-        - "Equilíbrio é a base de tudo. Proteínas constroem, carboidratos sustentam e gorduras boas protegem."
-        - "Antes do treino, 300-500ml de água ajudam na performance muscular."`,
+        prompt: `Você é o Personal IA do FitnessLynx. Gere UMA dica personalizada e prática de nutrição para hoje.
+
+Contexto do usuário:
+- Objetivo: ${userContext.objetivo}
+- Nível: ${userContext.nivel}
+- Treinou hoje: ${userContext.treinouHoje ? 'Sim (' + userContext.ultimoTreino + ')' : 'Não'}
+- Água hoje: ${userContext.aguaHoje}ml de ${userContext.metaAgua}ml
+- Divisão de treino: ${userContext.divisaoTreino || 'não definida'}
+
+Regras:
+- Seja empático, direto e educativo
+- Máximo 2 linhas
+- Personalize com base no contexto
+- Foque em educação nutricional
+- Use emoji relevante no início
+
+Exemplo: "💧 Você já bebeu ${userContext.aguaHoje}ml hoje. Tente chegar aos ${userContext.metaAgua}ml até o fim do dia para otimizar a recuperação muscular!"`,
         add_context_from_internet: false
       });
       return tip;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!userProfile,
   });
 
   useEffect(() => {
@@ -131,25 +171,37 @@ export default function SmartNutrition() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-bold text-white">Dica do Seu Personal IA</h3>
+                <h3 className="font-bold text-white">Dica Personalizada</h3>
                 <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
-                  Hoje
+                  {todayWorkouts.length > 0 ? 'Pós-Treino' : 'Hoje'}
                 </Badge>
               </div>
               {tipLoading ? (
-                <p className="text-[#CEEDB2] text-sm animate-pulse">Pensando...</p>
+                <p className="text-[#CEEDB2] text-sm animate-pulse">Gerando dica personalizada...</p>
               ) : (
-                <p className="text-[#CEEDB2] leading-relaxed">{personalAITip || "Mantenha o foco e a constância!"}</p>
+                <p className="text-[#CEEDB2] leading-relaxed">{personalAITip || "Mantenha o foco e a constância! 💪"}</p>
               )}
-              <Button
-                onClick={() => setShowChat(true)}
-                variant="outline"
-                size="sm"
-                className="mt-3 border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Conversar com Seu Personal IA
-              </Button>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  onClick={() => refetchTip()}
+                  variant="outline"
+                  size="sm"
+                  disabled={tipLoading}
+                  className="border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${tipLoading ? 'animate-spin' : ''}`} />
+                  Nova Dica
+                </Button>
+                <Button
+                  onClick={() => setShowChat(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Conversar
+                </Button>
+              </div>
             </div>
           </div>
         </Card>
@@ -172,9 +224,16 @@ export default function SmartNutrition() {
 
         {/* Quick Stats */}
         <Card className="glass-effect p-6 border-[#CEF17B]/20">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-[#CEF17B]" />
-            <h3 className="font-bold text-white">Seu Progresso</h3>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-[#CEF17B]" />
+              <h3 className="font-bold text-white">Seu Progresso</h3>
+            </div>
+            {todayWorkouts.length > 0 && (
+              <Badge className="bg-orange-500/20 text-orange-400 border-0 text-xs">
+                Treinou hoje! 🔥
+              </Badge>
+            )}
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-white/5 rounded-lg">

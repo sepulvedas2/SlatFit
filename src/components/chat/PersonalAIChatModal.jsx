@@ -3,20 +3,42 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { X, Send, Loader2, Sparkles } from "lucide-react";
+import { X, Send, Loader2, Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { useMutation } from "@tanstack/react-query";
 
 export default function PersonalAIChatModal({ user, onClose }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Olá! Sou o Seu Personal IA do FitLens. Como posso te ajudar hoje? Posso orientar sobre treinos, nutrição, recuperação e hábitos saudáveis!"
+      content: "Olá! Sou o Seu Personal IA do FitnessLynx. Como posso te ajudar hoje? Posso orientar sobre treinos, nutrição, recuperação e hábitos saudáveis! 💪"
     }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [feedbackGiven, setFeedbackGiven] = useState({});
   const messagesEndRef = useRef(null);
+
+  const feedbackMutation = useMutation({
+    mutationFn: async ({ messageIndex, feedbackType, message }) => {
+      const userQuestion = messages[messageIndex - 1]?.content || "";
+      return base44.entities.AIFeedback.create({
+        user_email: user.email,
+        message_content: message.content,
+        user_question: userQuestion,
+        feedback_type: feedbackType,
+        feedback_date: new Date().toISOString(),
+        context: `timestamp: ${message.timestamp || new Date().toISOString()}`
+      });
+    }
+  });
+
+  const handleFeedback = (messageIndex, feedbackType) => {
+    const message = messages[messageIndex];
+    feedbackMutation.mutate({ messageIndex, feedbackType, message });
+    setFeedbackGiven(prev => ({ ...prev, [messageIndex]: feedbackType }));
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,31 +57,86 @@ export default function PersonalAIChatModal({ user, onClose }) {
     setLoading(true);
 
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é "Seu Personal IA", o assistente de fitness e nutrição do FitLens. Você é empático, motivador e especialista em fitness, nutrição e bem-estar.
+      // Buscar contexto do usuário
+      const [profile, trainingProfile, todayNutrition, recentWorkouts] = await Promise.all([
+        base44.entities.UserProfile.filter({ user_email: user.email }).then(p => p[0]),
+        base44.entities.TrainingProfile.filter({ user_email: user.email }).then(t => t[0]).catch(() => null),
+        base44.entities.NutritionData.filter({ user_email: user.email, log_date: new Date().toISOString().split('T')[0] }).then(n => n[0]).catch(() => null),
+        base44.entities.WorkoutLog.filter({ user_email: user.email }).then(w => w.slice(0, 3)).catch(() => [])
+      ]);
 
-Contexto do usuário: ${user?.full_name || 'Usuário'} está usando o FitLens para melhorar sua saúde e fitness.
+      const userContext = {
+        nome: user.full_name,
+        idade: profile?.age,
+        objetivo: profile?.goal === 'weight_loss' ? 'Emagrecimento' : profile?.goal === 'muscle_gain' ? 'Hipertrofia' : 'Manutenção',
+        nivel: profile?.fitness_level || 'Iniciante',
+        peso: profile?.current_weight,
+        altura: profile?.height,
+        restricoes: profile?.dietary_restrictions || [],
+        frequenciaTreino: profile?.training_frequency || trainingProfile?.dias_treino?.length,
+        divisaoTreino: trainingProfile?.divisao_treino,
+        lesoes: trainingProfile?.lesoes_ou_limitacoes || [],
+        metaProteina: profile?.protein_target,
+        aguaHoje: todayNutrition?.water_intake_ml,
+        ultimosTreinos: recentWorkouts.map(w => w.workout_name)
+      };
+
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Você é o **Personal IA do aplicativo FitnessLynx**, especializado em **academia, treino, nutrição esportiva, saúde e bem-estar**.
+
+Seu papel é **educar, orientar e motivar** usuários de forma **ética, profissional, segura e humanizada**.
+
+📌 CONTEXTO DO USUÁRIO:
+- Nome: ${userContext.nome || 'Atleta'}
+- Idade: ${userContext.idade || 'não informada'}
+- Objetivo: ${userContext.objetivo}
+- Nível: ${userContext.nivel}
+- Peso atual: ${userContext.peso ? userContext.peso + 'kg' : 'não informado'}
+- Altura: ${userContext.altura ? userContext.altura + 'cm' : 'não informada'}
+- Frequência de treino: ${userContext.frequenciaTreino || 'não definida'} vezes por semana
+- Divisão: ${userContext.divisaoTreino || 'não definida'}
+- Restrições alimentares: ${userContext.restricoes.length > 0 ? userContext.restricoes.join(', ') : 'nenhuma'}
+- Lesões/limitações: ${userContext.lesoes.length > 0 ? userContext.lesoes.join(', ') : 'nenhuma'}
+- Meta de proteína: ${userContext.metaProteina ? userContext.metaProteina + 'g/dia' : 'não definida'}
+- Água hoje: ${userContext.aguaHoje ? userContext.aguaHoje + 'ml' : 'não registrada'}
+- Últimos treinos: ${userContext.ultimosTreinos.join(', ') || 'nenhum registrado'}
+
+📌 REGRAS DE COMPORTAMENTO:
+1. NUNCA prescreva medicamentos ou diagnósticos
+2. NUNCA substitua médicos ou nutricionistas
+3. Se a pergunta envolver risco à saúde, oriente procurar um profissional
+4. Use linguagem clara, amigável e motivadora
+5. Seja direto, sem respostas longas demais (máximo 4-5 linhas)
+6. SEMPRE incentive constância e hábitos saudáveis
+7. Personalize com base no contexto do usuário
+
+📌 TIPOS DE PERGUNTAS QUE VOCÊ DEVE RESPONDER:
+- Dúvidas sobre exercícios e execução correta
+- Frequência de treino e descanso muscular
+- Alimentação geral para treino
+- Hidratação e rotina saudável
+- Motivação e disciplina
+- Explicação de conceitos fitness
+
+📌 ESTRUTURA DAS RESPOSTAS:
+1. Resposta direta
+2. Explicação simples
+3. Dica prática aplicável hoje
+4. Mensagem motivacional curta (com emoji)
 
 Pergunta do usuário: ${userMessage}
 
-Instruções:
-- Seja breve, direto e motivador
-- Use emojis quando apropriado
-- Se a pergunta for sobre treino, nutrição ou saúde, responda com base científica mas de forma didática
-- Se não souber, seja honesto mas sempre tente ajudar
-- Mantenha tom amigável e encorajador
-- Máximo 4-5 linhas de resposta
-- Finalize com uma sugestão simples de ação ou reflexão
-- Evite linguagem técnica demais, seja acessível
-
-Responda de forma natural, humana e útil:`,
+Responda de forma personalizada, natural e útil:`,
         add_context_from_internet: false
       });
 
-      setMessages(prev => [...prev, { 
+      const assistantMessage = { 
         role: "assistant", 
-        content: response 
-      }]);
+        content: response,
+        timestamp: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       setMessages(prev => [...prev, { 
         role: "assistant", 
@@ -121,7 +198,66 @@ Responda de forma natural, humana e útil:`,
           </Button>
         </div>
 
-        {/* ... keep existing code (Messages and Input sections) */}
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[80%] rounded-2xl p-4 ${
+                  message.role === 'user'
+                    ? 'bg-[#CEF17B] text-[#084734]'
+                    : 'bg-white/10 text-white'
+                }`}
+              >
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                
+                {/* Feedback buttons for assistant messages */}
+                {message.role === 'assistant' && index > 0 && (
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/10">
+                    <span className="text-xs text-white/60">Foi útil?</span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleFeedback(index, 'positive')}
+                      disabled={feedbackGiven[index]}
+                      className={`h-7 px-2 ${
+                        feedbackGiven[index] === 'positive' 
+                          ? 'bg-green-500/20 text-green-400' 
+                          : 'hover:bg-white/10'
+                      }`}
+                    >
+                      <ThumbsUp className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleFeedback(index, 'negative')}
+                      disabled={feedbackGiven[index]}
+                      className={`h-7 px-2 ${
+                        feedbackGiven[index] === 'negative' 
+                          ? 'bg-red-500/20 text-red-400' 
+                          : 'hover:bg-white/10'
+                      }`}
+                    >
+                      <ThumbsDown className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-white/10 rounded-2xl p-4">
+                <Loader2 className="w-5 h-5 animate-spin text-[#CEF17B]" />
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
         {/* Input */}
         <div className="p-4 border-t border-[#CEF17B]/20">
