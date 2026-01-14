@@ -317,7 +317,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         { name: "Mesa Flexora", sets: "3x", reps: "10-12", image_placeholder: "mesa_flexora" },
         { name: "Desenvolvimento com Halteres", sets: "3x", reps: "10", image_placeholder: "desenvolvimento_halteres" },
         { name: "Remada Alta", sets: "3x", reps: "10", image_placeholder: "remada_alta" },
-        { name: "Elevação Unilateral na Polia", sets: "3x", reps: "10", image_placeholder: "elevacao_polia" }
+        { name: "Elevação Lateral na Polia", sets: "3x", reps: "10", image_placeholder: "elevacao_polia" }
       ]
     },
     quinta: { 
@@ -340,9 +340,9 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       restTime: "30-60 segundos",
       exercises: [
         { name: "Agachamento Lateral", sets: "3x", reps: "10-12", image_placeholder: "agachamento_lateral" },
-        { name: "Leg Press Unilateral", sets: "3x", reps: "10-15", image_placeholder: "leg_press_unilateral" },
-        { name: "Cadeira Extensora Unilateral", sets: "3x", reps: "10-15", image_placeholder: "extensora_unilateral" },
-        { name: "Cadeira Flexora Unilateral", sets: "3x", reps: "10-12", image_placeholder: "flexora_unilateral" },
+        { name: "Leg Press", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
+        { name: "Cadeira Extensora", sets: "3x", reps: "10-15", image_placeholder: "cadeira_extensora" },
+        { name: "Cadeira Flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
         { name: "Elevação Lateral", sets: "4x", reps: "8-12", image_placeholder: "elevacao_lateral" },
         { name: "Remada Alta", sets: "3x", reps: "10", image_placeholder: "remada_alta" },
         { name: "Desenvolvimento Máquina", sets: "3x", reps: "10-12", image_placeholder: "desenvolvimento_maquina" }
@@ -445,7 +445,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         { name: "Agachamento", sets: "4x", reps: "10-12", image_placeholder: "agachamento" },
         { name: "Stiff", sets: "3x", reps: "12-15", image_placeholder: "stiff" },
         { name: "Mesa Flexora", sets: "3x", reps: "10-12", image_placeholder: "mesa_flexora" },
-        { name: "Cadeira Flexora Unilateral", sets: "3x", reps: "10/10", image_placeholder: "flexora_unilateral" },
+        { name: "Cadeira Flexora", sets: "3x", reps: "10/10", image_placeholder: "cadeira_flexora" },
         { name: "Panturrilha", sets: "4x", reps: "10", image_placeholder: "panturrilha" },
         { name: "Elevação Lateral", sets: "4x", reps: "8-10", image_placeholder: "elevacao_lateral" },
         { name: "Elevação Frontal", sets: "3x", reps: "10-12", image_placeholder: "elevacao_frontal" },
