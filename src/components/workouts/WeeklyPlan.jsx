@@ -366,7 +366,35 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   // Semana 3 - Nível Avançado
   3: {
-...
+    segunda: { 
+      muscle: "Perna / Ombro", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Leg Press", sets: "4x", reps: "10-12", image_placeholder: "leg_press" },
+        { name: "Agachamento Livre", sets: "3x", reps: "10-12", image_placeholder: "agachamento" },
+        { name: "Cadeira Extensora", sets: "3x", reps: "12-15", image_placeholder: "cadeira_extensora" },
+        { name: "Avanço", sets: "3x", reps: "10/10", image_placeholder: "avanco" },
+        { name: "Cadeira Abdutora", sets: "3x", reps: "10-15", image_placeholder: "abdutora" },
+        { name: "Elevação Lateral", sets: "4x", reps: "10-12", image_placeholder: "elevacao_lateral" },
+        { name: "Elevação Frontal", sets: "3x", reps: "10-12", image_placeholder: "elevacao_frontal" },
+        { name: "Desenvolvimento Máquina", sets: "3x", reps: "10-12", image_placeholder: "desenvolvimento_maquina" }
+      ]
+    },
+    terca: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino Reto", sets: "4x", reps: "10-12", image_placeholder: "supino_reto" },
+        { name: "Supino Inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
+        { name: "Supino na Polia", sets: "3x", reps: "8-10", image_placeholder: "supino_polia" },
+        { name: "Crucifixo Polia", sets: "3x", reps: "10-12", image_placeholder: "crucifixo_polia" },
+        { name: "Tríceps Mergulho", sets: "3x", reps: "10-12", image_placeholder: "triceps_mergulho" },
+        { name: "Tríceps Coice", sets: "3x", reps: "8-10", image_placeholder: "triceps_coice" },
+        { name: "Tríceps Corda", sets: "4x", reps: "10-12", image_placeholder: "triceps_corda" }
+      ]
+    },
     quarta: { 
       muscle: "Costas / Bíceps", 
       icon: "🦾",
