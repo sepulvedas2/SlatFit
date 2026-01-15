@@ -17,7 +17,7 @@ import AchievementSystem from "../components/dashboard/AchievementSystem";
 import QuickActions from "../components/dashboard/QuickActions";
 import WelcomeModal from "../components/onboarding/WelcomeModal";
 import OnboardingModal from "../components/onboarding/OnboardingModal";
-import IAGOCoach from "../components/dashboard/IAGOCoach";
+import AssistantCoach from "../components/dashboard/IAGOCoach";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -288,7 +288,7 @@ export default function Dashboard() {
         <UserGreeting userName={user?.full_name?.split(' ')[0] || 'Atleta'} />
 
         {/* AI Coach */}
-        <IAGOCoach 
+        <AssistantCoach 
           user={user}
           profile={profile}
           todayCheckIn={todayCheckIn}
