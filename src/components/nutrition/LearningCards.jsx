@@ -27,7 +27,7 @@ Muitas vezes comemos por:
 
 A verdadeira fome física vem gradualmente e pode esperar. Já a fome emocional é urgente e específica.
 
-💬 IAGO diz: "Antes de comer, pergunte: estou com fome ou estou sentindo outra coisa?"`,
+💬 Seu Assistente Personal diz: "Antes de comer, pergunte: estou com fome ou estou sentindo outra coisa?"`,
       duration: "3 min"
     },
     {
@@ -43,7 +43,7 @@ O problema nunca foi o carboidrato, mas sim:
 
 Carboidratos complexos (arroz integral, batata-doce, aveia) liberam energia gradualmente. Os simples (açúcar, pão branco) causam picos rápidos.
 
-💬 IAGO diz: "Seu corpo precisa de energia. A questão é: você está dando o combustível certo?"`,
+💬 Seu Assistente Personal diz: "Seu corpo precisa de energia. A questão é: você está dando o combustível certo?"`,
       duration: "4 min"
     },
     {
@@ -61,7 +61,7 @@ Você precisa de ~1.6-2.2g por kg de peso corporal se treina regularmente.
 
 Fontes: Frango, peixe, ovos, feijão, tofu, iogurte grego.
 
-💬 IAGO diz: "Proteína é construção. Sem ela, seu treino não vira resultado."`,
+💬 Seu Assistente Personal diz: "Proteína é construção. Sem ela, seu treino não vira resultado."`,
       duration: "5 min"
     },
     {
@@ -82,7 +82,7 @@ O que fazer:
 ✓ Pratique mindfulness
 ✓ Exercite-se regularmente
 
-💬 IAGO diz: "Estresse crônico sabota seus objetivos. Cuide da mente para cuidar do corpo."`,
+💬 Seu Assistente Personal diz: "Estresse crônico sabota seus objetivos. Cuide da mente para cuidar do corpo."`,
       duration: "4 min"
     },
     {
@@ -98,7 +98,7 @@ O que fazer:
 
 Uma noite mal dormida pode aumentar sua ingestão calórica em até 300 kcal no dia seguinte.
 
-💬 IAGO diz: "Sono não é luxo, é estratégia. Dormir bem é treino de recuperação."`,
+💬 Seu Assistente Personal diz: "Sono não é luxo, é estratégia. Dormir bem é treino de recuperação."`,
       duration: "3 min"
     },
   ];
@@ -108,7 +108,7 @@ Uma noite mal dormida pode aumentar sua ingestão calórica em até 300 kcal no 
       <Card className="glass-effect p-6 border-[#CEF17B]/20">
         <div className="flex items-center gap-2 mb-4">
           <BookOpen className="w-5 h-5 text-[#CEF17B]" />
-          <h3 className="font-bold text-white">Aprenda com o IAGO</h3>
+          <h3 className="font-bold text-white">Aprenda com Seu Assistente</h3>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
@@ -136,7 +136,7 @@ Uma noite mal dormida pode aumentar sua ingestão calórica em até 300 kcal no 
 
         <div className="mt-4 p-3 bg-[#CEF17B]/10 rounded-lg border border-[#CEF17B]/20">
           <p className="text-xs text-[#CEEDB2] text-center">
-            💡 "Entender o que você come é mais importante do que contar calorias." - IAGO
+            💡 "Entender o que você come é mais importante do que contar calorias." - Seu Assistente Personal
           </p>
         </div>
       </Card>
