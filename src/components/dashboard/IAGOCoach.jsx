@@ -130,7 +130,7 @@ export default function IAGOCoach({
     const userName = user.full_name?.split(' ')[0] || 'atleta';
     
     const contextPrompt = `
-Você é IAGO, um personal trainer digital humanizado com inteligência emocional.
+Você é um assistente pessoal de fitness, um personal trainer digital humanizado com inteligência emocional.
 
 CONTEXTO DO USUÁRIO:
 - Nome: ${userName}
@@ -269,7 +269,7 @@ Gere uma mensagem personalizada para ${userName}:`;
       <Card className="gradient-card border-0 p-6 shadow-xl">
         <div className="flex items-center justify-center gap-3 py-4">
           <Loader2 className="w-6 h-6 animate-spin text-[#084734]" />
-          <p className="text-[#084734] font-medium">IAGO analisando seu estado...</p>
+          <p className="text-[#084734] font-medium">Assistente analisando seu estado...</p>
         </div>
       </Card>
     );
@@ -312,7 +312,7 @@ Gere uma mensagem personalizada para ${userName}:`;
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-[#084734]" />
-              <h3 className="font-bold text-[#084734]">IAGO</h3>
+              <h3 className="font-bold text-[#084734]">Assistente Pessoal</h3>
               <Badge className={`${config.bgColor} text-[#084734] border-0 text-xs`}>
                 {config.label}
               </Badge>

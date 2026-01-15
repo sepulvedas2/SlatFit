@@ -11,7 +11,7 @@ export default function IAGOChatModal({ user, onClose }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Olá! Sou o IAGO, seu personal AI do FitLens. Como posso te ajudar hoje? Posso responder sobre treinos, nutrição, recuperação e muito mais!"
+      content: "Olá! Sou seu assistente pessoal do FitLens. Como posso te ajudar hoje? Posso responder sobre treinos, nutrição, recuperação e muito mais!"
     }
   ]);
   const [input, setInput] = useState("");
@@ -36,7 +36,7 @@ export default function IAGOChatModal({ user, onClose }) {
 
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é o IAGO, o personal AI trainer do FitLens. Você é amigável, motivador e especialista em fitness, nutrição e bem-estar.
+        prompt: `Você é o assistente pessoal do FitLens. Você é amigável, motivador e especialista em fitness, nutrição e bem-estar.
 
 Contexto do usuário: ${user?.full_name || 'Usuário'} está usando o FitLens para melhorar sua saúde e fitness.
 
@@ -101,7 +101,7 @@ Responda de forma natural e útil:`,
             </div>
             <div>
               <h3 className="font-bold text-white flex items-center gap-2">
-                IAGO
+                Assistente Pessoal
                 <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
                   Online
                 </Badge>
@@ -170,7 +170,7 @@ Responda de forma natural e útil:`,
           </div>
           <p className="text-xs text-[#CEEDB2] mt-2 text-center">
             <Sparkles className="w-3 h-3 inline mr-1" />
-            IAGO usa IA para te ajudar, mas não substitui orientação profissional
+            O assistente usa IA para te ajudar, mas não substitui orientação profissional
           </p>
         </div>
       </motion.div>

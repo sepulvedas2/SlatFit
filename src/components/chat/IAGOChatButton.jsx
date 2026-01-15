@@ -101,7 +101,7 @@ export default function IAGOChatButton({ user }) {
             animate={{ opacity: 1, x: 0 }}
             className="absolute right-20 top-1/2 -translate-y-1/2 bg-[#084734] text-white px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap shadow-lg pointer-events-none"
           >
-            Pergunte ao IAGO
+            Pergunte ao Assistente
             <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-l-8 border-l-[#084734]" />
           </motion.div>
         )}
