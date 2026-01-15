@@ -7,7 +7,7 @@ import { X, Send, Loader2, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 
-export default function IAGOChatModal({ user, onClose }) {
+export default function AssistantChatModal({ user, onClose }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",

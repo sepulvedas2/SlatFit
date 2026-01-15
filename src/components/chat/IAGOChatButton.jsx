@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import IAGOChatModal from "./IAGOChatModal";
+import AssistantChatModal from "./IAGOChatModal";
 
-export default function IAGOChatButton({ user }) {
+export default function AssistantChatButton({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const [pulse, setPulse] = useState(false);
 
@@ -110,7 +110,7 @@ export default function IAGOChatButton({ user }) {
       {/* Modal do Chat */}
       <AnimatePresence>
         {isOpen && (
-          <IAGOChatModal 
+          <AssistantChatModal 
             user={user} 
             onClose={() => setIsOpen(false)} 
           />
