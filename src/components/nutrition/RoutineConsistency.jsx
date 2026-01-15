@@ -134,7 +134,7 @@ export default function RoutineConsistency({ userEmail }) {
 
       <div className="mt-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
         <p className="text-xs text-purple-300 text-center">
-          💬 IAGO: "Constância constrói resultados. Continue assim!"
+          💬 Seu Assistente Personal: "Constância constrói resultados. Continue assim!"
         </p>
       </div>
     </Card>
