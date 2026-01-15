@@ -81,14 +81,6 @@ export default function ExerciseBlock({ block, exercises = [] }) {
                         <span>{exercise.reps}</span>
                         <span>•</span>
                         <span>{exercise.duration}s</span>
-                        {exerciseData.image_url && (
-                          <>
-                            <span>•</span>
-                            <Badge className="bg-green-500/20 text-green-400 border-0 text-xs py-0">
-                              Com foto
-                            </Badge>
-                          </>
-                        )}
                       </div>
                       {latestPR && (
                         <p className="text-xs text-[#CEF17B] mt-1 flex items-center gap-1">
