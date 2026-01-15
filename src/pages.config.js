@@ -1,35 +1,37 @@
+import Agenda from './pages/Agenda';
+import BillingHistory from './pages/BillingHistory';
+import Challenges from './pages/Challenges';
+import CheckIn from './pages/CheckIn';
+import Checkout from './pages/Checkout';
+import Community from './pages/Community';
 import Dashboard from './pages/Dashboard';
 import FoodScanner from './pages/FoodScanner';
-import Workouts from './pages/Workouts';
+import Home from './pages/Home';
 import MealPlans from './pages/MealPlans';
 import Profile from './pages/Profile';
-import Subscription from './pages/Subscription';
-import Checkout from './pages/Checkout';
-import BillingHistory from './pages/BillingHistory';
-import CheckIn from './pages/CheckIn';
-import Challenges from './pages/Challenges';
-import Community from './pages/Community';
 import SmartNutrition from './pages/SmartNutrition';
-import Agenda from './pages/Agenda';
+import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
+import Workouts from './pages/Workouts';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "Agenda": Agenda,
+    "BillingHistory": BillingHistory,
+    "Challenges": Challenges,
+    "CheckIn": CheckIn,
+    "Checkout": Checkout,
+    "Community": Community,
     "Dashboard": Dashboard,
     "FoodScanner": FoodScanner,
-    "Workouts": Workouts,
+    "Home": Home,
     "MealPlans": MealPlans,
     "Profile": Profile,
-    "Subscription": Subscription,
-    "Checkout": Checkout,
-    "BillingHistory": BillingHistory,
-    "CheckIn": CheckIn,
-    "Challenges": Challenges,
-    "Community": Community,
     "SmartNutrition": SmartNutrition,
-    "Agenda": Agenda,
+    "Subscription": Subscription,
     "WorkoutProgress": WorkoutProgress,
+    "Workouts": Workouts,
 }
 
 export const pagesConfig = {

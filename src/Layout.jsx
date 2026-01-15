@@ -80,13 +80,13 @@ export default function Layout({ children, currentPageName }) {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-300 ${
+                  className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-300 ${
                     active 
-                      ? "bg-[#CEF17B]/20 scale-110"
+                      ? "bg-[#CEF17B]/20 scale-105"
                       : "hover:bg-[#CEF17B]/10"
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${
+                  <Icon className={`w-6 h-6 ${
                     active 
                       ? 'text-[#CEF17B]'
                       : 'text-white/70'
