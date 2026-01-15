@@ -283,8 +283,8 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "💪",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Supino Livre com Halteres", sets: "4x", reps: "10-12", image_placeholder: "supino_halteres" },
-        { name: "Supino Livre com Barra", sets: "3x", reps: "12-15", image_placeholder: "supino_barra" },
+        { name: "Supino com Halteres", sets: "4x", reps: "10-12", image_placeholder: "supino_halteres" },
+        { name: "Supino com Barra", sets: "3x", reps: "12-15", image_placeholder: "supino_barra" },
         { name: "Crucifixo com Halteres", sets: "3x", reps: "12-15", image_placeholder: "crucifixo_halteres" },
         { name: "Supino no Banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
         { name: "Tríceps Mergulho", sets: "3x", reps: "10-12", image_placeholder: "triceps_mergulho" },
@@ -353,8 +353,8 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "💪",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Supino Livre com Halteres", sets: "4x", reps: "10-12", image_placeholder: "supino_halteres" },
-        { name: "Supino Livre com Barra", sets: "3x", reps: "12-15", image_placeholder: "supino_barra" },
+        { name: "Supino com Halteres", sets: "4x", reps: "10-12", image_placeholder: "supino_halteres" },
+        { name: "Supino com Barra", sets: "3x", reps: "12-15", image_placeholder: "supino_barra" },
         { name: "Crucifixo com Halteres", sets: "3x", reps: "12-15", image_placeholder: "crucifixo_halteres" },
         { name: "Supino no Banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
         { name: "Tríceps Mergulho", sets: "3x", reps: "10-12", image_placeholder: "triceps_mergulho" },
