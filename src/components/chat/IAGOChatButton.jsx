@@ -31,8 +31,8 @@ export default function IAGOChatButton({ user }) {
       setIsOpen(true);
     };
 
-    window.addEventListener('openIAGOChat', handleOpenChat);
-    return () => window.removeEventListener('openIAGOChat', handleOpenChat);
+    window.addEventListener('openAssistantChat', handleOpenChat);
+    return () => window.removeEventListener('openAssistantChat', handleOpenChat);
   }, []);
 
   return (

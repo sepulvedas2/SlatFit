@@ -12,7 +12,7 @@ export default function PersonalAIChatModal({ user, onClose }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Olá! Sou o Seu Personal IA do FitnessLynx. Como posso te ajudar hoje? Posso orientar sobre treinos, nutrição, recuperação e hábitos saudáveis! 💪"
+      content: "Olá! Sou o Seu Assistente Personal do FitnessLynx. Como posso te ajudar hoje? Posso orientar sobre treinos, nutrição, recuperação e hábitos saudáveis! 💪"
     }
   ]);
   const [input, setInput] = useState("");
@@ -82,7 +82,7 @@ export default function PersonalAIChatModal({ user, onClose }) {
       };
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é o **Personal IA do aplicativo FitnessLynx**, especializado em **academia, treino, nutrição esportiva, saúde e bem-estar**.
+        prompt: `Você é o **Assistente Personal do aplicativo FitnessLynx**, especializado em **academia, treino, nutrição esportiva, saúde e bem-estar**.
 
 Seu papel é **educar, orientar e motivar** usuários de forma **ética, profissional, segura e humanizada**.
 
@@ -180,7 +180,7 @@ Responda de forma personalizada, natural e útil:`,
             </div>
             <div>
               <h3 className="font-bold text-white flex items-center gap-2">
-                Seu Personal IA
+                Seu Assistente Personal
                 <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
                   Online
                 </Badge>
