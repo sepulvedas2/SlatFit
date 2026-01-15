@@ -400,7 +400,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🦾",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Puxada no TRX", sets: "4x", reps: "10", image_placeholder: "puxada_trx" },
+        { name: "Puxada Alta Aberta", sets: "4x", reps: "10", image_placeholder: "puxada_alta_aberta" },
         { name: "Remada Baixa", sets: "3x", reps: "8-10", image_placeholder: "remada_baixa" },
         { name: "Remada Baixa Barra", sets: "3x", reps: "10-15", image_placeholder: "remada_baixa" },
         { name: "Puxada Alta Fechada", sets: "4x", reps: "10-12", image_placeholder: "puxada_fechada" },
@@ -428,7 +428,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🦾",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Puxada no TRX", sets: "4x", reps: "10", image_placeholder: "puxada_trx" },
+        { name: "Puxada Alta Aberta", sets: "4x", reps: "10", image_placeholder: "puxada_alta_aberta" },
         { name: "Remada Baixa", sets: "3x", reps: "8-10", image_placeholder: "remada_baixa" },
         { name: "Remada Baixa Barra", sets: "3x", reps: "10-15", image_placeholder: "remada_baixa" },
         { name: "Puxada Alta Fechada", sets: "4x", reps: "10-12", image_placeholder: "puxada_fechada" },
