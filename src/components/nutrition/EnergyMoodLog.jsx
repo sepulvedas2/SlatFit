@@ -106,7 +106,7 @@ export default function EnergyMoodLog({ userEmail, today }) {
       {nutritionData?.energy_level && nutritionData?.mood && (
         <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
           <p className="text-xs text-green-300 text-center">
-            ✓ Registrado! IAGO vai usar isso para personalizar suas dicas.
+            ✓ Registrado! Seu Assistente Personal irá usar esses dados para personalizar suas dicas.
           </p>
         </div>
       )}
