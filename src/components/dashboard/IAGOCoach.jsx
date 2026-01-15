@@ -261,40 +261,40 @@ Gere uma mensagem personalizada para ${userName}:`;
 
   if (loading) {
     return (
-      <Card className="bg-white/90 backdrop-blur-sm border border-[#084734]/10 p-5 shadow-sm mb-5">
+      <Card className="bg-[#084734] border-0 p-5 shadow-lg mb-8">
         <div className="flex items-center gap-3">
-          <Loader2 className="w-5 h-5 animate-spin text-[#084734]" />
-          <p className="text-[#084734]/70 text-sm font-medium">Analisando seu progresso...</p>
+          <Loader2 className="w-5 h-5 animate-spin text-[#CEF17B]" />
+          <p className="text-white/80 text-sm font-medium">Analisando seu progresso...</p>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border border-[#084734]/10 p-5 shadow-sm mb-5">
-      <div className="flex items-start gap-4">
+    <Card className="bg-[#084734] border-0 p-5 shadow-lg mb-8">
+      <div className="flex items-start gap-3">
         {/* Ícone profissional */}
         <div className="flex-shrink-0">
-          <div className="w-12 h-12 rounded-lg bg-[#084734] flex items-center justify-center shadow-sm">
-            <Icon className="w-6 h-6 text-[#CEF17B]" />
+          <div className="w-10 h-10 rounded-lg bg-[#CEF17B]/20 flex items-center justify-center">
+            <Icon className="w-5 h-5 text-[#CEF17B]" />
           </div>
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5">
-            <h3 className="font-semibold text-[#084734] text-sm">Seu Assistente Personal</h3>
-            <Badge variant="outline" className="text-xs text-[#084734]/60 border-[#084734]/20">
+            <h3 className="font-semibold text-white text-sm">Seu Assistente Personal</h3>
+            <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
               {config.label}
             </Badge>
           </div>
           <div className="relative">
-            <p className={`text-[#084734]/80 text-sm leading-relaxed ${shouldTruncate ? 'line-clamp-3' : ''}`}>
+            <p className={`text-white/90 text-sm leading-relaxed ${shouldTruncate ? 'line-clamp-3' : ''}`}>
               {message}
             </p>
             {isLongMessage && (
               <button 
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center gap-1 mt-2 text-[#084734] text-xs font-medium hover:text-[#084734]/70 transition-colors"
+                className="flex items-center gap-1 mt-2 text-[#CEF17B] text-xs font-medium hover:text-[#CEF17B]/80 transition-colors"
               >
                 {isExpanded ? 'Ver menos' : 'Ver mais'}
                 <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
