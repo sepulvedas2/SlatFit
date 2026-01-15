@@ -312,7 +312,7 @@ Gere uma mensagem personalizada para ${userName}:`;
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-[#084734]" />
-              <h3 className="font-bold text-[#084734]">Assistente Pessoal</h3>
+              <h3 className="font-bold text-[#084734]">Seu Assistente Personal</h3>
               <Badge className={`${config.bgColor} text-[#084734] border-0 text-xs`}>
                 {config.label}
               </Badge>
