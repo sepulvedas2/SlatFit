@@ -108,7 +108,7 @@ Uma noite mal dormida pode aumentar sua ingestão calórica em até 300 kcal no 
       <Card className="glass-effect p-6 border-[#CEF17B]/20">
         <div className="flex items-center gap-2 mb-4">
           <BookOpen className="w-5 h-5 text-[#CEF17B]" />
-          <h3 className="font-bold text-white">Aprenda com Seu Assistente</h3>
+          <h3 className="font-bold text-white">Aprenda com Seu Assistente Personal</h3>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
