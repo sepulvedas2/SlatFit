@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Loader2, Heart, Zap, Brain, Target } from "lucide-react";
+import { Sparkles, Loader2, Heart, Zap, Brain, Target, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { differenceInDays, format } from "date-fns";
@@ -19,6 +19,7 @@ export default function IAGOCoach({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [emotion, setEmotion] = useState("happy");
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -254,9 +255,13 @@ Gere uma mensagem personalizada para ${userName}:`;
   const config = getModeConfig();
   const Icon = config.icon;
 
+  // Verificar se a mensagem é longa (mais de 150 caracteres)
+  const isLongMessage = message.length > 150;
+  const shouldTruncate = isLongMessage && !isExpanded;
+
   if (loading) {
     return (
-      <Card className="bg-white/90 backdrop-blur-sm border border-[#084734]/10 p-5 shadow-sm">
+      <Card className="bg-white/90 backdrop-blur-sm border border-[#084734]/10 p-5 shadow-sm mb-5">
         <div className="flex items-center gap-3">
           <Loader2 className="w-5 h-5 animate-spin text-[#084734]" />
           <p className="text-[#084734]/70 text-sm font-medium">Analisando seu progresso...</p>
@@ -266,7 +271,7 @@ Gere uma mensagem personalizada para ${userName}:`;
   }
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border border-[#084734]/10 p-5 shadow-sm">
+    <Card className="bg-white/95 backdrop-blur-sm border border-[#084734]/10 p-5 shadow-sm mb-5">
       <div className="flex items-start gap-4">
         {/* Ícone profissional */}
         <div className="flex-shrink-0">
@@ -282,9 +287,20 @@ Gere uma mensagem personalizada para ${userName}:`;
               {config.label}
             </Badge>
           </div>
-          <p className="text-[#084734]/80 text-sm leading-relaxed">
-            {message}
-          </p>
+          <div className="relative">
+            <p className={`text-[#084734]/80 text-sm leading-relaxed ${shouldTruncate ? 'line-clamp-3' : ''}`}>
+              {message}
+            </p>
+            {isLongMessage && (
+              <button 
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center gap-1 mt-2 text-[#084734] text-xs font-medium hover:text-[#084734]/70 transition-colors"
+              >
+                {isExpanded ? 'Ver menos' : 'Ver mais'}
+                <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </Card>
