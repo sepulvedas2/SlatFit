@@ -64,14 +64,14 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Main Content */}
-      <main className="pb-28 md:pb-8 min-h-screen">
+      <main className="pb-24 md:pb-8 min-h-screen">
         {children}
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="bottom-navigation fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t bg-[#084734]/90 border-[#CEF17B]/20">
+      <nav className="bottom-navigation fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t bg-[#084734]/95 border-[#CEF17B]/20 shadow-2xl" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-lg mx-auto px-2">
-          <div className="flex justify-around items-center py-2">
+          <div className="flex justify-around items-center py-3">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
