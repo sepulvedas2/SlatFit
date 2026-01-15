@@ -251,91 +251,42 @@ Gere uma mensagem personalizada para ${userName}:`;
     return configs[iagoMode] || configs.calm_mentor;
   };
 
-  const getAvatarExpression = () => {
-    const expressions = {
-      excited: "😄",
-      focused: "🎯",
-      caring: "🤗",
-      analytical: "🧠"
-    };
-    return expressions[emotion] || "🤖";
-  };
-
   const config = getModeConfig();
   const Icon = config.icon;
 
   if (loading) {
     return (
-      <Card className="gradient-card border-0 p-6 shadow-xl">
-        <div className="flex items-center justify-center gap-3 py-4">
-          <Loader2 className="w-6 h-6 animate-spin text-[#084734]" />
-          <p className="text-[#084734] font-medium">Assistente analisando seu estado...</p>
+      <Card className="bg-white/90 backdrop-blur-sm border border-[#084734]/10 p-5 shadow-sm">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-5 h-5 animate-spin text-[#084734]" />
+          <p className="text-[#084734]/70 text-sm font-medium">Analisando seu progresso...</p>
         </div>
       </Card>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className="relative overflow-hidden gradient-card border-0 p-6 shadow-xl">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
-        
-        <div className="flex items-start gap-4 relative z-10">
-          {/* Avatar com expressão */}
-          <motion.div
-            animate={{ 
-              scale: [1, 1.05, 1],
-              rotate: [0, 3, -3, 0]
-            }}
-            transition={{ 
-              duration: 3,
-              repeat: Infinity,
-              repeatDelay: 2
-            }}
-            className="flex-shrink-0"
-          >
-            <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${config.color} p-1 shadow-lg relative`}>
-              <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                <span className="text-3xl">{getAvatarExpression()}</span>
-              </div>
-              {/* Indicador de modo */}
-              <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full ${config.bgColor} border-2 border-white flex items-center justify-center`}>
-                <Icon className="w-3 h-3 text-[#084734]" />
-              </div>
-            </div>
-          </motion.div>
-
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-[#084734]" />
-              <h3 className="font-bold text-[#084734]">Seu Assistente Personal</h3>
-              <Badge className={`${config.bgColor} text-[#084734] border-0 text-xs`}>
-                {config.label}
-              </Badge>
-            </div>
-            <p className="text-[#084734] font-medium leading-relaxed">
-              {message}
-            </p>
+    <Card className="bg-white/95 backdrop-blur-sm border border-[#084734]/10 p-5 shadow-sm">
+      <div className="flex items-start gap-4">
+        {/* Ícone profissional */}
+        <div className="flex-shrink-0">
+          <div className="w-12 h-12 rounded-lg bg-[#084734] flex items-center justify-center shadow-sm">
+            <Icon className="w-6 h-6 text-[#CEF17B]" />
           </div>
         </div>
 
-        {/* Barra de pulsação emocional */}
-        <motion.div
-          className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${config.color}`}
-          animate={{ 
-            scaleX: [0.3, 1, 0.3],
-          }}
-          transition={{ 
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </Card>
-    </motion.div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1.5">
+            <h3 className="font-semibold text-[#084734] text-sm">Seu Assistente Personal</h3>
+            <Badge variant="outline" className="text-xs text-[#084734]/60 border-[#084734]/20">
+              {config.label}
+            </Badge>
+          </div>
+          <p className="text-[#084734]/80 text-sm leading-relaxed">
+            {message}
+          </p>
+        </div>
+      </div>
+    </Card>
   );
 }
