@@ -92,7 +92,7 @@ export default function SmartNutrition() {
       };
 
       const tip = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é o Personal IA do FitnessLynx. Gere UMA dica personalizada e prática de nutrição para hoje.
+        prompt: `Você é o Assistente Personal do FitnessLynx. Gere UMA dica personalizada e prática de nutrição para hoje.
 
 Contexto do usuário:
 - Objetivo: ${userContext.objetivo}
@@ -251,14 +251,14 @@ Exemplo: "💧 Você já bebeu ${userContext.aguaHoje}ml hoje. Tente chegar aos 
           </div>
         </Card>
 
-        {/* IAGO Message */}
+        {/* Assistente Personal Message */}
         <Card className="glass-effect p-6 border-[#CEF17B]/20 text-center">
           <Lightbulb className="w-12 h-12 text-[#CEF17B] mx-auto mb-3" />
           <h3 className="text-lg font-bold text-white mb-2">
             "Entender o que você come é mais importante do que contar calorias."
           </h3>
           <p className="text-sm text-[#CEEDB2]">
-            — Seu Personal IA
+            — Seu Assistente Personal
           </p>
         </Card>
 
