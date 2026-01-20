@@ -17,6 +17,7 @@ import WorkoutSummary from "../components/workouts/WorkoutSummary";
 import WeeklyPlan from "../components/workouts/WeeklyPlan";
 import MyWorkouts from "../components/workouts/MyWorkouts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TodayWorkout from "../components/dashboard/TodayWorkout";
 
 export default function Workouts() {
   const [user, setUser] = useState(null);
@@ -34,6 +35,45 @@ export default function Workouts() {
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  const { data: profile } = useQuery({
+    queryKey: ['userProfile', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      return profiles[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
+  const { data: todayWorkouts = [] } = useQuery({
+    queryKey: ['todayWorkouts', user?.email],
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const logs = await base44.entities.WorkoutLog.filter({ 
+        user_email: user.email,
+        completed_date: today
+      });
+      return logs;
+    },
+    enabled: !!user?.email,
+    initialData: [],
+  });
+
+  const { data: weekWorkouts } = useQuery({
+    queryKey: ['weekWorkouts', user?.email],
+    queryFn: async () => {
+      const today = new Date();
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay() + 1);
+      const weekStartStr = weekStart.toISOString().split('T')[0];
+      
+      const logs = await base44.entities.WorkoutLog.filter({ user_email: user.email });
+      return logs.filter(log => log.completed_date >= weekStartStr);
+    },
+    enabled: !!user?.email,
+    initialData: [],
+  });
 
   // Fetch all exercises from database
   const { data: exercises = [] } = useQuery({
@@ -268,6 +308,13 @@ export default function Workouts() {
             </TabsList>
 
             <TabsContent value="app-workouts" className="space-y-6 mt-6">
+
+          {/* Treino de Hoje */}
+          <TodayWorkout 
+            profile={profile}
+            weekWorkouts={weekWorkouts}
+            todayWorkouts={todayWorkouts}
+          />
 
           {/* Week Selector */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

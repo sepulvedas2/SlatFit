@@ -312,13 +312,6 @@ export default function Dashboard() {
           profile={profile}
         />
 
-        {/* Treino do Dia Personalizado */}
-        <TodayWorkout 
-          profile={profile}
-          weekWorkouts={weekWorkouts}
-          todayWorkouts={todayWorkouts}
-        />
-
         {/* Check-in Reminder */}
         {!todayCheckIn && (
           <Link to={createPageUrl("CheckIn")}>
