@@ -318,8 +318,13 @@ export default function Workouts() {
               if (workoutType === 'hiit' || workoutType?.includes('hiit')) {
                 setView('hiit');
               } else {
-                // Para muscle splits, full body, etc - já está na view correta (plan)
-                // O plano semanal já está visível abaixo
+                // Para muscle splits, full body, etc - scroll até o plano semanal
+                setTimeout(() => {
+                  const weeklyPlanElement = document.getElementById('weekly-plan-section');
+                  if (weeklyPlanElement) {
+                    weeklyPlanElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
               }
             }}
           />
@@ -374,12 +379,14 @@ export default function Workouts() {
             </div>
           </Card>
 
-          <WeeklyPlan 
-            weekNumber={selectedWeek}
-            dailyWorkouts={dailyWorkouts}
-            onStartWorkout={handleStartWorkout}
-            onCompleteDay={handleCompleteDay}
-          />
+          <div id="weekly-plan-section">
+            <WeeklyPlan 
+              weekNumber={selectedWeek}
+              dailyWorkouts={dailyWorkouts}
+              onStartWorkout={handleStartWorkout}
+              onCompleteDay={handleCompleteDay}
+            />
+          </div>
 
           <Card className="glass-effect border-[#CEF17B]/20 p-4">
             <p className="text-sm text-[#CEEDB2] text-center">
