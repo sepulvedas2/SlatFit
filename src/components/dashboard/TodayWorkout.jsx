@@ -195,25 +195,16 @@ export default function TodayWorkout({ profile, weekWorkouts, todayWorkouts }) {
         </div>
       </div>
 
-      {!hasCompletedToday && (
-        <Link to={createPageUrl("Workouts")}>
-          <Button className="w-full bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90 font-semibold">
-            <Dumbbell className="w-4 h-4 mr-2" />
-            Começar Agora
-          </Button>
-        </Link>
-      )}
+      <Link to={createPageUrl("Workouts")}>
+        <Button className="w-full bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90 font-semibold">
+          <Dumbbell className="w-4 h-4 mr-2" />
+          {hasCompletedToday ? "Ver Todos os Treinos" : "Começar Treino"}
+        </Button>
+      </Link>
 
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#CEF17B]/20">
-        <p className="text-xs text-white/60">
-          {weekWorkouts?.length || 0}/{profile?.training_frequency || 3} treinos esta semana
-        </p>
-        <Link to={createPageUrl("Workouts")}>
-          <Button variant="ghost" size="sm" className="text-[#CEF17B] text-xs h-auto p-0">
-            Ver todos →
-          </Button>
-        </Link>
-      </div>
+      <p className="text-center text-xs text-white/50 mt-3">
+        {weekWorkouts?.length || 0} treinos esta semana • Continue firme!
+      </p>
     </Card>
   );
 }

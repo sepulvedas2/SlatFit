@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2, Heart, Zap, Brain, Target, ChevronDown, Dumbbell, TrendingUp } from "lucide-react";
+import { Sparkles, Loader2, Heart, Zap, Brain, Target, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { differenceInDays, format } from "date-fns";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 
 export default function IAGOCoach({ 
   user, 
@@ -23,7 +20,6 @@ export default function IAGOCoach({
   const [loading, setLoading] = useState(true);
   const [emotion, setEmotion] = useState("happy");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [recommendedAction, setRecommendedAction] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -44,14 +40,10 @@ export default function IAGOCoach({
     // 3. Gerar mensagem contextualizada
     const iagoMessage = await generateIAGOMessage(userState, mode);
     setMessage(iagoMessage);
-
+    
     // 4. Definir emoção do avatar
     setEmotion(getAvatarEmotion(mode));
-
-    // 5. Definir ação recomendada (botão de ação)
-    const action = determineRecommendedAction(userState, mode);
-    setRecommendedAction(action);
-
+    
     setLoading(false);
   };
 
@@ -275,68 +267,6 @@ Gere uma orientação profissional e motivadora para ${userName}:`;
     return emotions[mode] || "focused";
   };
 
-  const determineRecommendedAction = (state, mode) => {
-    // SISTEMA DE AÇÃO INTELIGENTE - O agente toma decisão e direciona
-
-    // Prioridade 1: Baixa constância (inatividade)
-    if (state.daysSinceLastWorkout >= 3) {
-      return {
-        type: "workout",
-        label: "Voltar aos Treinos",
-        description: "Treino adaptado de retomada",
-        icon: Dumbbell,
-        link: createPageUrl("Workouts"),
-        color: "bg-orange-500 hover:bg-orange-600"
-      };
-    }
-
-    // Prioridade 2: Sem treino hoje
-    if (state.weekWorkouts < (profile?.training_frequency || 3) && !todayCheckIn?.energy_level) {
-      return {
-        type: "checkin",
-        label: "Fazer Check-in",
-        description: "Ajustar treino de hoje",
-        icon: Target,
-        link: createPageUrl("CheckIn"),
-        color: "bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734]"
-      };
-    }
-
-    // Prioridade 3: Progresso calórico baixo
-    if (state.calorieProgress < 0.6 && profile?.goal === 'muscle_gain') {
-      return {
-        type: "nutrition",
-        label: "Ajustar Nutrição",
-        description: "Calorias abaixo da meta",
-        icon: TrendingUp,
-        link: createPageUrl("SmartNutrition"),
-        color: "bg-blue-500 hover:bg-blue-600"
-      };
-    }
-
-    // Prioridade 4: Treino disponível
-    if (state.weekWorkouts < (profile?.training_frequency || 3)) {
-      return {
-        type: "workout",
-        label: "Iniciar Treino de Hoje",
-        description: "Treino personalizado pronto",
-        icon: Dumbbell,
-        link: createPageUrl("Workouts"),
-        color: "bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734]"
-      };
-    }
-
-    // Default: Ver progresso
-    return {
-      type: "progress",
-      label: "Ver Meu Progresso",
-      description: "Análise completa",
-      icon: TrendingUp,
-      link: createPageUrl("WorkoutProgress"),
-      color: "bg-white/10 hover:bg-white/20 border border-[#CEF17B]/40"
-    };
-  };
-
   const getModeConfig = () => {
     const configs = {
       coach_confident: {
@@ -416,27 +346,9 @@ Gere uma orientação profissional e motivadora para ${userName}:`;
                 <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
               </button>
             )}
-            </div>
-            </div>
-
-            {/* AÇÃO RECOMENDADA - Botão de Direcionamento Inteligente */}
-            {recommendedAction && (
-            <div className="mt-3 pt-3 border-t border-white/10">
-            <Link to={recommendedAction.link}>
-              <Button 
-                className={`w-full ${recommendedAction.color} font-semibold`}
-                size="sm"
-              >
-                {React.createElement(recommendedAction.icon, { className: "w-4 h-4 mr-2" })}
-                {recommendedAction.label}
-              </Button>
-            </Link>
-            <p className="text-xs text-white/60 text-center mt-1">
-              {recommendedAction.description}
-            </p>
-            </div>
-            )}
-            </div>
-            </Card>
-            );
-            }
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}

@@ -20,7 +20,6 @@ import OnboardingModal from "../components/onboarding/OnboardingModal";
 import AssistantCoach from "../components/dashboard/IAGOCoach";
 import TodayWorkout from "../components/dashboard/TodayWorkout";
 import DailyGoals from "../components/dashboard/DailyGoals";
-import ConstancyAlert from "../components/dashboard/ConstancyAlert";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -302,14 +301,6 @@ export default function Dashboard() {
           todayCalories={todayCalories}
           calorieTarget={calorieTarget}
           userPoints={userPoints}
-        />
-
-        {/* Sistema Proativo de Constância */}
-        <ConstancyAlert 
-          user={user}
-          profile={profile}
-          weekWorkouts={weekWorkouts}
-          lastWorkout={weekWorkouts?.[0]}
         />
 
         {/* Metas de Hoje */}
