@@ -18,6 +18,8 @@ import QuickActions from "../components/dashboard/QuickActions";
 import WelcomeModal from "../components/onboarding/WelcomeModal";
 import OnboardingModal from "../components/onboarding/OnboardingModal";
 import AssistantCoach from "../components/dashboard/IAGOCoach";
+import TodayWorkout from "../components/dashboard/TodayWorkout";
+import DailyGoals from "../components/dashboard/DailyGoals";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -285,7 +287,10 @@ export default function Dashboard() {
         )}
 
         {/* 1. User Greeting */}
-        <UserGreeting userName={user?.full_name?.split(' ')[0] || 'Atleta'} />
+        <UserGreeting 
+          userName={user?.full_name?.split(' ')[0] || 'Atleta'} 
+          profile={profile}
+        />
 
         {/* AI Coach */}
         <AssistantCoach 
@@ -296,6 +301,22 @@ export default function Dashboard() {
           todayCalories={todayCalories}
           calorieTarget={calorieTarget}
           userPoints={userPoints}
+        />
+
+        {/* Metas de Hoje */}
+        <DailyGoals 
+          todayCalories={todayCalories}
+          calorieTarget={calorieTarget}
+          todayWorkouts={todayWorkouts}
+          nutritionData={nutritionData}
+          profile={profile}
+        />
+
+        {/* Treino do Dia Personalizado */}
+        <TodayWorkout 
+          profile={profile}
+          weekWorkouts={weekWorkouts}
+          todayWorkouts={todayWorkouts}
         />
 
         {/* Check-in Reminder */}
@@ -312,7 +333,7 @@ export default function Dashboard() {
                       Faça seu Check-in Diário! 🎯
                     </h3>
                     <p className="text-[#084734]/70 text-xs mt-0.5">
-                      A IA vai ajustar seu treino! (+10 XP)
+                      Seu personal vai ajustar as recomendações! (+10 XP)
                     </p>
                   </div>
                 </div>
@@ -324,39 +345,7 @@ export default function Dashboard() {
           </Link>
         )}
 
-        {/* 2. Daily Mission */}
-        <DailyMissions userEmail={user?.email} />
-
-        {/* Calories Burned Today */}
-        <Card className="glass-effect border-orange-500/30 p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center">
-                <Flame className="w-8 h-8 text-orange-400" />
-              </div>
-              <div>
-                <p className="text-white/60 text-sm mb-1">Calorias Queimadas Hoje</p>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold text-white">{todayCaloriesBurned}</p>
-                  <p className="text-orange-400 text-sm">kcal</p>
-                </div>
-              </div>
-            </div>
-            {todayCaloriesBurned > 0 && (
-              <div className="text-right">
-                <p className="text-xs text-white/60 mb-1">Treinos hoje</p>
-                <p className="text-2xl font-bold text-[#CEF17B]">{todayWorkouts.length}</p>
-              </div>
-            )}
-          </div>
-          {todayCaloriesBurned === 0 && (
-            <p className="text-center text-white/40 text-sm mt-4">
-              Comece um treino HIIT para queimar calorias! 🔥
-            </p>
-          )}
-        </Card>
-
-        {/* 3. Points Card */}
+        {/* Points Card */}
         <PointsCard userPoints={userPoints} />
 
         {/* 4. Weekly Goals */}
