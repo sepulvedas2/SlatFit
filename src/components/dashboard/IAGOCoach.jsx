@@ -24,6 +24,7 @@ export default function IAGOCoach({
   const [emotion, setEmotion] = useState("happy");
   const [isExpanded, setIsExpanded] = useState(false);
   const [recommendedAction, setRecommendedAction] = useState(null);
+  const [lastAnalyzedState, setLastAnalyzedState] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -33,24 +34,60 @@ export default function IAGOCoach({
 
   const analyzeUserStateAndRespond = async () => {
     setLoading(true);
-    
-    // 1. Analisar estado do usuário
-    const userState = await analyzeUserState();
-    
-    // 2. Determinar modo do IAGO
-    const mode = determineIAGOMode(userState);
-    setIagoMode(mode);
-    
-    // 3. Gerar mensagem contextualizada
-    const iagoMessage = await generateIAGOMessage(userState, mode);
-    setMessage(iagoMessage);
 
-    // 4. Definir emoção do avatar
-    setEmotion(getAvatarEmotion(mode));
+    try {
+      // 1. Analisar estado do usuário
+      const userState = await analyzeUserState();
 
-    // 5. Definir ação recomendada (botão de ação)
-    const action = determineRecommendedAction(userState, mode);
-    setRecommendedAction(action);
+      // Cache: Verificar se o estado mudou significativamente
+      const stateKey = `${userState.daysSinceLastWorkout}-${userState.weekWorkouts}-${userState.mood}-${userState.avgEnergy.toFixed(0)}`;
+      if (lastAnalyzedState === stateKey && message) {
+        setLoading(false);
+        return; // Usar mensagem em cache
+      }
+
+      // 2. Determinar modo do IAGO
+      const mode = determineIAGOMode(userState);
+      setIagoMode(mode);
+
+      // 3. Gerar mensagem contextualizada
+      const iagoMessage = await generateIAGOMessage(userState, mode);
+      setMessage(iagoMessage);
+
+      // 4. Definir emoção do avatar
+      setEmotion(getAvatarEmotion(mode));
+
+      // 5. Definir ação recomendada (botão de ação)
+      const action = determineRecommendedAction(userState, mode);
+      setRecommendedAction(action);
+
+      // Salvar estado para cache
+      setLastAnalyzedState(stateKey);
+
+    } catch (error) {
+      console.error("Erro ao analisar estado:", error);
+      // Em caso de erro (rate limit), usar fallback
+      const userState = await analyzeUserState();
+      const mode = determineIAGOMode(userState);
+      setIagoMode(mode);
+      setEmotion(getAvatarEmotion(mode));
+
+      // Usar mensagem fallback
+      const userName = user?.full_name?.split(' ')[0] || 'Atleta';
+      const objective = profile?.goal === 'weight_loss' ? 'emagrecimento' : profile?.goal === 'muscle_gain' ? 'hipertrofia' : 'manutenção';
+
+      const fallbacks = {
+        coach_confident: `${userName}, seu objetivo é ${objective}. Hoje: execute o treino direcionado com foco em técnica e mantenha as calorias dentro da meta. Essa disciplina diária é o que gera resultados reais.`,
+        calm_mentor: `${userName}, para ${objective}, o importante é consistência. Hoje: complete o treino planejado e mantenha nutrição adequada. Cada dia conta para o resultado final.`,
+        empathetic_support: `${userName}, vamos recomeçar de forma inteligente. Que tal um treino adaptado de 20 minutos hoje? Isso mantém o hábito ativo e prepara para retomar o ritmo. Constância importa mais que intensidade agora.`,
+        strategic_guide: `${userName}, análise: ${userState.weekWorkouts} treinos/semana, adesão calórica ${(userState.calorieProgress * 100).toFixed(0)}%. Para otimizar ${objective}, foque em sono de qualidade (7-8h) e hidratação (2L+). Isso acelera recuperação e resultados.`
+      };
+
+      setMessage(fallbacks[mode] || fallbacks.calm_mentor);
+
+      const action = determineRecommendedAction(userState, mode);
+      setRecommendedAction(action);
+    }
 
     setLoading(false);
   };
