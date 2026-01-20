@@ -315,8 +315,11 @@ export default function Workouts() {
             profile={profile}
             weekWorkouts={weekWorkouts}
             onStartWorkout={(workoutType) => {
-              if (workoutType === 'hiit') {
+              if (workoutType === 'hiit' || workoutType?.includes('hiit')) {
                 setView('hiit');
+              } else {
+                // Para muscle splits, full body, etc - já está na view correta (plan)
+                // O plano semanal já está visível abaixo
               }
             }}
           />
