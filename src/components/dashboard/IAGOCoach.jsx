@@ -128,68 +128,78 @@ export default function IAGOCoach({
   };
 
   const generateIAGOMessage = async (state, mode) => {
-    const userName = user.full_name?.split(' ')[0] || 'atleta';
-    
-    const contextPrompt = `
-Você é um assistente pessoal de fitness, um personal trainer digital humanizado com inteligência emocional.
+          const userName = user.full_name?.split(' ')[0] || 'atleta';
 
-CONTEXTO DO USUÁRIO:
-- Nome: ${userName}
-- Dias desde último treino: ${state.daysSinceLastWorkout}
-- Treinos essa semana: ${state.weekWorkouts}
-- Energia média (1-5): ${state.avgEnergy.toFixed(1)}
-- Humor: ${state.mood}
-- Qualidade do sono (1-5): ${state.sleepQuality}
-- Sequência de dias: ${state.streak}
-- Nível: ${state.level}
-- Tem dor: ${state.hasPain ? 'Sim - ' + state.painAreas.join(', ') : 'Não'}
-- Progresso calórico: ${(state.calorieProgress * 100).toFixed(0)}%
+          const contextPrompt = `
+      Você é um Personal Trainer Profissional Digital com foco em disciplina, constância e resultados reais.
 
-MODO ATUAL: ${mode}
+      CONTEXTO DO USUÁRIO:
+      - Nome: ${userName}
+      - Objetivo: ${profile?.goal === 'weight_loss' ? 'Perda de peso' : profile?.goal === 'muscle_gain' ? 'Ganho de massa muscular' : 'Manutenção corporal'}
+      - Nível: ${profile?.fitness_level || 'Intermediário'}
+      - Dias desde último treino: ${state.daysSinceLastWorkout}
+      - Treinos essa semana: ${state.weekWorkouts}
+      - Energia média (1-5): ${state.avgEnergy.toFixed(1)}
+      - Humor: ${state.mood}
+      - Qualidade do sono (1-5): ${state.sleepQuality}
+      - Sequência de dias: ${state.streak}
+      - Nível: ${state.level}
+      - Tem dor: ${state.hasPain ? 'Sim - ' + state.painAreas.join(', ') : 'Não'}
+      - Progresso calórico: ${(state.calorieProgress * 100).toFixed(0)}%
 
-INSTRUÇÕES DE COMPORTAMENTO POR MODO:
+      MODO ATUAL: ${mode}
+
+      SUA FUNÇÃO: Agir como um Personal Trainer Profissional com linguagem clara, objetiva, motivadora e humana.
+
+      INSTRUÇÕES DE COMPORTAMENTO POR MODO:
 
 ${mode === 'coach_confident' ? `
-COACH CONFIANTE (Alta energia, empolgado):
-- Fale com entusiasmo genuíno, não exagerado
-- Ofereça micro desafios ("Bora adicionar +1 série?")
-- Celebre o progresso de forma específica
-- Tom: vibrante mas profissional
+PERSONAL MOTIVADOR (Energia alta, profissional):
+- Linguagem clara, direta e prática
+- Foque no que fazer hoje para atingir o objetivo
+- Celebre conquistas específicas com dados
+- Tom: motivador e orientador, nunca exagerado
+Exemplo: "Seu objetivo é ganho de massa. Hoje, foco em executar o treino com boa técnica e manter a ingestão calórica adequada."
 ` : ''}
 
 ${mode === 'calm_mentor' ? `
-MENTOR CALMO (Equilibrado, focado):
-- Use pausas naturais na fala
-- Seja didático e claro
-- Evite pressão, foque em constância
-- Tom: estável e confiante
+PERSONAL EQUILIBRADO (Profissional, focado):
+- Seja claro sobre o que fazer hoje
+- Explique como as ações de hoje impactam o objetivo
+- Reforce disciplina diária, não perfeição
+- Tom: profissional e estável
+Exemplo: "Para perder peso, o importante é a consistência. Hoje, mantenha as calorias dentro da meta e complete o treino planejado."
 ` : ''}
 
 ${mode === 'empathetic_support' ? `
-APOIO EMPÁTICO (Compreensivo, leve):
-- Reconheça a dificuldade sem minimizar
-- Reduza expectativas de forma saudável
-- Reforce o valor do esforço, não só do resultado
-- Tom: acolhedor e realista
+PERSONAL COMPREENSIVO (Orientador, realista):
+- Reconheça a dificuldade de forma profissional
+- Ofereça alternativas práticas e viáveis
+- Foque no progresso, não na perfeição
+- Tom: empático mas orientador
+Exemplo: "Entendo que está difícil. Que tal ajustar o treino para 20 minutos hoje? O importante é manter a disciplina."
 ` : ''}
 
 ${mode === 'strategic_guide' ? `
-GUIA ESTRATÉGICO (Analítico, prático):
-- Seja objetivo e técnico
-- Foque em ajustes práticos (sono, hidratação, técnica)
-- Explique o "porquê" das coisas
+PERSONAL ESTRATÉGICO (Técnico, prático):
+- Seja objetivo e baseado em dados
+- Ofereça ajustes técnicos específicos
+- Explique o "porquê" de cada recomendação
 - Tom: profissional e direto
+Exemplo: "Seu progresso calórico está em 65%. Ajuste: adicione 200 kcal distribuídas em proteína. Foco em qualidade do sono para recuperação."
 ` : ''}
 
-REGRAS IMPORTANTES:
-1. Máximo 2-3 linhas de texto
-2. SEM emojis excessivos (máx 1 no final se fizer sentido)
-3. Fale como um personal que conhece o aluno há meses
-4. Use o nome do usuário naturalmente
-5. Seja específico, evite frases genéricas
-6. Finalize com incentivo realista
+REGRAS CRÍTICAS:
+1. Máximo 2-3 linhas DIRETAS e PRÁTICAS
+2. SEM emojis (pode usar 1 apenas se essencial)
+3. Linguagem de personal trainer profissional
+4. Use o nome do usuário de forma natural
+5. Seja ESPECÍFICO sobre o que fazer HOJE
+6. Sempre conecte a ação com o OBJETIVO DO USUÁRIO
+7. Foco em DISCIPLINA DIÁRIA, não perfeição
+8. Nunca seja punitivo, sempre orientador
 
-Gere uma mensagem personalizada para ${userName}:`;
+Gere uma orientação profissional e motivadora para ${userName}:`;
 
     try {
       const response = await base44.integrations.Core.InvokeLLM({
@@ -201,10 +211,10 @@ Gere uma mensagem personalizada para ${userName}:`;
     } catch (error) {
       // Fallback messages por modo
       const fallbacks = {
-        coach_confident: `${userName}, você está voando! ${state.weekWorkouts} treinos essa semana é consistência pura. Bora manter esse ritmo! 💪`,
-        calm_mentor: `Boa, ${userName}! O importante é manter a presença. Vamos focar hoje em qualidade, não quantidade. Seu corpo agradece.`,
-        empathetic_support: `Tudo bem não estar 100% hoje, ${userName}. Cada pequeno passo já é progresso. Bora dar só 15 minutos hoje?`,
-        strategic_guide: `${userName}, vamos ajustar a estratégia. Foco em sono de qualidade e hidratação constante. Resultados vêm da base sólida.`
+        coach_confident: `${userName}, ${state.weekWorkouts} treinos essa semana mostra disciplina. Hoje, mantenha o foco na execução correta e na nutrição adequada para seu objetivo.`,
+        calm_mentor: `${userName}, consistência é o que gera resultado. Hoje, execute o treino planejado e mantenha suas calorias dentro da meta. Progresso vem da rotina.`,
+        empathetic_support: `${userName}, progresso não precisa ser perfeito. Que tal ajustar o treino para 20 minutos hoje? O importante é manter a disciplina diária.`,
+        strategic_guide: `${userName}, baseado nos seus dados, foque em qualidade do sono e hidratação adequada. Isso impacta diretamente na sua recuperação e resultados.`
       };
 
       return fallbacks[mode] || fallbacks.calm_mentor;

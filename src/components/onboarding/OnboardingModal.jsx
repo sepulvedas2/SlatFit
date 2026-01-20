@@ -17,6 +17,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
     age: "",
     gender: "male",
     goal: "weight_loss",
+    fitness_level: "Iniciante",
     activity_level: "moderate",
     body_type: "mesomorph"
   });
@@ -63,7 +64,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
   });
 
   const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < 5) setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -85,6 +86,8 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
       case 3:
         return formData.goal;
       case 4:
+        return formData.fitness_level;
+      case 5:
         return formData.activity_level;
       default:
         return true;
@@ -104,7 +107,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
             <motion.div 
               className="h-full bg-[#CEF17B]"
               initial={{ width: "0%" }}
-              animate={{ width: `${(step / 4) * 100}%` }}
+              animate={{ width: `${(step / 5) * 100}%` }}
               transition={{ duration: 0.3 }}
             />
           </div>
@@ -113,10 +116,10 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
             {/* Header */}
             <div className="text-center mb-8 mt-4">
               <h2 className="text-2xl font-bold text-white mb-2">
-                Bem-vindo ao FitLens! 👋
+                Seu Personal Trainer Digital 💪
               </h2>
               <p className="text-[#CEEDB2]">
-                Vamos personalizar sua experiência em {4 - step + 1} passos
+                Vamos criar seu plano personalizado em {5 - step + 1} passos
               </p>
             </div>
 
@@ -288,7 +291,46 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                   </div>
 
                   <h3 className="text-xl font-bold text-white text-center mb-6">
-                    Nível de Atividade
+                    Qual seu nível de treino?
+                  </h3>
+
+                  <div className="space-y-3">
+                    {[
+                      { value: "Iniciante", label: "Iniciante", desc: "Pouca ou nenhuma experiência com treinos" },
+                      { value: "Intermediário", label: "Intermediário", desc: "Treino regular há alguns meses" },
+                      { value: "Avançado", label: "Avançado", desc: "Treino consistente há mais de 1 ano" }
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => updateField("fitness_level", option.value)}
+                        className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                          formData.fitness_level === option.value
+                            ? "border-[#CEF17B] bg-[#CEF17B]/10"
+                            : "border-white/10 hover:border-[#CEF17B]/50"
+                        }`}
+                      >
+                        <div className="text-white font-semibold">{option.label}</div>
+                        <div className="text-[#CEEDB2] text-sm">{option.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {step === 5 && (
+                <motion.div
+                  key="step5"
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="w-16 h-16 rounded-full bg-[#CEF17B]/20 flex items-center justify-center mx-auto mb-4">
+                    <Activity className="w-8 h-8 text-[#CEF17B]" />
+                  </div>
+
+                  <h3 className="text-xl font-bold text-white text-center mb-6">
+                    Frequência Semanal
                   </h3>
 
                   <div className="space-y-3">
@@ -330,7 +372,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                 </Button>
               )}
               
-              {step < 4 ? (
+              {step < 5 ? (
                 <Button
                   onClick={handleNext}
                   disabled={!validateCurrentStep()}
@@ -345,7 +387,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                   disabled={!validateCurrentStep() || createProfileMutation.isPending}
                   className="flex-1 gradient-button text-[#084734]"
                 >
-                  {createProfileMutation.isPending ? "Criando..." : "Finalizar ✨"}
+                  {createProfileMutation.isPending ? "Criando seu plano..." : "Começar! 💪"}
                 </Button>
               )}
             </div>
