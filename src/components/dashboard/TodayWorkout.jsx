@@ -6,72 +6,113 @@ import { createPageUrl } from "@/utils";
 import { Dumbbell, Clock, Flame, Target } from "lucide-react";
 
 export default function TodayWorkout({ profile, weekWorkouts, todayWorkouts }) {
-  // Determinar treino recomendado baseado no perfil
+  // SISTEMA INTELIGENTE DE RECOMENDAÇÃO DE TREINO
+  // Baseado em: objetivo, biotipo, nível, frequência, constância
   const getRecommendedWorkout = () => {
-    const { goal, fitness_level, activity_level } = profile || {};
+    const { goal, fitness_level, body_type, training_frequency } = profile || {};
     
     if (!goal) return null;
 
-    // Lógica de personalização
+    const weekCount = weekWorkouts?.length || 0;
+    const isConsistent = weekCount >= (training_frequency || 3);
+    const dayOfWeek = new Date().getDay();
+
+    // ========== EMAGRECIMENTO ==========
     if (goal === "weight_loss") {
+      // Iniciante: Progressão gradual
       if (fitness_level === "Iniciante") {
         return {
           name: "Cardio Progressivo",
           duration: 30,
-          description: "Caminhada intensa ou corrida leve para queimar calorias",
+          description: "Escolhido para: iniciar adaptação cardiovascular e criar hábito sem sobrecarga",
+          rationale: "Emagrecimento em iniciantes funciona melhor com volume moderado e aderência alta",
           calories: 250,
           category: "cardio",
           exercises: [
-            { name: "Aquecimento", duration: "5 min" },
-            { name: "Cardio Principal", duration: "20 min" },
+            { name: "Aquecimento articular", duration: "5 min" },
+            { name: "Caminhada rápida ou trote", duration: "20 min" },
             { name: "Alongamento", duration: "5 min" }
           ]
         };
-      } else {
-        return {
-          name: "HIIT Queima Gordura",
-          duration: 25,
-          description: "Treino intervalado de alta intensidade",
-          calories: 350,
-          category: "cardio",
-          exercises: [
-            { name: "Burpees", reps: "3x10" },
-            { name: "Mountain Climbers", reps: "3x20" },
-            { name: "Jump Squats", reps: "3x15" }
-          ]
-        };
       }
-    }
-
-    if (goal === "muscle_gain") {
-      const dayOfWeek = new Date().getDay();
-      const workoutSplit = ["Peito e Tríceps", "Costas e Bíceps", "Pernas", "Ombros e Abdômen", "Full Body"];
       
+      // Intermediário/Avançado: Maximizar queima
       return {
-        name: workoutSplit[dayOfWeek % workoutSplit.length],
-        duration: 60,
-        description: "Foco em hipertrofia com volume adequado",
-        calories: 300,
-        category: "forca",
+        name: "HIIT Queima Gordura",
+        duration: 25,
+        description: "Escolhido para: maximizar gasto calórico e efeito pós-treino (EPOC)",
+        rationale: "Treino intervalado queima mais calorias e mantém metabolismo elevado por até 24h",
+        calories: 350,
+        category: "cardio",
         exercises: [
-          { name: "Exercício composto", reps: "4x8-10" },
-          { name: "Exercício isolado 1", reps: "3x12" },
-          { name: "Exercício isolado 2", reps: "3x12" }
+          { name: "Burpees", reps: "3x10" },
+          { name: "Mountain Climbers", reps: "3x20" },
+          { name: "Jump Squats", reps: "3x15" }
         ]
       };
     }
 
-    // Manutenção
+    // ========== HIPERTROFIA ==========
+    if (goal === "muscle_gain") {
+      // Definir divisão baseado em frequência
+      let split, splitName, description, rationale;
+      
+      if (training_frequency >= 5) {
+        // ABCDE ou Push/Pull/Legs
+        split = ["Peito", "Costas", "Pernas", "Ombros", "Braços"];
+        splitName = "ABCDE";
+        description = "Escolhido para: volume alto com recuperação adequada por grupo muscular";
+        rationale = "Frequência de 5x/semana permite trabalhar cada grupo 1x com intensidade máxima";
+      } else if (training_frequency >= 4) {
+        // ABCD ou Upper/Lower
+        split = ["Peito e Tríceps", "Costas e Bíceps", "Pernas Completo", "Ombros e Abdômen"];
+        splitName = "ABCD";
+        description = "Escolhido para: dividir treinos com volume moderado-alto e boa frequência";
+        rationale = "4 treinos semanais permitem trabalhar cada grupo 1-2x com recuperação total";
+      } else if (training_frequency >= 3) {
+        // ABC
+        split = ["Peito e Tríceps", "Costas e Bíceps", "Pernas e Ombros"];
+        splitName = "ABC";
+        description = "Escolhido para: treino completo 3x na semana com volume adequado";
+        rationale = "Divisão ABC é ideal para treinar todos os grupos musculares com 48h de descanso";
+      } else {
+        // Full Body ou AB
+        split = ["Full Body A", "Full Body B"];
+        splitName = "AB";
+        description = "Escolhido para: estimular todos os músculos mesmo com baixa frequência";
+        rationale = "Full Body garante estímulo completo mesmo treinando 2x/semana";
+      }
+      
+      const todayWorkoutName = split[dayOfWeek % split.length];
+      
+      return {
+        name: `${todayWorkoutName} (${splitName})`,
+        duration: 60,
+        description,
+        rationale,
+        calories: 300,
+        category: "forca",
+        exercises: [
+          { name: "Exercício composto (base)", reps: "4x6-8" },
+          { name: "Exercício acessório 1", reps: "3x10-12" },
+          { name: "Exercício isolado", reps: "3x12-15" },
+          { name: "Finalizador", reps: "2x15-20" }
+        ]
+      };
+    }
+
+    // ========== MANUTENÇÃO ==========
     return {
       name: "Treino Equilibrado",
       duration: 45,
-      description: "Combinação de força e cardio moderado",
+      description: "Escolhido para: manter forma física e saúde geral",
+      rationale: "Combinação de força e cardio preserva massa muscular e capacidade cardiovascular",
       calories: 280,
       category: "full_body",
       exercises: [
-        { name: "Aquecimento", duration: "5 min" },
-        { name: "Força", duration: "25 min" },
-        { name: "Cardio", duration: "15 min" }
+        { name: "Aquecimento dinâmico", duration: "5 min" },
+        { name: "Força (compostos)", duration: "25 min" },
+        { name: "Cardio moderado", duration: "15 min" }
       ]
     };
   };
@@ -106,7 +147,13 @@ export default function TodayWorkout({ profile, weekWorkouts, todayWorkouts }) {
 
       <div className="bg-[#CEF17B]/10 rounded-lg p-4 mb-4">
         <h4 className="text-white font-bold text-xl mb-2">{workout.name}</h4>
-        <p className="text-[#CEEDB2] text-sm mb-3">{workout.description}</p>
+        <p className="text-[#CEEDB2] text-sm mb-2">{workout.description}</p>
+        
+        {/* Explicação Inteligente - Por que este treino? */}
+        <div className="bg-[#084734]/40 rounded-lg p-3 mb-3 border border-[#CEF17B]/20">
+          <p className="text-xs text-[#CEF17B] font-semibold mb-1">💡 Por que este treino?</p>
+          <p className="text-white/80 text-xs leading-relaxed">{workout.rationale}</p>
+        </div>
         
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="flex items-center gap-2">
