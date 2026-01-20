@@ -18,6 +18,7 @@ import WeeklyPlan from "../components/workouts/WeeklyPlan";
 import MyWorkouts from "../components/workouts/MyWorkouts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TodayWorkout from "../components/dashboard/TodayWorkout";
+import WorkoutAICoach from "../components/workouts/WorkoutAICoach";
 
 export default function Workouts() {
   const [user, setUser] = useState(null);
@@ -309,11 +310,17 @@ export default function Workouts() {
 
             <TabsContent value="app-workouts" className="space-y-6 mt-6">
 
-          {/* Treino de Hoje */}
-          <TodayWorkout 
+          {/* Agente de IA - Personal Trainer Inteligente */}
+          <WorkoutAICoach 
             profile={profile}
             weekWorkouts={weekWorkouts}
-            todayWorkouts={todayWorkouts}
+            onStartWorkout={(workoutType) => {
+              if (workoutType === 'hiit') {
+                setActiveView('hiit');
+              } else {
+                setActiveView('weekly');
+              }
+            }}
           />
 
           {/* Week Selector */}
