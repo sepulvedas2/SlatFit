@@ -316,9 +316,7 @@ export default function Workouts() {
             weekWorkouts={weekWorkouts}
             onStartWorkout={(workoutType) => {
               if (workoutType === 'hiit') {
-                setActiveView('hiit');
-              } else {
-                setActiveView('weekly');
+                setView('hiit');
               }
             }}
           />
