@@ -21,9 +21,13 @@ export default function LearningLibrary() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [expandedContent, setExpandedContent] = useState(null);
 
-  const { data: allContent = [] } = useQuery({
+  const { data: allContent = [], isLoading } = useQuery({
     queryKey: ['learningContent'],
-    queryFn: () => base44.entities.LearningContent.list(),
+    queryFn: async () => {
+      const content = await base44.entities.LearningContent.list('-order');
+      console.log('Conteúdos carregados:', content.length);
+      return content;
+    },
     initialData: [],
     staleTime: 10 * 60 * 1000,
   });
@@ -121,6 +125,15 @@ export default function LearningLibrary() {
           </Card>
         )}
 
+        {/* Debug Info */}
+        {allContent.length > 0 && (
+          <Card className="glass-effect border-green-500/30 p-3">
+            <p className="text-green-400 text-xs text-center">
+              ✅ {allContent.length} dicas carregadas no banco
+            </p>
+          </Card>
+        )}
+
         {/* Categorias */}
         <div>
           <h3 className="text-white font-semibold text-sm mb-3 uppercase tracking-wide">Categorias</h3>
@@ -157,9 +170,17 @@ export default function LearningLibrary() {
             {selectedCategory ? categoryLabels[selectedCategory] : "Todas as Dicas"}
           </h3>
           <div className="space-y-3">
-            {filteredContent.length === 0 ? (
+            {isLoading ? (
               <Card className="glass-effect border-[#CEF17B]/20 p-6 text-center">
-                <p className="text-white/70">Nenhuma dica encontrada nesta categoria.</p>
+                <p className="text-white/70">Carregando dicas...</p>
+              </Card>
+            ) : filteredContent.length === 0 ? (
+              <Card className="glass-effect border-[#CEF17B]/20 p-6 text-center">
+                <p className="text-white/70">
+                  {allContent.length === 0 
+                    ? "Nenhuma dica disponível ainda. Aguarde, estamos preparando conteúdo para você!" 
+                    : "Nenhuma dica encontrada nesta categoria."}
+                </p>
               </Card>
             ) : (
               filteredContent.map((content) => {
