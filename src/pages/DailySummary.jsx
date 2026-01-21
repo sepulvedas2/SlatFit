@@ -203,9 +203,8 @@ export default function DailySummary() {
                   {!goal.completed && (
                     <Link to={goal.actionLink}>
                       <Button 
-                        variant="outline" 
                         size="sm" 
-                        className="w-full border-[#CEF17B]/20 text-[#CEF17B] hover:bg-[#CEF17B]/10"
+                        className="w-full bg-gradient-to-r from-[#084734] to-[#0d6849] text-[#CEF17B] hover:from-[#0d6849] hover:to-[#0f8559] font-semibold border-0"
                       >
                         {goal.action}
                       </Button>
