@@ -87,7 +87,18 @@ export default function IAGOCoach({
   };
 
   const determineIAGOMode = (state) => {
-    // Modo: Apoio Empático (prioridade máxima para dor ou desmotivação)
+    // REGRA CRÍTICA: Se treinou hoje, sempre modo positivo
+    const hasWorkoutToday = weekWorkouts.some(w => {
+      const workoutDate = format(new Date(w.completed_date), 'yyyy-MM-dd');
+      const todayDate = format(new Date(), 'yyyy-MM-dd');
+      return workoutDate === todayDate;
+    });
+
+    if (hasWorkoutToday) {
+      return "coach_confident"; // Sempre parabenizar quem treinou hoje
+    }
+
+    // Modo: Apoio Empático (prioridade para dor ou desmotivação)
     if (state.hasPain) {
       return "empathetic_support";
     }
@@ -225,6 +236,8 @@ REGRAS CRÍTICAS:
 6. Sempre conecte a ação com o OBJETIVO DO USUÁRIO
 7. Foco em DISCIPLINA DIÁRIA, não perfeição
 8. Nunca seja punitivo, sempre orientador
+9. NUNCA mencione "dias sem treinar" se o usuário treinou HOJE
+10. Se treinou hoje, SEMPRE parabenize e reforce o hábito
 
 Gere uma orientação profissional e motivadora para ${userName}:`;
 

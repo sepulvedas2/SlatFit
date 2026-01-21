@@ -308,7 +308,9 @@ export default function Dashboard() {
             />
 
             {/* 2. AÇÃO PRINCIPAL - CHECK-IN DIÁRIO */}
-            <PrimaryActionCard hasCheckIn={!!todayCheckIn} />
+            <div className="mt-4">
+              <PrimaryActionCard hasCheckIn={!!todayCheckIn} />
+            </div>
           </>
         )}
 
