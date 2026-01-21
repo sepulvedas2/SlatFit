@@ -354,7 +354,9 @@ export default function Dashboard() {
         )}
 
         {/* Points Card */}
-        <PointsCard userPoints={userPoints} />
+        <Link to={createPageUrl("Challenges")}>
+          <PointsCard userPoints={userPoints} />
+        </Link>
 
         {/* 4. Weekly Goals */}
         <WeeklyGoals 
