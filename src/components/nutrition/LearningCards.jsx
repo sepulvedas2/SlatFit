@@ -1,140 +1,132 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Play, Check, Bookmark } from "lucide-react";
+import { BookOpen, Play, Check, ChevronRight, Filter } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function LearningCards() {
   const [selectedLesson, setSelectedLesson] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const lessons = [
-    {
-      id: 1,
-      title: "O que é saciedade e por que ela importa",
-      summary: "Entenda a diferença entre fome física e emocional",
-      content: `A saciedade é o sinal que seu corpo dá quando está satisfeito. Não é apenas "estar cheio" - é quando você percebe que pode parar de comer sem sentir privação.
+  const { data: allTips = [] } = useQuery({
+    queryKey: ['learningTips'],
+    queryFn: () => base44.entities.LearningTip.list(),
+    initialData: [],
+  });
 
-Muitas vezes comemos por:
-• Tédio ou ansiedade
-• Horário do relógio
-• Hábito social
-
-A verdadeira fome física vem gradualmente e pode esperar. Já a fome emocional é urgente e específica.
-
-💬 Seu Assistente Personal diz: "Antes de comer, pergunte: estou com fome ou estou sentindo outra coisa?"`,
-      duration: "3 min"
-    },
-    {
-      id: 2,
-      title: "Carboidratos: vilões ou aliados?",
-      summary: "A verdade sobre a fonte de energia do seu corpo",
-      content: `Carboidratos não são vilões - são combustível!
-
-O problema nunca foi o carboidrato, mas sim:
-• A qualidade (refinado vs integral)
-• A quantidade inadequada
-• O timing errado
-
-Carboidratos complexos (arroz integral, batata-doce, aveia) liberam energia gradualmente. Os simples (açúcar, pão branco) causam picos rápidos.
-
-💬 Seu Assistente Personal diz: "Seu corpo precisa de energia. A questão é: você está dando o combustível certo?"`,
-      duration: "4 min"
-    },
-    {
-      id: 3,
-      title: "O papel da proteína na recuperação",
-      summary: "Por que atletas precisam pensar em proteína",
-      content: `Proteína não é só para "ficar grande". Ela:
-
-✓ Repara músculos após treino
-✓ Mantém você saciado por mais tempo
-✓ Ajuda na recuperação
-✓ Fortalece sistema imunológico
-
-Você precisa de ~1.6-2.2g por kg de peso corporal se treina regularmente.
-
-Fontes: Frango, peixe, ovos, feijão, tofu, iogurte grego.
-
-💬 Seu Assistente Personal diz: "Proteína é construção. Sem ela, seu treino não vira resultado."`,
-      duration: "5 min"
-    },
-    {
-      id: 4,
-      title: "Como o estresse muda sua fome",
-      summary: "A conexão entre cortisol e apetite",
-      content: `Quando você está estressado, seu corpo libera cortisol - o "hormônio do estresse".
-
-Cortisol alto causa:
-• Aumento de apetite (especialmente por doces)
-• Acúmulo de gordura abdominal
-• Desejo por comfort food
-• Fadiga e baixa energia
-
-O que fazer:
-✓ Respire fundo antes de comer
-✓ Durma bem (essencial!)
-✓ Pratique mindfulness
-✓ Exercite-se regularmente
-
-💬 Seu Assistente Personal diz: "Estresse crônico sabota seus objetivos. Cuide da mente para cuidar do corpo."`,
-      duration: "4 min"
-    },
-    {
-      id: 5,
-      title: "Sono e alimentação: o elo invisível",
-      summary: "Por que dormir mal te faz comer mais",
-      content: `Dormir menos de 7h por noite:
-
-• Aumenta grelina (hormônio da fome)
-• Diminui leptina (hormônio da saciedade)
-• Reduz autocontrole alimentar
-• Aumenta desejo por junk food
-
-Uma noite mal dormida pode aumentar sua ingestão calórica em até 300 kcal no dia seguinte.
-
-💬 Seu Assistente Personal diz: "Sono não é luxo, é estratégia. Dormir bem é treino de recuperação."`,
-      duration: "3 min"
-    },
+  const categories = [
+    { id: "all", name: "Todas", count: allTips.length },
+    { id: "Alimentação Prática", name: "Alimentação Prática", count: allTips.filter(t => t.category === "Alimentação Prática").length },
+    { id: "Mitos & Verdades", name: "Mitos & Verdades", count: allTips.filter(t => t.category === "Mitos & Verdades").length },
+    { id: "Comportamento Alimentar", name: "Comportamento", count: allTips.filter(t => t.category === "Comportamento Alimentar").length },
+    { id: "Treino & Nutrição", name: "Treino & Nutrição", count: allTips.filter(t => t.category === "Treino & Nutrição").length },
+    { id: "Dia a Dia", name: "Dia a Dia", count: allTips.filter(t => t.category === "Dia a Dia").length },
   ];
+
+  const filteredTips = selectedCategory === "all" 
+    ? allTips 
+    : allTips.filter(tip => tip.category === selectedCategory);
+
+  const dailyTip = allTips[0]; // Primeira dica como "dica do dia"
 
   return (
     <>
       <Card className="glass-effect p-6 border-[#CEF17B]/20">
-        <div className="flex items-center gap-2 mb-4">
-          <BookOpen className="w-5 h-5 text-[#CEF17B]" />
-          <h3 className="font-bold text-white">Aprenda com Seu Assistente Personal</h3>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-bold text-white text-xl">Aprenda com Seu Assistente Personal</h3>
+            <p className="text-sm text-[#CEEDB2] mt-1">Dicas rápidas para o seu dia a dia</p>
+          </div>
+          <BookOpen className="w-6 h-6 text-[#CEF17B]" />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          {lessons.map((lesson) => (
-            <Card
-              key={lesson.id}
-              className="bg-white/5 border-white/10 p-4 cursor-pointer hover:bg-white/10 transition-all"
-              onClick={() => setSelectedLesson(lesson)}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-white text-sm mb-1">
-                    {lesson.title}
-                  </h4>
-                  <p className="text-xs text-[#CEEDB2]">{lesson.summary}</p>
-                </div>
-                <Play className="w-5 h-5 text-[#CEF17B] flex-shrink-0 ml-2" />
-              </div>
-              <Badge variant="outline" className="bg-white/5 border-white/10 text-xs">
-                {lesson.duration}
+        {/* Dica do Dia */}
+        {dailyTip && (
+          <Card className="gradient-card p-5 mb-6 cursor-pointer hover:scale-[1.02] transition-all border-0"
+            onClick={() => setSelectedLesson(dailyTip)}>
+            <div className="flex items-center gap-2 mb-3">
+              <Badge className="bg-[#084734] text-[#CEF17B] border-0">✨ Dica do Dia</Badge>
+              <Badge variant="outline" className="text-xs border-[#084734]/20">
+                {dailyTip.reading_time}
               </Badge>
-            </Card>
-          ))}
+            </div>
+            <h4 className="font-bold text-[#084734] text-lg mb-2">{dailyTip.title}</h4>
+            <div className="flex items-center gap-2 text-[#084734]/80">
+              <span className="text-sm">Ler agora</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </Card>
+        )}
+
+        {/* Categorias */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="w-4 h-4 text-[#CEF17B]" />
+            <span className="text-sm text-white font-semibold">Categorias</span>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {categories.map(cat => (
+              <Button
+                key={cat.id}
+                size="sm"
+                variant={selectedCategory === cat.id ? "default" : "outline"}
+                className={selectedCategory === cat.id 
+                  ? "bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90 border-0" 
+                  : "bg-white/5 border-white/10 text-white hover:bg-white/10"}
+                onClick={() => setSelectedCategory(cat.id)}
+              >
+                {cat.name} <span className="ml-1.5 opacity-70">({cat.count})</span>
+              </Button>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-4 p-3 bg-[#CEF17B]/10 rounded-lg border border-[#CEF17B]/20">
+        {/* Lista de Dicas */}
+        <div className="space-y-3">
+          <h4 className="text-sm text-white font-semibold mb-3">
+            {selectedCategory === "all" ? "Todas as Dicas" : categories.find(c => c.id === selectedCategory)?.name}
+          </h4>
+          
+          {filteredTips.length === 0 ? (
+            <p className="text-center text-white/50 py-8">Nenhuma dica encontrada</p>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-3">
+              {filteredTips.map((tip) => (
+                <Card
+                  key={tip.id}
+                  className="bg-white/5 border-white/10 p-4 cursor-pointer hover:bg-white/10 transition-all"
+                  onClick={() => setSelectedLesson(tip)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-white text-sm mb-1">
+                        {tip.title}
+                      </h4>
+                      <Badge variant="outline" className="bg-white/5 border-white/10 text-xs mt-2">
+                        {tip.category}
+                      </Badge>
+                    </div>
+                    <Play className="w-5 h-5 text-[#CEF17B] flex-shrink-0 ml-2" />
+                  </div>
+                  <div className="flex items-center gap-2 mt-3 text-xs text-[#CEEDB2]">
+                    <span>{tip.reading_time}</span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 p-3 bg-[#CEF17B]/10 rounded-lg border border-[#CEF17B]/20">
           <p className="text-xs text-[#CEEDB2] text-center">
             💡 "Entender o que você come é mais importante do que contar calorias." - Seu Assistente Personal
           </p>
