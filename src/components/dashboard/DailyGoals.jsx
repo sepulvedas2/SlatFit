@@ -50,66 +50,40 @@ export default function DailyGoals({
   const completedGoals = goals.filter(g => g.progress >= 100).length;
 
   return (
-    <Card className="glass-effect p-6 border-[#CEF17B]/20">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="font-bold text-white text-lg mb-1">Metas de Hoje</h3>
-          <p className="text-[#CEEDB2] text-sm">
-            {completedGoals} de {goals.length} completas
-          </p>
-        </div>
-        {completedGoals === goals.length && (
-          <div className="bg-green-500/20 px-3 py-2 rounded-lg">
-            <CheckCircle className="w-5 h-5 text-green-400" />
-          </div>
-        )}
-      </div>
+    <Card className="glass-effect p-5 border-[#CEF17B]/20">
+      <h3 className="font-bold text-white text-base mb-4">Metas de Hoje</h3>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {goals.map((goal, idx) => {
           const Icon = goal.icon;
           const isComplete = goal.progress >= 100;
           
           return (
-            <div key={idx} className="space-y-2">
+            <div key={idx} className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg ${goal.bgColor} flex items-center justify-center`}>
-                    <Icon className={`w-5 h-5 ${goal.color}`} />
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-9 h-9 rounded-lg ${goal.bgColor} flex items-center justify-center`}>
+                    <Icon className={`w-4 h-4 ${goal.color}`} />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{goal.label}</p>
+                    <p className="text-white font-medium text-sm">{goal.label}</p>
                     <p className="text-[#CEEDB2] text-xs">
                       {goal.current} / {goal.target} {goal.unit}
                     </p>
                   </div>
                 </div>
                 {isComplete && (
-                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <CheckCircle className="w-4 h-4 text-green-400" />
                 )}
               </div>
               <Progress 
                 value={goal.progress} 
-                className="h-2 bg-white/10"
+                className="h-1.5 bg-white/10"
               />
             </div>
           );
         })}
       </div>
-
-      {completedGoals === goals.length ? (
-        <div className="mt-6 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-          <p className="text-green-300 text-sm text-center font-semibold">
-            🎉 Todas as metas cumpridas! Disciplina diária em ação.
-          </p>
-        </div>
-      ) : (
-        <div className="mt-6 p-3 bg-[#CEF17B]/10 rounded-lg">
-          <p className="text-white text-sm text-center">
-            <strong>Foco:</strong> Complete suas metas para maximizar resultados hoje.
-          </p>
-        </div>
-      )}
     </Card>
   );
 }

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, Loader2, Heart, Zap, Brain, Target, ChevronDown } from "lucide-react";
-import { motion } from "framer-motion";
+import { Heart, Zap, Brain, Target } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { differenceInDays, format } from "date-fns";
+import AIAssistantCard from "./AIAssistantCard";
 
 export default function IAGOCoach({ 
   user, 
@@ -18,8 +16,6 @@ export default function IAGOCoach({
   const [iagoMode, setIagoMode] = useState("coach_confident");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [emotion, setEmotion] = useState("happy");
-  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -40,9 +36,6 @@ export default function IAGOCoach({
     // 3. Gerar mensagem contextualizada
     const iagoMessage = await generateIAGOMessage(userState, mode);
     setMessage(iagoMessage);
-    
-    // 4. Definir emoção do avatar
-    setEmotion(getAvatarEmotion(mode));
     
     setLoading(false);
   };
@@ -257,16 +250,6 @@ Gere uma orientação profissional e motivadora para ${userName}:`;
     }
   };
 
-  const getAvatarEmotion = (mode) => {
-    const emotions = {
-      coach_confident: "excited",
-      calm_mentor: "focused",
-      empathetic_support: "caring",
-      strategic_guide: "analytical"
-    };
-    return emotions[mode] || "focused";
-  };
-
   const getModeConfig = () => {
     const configs = {
       coach_confident: {
@@ -301,54 +284,12 @@ Gere uma orientação profissional e motivadora para ${userName}:`;
   const config = getModeConfig();
   const Icon = config.icon;
 
-  // Verificar se a mensagem é longa (mais de 150 caracteres)
-  const isLongMessage = message.length > 150;
-  const shouldTruncate = isLongMessage && !isExpanded;
-
-  if (loading) {
-    return (
-      <Card className="bg-[#084734] border-0 p-5 shadow-lg mb-8">
-        <div className="flex items-center gap-3">
-          <Loader2 className="w-5 h-5 animate-spin text-[#CEF17B]" />
-          <p className="text-white/80 text-sm font-medium">Analisando seu progresso...</p>
-        </div>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="bg-[#084734] border-0 p-5 shadow-lg mb-8">
-      <div className="flex items-start gap-3">
-        {/* Ícone profissional */}
-        <div className="flex-shrink-0">
-          <div className="w-10 h-10 rounded-lg bg-[#CEF17B]/20 flex items-center justify-center">
-            <Icon className="w-5 h-5 text-[#CEF17B]" />
-          </div>
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1.5">
-            <h3 className="font-semibold text-white text-sm">Seu Assistente Personal</h3>
-            <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
-              {config.label}
-            </Badge>
-          </div>
-          <div className="relative">
-            <p className={`text-white/90 text-sm leading-relaxed ${shouldTruncate ? 'line-clamp-3' : ''}`}>
-              {message}
-            </p>
-            {isLongMessage && (
-              <button 
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center gap-1 mt-2 text-[#CEF17B] text-xs font-medium hover:text-[#CEF17B]/80 transition-colors"
-              >
-                {isExpanded ? 'Ver menos' : 'Ver mais'}
-                <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </Card>
+    <AIAssistantCard
+      message={message}
+      modeLabel={config.label}
+      loading={loading}
+      icon={Icon}
+    />
   );
 }

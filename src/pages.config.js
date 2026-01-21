@@ -4,6 +4,7 @@ import Challenges from './pages/Challenges';
 import CheckIn from './pages/CheckIn';
 import Checkout from './pages/Checkout';
 import Community from './pages/Community';
+import Dashboard from './pages/Dashboard';
 import FoodScanner from './pages/FoodScanner';
 import Home from './pages/Home';
 import MealPlans from './pages/MealPlans';
@@ -12,7 +13,6 @@ import SmartNutrition from './pages/SmartNutrition';
 import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
 import Workouts from './pages/Workouts';
-import Dashboard from './pages/Dashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -23,6 +23,7 @@ export const PAGES = {
     "CheckIn": CheckIn,
     "Checkout": Checkout,
     "Community": Community,
+    "Dashboard": Dashboard,
     "FoodScanner": FoodScanner,
     "Home": Home,
     "MealPlans": MealPlans,
@@ -31,7 +32,6 @@ export const PAGES = {
     "Subscription": Subscription,
     "WorkoutProgress": WorkoutProgress,
     "Workouts": Workouts,
-    "Dashboard": Dashboard,
 }
 
 export const pagesConfig = {

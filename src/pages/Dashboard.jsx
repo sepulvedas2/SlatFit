@@ -20,6 +20,9 @@ import OnboardingModal from "../components/onboarding/OnboardingModal";
 import AssistantCoach from "../components/dashboard/IAGOCoach";
 import TodayWorkout from "../components/dashboard/TodayWorkout";
 import DailyGoals from "../components/dashboard/DailyGoals";
+import DailyStatusCard from "../components/dashboard/DailyStatusCard";
+import PrimaryActionCard from "../components/dashboard/PrimaryActionCard";
+import AIAssistantCard from "../components/dashboard/AIAssistantCard";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -204,6 +207,16 @@ export default function Dashboard() {
   const calorieTarget = profile?.daily_calorie_target || 2000;
   const streakDays = weekWorkouts.length;
 
+  // Calcular metas completas para Status Card
+  const calorieProgress = calorieTarget > 0 ? (todayCalories / calorieTarget) * 100 : 0;
+  const workoutComplete = todayWorkouts?.length > 0;
+  const waterGoalReached = nutritionData?.water_goal_reached || false;
+  const completedGoalsCount = [
+    calorieProgress >= 100,
+    workoutComplete,
+    waterGoalReached
+  ].filter(Boolean).length;
+
   const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
   const isFreeTrial = subscription?.plan === "free_trial";
   const daysLeft = subscription?.end_date 
@@ -286,13 +299,25 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* 1. User Greeting */}
-        <UserGreeting 
-          userName={user?.full_name?.split(' ')[0] || 'Atleta'} 
+        {/* 1. STATUS DO DIA */}
+        <DailyStatusCard 
+          completedGoals={completedGoalsCount}
+          totalGoals={3}
+        />
+
+        {/* 2. AÇÃO PRINCIPAL - CHECK-IN DIÁRIO */}
+        <PrimaryActionCard hasCheckIn={!!todayCheckIn} />
+
+        {/* 3. METAS DE HOJE */}
+        <DailyGoals 
+          todayCalories={todayCalories}
+          calorieTarget={calorieTarget}
+          todayWorkouts={todayWorkouts}
+          nutritionData={nutritionData}
           profile={profile}
         />
 
-        {/* AI Coach */}
+        {/* 4. ASSISTENTE DE IA */}
         <AssistantCoach 
           user={user}
           profile={profile}
@@ -302,41 +327,6 @@ export default function Dashboard() {
           calorieTarget={calorieTarget}
           userPoints={userPoints}
         />
-
-        {/* Metas de Hoje */}
-        <DailyGoals 
-          todayCalories={todayCalories}
-          calorieTarget={calorieTarget}
-          todayWorkouts={todayWorkouts}
-          nutritionData={nutritionData}
-          profile={profile}
-        />
-
-        {/* Check-in Reminder */}
-        {!todayCheckIn && (
-          <Link to={createPageUrl("CheckIn")}>
-            <Card className="gradient-card border-0 p-5 cursor-pointer hover:scale-[1.02] transition-all shadow-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#084734]/30 flex items-center justify-center">
-                    <CheckCircle className="w-6 h-6 text-[#084734]" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-[#084734]">
-                      Faça seu Check-in Diário! 🎯
-                    </h3>
-                    <p className="text-[#084734]/70 text-xs mt-0.5">
-                      Seu personal vai ajustar as recomendações! (+10 XP)
-                    </p>
-                  </div>
-                </div>
-                <Button className="bg-[#084734] text-[#CEF17B] hover:bg-[#084734]/90 text-sm">
-                  Começar
-                </Button>
-              </div>
-            </Card>
-          </Link>
-        )}
 
         {/* Points Card */}
         <PointsCard userPoints={userPoints} />
