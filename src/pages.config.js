@@ -8,13 +8,13 @@ import DailySummary from './pages/DailySummary';
 import Dashboard from './pages/Dashboard';
 import FoodScanner from './pages/FoodScanner';
 import Home from './pages/Home';
-import LearningLibrary from './pages/LearningLibrary';
 import MealPlans from './pages/MealPlans';
 import Profile from './pages/Profile';
 import SmartNutrition from './pages/SmartNutrition';
 import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
 import Workouts from './pages/Workouts';
+import LearningLibrary from './pages/LearningLibrary';
 import __Layout from './Layout.jsx';
 
 
@@ -29,13 +29,13 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "FoodScanner": FoodScanner,
     "Home": Home,
-    "LearningLibrary": LearningLibrary,
     "MealPlans": MealPlans,
     "Profile": Profile,
     "SmartNutrition": SmartNutrition,
     "Subscription": Subscription,
     "WorkoutProgress": WorkoutProgress,
     "Workouts": Workouts,
+    "LearningLibrary": LearningLibrary,
 }
 
 export const pagesConfig = {
