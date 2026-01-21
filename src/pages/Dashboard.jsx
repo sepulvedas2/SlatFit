@@ -42,6 +42,8 @@ export default function Dashboard() {
       return profiles[0] || null;
     },
     enabled: !!user?.email,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    cacheTime: 10 * 60 * 1000,
   });
 
   const { data: subscription } = useQuery({
@@ -52,6 +54,7 @@ export default function Dashboard() {
       return subs[0] || null;
     },
     enabled: !!user?.email,
+    staleTime: 10 * 60 * 1000,
   });
 
   // Show onboarding if user doesn't have a profile yet
@@ -79,8 +82,9 @@ export default function Dashboard() {
       user_email: user.email, 
       log_date: today 
     }),
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: [],
+    staleTime: 2 * 60 * 1000,
   });
 
   const { data: weekWorkouts } = useQuery({
@@ -89,8 +93,9 @@ export default function Dashboard() {
       const logs = await base44.entities.WorkoutLog.filter({ user_email: user.email });
       return logs.filter(log => log.completed_date >= weekStart);
     },
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: [],
+    staleTime: 3 * 60 * 1000,
   });
 
   const { data: todayWorkouts } = useQuery({
@@ -102,29 +107,33 @@ export default function Dashboard() {
       });
       return logs;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: [],
+    staleTime: 2 * 60 * 1000,
   });
 
   const { data: achievements } = useQuery({
     queryKey: ['achievements', user?.email],
     queryFn: () => base44.entities.Achievement.filter({ user_email: user.email }),
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: [],
+    staleTime: 10 * 60 * 1000,
   });
 
   const { data: allWorkoutLogs } = useQuery({
     queryKey: ['allWorkoutLogs', user?.email],
     queryFn: () => base44.entities.WorkoutLog.filter({ user_email: user.email }),
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: [],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: allFoodLogs } = useQuery({
     queryKey: ['allFoodLogs', user?.email],
     queryFn: () => base44.entities.FoodLog.filter({ user_email: user.email }),
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: [],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: completedChallenges } = useQuery({
@@ -136,8 +145,9 @@ export default function Dashboard() {
       });
       return challenges.length;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: 0,
+    staleTime: 10 * 60 * 1000,
   });
 
   const totalCaloriesBurned = allWorkoutLogs.reduce((sum, log) => sum + (log.calories_burned || 0), 0);
@@ -173,7 +183,8 @@ export default function Dashboard() {
       });
       return checkIns[0] || null;
     },
-    enabled: !!user?.email
+    enabled: !!user?.email && !!profile,
+    staleTime: 2 * 60 * 1000,
   });
 
   const { data: userPoints } = useQuery({
@@ -182,7 +193,8 @@ export default function Dashboard() {
       const points = await base44.entities.UserPoints.filter({ user_email: user.email });
       return points[0] || null;
     },
-    enabled: !!user?.email
+    enabled: !!user?.email && !!profile,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: nutritionData } = useQuery({
@@ -195,7 +207,8 @@ export default function Dashboard() {
       });
       return data[0] || null;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
+    staleTime: 2 * 60 * 1000,
   });
 
   const todayCalories = todayFoods.reduce((sum, food) => sum + (food.calories || 0), 0);
@@ -231,8 +244,9 @@ export default function Dashboard() {
       const data = await base44.entities.NutritionData.filter({ user_email: user.email });
       return data.filter(d => d.log_date >= weekStart);
     },
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: [],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: weekFoodLogs = [] } = useQuery({
@@ -242,8 +256,9 @@ export default function Dashboard() {
       const logs = await base44.entities.FoodLog.filter({ user_email: user.email });
       return logs.filter(log => log.log_date >= weekStart);
     },
-    enabled: !!user?.email,
+    enabled: !!user?.email && !!profile,
     initialData: [],
+    staleTime: 5 * 60 * 1000,
   });
 
   const waterDaysCompleted = weekNutrition.filter(d => d.water_goal_reached === true).length;
