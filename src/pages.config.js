@@ -13,6 +13,7 @@ import SmartNutrition from './pages/SmartNutrition';
 import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
 import Workouts from './pages/Workouts';
+import DailySummary from './pages/DailySummary';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "Subscription": Subscription,
     "WorkoutProgress": WorkoutProgress,
     "Workouts": Workouts,
+    "DailySummary": DailySummary,
 }
 
 export const pagesConfig = {
