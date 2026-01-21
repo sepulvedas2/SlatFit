@@ -14,7 +14,6 @@ import SmartNutrition from './pages/SmartNutrition';
 import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
 import Workouts from './pages/Workouts';
-import LearningLibrary from './pages/LearningLibrary';
 import __Layout from './Layout.jsx';
 
 
@@ -35,7 +34,6 @@ export const PAGES = {
     "Subscription": Subscription,
     "WorkoutProgress": WorkoutProgress,
     "Workouts": Workouts,
-    "LearningLibrary": LearningLibrary,
 }
 
 export const pagesConfig = {
