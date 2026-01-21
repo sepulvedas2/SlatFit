@@ -299,34 +299,42 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* 1. STATUS DO DIA */}
-        <DailyStatusCard 
-          completedGoals={completedGoalsCount}
-          totalGoals={3}
-        />
+        {user && (
+          <>
+            {/* 1. STATUS DO DIA */}
+            <DailyStatusCard 
+              completedGoals={completedGoalsCount}
+              totalGoals={3}
+            />
 
-        {/* 2. AÇÃO PRINCIPAL - CHECK-IN DIÁRIO */}
-        <PrimaryActionCard hasCheckIn={!!todayCheckIn} />
+            {/* 2. AÇÃO PRINCIPAL - CHECK-IN DIÁRIO */}
+            <PrimaryActionCard hasCheckIn={!!todayCheckIn} />
+          </>
+        )}
 
-        {/* 3. METAS DE HOJE */}
-        <DailyGoals 
-          todayCalories={todayCalories}
-          calorieTarget={calorieTarget}
-          todayWorkouts={todayWorkouts}
-          nutritionData={nutritionData}
-          profile={profile}
-        />
+        {user && (
+          <>
+            {/* 3. METAS DE HOJE */}
+            <DailyGoals 
+              todayCalories={todayCalories}
+              calorieTarget={calorieTarget}
+              todayWorkouts={todayWorkouts}
+              nutritionData={nutritionData}
+              profile={profile}
+            />
 
-        {/* 4. ASSISTENTE DE IA */}
-        <AssistantCoach 
-          user={user}
-          profile={profile}
-          todayCheckIn={todayCheckIn}
-          weekWorkouts={weekWorkouts}
-          todayCalories={todayCalories}
-          calorieTarget={calorieTarget}
-          userPoints={userPoints}
-        />
+            {/* 4. ASSISTENTE DE IA */}
+            <AssistantCoach 
+              user={user}
+              profile={profile}
+              todayCheckIn={todayCheckIn}
+              weekWorkouts={weekWorkouts}
+              todayCalories={todayCalories}
+              calorieTarget={calorieTarget}
+              userPoints={userPoints}
+            />
+          </>
+        )}
 
         {/* Points Card */}
         <PointsCard userPoints={userPoints} />
