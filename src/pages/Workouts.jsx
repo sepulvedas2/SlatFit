@@ -292,7 +292,8 @@ export default function Workouts() {
       { number: 1, title: "Planilha 1", subtitle: "Iniciante" },
       { number: 2, title: "Planilha 2", subtitle: "Intermediário" },
       { number: 3, title: "Planilha 3", subtitle: "Avançado" },
-      { number: 4, title: "Planilha 4", subtitle: "Expert" }
+      { number: 4, title: "Planilha 4", subtitle: "Expert" },
+      { number: 5, title: "Planilha 5", subtitle: "Feminino | Inferiores" }
     ];
 
     return (
