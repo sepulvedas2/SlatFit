@@ -274,10 +274,11 @@ export default function Workouts() {
   // Weekly Plan View (Main View)
   if (view === "plan") {
     const weekOptions = [
-      { number: 1, title: "Semana 1", subtitle: "Iniciante" },
-      { number: 2, title: "Semana 2", subtitle: "Intermediário" },
-      { number: 3, title: "Semana 3", subtitle: "Avançado" },
-      { number: 4, title: "Semana 4", subtitle: "Expert" }
+      { number: 1, title: "Planilha 1", subtitle: "Iniciante" },
+      { number: 2, title: "Planilha 2", subtitle: "Intermediário" },
+      { number: 3, title: "Planilha 3", subtitle: "Avançado" },
+      { number: 4, title: "Planilha 4", subtitle: "Expert" },
+      { number: 5, title: "Planilha 5", subtitle: "Feminino | Inferiores (ABC)" }
     ];
 
     return (
@@ -301,7 +302,7 @@ export default function Workouts() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-[#CEF17B]/20">
               <TabsTrigger value="app-workouts" className="data-[state=active]:bg-[#CEF17B]/20 data-[state=active]:text-[#CEF17B]">
-                Treinos do App
+                Planilhas do App
               </TabsTrigger>
               <TabsTrigger value="my-workouts" className="data-[state=active]:bg-[#CEF17B]/20 data-[state=active]:text-[#CEF17B]">
                 Meus Treinos
@@ -329,8 +330,8 @@ export default function Workouts() {
             }}
           />
 
-          {/* Week Selector */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Planilha Selector */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {weekOptions.map((week) => (
               <Card 
                 key={week.number}

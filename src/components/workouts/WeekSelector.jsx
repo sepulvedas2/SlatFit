@@ -7,10 +7,11 @@ import { motion } from "framer-motion";
 
 export default function WeekSelector({ currentWeek, onSelectWeek, weekProgress = [] }) {
   const weeks = [
-    { number: 1, title: "Semana 1", subtitle: "Adaptação e Fundamentos", unlocked: true },
-    { number: 2, title: "Semana 2", subtitle: "Construção Muscular", unlocked: currentWeek >= 2 },
-    { number: 3, title: "Semana 3", subtitle: "Intensificação", unlocked: currentWeek >= 3 },
-    { number: 4, title: "Semana 4", subtitle: "Performance Máxima", unlocked: currentWeek >= 4 },
+    { number: 1, title: "Planilha 1", subtitle: "Iniciante", unlocked: true },
+    { number: 2, title: "Planilha 2", subtitle: "Intermediário", unlocked: currentWeek >= 2 },
+    { number: 3, title: "Planilha 3", subtitle: "Avançado", unlocked: currentWeek >= 3 },
+    { number: 4, title: "Planilha 4", subtitle: "Expert", unlocked: currentWeek >= 4 },
+    { number: 5, title: "Planilha 5", subtitle: "Feminino | Inferiores (ABC)", unlocked: true },
   ];
 
   const getWeekProgress = (weekNumber) => {
@@ -78,7 +79,7 @@ export default function WeekSelector({ currentWeek, onSelectWeek, weekProgress =
 
               {!week.unlocked && (
                 <p className="text-xs text-white/60 mt-2">
-                  Complete a semana anterior para desbloquear
+                  Complete a planilha anterior para desbloquear
                 </p>
               )}
             </Card>

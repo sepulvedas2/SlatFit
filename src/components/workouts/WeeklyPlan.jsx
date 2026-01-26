@@ -452,16 +452,79 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         { name: "Desenvolvimento Máquina", sets: "3x", reps: "10-12", image_placeholder: "desenvolvimento_maquina" }
       ]
     }
+  },
+
+  // Planilha 5 - Feminino | Inferiores (ABC)
+  5: {
+    segunda: { 
+      muscle: "Treino A - Inferiores", 
+      icon: "🍑",
+      restTime: "45-60 segundos",
+      exercises: [
+        { name: "Agachamento a Fundo", sets: "4x", reps: "12-15", image_placeholder: "agachamento_fundo" },
+        { name: "Avanço Parado", sets: "3x", reps: "10-12 (cada perna)", image_placeholder: "avanco_parado" },
+        { name: "Abdução de Quadril em Pé com Elástico", sets: "3x", reps: "15-20", image_placeholder: "abducao_pe" },
+        { name: "Elevação Lateral de Coxa no Solo", sets: "3x", reps: "15-20", image_placeholder: "elevacao_lateral_solo" },
+        { name: "Extensão de Quadril no Solo com Elástico", sets: "3x", reps: "15", image_placeholder: "extensao_quadril_elastico" },
+        { name: "Elevação de Pelve no Solo", sets: "4x", reps: "12-15", image_placeholder: "elevacao_pelve" }
+      ]
+    },
+    terca: { 
+      muscle: "Descanso", 
+      icon: "😴",
+      restTime: "N/A",
+      exercises: []
+    },
+    quarta: { 
+      muscle: "Treino B - Inferiores", 
+      icon: "🍑",
+      restTime: "60-90 segundos",
+      exercises: [
+        { name: "Agachamento Livre", sets: "4x", reps: "8-12", image_placeholder: "agachamento_livre" },
+        { name: "Avanço com Barra Andando", sets: "3x", reps: "10 (cada perna)", image_placeholder: "avanco_barra" },
+        { name: "Abdução de Quadril na Polia", sets: "3x", reps: "12-15", image_placeholder: "abducao_polia" },
+        { name: "Extensão de Quadril no Aparelho", sets: "3x", reps: "12-15", image_placeholder: "extensao_aparelho" },
+        { name: "Extensão de Quadril sobre Banco", sets: "3x", reps: "12", image_placeholder: "extensao_banco" },
+        { name: "Elevação Pélvica Unilateral", sets: "3x", reps: "10-12 (cada perna)", image_placeholder: "elevacao_unilateral" }
+      ]
+    },
+    quinta: { 
+      muscle: "Descanso", 
+      icon: "😴",
+      restTime: "N/A",
+      exercises: []
+    },
+    sexta: { 
+      muscle: "Treino C - Inferiores", 
+      icon: "🍑",
+      restTime: "45-60 segundos",
+      exercises: [
+        { name: "Leg Press", sets: "4x", reps: "12-15", image_placeholder: "leg_press" },
+        { name: "Subida no Banco", sets: "3x", reps: "12 (cada perna)", image_placeholder: "subida_banco" },
+        { name: "Abdução de Quadril Lateral Deitada com Elástico", sets: "3x", reps: "20", image_placeholder: "abducao_deitada" },
+        { name: "Extensão de Quadril", sets: "3x", reps: "15", image_placeholder: "extensao_quadril" },
+        { name: "Extensão de Quadril Deitada no Aparelho", sets: "3x", reps: "12-15", image_placeholder: "extensao_deitada_aparelho" },
+        { name: "Extensão de Quadril em Decúbito Ventral", sets: "3x", reps: "15", image_placeholder: "extensao_ventral" },
+        { name: "Elevação de Pelve com Pés sobre o Banco", sets: "4x", reps: "12-15", image_placeholder: "elevacao_pelve_banco" }
+      ]
+    },
+    sabado: { 
+      muscle: "Descanso", 
+      icon: "😴",
+      restTime: "N/A",
+      exercises: []
+    }
   }
   };
 
   const weekPlan = weekPlans[weekNumber] || weekPlans[1];
 
   const weekTitles = {
-    1: { title: "Semana 1 - Nível Iniciante", subtitle: "Treino completo com foco em fundamentos" },
-    2: { title: "Semana 2 - Nível Intermediário", subtitle: "Evolução com treinos mais intensos" },
-    3: { title: "Semana 3 - Nível Avançado", subtitle: "Alta intensidade e volume aumentado" },
-    4: { title: "Semana 4 - Nível Expert", subtitle: "Máxima performance e técnicas avançadas" }
+    1: { title: "Planilha 1 - Nível Iniciante", subtitle: "Treino completo com foco em fundamentos" },
+    2: { title: "Planilha 2 - Nível Intermediário", subtitle: "Evolução com treinos mais intensos" },
+    3: { title: "Planilha 3 - Nível Avançado", subtitle: "Alta intensidade e volume aumentado" },
+    4: { title: "Planilha 4 - Nível Expert", subtitle: "Máxima performance e técnicas avançadas" },
+    5: { title: "Planilha 5 - Feminino | Inferiores (ABC)", subtitle: "Treino focado em glúteos e pernas - 3x na semana" }
   };
 
   const currentWeekInfo = weekTitles[weekNumber] || weekTitles[1];
