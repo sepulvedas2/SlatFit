@@ -19,8 +19,6 @@ import MyWorkouts from "../components/workouts/MyWorkouts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TodayWorkout from "../components/dashboard/TodayWorkout";
 import WorkoutAICoach from "../components/workouts/WorkoutAICoach";
-import WorkoutCard from "../components/workouts/WorkoutCard";
-import WorkoutDetailModal from "../components/workouts/WorkoutDetailModal";
 
 export default function Workouts() {
   const [user, setUser] = useState(null);
@@ -32,8 +30,6 @@ export default function Workouts() {
   const [selectedBlockId, setSelectedBlockId] = useState(null);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [totalTime, setTotalTime] = useState(0);
-  const [selectedWorkout, setSelectedWorkout] = useState(null);
-  const [genderFilter, setGenderFilter] = useState("all");
 
   const queryClient = useQueryClient();
 
@@ -97,17 +93,6 @@ export default function Workouts() {
     enabled: !!user?.email,
     initialData: [],
   });
-
-  // Fetch workout catalog
-  const { data: workoutCatalog = [] } = useQuery({
-    queryKey: ['workoutCatalog'],
-    queryFn: () => base44.entities.Workout.list(),
-    initialData: [],
-  });
-
-  const filteredWorkouts = genderFilter === "all" 
-    ? workoutCatalog 
-    : workoutCatalog.filter(w => w.target_gender === genderFilter || w.target_gender === "both");
 
   const hiitWorkout = {
     title: "HIIT para Emagrecimento",
@@ -289,11 +274,10 @@ export default function Workouts() {
   // Weekly Plan View (Main View)
   if (view === "plan") {
     const weekOptions = [
-      { number: 1, title: "Planilha 1", subtitle: "Iniciante" },
-      { number: 2, title: "Planilha 2", subtitle: "Intermediário" },
-      { number: 3, title: "Planilha 3", subtitle: "Avançado" },
-      { number: 4, title: "Planilha 4", subtitle: "Expert" },
-      { number: 5, title: "Planilha 5", subtitle: "Feminino | Inferiores" }
+      { number: 1, title: "Semana 1", subtitle: "Iniciante" },
+      { number: 2, title: "Semana 2", subtitle: "Intermediário" },
+      { number: 3, title: "Semana 3", subtitle: "Avançado" },
+      { number: 4, title: "Semana 4", subtitle: "Expert" }
     ];
 
     return (
@@ -402,61 +386,6 @@ export default function Workouts() {
               onStartWorkout={handleStartWorkout}
               onCompleteDay={handleCompleteDay}
             />
-          </div>
-
-          {/* Treinos Prontos Femininos */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-white">Treinos Prontos</h2>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant={genderFilter === "all" ? "default" : "outline"}
-                  onClick={() => setGenderFilter("all")}
-                  className={genderFilter === "all" 
-                    ? "bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90" 
-                    : "bg-white/5 border-white/10 text-white hover:bg-white/10"}
-                >
-                  Todos
-                </Button>
-                <Button
-                  size="sm"
-                  variant={genderFilter === "female" ? "default" : "outline"}
-                  onClick={() => setGenderFilter("female")}
-                  className={genderFilter === "female" 
-                    ? "bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90" 
-                    : "bg-white/5 border-white/10 text-white hover:bg-white/10"}
-                >
-                  Feminino
-                </Button>
-                <Button
-                  size="sm"
-                  variant={genderFilter === "male" ? "default" : "outline"}
-                  onClick={() => setGenderFilter("male")}
-                  className={genderFilter === "male" 
-                    ? "bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90" 
-                    : "bg-white/5 border-white/10 text-white hover:bg-white/10"}
-                >
-                  Masculino
-                </Button>
-              </div>
-            </div>
-
-            {filteredWorkouts.length === 0 ? (
-              <Card className="glass-effect border-[#CEF17B]/20 p-8 text-center">
-                <p className="text-white/60">Nenhum treino disponível para este filtro</p>
-              </Card>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {filteredWorkouts.map((workout) => (
-                  <WorkoutCard
-                    key={workout.id}
-                    workout={workout}
-                    onClick={() => setSelectedWorkout(workout)}
-                  />
-                ))}
-              </div>
-            )}
           </div>
 
           <Card className="glass-effect border-[#CEF17B]/20 p-4">
@@ -637,15 +566,6 @@ export default function Workouts() {
         </Card>
 
       </div>
-
-      {/* Workout Detail Modal */}
-      {selectedWorkout && (
-        <WorkoutDetailModal
-          workout={selectedWorkout}
-          isOpen={!!selectedWorkout}
-          onClose={() => setSelectedWorkout(null)}
-        />
-      )}
     </div>
   );
 }
