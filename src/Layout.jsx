@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Home, Camera, Dumbbell, UtensilsCrossed, User, CalendarDays } from "lucide-react";
+import { Home, Camera, Dumbbell, UtensilsCrossed, User } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function Layout({ children, currentPageName }) {
@@ -16,8 +16,8 @@ export default function Layout({ children, currentPageName }) {
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
     { name: "Scanner", icon: Camera, path: createPageUrl("FoodScanner") },
     { name: "Treinos", icon: Dumbbell, path: createPageUrl("Workouts") },
+    { name: "Corrida", icon: "🏃", path: createPageUrl("Running") },
     { name: "Nutrição", icon: UtensilsCrossed, path: createPageUrl("SmartNutrition") },
-    { name: "Agenda", icon: CalendarDays, path: createPageUrl("Agenda") },
     { name: "Perfil", icon: User, path: createPageUrl("Profile") },
   ];
 
@@ -86,11 +86,15 @@ export default function Layout({ children, currentPageName }) {
                       : "hover:bg-[#CEF17B]/10"
                   }`}
                 >
-                  <Icon className={`w-6 h-6 ${
-                    active 
-                      ? 'text-[#CEF17B]'
-                      : 'text-white/70'
-                  }`} />
+                  {typeof item.icon === 'string' ? (
+                    <span className="text-2xl">{item.icon}</span>
+                  ) : (
+                    <Icon className={`w-6 h-6 ${
+                      active 
+                        ? 'text-[#CEF17B]'
+                        : 'text-white/70'
+                    }`} />
+                  )}
                   <span className={`text-xs font-medium ${
                     active 
                       ? 'text-[#CEF17B]'
