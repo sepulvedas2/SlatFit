@@ -21,6 +21,7 @@ export default function RunningTracker({ onFinish, userEmail }) {
   const [isMoving, setIsMoving] = useState(false);
   const [voiceFeedback, setVoiceFeedback] = useState(true);
   const [lastVoiceKm, setLastVoiceKm] = useState(0);
+  const [lastVoiceDistance, setLastVoiceDistance] = useState(0);
   
   // Goals
   const [goalDistance, setGoalDistance] = useState("");
@@ -47,6 +48,7 @@ export default function RunningTracker({ onFinish, userEmail }) {
   const lastKmDistanceRef = useRef(0);
   const lastKmTimeRef = useRef(0);
   const speedHistoryRef = useRef([]);
+  const lastPaceCheckRef = useRef({ distance: 0, pace: null });
   
   const queryClient = useQueryClient();
 
@@ -202,9 +204,9 @@ export default function RunningTracker({ onFinish, userEmail }) {
     window.speechSynthesis.speak(utterance);
   };
 
-  // Check for voice milestones
+  // Check for voice milestones and pace monitoring
   useEffect(() => {
-    if (!isTracking || isPaused) return;
+    if (!isTracking || isPaused || !voiceFeedback) return;
     
     const currentKm = Math.floor(distance);
     
@@ -227,35 +229,51 @@ export default function RunningTracker({ onFinish, userEmail }) {
       setLastVoiceKm(currentKm);
     }
     
+    // Monitor pace every 500m (if goal is set)
+    if (goalPace && distance >= lastVoiceDistance + 0.5 && distance > 0.5) {
+      const [goalMins, goalSecs] = goalPace.split(':').map(Number);
+      const goalPaceSeconds = goalMins * 60 + goalSecs;
+      
+      if (currentPace !== "--:--") {
+        const [currentMins, currentSecs] = currentPace.split(':').map(Number);
+        const currentPaceSeconds = currentMins * 60 + currentSecs;
+        
+        // Check if pace dropped significantly (more than 20%)
+        if (lastPaceCheckRef.current.pace) {
+          const [lastMins, lastSecs] = lastPaceCheckRef.current.pace.split(':').map(Number);
+          const lastPaceSeconds = lastMins * 60 + lastSecs;
+          
+          const paceDropPercent = ((currentPaceSeconds - lastPaceSeconds) / lastPaceSeconds) * 100;
+          
+          if (paceDropPercent > 15) {
+            const targetPaceStr = goalPace.replace(':', ' minutos e ') + ' segundos';
+            speak(`Atenção, seu ritmo caiu. Para atingir sua meta em ${estimatedFinishTime}, você precisa retomar o pace de ${targetPaceStr} por quilômetro.`);
+          }
+        }
+        
+        lastPaceCheckRef.current = { distance, pace: currentPace };
+      }
+      
+      setLastVoiceDistance(distance);
+    }
+    
     // Halfway to goal
-    if (goalDistance && distance >= parseFloat(goalDistance) / 2 && lastVoiceKm < parseFloat(goalDistance) / 2) {
-      speak(`Metade do percurso concluída! Falta apenas ${(parseFloat(goalDistance) - distance).toFixed(1)} quilômetros!`);
+    if (goalDistance && distance >= parseFloat(goalDistance) / 2 && distance < parseFloat(goalDistance) / 2 + 0.1) {
+      const remaining = parseFloat(goalDistance) - distance;
+      speak(`Metade do percurso concluída! Faltam ${remaining.toFixed(1)} quilômetros. Mantenha o ritmo!`);
     }
     
     // Near goal (500m before)
-    if (goalDistance && distance >= parseFloat(goalDistance) - 0.5 && distance < parseFloat(goalDistance)) {
+    if (goalDistance && distance >= parseFloat(goalDistance) - 0.5 && distance < parseFloat(goalDistance) - 0.4) {
       speak(`Faltam apenas 500 metros! Acelere para a reta final!`);
     }
     
     // Goal completed
-    if (goalDistance && distance >= parseFloat(goalDistance)) {
-      speak(`Parabéns! Meta de ${goalDistance} quilômetros atingida!`);
+    if (goalDistance && distance >= parseFloat(goalDistance) && lastVoiceKm < parseFloat(goalDistance)) {
+      speak(`Parabéns! Meta de ${goalDistance} quilômetros atingida em ${formatTime(movingTime)}!`);
+      setLastVoiceKm(parseFloat(goalDistance) + 1);
     }
-    
-    // Pace warnings
-    if (goalPace && currentPace !== "--:--") {
-      const [goalMins, goalSecs] = goalPace.split(':').map(Number);
-      const [currentMins, currentSecs] = currentPace.split(':').map(Number);
-      const goalPaceSeconds = goalMins * 60 + goalSecs;
-      const currentPaceSeconds = currentMins * 60 + currentSecs;
-      
-      if (currentPaceSeconds < goalPaceSeconds * 0.9) {
-        speak('Você está acima do pace alvo! Excelente!');
-      } else if (currentPaceSeconds > goalPaceSeconds * 1.1) {
-        speak('Pace abaixo do objetivo. Tente acelerar um pouco.');
-      }
-    }
-  }, [distance, isTracking, isPaused]);
+  }, [distance, currentPace, isTracking, isPaused, voiceFeedback]);
 
   // Start tracking
   const startTracking = () => {
@@ -271,14 +289,15 @@ export default function RunningTracker({ onFinish, userEmail }) {
     // Initial voice feedback
     speak('Atividade iniciada. Bom treino!');
     
-    // Request GPS permission and start watching position
+    // Request GPS permission with optimized settings
     gpsWatchId.current = navigator.geolocation.watchPosition(
       handlePositionUpdate,
       handlePositionError,
       {
         enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
+        timeout: 10000,
+        maximumAge: 2000, // Battery optimization: accept 2s old positions
+        distanceFilter: 3 // Only update when moved 3m (battery saver)
       }
     );
     
@@ -314,8 +333,9 @@ export default function RunningTracker({ onFinish, userEmail }) {
       handlePositionError,
       {
         enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
+        timeout: 10000,
+        maximumAge: 2000,
+        distanceFilter: 3
       }
     );
     
@@ -592,31 +612,90 @@ export default function RunningTracker({ onFinish, userEmail }) {
         <Card className="glass-effect p-6 border-[#CEF17B]/20">
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="w-5 h-5 text-[#CEF17B]" />
-            <h3 className="font-bold text-white">Trajeto GPS</h3>
+            <h3 className="font-bold text-white">Trajeto em Tempo Real</h3>
             <Badge className="bg-[#CEF17B]/10 text-[#CEF17B] border-0 text-xs ml-auto">
-              {routePoints.length} pontos
+              {routePoints.length} pontos GPS
             </Badge>
           </div>
+          {goalPace && (
+            <div className="flex items-center justify-center gap-4 mb-3 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <span className="text-white/70">Acima da meta</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                <span className="text-white/70">Na meta</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <span className="text-white/70">Abaixo da meta</span>
+              </div>
+            </div>
+          )}
           <div className="h-64 rounded-lg overflow-hidden">
             {routePoints.length > 0 ? (
               <MapContainer
-                center={[routePoints[0].lat, routePoints[0].lng]}
-                zoom={15}
-                style={{ height: '100%', width: '100%' }}
+                center={[routePoints[routePoints.length - 1].lat, routePoints[routePoints.length - 1].lng]}
+                zoom={16}
+                style={{ height: '100%', width: '100%', filter: 'brightness(0.9) contrast(1.1)' }}
                 scrollWheelZoom={false}
+                zoomControl={false}
               >
                 <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; OpenStreetMap contributors'
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; OpenStreetMap contributors, CartoDB'
                 />
                 {routePoints.length > 0 && (
                   <>
                     <Marker position={[routePoints[0].lat, routePoints[0].lng]} />
-                    <Polyline
-                      positions={routePoints.map(p => [p.lat, p.lng])}
-                      color="#CEF17B"
-                      weight={4}
-                    />
+                    {/* Render polyline with color based on pace performance */}
+                    {(() => {
+                      if (!goalPace) {
+                        return <Polyline
+                          positions={routePoints.map(p => [p.lat, p.lng])}
+                          color="#CEF17B"
+                          weight={5}
+                          opacity={0.9}
+                        />;
+                      }
+                      
+                      // Split route into segments based on pace
+                      const segments = [];
+                      for (let i = 1; i < routePoints.length; i++) {
+                        const segmentDist = calculateDistance(
+                          routePoints[i-1].lat, routePoints[i-1].lng,
+                          routePoints[i].lat, routePoints[i].lng
+                        );
+                        const segmentTime = (routePoints[i].timestamp - routePoints[i-1].timestamp) / 1000;
+                        
+                        if (segmentTime > 0 && segmentDist > 0) {
+                          const segmentPace = segmentTime / 60 / segmentDist;
+                          const [goalMins, goalSecs] = goalPace.split(':').map(Number);
+                          const goalPaceMinutes = goalMins + goalSecs / 60;
+                          
+                          let color;
+                          if (segmentPace <= goalPaceMinutes * 0.95) {
+                            color = '#22c55e'; // Green - above target
+                          } else if (segmentPace <= goalPaceMinutes * 1.05) {
+                            color = '#eab308'; // Yellow - on target
+                          } else {
+                            color = '#ef4444'; // Red - below target
+                          }
+                          
+                          segments.push(
+                            <Polyline
+                              key={i}
+                              positions={[[routePoints[i-1].lat, routePoints[i-1].lng], [routePoints[i].lat, routePoints[i].lng]]}
+                              color={color}
+                              weight={5}
+                              opacity={0.9}
+                            />
+                          );
+                        }
+                      }
+                      return segments;
+                    })()}
                   </>
                 )}
               </MapContainer>
