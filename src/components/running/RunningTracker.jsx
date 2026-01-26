@@ -7,14 +7,18 @@ import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Play, Pause, Square, MapPin, Timer, Zap, 
-  Target, TrendingUp, ArrowLeft, Flame
+  Target, TrendingUp, ArrowLeft, Flame, AlertCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { MapContainer, TileLayer, Polyline, Marker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 export default function RunningTracker({ onFinish, userEmail }) {
   const [isTracking, setIsTracking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [activityType, setActivityType] = useState("corrida");
+  const [gpsError, setGpsError] = useState(null);
+  const [isMoving, setIsMoving] = useState(false);
   
   // Goals
   const [goalDistance, setGoalDistance] = useState("");
@@ -23,16 +27,33 @@ export default function RunningTracker({ onFinish, userEmail }) {
   // Live stats
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [movingTime, setMovingTime] = useState(0);
   const [currentPace, setCurrentPace] = useState("--:--");
   const [avgSpeed, setAvgSpeed] = useState(0);
+  const [currentSpeed, setCurrentSpeed] = useState(0);
   const [calories, setCalories] = useState(0);
   const [estimatedFinishTime, setEstimatedFinishTime] = useState("--:--");
   
   const [routePoints, setRoutePoints] = useState([]);
+  const [lastPosition, setLastPosition] = useState(null);
   const timerRef = useRef(null);
-  const startTimeRef = useRef(null);
+  const gpsWatchId = useRef(null);
+  const movingTimeRef = useRef(0);
   
   const queryClient = useQueryClient();
+
+  // Haversine formula to calculate distance between two GPS points
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in km
+  };
 
   // Format time helper
   const formatTime = (seconds) => {
@@ -43,69 +64,146 @@ export default function RunningTracker({ onFinish, userEmail }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Calculate pace (min/km)
+  // Calculate pace (min/km) - use moving time only
   const calculatePace = (distKm, durationSec) => {
-    if (distKm === 0) return "--:--";
+    if (distKm === 0 || durationSec === 0) return "--:--";
     const paceMinutes = durationSec / 60 / distKm;
+    if (!isFinite(paceMinutes)) return "--:--";
     const mins = Math.floor(paceMinutes);
     const secs = Math.round((paceMinutes - mins) * 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Start tracking
-  const startTracking = () => {
-    setIsTracking(true);
-    setIsPaused(false);
-    startTimeRef.current = Date.now() - (duration * 1000);
+  // Handle GPS position updates
+  const handlePositionUpdate = (position) => {
+    const { latitude, longitude, speed } = position.coords;
+    const timestamp = Date.now();
     
-    timerRef.current = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      setDuration(elapsed);
+    const newPoint = { lat: latitude, lng: longitude, timestamp };
+    
+    // Calculate speed in km/h (speed is in m/s)
+    const speedKmh = speed ? speed * 3.6 : 0;
+    setCurrentSpeed(speedKmh);
+    
+    // Detect if user is moving (speed > 0.5 km/h)
+    const moving = speedKmh > 0.5;
+    setIsMoving(moving);
+    
+    if (lastPosition && moving) {
+      // Calculate distance increment
+      const distIncrement = calculateDistance(
+        lastPosition.lat,
+        lastPosition.lng,
+        latitude,
+        longitude
+      );
       
-      // Simulate GPS movement (in real app, use navigator.geolocation.watchPosition)
+      // Update distance
       setDistance(prev => {
-        const newDist = prev + 0.01; // Simulated increment
-        const newPace = calculatePace(newDist, elapsed);
+        const newDist = prev + distIncrement;
+        
+        // Update pace based on moving time
+        const newPace = calculatePace(newDist, movingTimeRef.current);
         setCurrentPace(newPace);
         
         // Calculate avg speed
-        const speed = (newDist / elapsed) * 3600;
-        setAvgSpeed(speed);
+        if (movingTimeRef.current > 0) {
+          const speed = (newDist / movingTimeRef.current) * 3600;
+          setAvgSpeed(speed);
+        }
         
         // Estimate calories (rough: 0.75 kcal per kg per km, assume 70kg)
         setCalories(Math.round(newDist * 70 * 0.75));
         
         // Calculate estimated finish time if goal is set
-        if (goalDistance) {
+        if (goalDistance && speed > 0) {
           const remainingDist = parseFloat(goalDistance) - newDist;
-          if (remainingDist > 0 && speed > 0) {
+          if (remainingDist > 0) {
             const remainingTime = (remainingDist / speed) * 3600;
-            setEstimatedFinishTime(formatTime(Math.round(remainingTime + elapsed)));
+            setEstimatedFinishTime(formatTime(Math.round(remainingTime + movingTimeRef.current)));
           }
         }
         
         return newDist;
       });
+    }
+    
+    setLastPosition(newPoint);
+    setRoutePoints(prev => [...prev, newPoint]);
+  };
+
+  const handlePositionError = (error) => {
+    console.error('GPS error:', error);
+    setGpsError(error.message);
+  };
+
+  // Start tracking
+  const startTracking = () => {
+    if (!navigator.geolocation) {
+      setGpsError("GPS não disponível neste dispositivo");
+      return;
+    }
+
+    setIsTracking(true);
+    setIsPaused(false);
+    setGpsError(null);
+    
+    // Request GPS permission and start watching position
+    gpsWatchId.current = navigator.geolocation.watchPosition(
+      handlePositionUpdate,
+      handlePositionError,
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
+    
+    // Timer to update duration and moving time
+    timerRef.current = setInterval(() => {
+      setDuration(prev => prev + 1);
       
-      // Add GPS point (simulated)
-      setRoutePoints(prev => [...prev, {
-        lat: -23.5505 + Math.random() * 0.01,
-        lng: -46.6333 + Math.random() * 0.01,
-        timestamp: Date.now()
-      }]);
-      
+      // Only count moving time when user is actually moving
+      if (isMoving) {
+        movingTimeRef.current += 1;
+        setMovingTime(movingTimeRef.current);
+      }
     }, 1000);
   };
 
   const pauseTracking = () => {
     setIsPaused(true);
     if (timerRef.current) clearInterval(timerRef.current);
+    if (gpsWatchId.current) navigator.geolocation.clearWatch(gpsWatchId.current);
   };
 
   const resumeTracking = () => {
     setIsPaused(false);
-    startTimeRef.current = Date.now() - (duration * 1000);
-    startTracking();
+    
+    // Resume GPS tracking
+    if (!navigator.geolocation) {
+      setGpsError("GPS não disponível");
+      return;
+    }
+
+    gpsWatchId.current = navigator.geolocation.watchPosition(
+      handlePositionUpdate,
+      handlePositionError,
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
+    
+    // Resume timer
+    timerRef.current = setInterval(() => {
+      setDuration(prev => prev + 1);
+      if (isMoving) {
+        movingTimeRef.current += 1;
+        setMovingTime(movingTimeRef.current);
+      }
+    }, 1000);
   };
 
   const stopMutation = useMutation({
@@ -120,6 +218,7 @@ export default function RunningTracker({ onFinish, userEmail }) {
 
   const stopTracking = () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    if (gpsWatchId.current) navigator.geolocation.clearWatch(gpsWatchId.current);
     
     // Save activity
     if (userEmail && distance > 0) {
@@ -128,7 +227,7 @@ export default function RunningTracker({ onFinish, userEmail }) {
         activity_type: activityType,
         activity_date: new Date().toISOString(),
         distance_km: parseFloat(distance.toFixed(2)),
-        duration_seconds: duration,
+        duration_seconds: movingTime, // Use moving time, not total time
         pace_avg: currentPace,
         speed_avg: parseFloat(avgSpeed.toFixed(2)),
         calories_burned: calories,
@@ -145,8 +244,14 @@ export default function RunningTracker({ onFinish, userEmail }) {
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (gpsWatchId.current) navigator.geolocation.clearWatch(gpsWatchId.current);
     };
   }, []);
+
+  // Update moving detection
+  useEffect(() => {
+    setIsMoving(currentSpeed > 0.5);
+  }, [currentSpeed]);
 
   if (!isTracking) {
     return (
@@ -246,10 +351,18 @@ export default function RunningTracker({ onFinish, userEmail }) {
         
         {/* Header */}
         <div className="flex items-center justify-between">
-          <Badge className="bg-green-500/20 text-green-400 border-0 px-4 py-2">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2" />
-            Atividade em progresso
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className={`${isMoving ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'} border-0 px-4 py-2`}>
+              <div className={`w-2 h-2 rounded-full ${isMoving ? 'bg-green-400' : 'bg-yellow-400'} animate-pulse mr-2`} />
+              {isMoving ? 'Em movimento' : 'Parado'}
+            </Badge>
+            {gpsError && (
+              <Badge className="bg-red-500/20 text-red-400 border-0 px-3 py-1">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                GPS Error
+              </Badge>
+            )}
+          </div>
           <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 capitalize">
             {activityType}
           </Badge>
@@ -270,8 +383,8 @@ export default function RunningTracker({ onFinish, userEmail }) {
             </div>
             <div className="text-center">
               <p className="text-sm text-white/60 mb-1">Tempo</p>
-              <p className="text-4xl font-bold text-white">{formatTime(duration)}</p>
-              <p className="text-sm text-[#CEF17B]">total</p>
+              <p className="text-4xl font-bold text-white">{formatTime(movingTime)}</p>
+              <p className="text-sm text-[#CEF17B]">em movimento</p>
             </div>
           </div>
 
@@ -307,16 +420,43 @@ export default function RunningTracker({ onFinish, userEmail }) {
           </Card>
         </div>
 
-        {/* Map Placeholder */}
+        {/* Map */}
         <Card className="glass-effect p-6 border-[#CEF17B]/20">
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="w-5 h-5 text-[#CEF17B]" />
             <h3 className="font-bold text-white">Trajeto GPS</h3>
+            <Badge className="bg-[#CEF17B]/10 text-[#CEF17B] border-0 text-xs ml-auto">
+              {routePoints.length} pontos
+            </Badge>
           </div>
-          <div className="h-48 bg-white/5 rounded-lg flex items-center justify-center">
-            <p className="text-white/60 text-sm">
-              📍 {routePoints.length} pontos registrados
-            </p>
+          <div className="h-64 rounded-lg overflow-hidden">
+            {routePoints.length > 0 ? (
+              <MapContainer
+                center={[routePoints[0].lat, routePoints[0].lng]}
+                zoom={15}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={false}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; OpenStreetMap contributors'
+                />
+                {routePoints.length > 0 && (
+                  <>
+                    <Marker position={[routePoints[0].lat, routePoints[0].lng]} />
+                    <Polyline
+                      positions={routePoints.map(p => [p.lat, p.lng])}
+                      color="#CEF17B"
+                      weight={4}
+                    />
+                  </>
+                )}
+              </MapContainer>
+            ) : (
+              <div className="h-full bg-white/5 flex items-center justify-center">
+                <p className="text-white/60 text-sm">Aguardando GPS...</p>
+              </div>
+            )}
           </div>
         </Card>
 
