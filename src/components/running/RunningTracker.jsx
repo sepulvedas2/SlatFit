@@ -31,16 +31,22 @@ export default function RunningTracker({ onFinish, userEmail }) {
   const [duration, setDuration] = useState(0);
   const [movingTime, setMovingTime] = useState(0);
   const [currentPace, setCurrentPace] = useState("--:--");
+  const [avgPace, setAvgPace] = useState("--:--");
+  const [lastKmPace, setLastKmPace] = useState("--:--");
   const [avgSpeed, setAvgSpeed] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(0);
   const [calories, setCalories] = useState(0);
   const [estimatedFinishTime, setEstimatedFinishTime] = useState("--:--");
+  const [timeAhead, setTimeAhead] = useState(0);
   
   const [routePoints, setRoutePoints] = useState([]);
   const [lastPosition, setLastPosition] = useState(null);
   const timerRef = useRef(null);
   const gpsWatchId = useRef(null);
   const movingTimeRef = useRef(0);
+  const lastKmDistanceRef = useRef(0);
+  const lastKmTimeRef = useRef(0);
+  const speedHistoryRef = useRef([]);
   
   const queryClient = useQueryClient();
 
@@ -66,11 +72,29 @@ export default function RunningTracker({ onFinish, userEmail }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Calculate pace (min/km) - use moving time only
+  // Calculate pace (min/km) with smoothing
   const calculatePace = (distKm, durationSec) => {
     if (distKm === 0 || durationSec === 0) return "--:--";
     const paceMinutes = durationSec / 60 / distKm;
-    if (!isFinite(paceMinutes)) return "--:--";
+    if (!isFinite(paceMinutes) || paceMinutes > 30) return "--:--"; // Cap at 30 min/km
+    const mins = Math.floor(paceMinutes);
+    const secs = Math.round((paceMinutes - mins) * 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Calculate smooth current pace using speed history
+  const calculateSmoothPace = () => {
+    if (speedHistoryRef.current.length < 3) return currentPace;
+    
+    // Average last 5 speeds
+    const recentSpeeds = speedHistoryRef.current.slice(-5);
+    const avgSpeed = recentSpeeds.reduce((sum, s) => sum + s, 0) / recentSpeeds.length;
+    
+    if (avgSpeed === 0) return "--:--";
+    
+    const paceMinutes = 60 / avgSpeed;
+    if (!isFinite(paceMinutes) || paceMinutes > 30) return "--:--";
+    
     const mins = Math.floor(paceMinutes);
     const secs = Math.round((paceMinutes - mins) * 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -86,6 +110,12 @@ export default function RunningTracker({ onFinish, userEmail }) {
     // Calculate speed in km/h (speed is in m/s)
     const speedKmh = speed ? speed * 3.6 : 0;
     setCurrentSpeed(speedKmh);
+    
+    // Add to speed history for smoothing
+    speedHistoryRef.current.push(speedKmh);
+    if (speedHistoryRef.current.length > 10) {
+      speedHistoryRef.current.shift();
+    }
     
     // Detect if user is moving (speed > 0.5 km/h)
     const moving = speedKmh > 0.5;
@@ -104,9 +134,23 @@ export default function RunningTracker({ onFinish, userEmail }) {
       setDistance(prev => {
         const newDist = prev + distIncrement;
         
-        // Update pace based on moving time
-        const newPace = calculatePace(newDist, movingTimeRef.current);
-        setCurrentPace(newPace);
+        // Calculate avg pace based on total moving time
+        const avgPaceValue = calculatePace(newDist, movingTimeRef.current);
+        setAvgPace(avgPaceValue);
+        
+        // Update smooth current pace
+        const smoothPace = calculateSmoothPace();
+        setCurrentPace(smoothPace);
+        
+        // Calculate last km pace
+        if (Math.floor(newDist) > Math.floor(lastKmDistanceRef.current)) {
+          const kmDist = newDist - lastKmDistanceRef.current;
+          const kmTime = movingTimeRef.current - lastKmTimeRef.current;
+          const kmPace = calculatePace(kmDist, kmTime);
+          setLastKmPace(kmPace);
+          lastKmDistanceRef.current = newDist;
+          lastKmTimeRef.current = movingTimeRef.current;
+        }
         
         // Calculate avg speed
         if (movingTimeRef.current > 0) {
@@ -118,11 +162,21 @@ export default function RunningTracker({ onFinish, userEmail }) {
         setCalories(Math.round(newDist * 70 * 0.75));
         
         // Calculate estimated finish time if goal is set
-        if (goalDistance && speed > 0) {
+        if (goalDistance && movingTimeRef.current > 0) {
           const remainingDist = parseFloat(goalDistance) - newDist;
           if (remainingDist > 0) {
-            const remainingTime = (remainingDist / speed) * 3600;
-            setEstimatedFinishTime(formatTime(Math.round(remainingTime + movingTimeRef.current)));
+            const avgSpeed = (newDist / movingTimeRef.current) * 3600;
+            const remainingTime = (remainingDist / avgSpeed) * 3600;
+            const totalEstimatedTime = movingTimeRef.current + remainingTime;
+            setEstimatedFinishTime(formatTime(Math.round(totalEstimatedTime)));
+            
+            // Calculate if ahead or behind
+            if (goalPace) {
+              const [goalMins, goalSecs] = goalPace.split(':').map(Number);
+              const goalTotalTime = (goalMins * 60 + goalSecs) * parseFloat(goalDistance);
+              const timeDiff = goalTotalTime - totalEstimatedTime;
+              setTimeAhead(Math.round(timeDiff));
+            }
           }
         }
         
@@ -156,7 +210,20 @@ export default function RunningTracker({ onFinish, userEmail }) {
     
     // Every km completed
     if (currentKm > lastVoiceKm && currentKm > 0) {
-      speak(`${currentKm} quilômetros completados. Pace atual: ${currentPace}. Continue assim!`);
+      let message = `${currentKm} quilômetros completados. Pace médio: ${avgPace}.`;
+      
+      // Add time ahead/behind info
+      if (goalDistance && timeAhead !== 0) {
+        const absTime = Math.abs(timeAhead);
+        const timeStr = formatTime(absTime);
+        if (timeAhead > 0) {
+          message += ` Você está ${timeStr} adiantado!`;
+        } else {
+          message += ` Você está ${timeStr} atrasado. Acelere!`;
+        }
+      }
+      
+      speak(message);
       setLastVoiceKm(currentKm);
     }
     
@@ -215,11 +282,11 @@ export default function RunningTracker({ onFinish, userEmail }) {
       }
     );
     
-    // Timer to update duration and moving time
+    // Timer - starts immediately, counts total time
     timerRef.current = setInterval(() => {
       setDuration(prev => prev + 1);
       
-      // Only count moving time when user is actually moving
+      // Count moving time only when actually moving
       if (isMoving) {
         movingTimeRef.current += 1;
         setMovingTime(movingTimeRef.current);
@@ -458,17 +525,42 @@ export default function RunningTracker({ onFinish, userEmail }) {
               <p className="text-sm text-[#CEF17B]">min/km</p>
             </div>
             <div className="text-center">
-              <p className="text-sm text-white/60 mb-1">Tempo</p>
-              <p className="text-4xl font-bold text-white">{formatTime(movingTime)}</p>
-              <p className="text-sm text-[#CEF17B]">em movimento</p>
+              <p className="text-sm text-white/60 mb-1">Tempo Total</p>
+              <p className="text-4xl font-bold text-white">{formatTime(duration)}</p>
+              <p className="text-sm text-[#CEF17B]">movimento: {formatTime(movingTime)}</p>
+            </div>
+          </div>
+
+          {/* Pace Details */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="p-2 bg-white/5 rounded text-center">
+              <p className="text-xs text-white/60">Pace Médio</p>
+              <p className="text-lg font-bold text-white">{avgPace}</p>
+            </div>
+            <div className="p-2 bg-white/5 rounded text-center">
+              <p className="text-xs text-white/60">Último KM</p>
+              <p className="text-lg font-bold text-white">{lastKmPace}</p>
             </div>
           </div>
 
           {goalDistance && (
-            <div className="p-4 bg-[#CEF17B]/10 rounded-lg border border-[#CEF17B]/20">
-              <p className="text-sm text-[#CEEDB2] text-center">
-                🎯 Meta: {goalDistance}km • Estimativa: {estimatedFinishTime}
-              </p>
+            <div className={`p-4 rounded-lg border ${
+              timeAhead > 0 ? 'bg-green-500/10 border-green-500/20' : 
+              timeAhead < 0 ? 'bg-yellow-500/10 border-yellow-500/20' : 
+              'bg-[#CEF17B]/10 border-[#CEF17B]/20'
+            }`}>
+              <div className="text-center">
+                <p className="text-sm text-white/80 mb-1">
+                  🎯 Meta: {goalDistance}km • Chegada prevista: {estimatedFinishTime}
+                </p>
+                {timeAhead !== 0 && (
+                  <p className={`text-xs font-semibold ${
+                    timeAhead > 0 ? 'text-green-400' : 'text-yellow-400'
+                  }`}>
+                    {timeAhead > 0 ? `✓ ${formatTime(Math.abs(timeAhead))} adiantado` : `⚠ ${formatTime(Math.abs(timeAhead))} atrasado`}
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </Card>
