@@ -264,13 +264,117 @@ export default function RunningTracker({ onFinish, userEmail }) {
 
   const stopMutation = useMutation({
     mutationFn: async (activityData) => {
-      return base44.entities.RunningActivity.create(activityData);
+      const activity = await base44.entities.RunningActivity.create(activityData);
+      
+      // Update ranking
+      await updateRanking(activity);
+      
+      // Update challenges
+      await updateChallenges(activity);
+      
+      return activity;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['runningActivities']);
+      queryClient.invalidateQueries(['cityRanking']);
+      queryClient.invalidateQueries(['runningChallenges']);
       onFinish();
     }
   });
+
+  const updateRanking = async (activity) => {
+    if (!userEmail) return;
+    
+    const periods = ['daily', 'weekly', 'monthly'];
+    const city = "São Paulo"; // In real app: get from reverse geocoding
+    
+    for (const period of periods) {
+      const periodDate = getPeriodDate(period);
+      
+      // Check if ranking exists
+      const existing = await base44.entities.CityRanking.filter({
+        user_email: userEmail,
+        city: city,
+        period: period,
+        period_date: periodDate
+      });
+      
+      if (existing.length > 0) {
+        // Update existing
+        const current = existing[0];
+        await base44.entities.CityRanking.update(current.id, {
+          total_distance_km: current.total_distance_km + activity.distance_km,
+          total_time_seconds: current.total_time_seconds + activity.duration_seconds,
+          activities_count: current.activities_count + 1,
+          avg_pace: activity.pace_avg // Could calculate real average
+        });
+      } else {
+        // Create new
+        await base44.entities.CityRanking.create({
+          user_email: userEmail,
+          user_name: userEmail.split('@')[0], // Get from profile in real app
+          city: city,
+          period: period,
+          period_date: periodDate,
+          total_distance_km: activity.distance_km,
+          total_time_seconds: activity.duration_seconds,
+          activities_count: 1,
+          avg_pace: activity.pace_avg
+        });
+      }
+    }
+  };
+
+  const updateChallenges = async (activity) => {
+    if (!userEmail) return;
+    
+    // Get active challenges
+    const challenges = await base44.entities.RunningChallenge.filter({
+      user_email: userEmail,
+      status: 'active'
+    });
+    
+    for (const challenge of challenges) {
+      let newValue = challenge.current_value;
+      
+      if (challenge.challenge_type === 'weekly_distance' || challenge.challenge_type === 'monthly_distance') {
+        newValue += activity.distance_km;
+      } else if (challenge.challenge_type === 'consistency') {
+        newValue += 1;
+      }
+      
+      const completed = newValue >= challenge.target_value;
+      
+      await base44.entities.RunningChallenge.update(challenge.id, {
+        current_value: newValue,
+        is_completed: completed,
+        status: completed ? 'completed' : 'active'
+      });
+      
+      // Award points if completed
+      if (completed && userEmail) {
+        const userPoints = await base44.entities.UserPoints.filter({ user_email: userEmail });
+        if (userPoints[0]) {
+          await base44.entities.UserPoints.update(userPoints[0].id, {
+            total_points: (userPoints[0].total_points || 0) + challenge.reward_points
+          });
+        }
+      }
+    }
+  };
+
+  const getPeriodDate = (periodType) => {
+    const today = new Date();
+    if (periodType === "daily") {
+      return today.toISOString().split('T')[0];
+    } else if (periodType === "weekly") {
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+      return startOfWeek.toISOString().split('T')[0];
+    } else {
+      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+    }
+  };
 
   const stopTracking = () => {
     if (timerRef.current) clearInterval(timerRef.current);

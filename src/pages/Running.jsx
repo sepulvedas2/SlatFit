@@ -16,10 +16,11 @@ import RunningHistory from "../components/running/RunningHistory";
 import RunningStats from "../components/running/RunningStats";
 import RunningChallenges from "../components/running/RunningChallenges";
 import RunningAnalytics from "../components/running/RunningAnalytics";
+import RunningRanking from "../components/running/RunningRanking";
 
 export default function Running() {
   const [user, setUser] = useState(null);
-  const [activeView, setActiveView] = useState("home"); // home, tracking, history, challenges, analytics
+  const [activeView, setActiveView] = useState("home"); // home, tracking, history, challenges, analytics, ranking
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -84,6 +85,24 @@ export default function Running() {
             <p className="text-[#CEEDB2]">Acompanhe sua evolução</p>
           </div>
           <RunningAnalytics activities={recentActivities} />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeView === "ranking") {
+    return (
+      <div className="min-h-screen p-4 md:p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Button
+            onClick={() => setActiveView("home")}
+            variant="outline"
+            className="glass-effect border-[#CEF17B]/20 mb-4"
+          >
+            <ChevronRight className="w-4 h-4 mr-2 rotate-180" />
+            Voltar
+          </Button>
+          <RunningRanking userEmail={user?.email} userName={user?.full_name} />
         </div>
       </div>
     );
@@ -236,7 +255,25 @@ export default function Running() {
         )}
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card 
+            onClick={() => setActiveView("ranking")}
+            className="glass-effect p-4 border-[#CEF17B]/20 cursor-pointer hover:scale-[1.02] transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#CEF17B]/20 flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-[#CEF17B]" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">Ranking</p>
+                  <p className="text-xs text-[#CEEDB2]">Sua cidade</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#CEF17B]" />
+            </div>
+          </Card>
+
           <Card 
             onClick={() => setActiveView("challenges")}
             className="glass-effect p-4 border-[#CEF17B]/20 cursor-pointer hover:scale-[1.02] transition-all"
@@ -244,7 +281,7 @@ export default function Running() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                  <Trophy className="w-5 h-5 text-yellow-400" />
+                  <Target className="w-5 h-5 text-yellow-400" />
                 </div>
                 <div>
                   <p className="font-semibold text-white">Desafios</p>
