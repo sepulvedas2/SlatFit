@@ -19,6 +19,8 @@ export default function RunningTracker({ onFinish, userEmail }) {
   const [activityType, setActivityType] = useState("corrida");
   const [gpsError, setGpsError] = useState(null);
   const [isMoving, setIsMoving] = useState(false);
+  const [voiceFeedback, setVoiceFeedback] = useState(true);
+  const [lastVoiceKm, setLastVoiceKm] = useState(0);
   
   // Goals
   const [goalDistance, setGoalDistance] = useState("");
@@ -137,6 +139,57 @@ export default function RunningTracker({ onFinish, userEmail }) {
     setGpsError(error.message);
   };
 
+  // Voice feedback function
+  const speak = (text) => {
+    if (!voiceFeedback || !window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Check for voice milestones
+  useEffect(() => {
+    if (!isTracking || isPaused) return;
+    
+    const currentKm = Math.floor(distance);
+    
+    // Every km completed
+    if (currentKm > lastVoiceKm && currentKm > 0) {
+      speak(`${currentKm} quilômetros completados. Pace atual: ${currentPace}. Continue assim!`);
+      setLastVoiceKm(currentKm);
+    }
+    
+    // Halfway to goal
+    if (goalDistance && distance >= parseFloat(goalDistance) / 2 && lastVoiceKm < parseFloat(goalDistance) / 2) {
+      speak(`Metade do percurso concluída! Falta apenas ${(parseFloat(goalDistance) - distance).toFixed(1)} quilômetros!`);
+    }
+    
+    // Near goal (500m before)
+    if (goalDistance && distance >= parseFloat(goalDistance) - 0.5 && distance < parseFloat(goalDistance)) {
+      speak(`Faltam apenas 500 metros! Acelere para a reta final!`);
+    }
+    
+    // Goal completed
+    if (goalDistance && distance >= parseFloat(goalDistance)) {
+      speak(`Parabéns! Meta de ${goalDistance} quilômetros atingida!`);
+    }
+    
+    // Pace warnings
+    if (goalPace && currentPace !== "--:--") {
+      const [goalMins, goalSecs] = goalPace.split(':').map(Number);
+      const [currentMins, currentSecs] = currentPace.split(':').map(Number);
+      const goalPaceSeconds = goalMins * 60 + goalSecs;
+      const currentPaceSeconds = currentMins * 60 + currentSecs;
+      
+      if (currentPaceSeconds < goalPaceSeconds * 0.9) {
+        speak('Você está acima do pace alvo! Excelente!');
+      } else if (currentPaceSeconds > goalPaceSeconds * 1.1) {
+        speak('Pace abaixo do objetivo. Tente acelerar um pouco.');
+      }
+    }
+  }, [distance, isTracking, isPaused]);
+
   // Start tracking
   const startTracking = () => {
     if (!navigator.geolocation) {
@@ -147,6 +200,9 @@ export default function RunningTracker({ onFinish, userEmail }) {
     setIsTracking(true);
     setIsPaused(false);
     setGpsError(null);
+    
+    // Initial voice feedback
+    speak('Atividade iniciada. Bom treino!');
     
     // Request GPS permission and start watching position
     gpsWatchId.current = navigator.geolocation.watchPosition(
@@ -315,6 +371,26 @@ export default function RunningTracker({ onFinish, userEmail }) {
                   onChange={(e) => setGoalPace(e.target.value)}
                   className="bg-white/10 border-white/20 text-white"
                 />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🎤</span>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Feedback por Voz</p>
+                    <p className="text-xs text-[#CEEDB2]">Orientações durante o treino</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setVoiceFeedback(!voiceFeedback)}
+                  className={`w-12 h-6 rounded-full transition-all ${
+                    voiceFeedback ? 'bg-[#CEF17B]' : 'bg-white/20'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                    voiceFeedback ? 'translate-x-6' : 'translate-x-0.5'
+                  }`} />
+                </button>
               </div>
               
               {goalDistance && goalPace && (

@@ -14,10 +14,12 @@ import { createPageUrl } from "@/utils";
 import RunningTracker from "../components/running/RunningTracker";
 import RunningHistory from "../components/running/RunningHistory";
 import RunningStats from "../components/running/RunningStats";
+import RunningChallenges from "../components/running/RunningChallenges";
+import RunningAnalytics from "../components/running/RunningAnalytics";
 
 export default function Running() {
   const [user, setUser] = useState(null);
-  const [activeView, setActiveView] = useState("home"); // home, tracking, history
+  const [activeView, setActiveView] = useState("home"); // home, tracking, history, challenges, analytics
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -45,6 +47,46 @@ export default function Running() {
 
   if (activeView === "history") {
     return <RunningHistory userEmail={user?.email} onBack={() => setActiveView("home")} />;
+  }
+
+  if (activeView === "challenges") {
+    return (
+      <div className="min-h-screen p-4 md:p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Button
+            onClick={() => setActiveView("home")}
+            variant="outline"
+            className="glass-effect border-[#CEF17B]/20 mb-4"
+          >
+            <ChevronRight className="w-4 h-4 mr-2 rotate-180" />
+            Voltar
+          </Button>
+          <RunningChallenges userEmail={user?.email} />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeView === "analytics") {
+    return (
+      <div className="min-h-screen p-4 md:p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Button
+            onClick={() => setActiveView("home")}
+            variant="outline"
+            className="glass-effect border-[#CEF17B]/20 mb-4"
+          >
+            <ChevronRight className="w-4 h-4 mr-2 rotate-180" />
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Análise de Performance</h1>
+            <p className="text-[#CEEDB2]">Acompanhe sua evolução</p>
+          </div>
+          <RunningAnalytics activities={recentActivities} />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -193,15 +235,54 @@ export default function Running() {
           </Card>
         )}
 
+        {/* Quick Actions */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card 
+            onClick={() => setActiveView("challenges")}
+            className="glass-effect p-4 border-[#CEF17B]/20 cursor-pointer hover:scale-[1.02] transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-yellow-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">Desafios</p>
+                  <p className="text-xs text-[#CEEDB2]">Gamificação</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#CEF17B]" />
+            </div>
+          </Card>
+
+          <Card 
+            onClick={() => setActiveView("analytics")}
+            className="glass-effect p-4 border-[#CEF17B]/20 cursor-pointer hover:scale-[1.02] transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">Análise</p>
+                  <p className="text-xs text-[#CEEDB2]">Performance</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#CEF17B]" />
+            </div>
+          </Card>
+        </div>
+
         {/* Info Cards */}
         <Card className="glass-effect p-6 border-[#CEF17B]/20">
-          <h3 className="font-bold text-white mb-3">💡 Como funciona</h3>
+          <h3 className="font-bold text-white mb-3">💡 Recursos Premium</h3>
           <div className="space-y-2 text-sm text-[#CEEDB2]">
-            <p>• GPS em tempo real durante toda a atividade</p>
-            <p>• Pace dinâmico calculado automaticamente</p>
-            <p>• Feedback motivacional durante o treino</p>
-            <p>• Histórico completo e gráficos de evolução</p>
-            <p>• Recordes pessoais destacados</p>
+            <p>• 🎤 Feedback por voz em tempo real</p>
+            <p>• 📍 GPS otimizado para economizar bateria</p>
+            <p>• 🏆 Sistema de desafios e gamificação</p>
+            <p>• 📊 Análise avançada de performance</p>
+            <p>• 🎯 Treinos intervalados outdoor</p>
           </div>
         </Card>
 
