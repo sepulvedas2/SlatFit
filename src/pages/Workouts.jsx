@@ -289,10 +289,10 @@ export default function Workouts() {
   // Weekly Plan View (Main View)
   if (view === "plan") {
     const weekOptions = [
-      { number: 1, title: "Semana 1", subtitle: "Iniciante" },
-      { number: 2, title: "Semana 2", subtitle: "Intermediário" },
-      { number: 3, title: "Semana 3", subtitle: "Avançado" },
-      { number: 4, title: "Semana 4", subtitle: "Expert" }
+      { number: 1, title: "Planilha 1", subtitle: "Iniciante" },
+      { number: 2, title: "Planilha 2", subtitle: "Intermediário" },
+      { number: 3, title: "Planilha 3", subtitle: "Avançado" },
+      { number: 4, title: "Planilha 4", subtitle: "Expert" }
     ];
 
     return (
