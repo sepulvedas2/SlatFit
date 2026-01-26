@@ -458,7 +458,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
   5: {
     segunda: { 
       muscle: "Treino A - Inferiores", 
-      icon: "🍑",
+      icon: "🦵",
       restTime: "45-60 segundos",
       exercises: [
         { name: "Agachamento a Fundo", sets: "4x", reps: "12-15", image_placeholder: "agachamento_fundo" },
@@ -477,7 +477,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     },
     quarta: { 
       muscle: "Treino B - Inferiores", 
-      icon: "🍑",
+      icon: "🦵",
       restTime: "60-90 segundos",
       exercises: [
         { name: "Agachamento Livre", sets: "4x", reps: "8-12", image_placeholder: "agachamento_livre" },
@@ -496,7 +496,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     },
     sexta: { 
       muscle: "Treino C - Inferiores", 
-      icon: "🍑",
+      icon: "🦵",
       restTime: "45-60 segundos",
       exercises: [
         { name: "Leg Press", sets: "4x", reps: "12-15", image_placeholder: "leg_press" },
