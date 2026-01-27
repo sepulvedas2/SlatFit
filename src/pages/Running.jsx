@@ -18,6 +18,8 @@ import RunningChallenges from "../components/running/RunningChallenges";
 import RunningAnalytics from "../components/running/RunningAnalytics";
 import RunningLeaderboard from "../components/running/RunningLeaderboard";
 import ActivityFeed from "../components/running/ActivityFeed";
+import CityChallenges from "../components/running/CityChallenges";
+import RouteComparison from "../components/running/RouteComparison";
 
 export default function Running() {
   const [user, setUser] = useState(null);
@@ -125,6 +127,13 @@ export default function Running() {
               userEmail={user?.email} 
               userCity={profile?.city || "São Paulo"} 
             />
+
+            <CityChallenges 
+              userEmail={user?.email}
+              userCity={profile?.city || "São Paulo"}
+            />
+
+            <RouteComparison userEmail={user?.email} />
             
             <div>
               <h2 className="text-xl font-bold text-white mb-4">Feed de Atividades</h2>

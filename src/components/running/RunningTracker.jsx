@@ -393,6 +393,20 @@ export default function RunningTracker({ onFinish, userEmail }) {
             last_activity_date: new Date().toISOString()
           });
         }
+
+        // Update city challenges
+        const activeChallenges = await base44.entities.CityChallenge.filter({ 
+          city: userCity,
+          status: 'active'
+        });
+        
+        for (const challenge of activeChallenges) {
+          if (challenge.participants?.includes(userEmail)) {
+            await base44.entities.CityChallenge.update(challenge.id, {
+              current_value: (challenge.current_value || 0) + activityData.distance_km
+            });
+          }
+        }
       }
       
       return activity;
@@ -400,6 +414,7 @@ export default function RunningTracker({ onFinish, userEmail }) {
     onSuccess: () => {
       queryClient.invalidateQueries(['runningActivities']);
       queryClient.invalidateQueries(['cityLeaderboard']);
+      queryClient.invalidateQueries(['cityChallenges']);
       onFinish();
     }
   });
