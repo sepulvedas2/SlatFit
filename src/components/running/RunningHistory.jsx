@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Trophy, Footprints, Bike, MapPin, Timer, Zap } from "lucide-react";
+import { ArrowLeft, Trophy, Footprints, Bike, MapPin, Timer, Zap, ChevronDown, ChevronUp } from "lucide-react";
+import SplitsDetail from "./SplitsDetail";
 
 export default function RunningHistory({ userEmail, onBack }) {
+  const [expandedActivity, setExpandedActivity] = useState(null);
+
   const { data: activities = [] } = useQuery({
     queryKey: ['runningActivities', userEmail],
     queryFn: async () => {
@@ -111,6 +114,38 @@ export default function RunningHistory({ userEmail, onBack }) {
 
                     {activity.notes && (
                       <p className="text-sm text-[#CEEDB2] mt-3 italic">"{activity.notes}"</p>
+                    )}
+
+                    {/* Toggle Splits */}
+                    {activity.route_data && activity.route_data.length > 2 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedActivity(expandedActivity === activity.id ? null : activity.id);
+                        }}
+                        className="w-full mt-3 text-[#CEF17B] hover:bg-[#CEF17B]/10"
+                      >
+                        {expandedActivity === activity.id ? (
+                          <>
+                            <ChevronUp className="w-4 h-4 mr-1" />
+                            Ocultar Splits
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-4 h-4 mr-1" />
+                            Ver Splits por KM
+                          </>
+                        )}
+                      </Button>
+                    )}
+
+                    {/* Expanded Splits */}
+                    {expandedActivity === activity.id && (
+                      <div className="mt-3">
+                        <SplitsDetail activity={activity} />
+                      </div>
                     )}
                   </div>
 

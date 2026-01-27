@@ -21,7 +21,7 @@ import ActivityFeed from "../components/running/ActivityFeed";
 
 export default function Running() {
   const [user, setUser] = useState(null);
-  const [activeView, setActiveView] = useState("home"); // home, tracking, history, challenges, analytics
+  const [activeView, setActiveView] = useState("home"); // home, tracking, history, challenges, analytics, leaderboard
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -38,6 +38,16 @@ export default function Running() {
     },
     enabled: !!user?.email,
     initialData: [],
+  });
+
+  const { data: profile } = useQuery({
+    queryKey: ['userProfile', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      return profiles[0] || null;
+    },
+    enabled: !!user?.email,
   });
 
   const totalDistance = recentActivities.reduce((sum, act) => sum + (act.distance_km || 0), 0);
@@ -86,6 +96,44 @@ export default function Running() {
             <p className="text-[#CEEDB2]">Acompanhe sua evolução</p>
           </div>
           <RunningAnalytics activities={recentActivities} />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeView === "leaderboard") {
+    return (
+      <div className="min-h-screen p-4 md:p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setActiveView("home")}
+              className="glass-effect border-[#CEF17B]/20"
+            >
+              <ChevronRight className="w-5 h-5 text-white rotate-180" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-white">Ranking & Comunidade</h1>
+              <p className="text-[#CEEDB2]">Competição saudável na sua cidade</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <RunningLeaderboard 
+              userEmail={user?.email} 
+              userCity={profile?.city || "São Paulo"} 
+            />
+            
+            <div>
+              <h2 className="text-xl font-bold text-white mb-4">Feed de Atividades</h2>
+              <ActivityFeed 
+                userCity={profile?.city || "São Paulo"}
+                limit={20}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -269,6 +317,24 @@ export default function Running() {
                 <div>
                   <p className="font-semibold text-white">Análise</p>
                   <p className="text-xs text-[#CEEDB2]">Performance</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#CEF17B]" />
+            </div>
+          </Card>
+
+          <Card 
+            onClick={() => setActiveView("leaderboard")}
+            className="glass-effect p-4 border-[#CEF17B]/20 cursor-pointer hover:scale-[1.02] transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-yellow-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">Ranking</p>
+                  <p className="text-xs text-[#CEEDB2]">Por cidade</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-[#CEF17B]" />
