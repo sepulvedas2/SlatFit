@@ -16,7 +16,6 @@ export default function Layout({ children, currentPageName }) {
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
     { name: "Scanner", icon: Camera, path: createPageUrl("FoodScanner") },
     { name: "Treinos", icon: Dumbbell, path: createPageUrl("Workouts") },
-    { name: "Corrida", icon: "🏃", path: createPageUrl("Running") },
     { name: "Nutrição", icon: UtensilsCrossed, path: createPageUrl("SmartNutrition") },
     { name: "Perfil", icon: User, path: createPageUrl("Profile") },
   ];
