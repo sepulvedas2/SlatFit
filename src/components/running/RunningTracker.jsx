@@ -351,10 +351,55 @@ export default function RunningTracker({ onFinish, userEmail }) {
 
   const stopMutation = useMutation({
     mutationFn: async (activityData) => {
-      return base44.entities.RunningActivity.create(activityData);
+      const activity = await base44.entities.RunningActivity.create(activityData);
+      
+      // Update city leaderboard
+      const profiles = await base44.entities.UserProfile.filter({ user_email: userEmail });
+      const userCity = profiles[0]?.city;
+      const userName = profiles[0]?.user_email?.split('@')[0] || 'Anônimo';
+      
+      if (userCity) {
+        const leaderboards = await base44.entities.CityLeaderboard.filter({ user_email: userEmail });
+        
+        if (leaderboards[0]) {
+          // Update existing
+          const current = leaderboards[0];
+          await base44.entities.CityLeaderboard.update(current.id, {
+            total_distance_km: (current.total_distance_km || 0) + activityData.distance_km,
+            total_runs: (current.total_runs || 0) + 1,
+            total_time_seconds: (current.total_time_seconds || 0) + activityData.duration_seconds,
+            best_pace: !current.best_pace || activityData.pace_avg < current.best_pace ? activityData.pace_avg : current.best_pace,
+            longest_run_km: Math.max(current.longest_run_km || 0, activityData.distance_km),
+            week_distance_km: (current.week_distance_km || 0) + activityData.distance_km,
+            month_distance_km: (current.month_distance_km || 0) + activityData.distance_km,
+            points: (current.points || 0) + Math.round(activityData.distance_km * 10),
+            last_activity_date: new Date().toISOString(),
+            user_name: userName
+          });
+        } else {
+          // Create new
+          await base44.entities.CityLeaderboard.create({
+            user_email: userEmail,
+            user_name: userName,
+            city: userCity,
+            total_distance_km: activityData.distance_km,
+            total_runs: 1,
+            total_time_seconds: activityData.duration_seconds,
+            best_pace: activityData.pace_avg,
+            longest_run_km: activityData.distance_km,
+            week_distance_km: activityData.distance_km,
+            month_distance_km: activityData.distance_km,
+            points: Math.round(activityData.distance_km * 10),
+            last_activity_date: new Date().toISOString()
+          });
+        }
+      }
+      
+      return activity;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['runningActivities']);
+      queryClient.invalidateQueries(['cityLeaderboard']);
       onFinish();
     }
   });

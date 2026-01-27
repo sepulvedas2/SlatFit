@@ -16,6 +16,8 @@ import RunningHistory from "../components/running/RunningHistory";
 import RunningStats from "../components/running/RunningStats";
 import RunningChallenges from "../components/running/RunningChallenges";
 import RunningAnalytics from "../components/running/RunningAnalytics";
+import RunningLeaderboard from "../components/running/RunningLeaderboard";
+import ActivityFeed from "../components/running/ActivityFeed";
 
 export default function Running() {
   const [user, setUser] = useState(null);
