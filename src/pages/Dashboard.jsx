@@ -9,20 +9,14 @@ import {
   CheckCircle, Crown, Flame
 } from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
-import UserGreeting from "../components/dashboard/UserGreeting";
-import DailyMissions from "../components/dashboard/DailyMissions";
-import PointsCard from "../components/dashboard/PointsCard";
-import WeeklyGoals from "../components/dashboard/WeeklyGoals";
-import AchievementSystem from "../components/dashboard/AchievementSystem";
-import QuickActions from "../components/dashboard/QuickActions";
 import WelcomeModal from "../components/onboarding/WelcomeModal";
 import OnboardingModal from "../components/onboarding/OnboardingModal";
-import AssistantCoach from "../components/dashboard/IAGOCoach";
-import TodayWorkout from "../components/dashboard/TodayWorkout";
-import DailyGoals from "../components/dashboard/DailyGoals";
-import DailyStatusCard from "../components/dashboard/DailyStatusCard";
-import PrimaryActionCard from "../components/dashboard/PrimaryActionCard";
-import AIAssistantCard from "../components/dashboard/AIAssistantCard";
+import HeroHeader from "../components/dashboard/HeroHeader";
+import HeroAction from "../components/dashboard/HeroAction";
+import TodayGoals from "../components/dashboard/TodayGoals";
+import WeekProgress from "../components/dashboard/WeekProgress";
+import QuickAchievements from "../components/dashboard/QuickAchievements";
+import QuickActionsGrid from "../components/dashboard/QuickActionsGrid";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -219,16 +213,15 @@ export default function Dashboard() {
 
   const calorieTarget = profile?.daily_calorie_target || 2000;
   const streakDays = weekWorkouts.length;
+  
+  const waterProgress = nutritionData?.water_intake_ml && nutritionData?.water_goal_ml
+    ? (nutritionData.water_intake_ml / nutritionData.water_goal_ml) * 100
+    : 0;
 
-  // Calcular metas completas para Status Card
-  const calorieProgress = calorieTarget > 0 ? (todayCalories / calorieTarget) * 100 : 0;
-  const workoutComplete = todayWorkouts?.length > 0;
-  const waterGoalReached = nutritionData?.water_goal_reached || false;
-  const completedGoalsCount = [
-    calorieProgress >= 100,
-    workoutComplete,
-    waterGoalReached
-  ].filter(Boolean).length;
+  const level = userPoints?.level || 1;
+  const xpProgress = userPoints?.xp_current && userPoints?.xp_next_level
+    ? (userPoints.xp_current / userPoints.xp_next_level) * 100
+    : 0;
 
   const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
   const isFreeTrial = subscription?.plan === "free_trial";
@@ -314,73 +307,50 @@ export default function Dashboard() {
           </div>
         )}
 
-        {user && (
+        {user && profile && (
           <>
-            {/* 1. STATUS DO DIA */}
-            <DailyStatusCard 
-              completedGoals={completedGoalsCount}
-              totalGoals={3}
+            {/* 1️⃣ TOPO – STATUS DO USUÁRIO */}
+            <HeroHeader 
+              user={user}
+              userPoints={userPoints}
+              level={level}
+              xpProgress={xpProgress}
             />
 
-            {/* 2. AÇÃO PRINCIPAL - CHECK-IN DIÁRIO */}
-            <div className="mt-4">
-              <PrimaryActionCard hasCheckIn={!!todayCheckIn} />
-            </div>
-          </>
-        )}
+            {/* 2️⃣ CARD PRINCIPAL – AÇÃO DO DIA */}
+            <HeroAction 
+              hasCheckIn={!!todayCheckIn}
+              todayWorkouts={todayWorkouts}
+              todayCalories={todayCalories}
+              calorieTarget={calorieTarget}
+            />
 
-        {user && (
-          <>
-            {/* 3. METAS DE HOJE */}
-            <DailyGoals 
+            {/* 3️⃣ METAS DO DIA */}
+            <TodayGoals 
               todayCalories={todayCalories}
               calorieTarget={calorieTarget}
               todayWorkouts={todayWorkouts}
-              nutritionData={nutritionData}
-              profile={profile}
+              waterProgress={waterProgress}
             />
 
-            {/* 4. ASSISTENTE DE IA */}
-            <AssistantCoach 
-              user={user}
-              profile={profile}
-              todayCheckIn={todayCheckIn}
-              weekWorkouts={weekWorkouts}
-              todayCalories={todayCalories}
-              calorieTarget={calorieTarget}
-              userPoints={userPoints}
+            {/* 4️⃣ METAS DA SEMANA */}
+            <WeekProgress 
+              weekWorkouts={weekWorkouts.length}
+              waterDays={waterDaysCompleted}
+              proteinDays={proteinDaysCompleted}
             />
+
+            {/* 5️⃣ CONQUISTAS E GAMIFICAÇÃO */}
+            <QuickAchievements 
+              achievements={achievements}
+              workoutCount={allWorkoutLogs.length}
+              streak={calculateStreak()}
+            />
+
+            {/* 6️⃣ AÇÕES RÁPIDAS */}
+            <QuickActionsGrid />
           </>
         )}
-
-        {/* Points Card */}
-        <Link to={createPageUrl("Challenges")}>
-          <PointsCard userPoints={userPoints} />
-        </Link>
-
-        {/* 4. Weekly Goals */}
-        <WeeklyGoals 
-          weekWorkouts={weekWorkouts.length}
-          waterDays={waterDaysCompleted}
-          proteinDays={proteinDaysCompleted}
-        />
-
-        {/* 5. Achievements */}
-        <AchievementSystem
-          userEmail={user?.email}
-          achievements={achievements}
-          workoutCount={allWorkoutLogs.length}
-          streak={calculateStreak()}
-          totalCalories={totalCaloriesBurned}
-          foodLogCount={allFoodLogs.length}
-          userLevel={userPoints?.level || 1}
-          completedChallenges={completedChallenges}
-          proteinDaysCount={proteinDaysCompleted}
-          waterDaysCount={waterDaysCompleted}
-        />
-
-        {/* 6. Quick Actions */}
-        <QuickActions />
 
       </div>
     </div>
