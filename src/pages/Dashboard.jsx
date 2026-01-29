@@ -5,16 +5,24 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Crown } from "lucide-react";
+import { 
+  CheckCircle, Crown, Flame
+} from "lucide-react";
 import { format, startOfWeek, differenceInDays } from "date-fns";
+import UserGreeting from "../components/dashboard/UserGreeting";
+import DailyMissions from "../components/dashboard/DailyMissions";
+import PointsCard from "../components/dashboard/PointsCard";
+import WeeklyGoals from "../components/dashboard/WeeklyGoals";
+import AchievementSystem from "../components/dashboard/AchievementSystem";
+import QuickActions from "../components/dashboard/QuickActions";
 import WelcomeModal from "../components/onboarding/WelcomeModal";
 import OnboardingModal from "../components/onboarding/OnboardingModal";
-import UserStatus from "../components/dashboard/UserStatus";
-import PrimaryAction from "../components/dashboard/PrimaryAction";
-import TodayGoals from "../components/dashboard/TodayGoals";
-import WeekProgress from "../components/dashboard/WeekProgress";
-import Achievements from "../components/dashboard/Achievements";
-import QuickActionsGrid from "../components/dashboard/QuickActionsGrid";
+import AssistantCoach from "../components/dashboard/IAGOCoach";
+import TodayWorkout from "../components/dashboard/TodayWorkout";
+import DailyGoals from "../components/dashboard/DailyGoals";
+import DailyStatusCard from "../components/dashboard/DailyStatusCard";
+import PrimaryActionCard from "../components/dashboard/PrimaryActionCard";
+import AIAssistantCard from "../components/dashboard/AIAssistantCard";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -270,7 +278,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen p-4 md:p-6 pb-24">
-      <div className="max-w-2xl mx-auto space-y-5">
+      <div className="max-w-4xl mx-auto space-y-6">
 
         {showOnboarding && user && (
           <OnboardingModal 
@@ -287,7 +295,7 @@ export default function Dashboard() {
           />
         )}
 
-        {/* Premium Badge */}
+        {/* Premium Badge (Top Right) */}
         {isPremium && (
           <div className="flex justify-end">
             <Link to={createPageUrl("Subscription")}>
@@ -297,7 +305,9 @@ export default function Dashboard() {
                   <div className="font-bold text-white">
                     {isFreeTrial ? 'Teste Grátis' : 'Premium'}
                   </div>
-                  <div className="text-[#CEEDB2]">{daysLeft} dias</div>
+                  <div className="text-[#CEEDB2]">
+                    {daysLeft} dias
+                  </div>
                 </div>
               </div>
             </Link>
@@ -306,42 +316,71 @@ export default function Dashboard() {
 
         {user && (
           <>
-            {/* 1️⃣ STATUS DO USUÁRIO */}
-            <UserStatus user={user} userPoints={userPoints} />
-
-            {/* 2️⃣ AÇÃO PRINCIPAL DO DIA */}
-            <PrimaryAction 
-              hasCheckIn={!!todayCheckIn} 
-              todayWorkouts={todayWorkouts}
-              profile={profile}
+            {/* 1. STATUS DO DIA */}
+            <DailyStatusCard 
+              completedGoals={completedGoalsCount}
+              totalGoals={3}
             />
 
-            {/* 3️⃣ METAS DE HOJE */}
-            <TodayGoals 
+            {/* 2. AÇÃO PRINCIPAL - CHECK-IN DIÁRIO */}
+            <div className="mt-4">
+              <PrimaryActionCard hasCheckIn={!!todayCheckIn} />
+            </div>
+          </>
+        )}
+
+        {user && (
+          <>
+            {/* 3. METAS DE HOJE */}
+            <DailyGoals 
               todayCalories={todayCalories}
               calorieTarget={calorieTarget}
               todayWorkouts={todayWorkouts}
               nutritionData={nutritionData}
+              profile={profile}
             />
 
-            {/* 4️⃣ PROGRESSO SEMANAL */}
-            <WeekProgress 
-              weekWorkouts={weekWorkouts.length}
-              waterDays={waterDaysCompleted}
-              proteinDays={proteinDaysCompleted}
+            {/* 4. ASSISTENTE DE IA */}
+            <AssistantCoach 
+              user={user}
+              profile={profile}
+              todayCheckIn={todayCheckIn}
+              weekWorkouts={weekWorkouts}
+              todayCalories={todayCalories}
+              calorieTarget={calorieTarget}
+              userPoints={userPoints}
             />
-
-            {/* 5️⃣ CONQUISTAS */}
-            <Achievements 
-              achievements={achievements}
-              workoutCount={allWorkoutLogs.length}
-              streak={calculateStreak()}
-            />
-
-            {/* 6️⃣ AÇÕES RÁPIDAS */}
-            <QuickActionsGrid />
           </>
         )}
+
+        {/* Points Card */}
+        <Link to={createPageUrl("Challenges")}>
+          <PointsCard userPoints={userPoints} />
+        </Link>
+
+        {/* 4. Weekly Goals */}
+        <WeeklyGoals 
+          weekWorkouts={weekWorkouts.length}
+          waterDays={waterDaysCompleted}
+          proteinDays={proteinDaysCompleted}
+        />
+
+        {/* 5. Achievements */}
+        <AchievementSystem
+          userEmail={user?.email}
+          achievements={achievements}
+          workoutCount={allWorkoutLogs.length}
+          streak={calculateStreak()}
+          totalCalories={totalCaloriesBurned}
+          foodLogCount={allFoodLogs.length}
+          userLevel={userPoints?.level || 1}
+          completedChallenges={completedChallenges}
+          proteinDaysCount={proteinDaysCompleted}
+          waterDaysCount={waterDaysCompleted}
+        />
+
+        {/* 6. Quick Actions */}
+        <QuickActions />
 
       </div>
     </div>
