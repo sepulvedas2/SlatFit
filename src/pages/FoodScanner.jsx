@@ -8,6 +8,7 @@ import { Camera, Upload, Sparkles, Loader2, Check, X, Edit, Calculator } from "l
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import NutritionResults from "../components/scanner/NutritionResults";
 import MealTypeSelector from "../components/scanner/MealTypeSelector";
+import RecentScans from "../components/scanner/RecentScans";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import PremiumFeatureLock from "../components/dashboard/PremiumFeatureLock";
 import { Badge } from "@/components/ui/badge";
@@ -265,56 +266,56 @@ REGRAS CRÍTICAS:
   };
 
   return (
-    <div className="min-h-screen p-3 md:p-8 pb-24 bg-[#054D3B]">
-      <div className="max-w-2xl mx-auto space-y-4">
+    <div className="min-h-screen p-4 md:p-8 pb-24">
+      <div className="max-w-2xl mx-auto space-y-5">
         
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-3 bg-orange-500/20 border border-orange-500/30">
-            <Sparkles className="w-4 h-4 text-orange-500" />
-            <span className="text-xs font-semibold text-white">Scanner Nutricional IA</span>
-            {!isPremium && (
-              <span className="text-xs text-orange-500">
-                ({dailyScans}/{scanLimit})
-              </span>
-            )}
+        {/* 1️⃣ HEADER DA TELA */}
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-3 glass-effect border border-[#CEF17B]/30">
+            <Sparkles className="w-4 h-4 text-[#CEF17B]" />
+            <span className="text-xs font-bold text-white">IA ATIVA</span>
+            <span className="text-xs text-white/60">•</span>
+            <span className="text-xs text-white/80">BASE TACO/USDA</span>
           </div>
-          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
+          
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
             Scanner Nutricional IA
           </h1>
-          <p className="text-sm md:text-lg px-2 text-white/70">
-            Calorias precisas com IA + ajuste de porção
+          
+          <p className="text-sm text-[#CEEDB2] mb-1">
+            Calorias precisas com IA e ajuste de porção
           </p>
-          {isPremium && (
-            <p className="text-xs md:text-sm mt-1 text-white/60">
-              Identificação automática • Base TACO/USDA
-            </p>
+
+          {!isPremium && (
+            <Badge className="mt-2 bg-orange-500/20 text-orange-400 border-orange-500/30">
+              {dailyScans}/{scanLimit} scans hoje
+            </Badge>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        {/* 2️⃣ BOTÕES DE AÇÃO (CTA) */}
+        <div className="grid grid-cols-2 gap-3">
           <Button
             onClick={() => setMode("scan")}
-            className={`h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl transition-all ${
+            className={`h-14 font-semibold rounded-2xl transition-all shadow-lg ${
               mode === "scan" 
-                ? "bg-orange-500 text-white shadow-lg hover:bg-orange-600" 
-                : "bg-white text-[#0B6B54] border-2 border-[#0B6B54] hover:bg-gray-50 dark:bg-slate-700 dark:text-white dark:border-slate-600 dark:hover:bg-slate-600"
+                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white scale-[1.02]" 
+                : "glass-effect border-[#CEF17B]/20 text-white hover:bg-white/10"
             }`}
           >
-            <Camera className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
-            <span className="hidden md:inline">Escanear com IA</span>
-            <span className="md:hidden ml-1 text-xs">Escanear</span>
+            <Camera className="w-5 h-5 mr-2" />
+            Escanear Alimento
           </Button>
           <Button
             onClick={() => setMode("manual")}
-            className={`h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl transition-all ${
+            className={`h-14 font-semibold rounded-2xl transition-all ${
               mode === "manual" 
-                ? "bg-orange-500 text-white shadow-lg hover:bg-orange-600" 
-                : "bg-white text-orange-500 border-2 border-orange-500 hover:bg-gray-50 dark:bg-slate-700 dark:text-white dark:border-slate-600 dark:hover:bg-slate-600"
+                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white scale-[1.02] shadow-lg" 
+                : "glass-effect border-[#CEF17B]/20 text-white/80 hover:bg-white/10"
             }`}
           >
-            <Edit className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
-            <span className="hidden md:inline">Inserir Manualmente</span>
-            <span className="md:hidden ml-1 text-xs">Manual</span>
+            <Edit className="w-5 h-5 mr-2" />
+            Inserir Manualmente
           </Button>
         </div>
 
@@ -330,10 +331,15 @@ REGRAS CRÍTICAS:
 
         {mode === "manual" && (
           <Card className="p-6 rounded-3xl glass-effect border-[#CEF17B]/20">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Calculator className="w-5 h-5 text-orange-500" />
-                <h3 className="font-bold text-white text-lg">Inserir Dados Manualmente</h3>
+            <div className="space-y-5">
+              <div className="flex items-center gap-3 pb-4 border-b border-white/10">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                  <Calculator className="w-5 h-5 text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-lg">Inserir Manualmente</h3>
+                  <p className="text-xs text-white/60">Preencha os dados nutricionais</p>
+                </div>
               </div>
 
               <MealTypeSelector 
@@ -442,27 +448,25 @@ REGRAS CRÍTICAS:
         {mode === "scan" && (isPremium || dailyScans < scanLimit) && (
           <>
             {!showCamera && !imagePreview && (
-              <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-br from-[#0B6B54] to-orange-500/30 border border-orange-500/20 dark:from-slate-800 dark:to-slate-900 dark:border-slate-700/20">
-                <div className="space-y-4 md:space-y-6">
+              <>
+                {/* 3️⃣ ÁREA DE CÂMERA */}
+                <Card className="glass-effect border-[#CEF17B]/20 p-8 rounded-3xl hover:scale-[1.01] transition-all">
                   <Button
                     onClick={() => setShowCamera(true)}
-                    className="w-full h-32 md:h-40 text-lg md:text-xl font-bold rounded-2xl md:rounded-3xl flex flex-col items-center justify-center gap-2 md:gap-3 shadow-xl active:scale-95 md:hover:scale-105 transition-all bg-orange-500 hover:bg-orange-600"
+                    className="w-full h-40 bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-2xl flex flex-col items-center justify-center gap-4 shadow-xl hover:shadow-2xl transition-all"
                   >
-                    <Camera className="w-10 h-10 md:w-12 md:h-12" />
-                    Abrir Câmera
+                    <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+                      <Camera className="w-9 h-9" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold">Abrir Câmera</p>
+                      <p className="text-sm text-white/80 mt-1">Escaneie o alimento em tempo real</p>
+                    </div>
                   </Button>
+                </Card>
 
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/20"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-3 md:px-4 text-sm md:text-base font-semibold bg-[#0B6B54] text-orange-500 dark:bg-slate-900 dark:text-orange-400">
-                        OU
-                      </span>
-                    </div>
-                  </div>
-
+                {/* 4️⃣ OPÇÃO DE UPLOAD DE IMAGEM */}
+                <Card className="glass-effect border-[#CEF17B]/20 p-6 rounded-2xl cursor-pointer hover:bg-white/5 transition-all">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -470,59 +474,65 @@ REGRAS CRÍTICAS:
                     onChange={(e) => handleFileSelect(e.target.files[0])}
                     className="hidden"
                   />
-                  <Button
+                  <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-24 md:h-28 border-dashed border-2 rounded-2xl md:rounded-3xl bg-transparent active:scale-95 md:hover:scale-105 transition-all flex-col md:flex-row gap-2 border-orange-500 text-white hover:bg-white/5 dark:border-orange-400 dark:hover:bg-slate-800/50"
+                    className="flex flex-col items-center gap-3 py-4"
                   >
-                    <Upload className="w-7 h-7 md:w-8 md:h-8 md:mr-3 text-orange-500 dark:text-orange-400" />
-                    <span className="text-base md:text-lg font-semibold">Fazer Upload de Imagem</span>
-                  </Button>
+                    <Upload className="w-10 h-10 text-[#CEF17B]" />
+                    <p className="text-white font-semibold">Selecionar imagem da galeria</p>
+                    <p className="text-xs text-white/60">Ou arraste e solte aqui</p>
+                  </div>
+                </Card>
 
-                  <div className="p-3 md:p-4 rounded-xl md:rounded-2xl flex items-start gap-2 md:gap-3 bg-orange-500/15 border border-orange-500/30 dark:bg-orange-600/20 dark:border-orange-600/30">
-                    <div className="text-xl md:text-2xl flex-shrink-0">💡</div>
+                {/* 5️⃣ HISTÓRICO RECENTE */}
+                <RecentScans recentFoods={todayFoods} />
+
+                {/* 6️⃣ DICA DE USO */}
+                <Card className="glass-effect border-[#CEF17B]/20 p-4 rounded-2xl">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">💡</div>
                     <div>
-                      <p className="text-xs md:text-sm font-semibold text-white mb-1">Dica de Uso:</p>
-                      <p className="text-xs text-white/80 dark:text-gray-300">
+                      <p className="text-xs text-white/60 leading-relaxed">
                         Para maior precisão, fotografe o alimento de cima, com boa iluminação.
                       </p>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </>
             )}
 
             {showCamera && (
-              <Card className="overflow-hidden rounded-2xl md:rounded-3xl bg-[#0B6B54] border-2 border-orange-500 dark:bg-slate-900 dark:border-orange-400">
+              <Card className="overflow-hidden rounded-3xl glass-effect border-[#CEF17B]/20">
                 <video
                   ref={videoRef}
                   autoPlay
                   playsInline
-                  className="w-full aspect-video object-cover"
+                  className="w-full aspect-video object-cover bg-black"
                 />
-                <div className="p-3 md:p-4 flex gap-2 md:gap-3">
+                <div className="p-4 flex gap-3 bg-gradient-to-t from-black/50 to-transparent">
                   <Button
                     onClick={capturePhoto}
-                    className="flex-1 h-12 md:h-14 text-sm md:text-base font-semibold rounded-xl md:rounded-2xl bg-orange-500 hover:bg-orange-600"
+                    className="flex-1 h-14 font-semibold rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
                   >
-                    <Camera className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                    Capturar
+                    <Camera className="w-5 h-5 mr-2" />
+                    Capturar Foto
                   </Button>
                   <Button
                     onClick={() => setShowCamera(false)}
-                    className="h-12 md:h-14 px-4 md:px-6 rounded-xl md:rounded-2xl bg-white text-[#054D3B] hover:bg-gray-100 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                    className="h-14 px-6 rounded-2xl glass-effect border-[#CEF17B]/20 text-white hover:bg-white/10"
                   >
-                    <X className="w-4 h-4 md:w-5 md:h-5" />
+                    <X className="w-5 h-5" />
                   </Button>
                 </div>
               </Card>
             )}
 
             {imagePreview && (
-              <Card className="overflow-hidden rounded-2xl md:rounded-3xl bg-[#0B6B54] border-2 border-orange-500/40 dark:bg-slate-900 dark:border-orange-400/40">
+              <Card className="overflow-hidden rounded-3xl glass-effect border-[#CEF17B]/20">
                 <img
                   src={imagePreview}
                   alt="Food preview"
-                  className="w-full aspect-video object-cover"
+                  className="w-full aspect-video object-cover bg-black"
                 />
                 
                 <div className="p-4 md:p-6 space-y-3 md:space-y-4">
