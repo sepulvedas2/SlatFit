@@ -12,9 +12,11 @@ import {
 import { format } from "date-fns";
 import RoutineConsistency from "../components/nutrition/RoutineConsistency";
 import EnergyMoodLog from "../components/nutrition/EnergyMoodLog";
-import LearningCards from "../components/nutrition/LearningCards";
+import QuickCheckIns from "../components/nutrition/QuickCheckIns";
 import PersonalAIChatModal from "../components/chat/PersonalAIChatModal";
 import WaterGoalTracker from "../components/nutrition/WaterGoalTracker";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 export default function SmartNutrition() {
   const [user, setUser] = useState(null);
@@ -143,51 +145,52 @@ Exemplo: "💧 Você já bebeu ${userContext.aguaHoje}ml hoje. Tente chegar aos 
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen p-4 md:p-8 pb-24">
+      <div className="max-w-4xl mx-auto space-y-5">
         
-        {/* Header */}
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full border border-green-500/30 mb-4">
-            <Brain className="w-4 h-4 text-green-400" />
-            <span className="text-sm font-semibold text-green-300">Nutrição Inteligente</span>
+        {/* 1️⃣ HEADER */}
+        <div>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect border border-[#CEF17B]/30 mb-3">
+            <Brain className="w-4 h-4 text-[#CEF17B]" />
+            <span className="text-xs font-bold text-white">NUTRIÇÃO INTELIGENTE</span>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+          
+          <h1 className="text-3xl font-bold text-white mb-2">
             Entenda seu Corpo
           </h1>
-          <p className="text-gray-400 mt-2">
-            Educação + Consciência + Performance
+          
+          <p className="text-sm text-[#CEEDB2]">
+            Educação • Consciência • Performance
           </p>
         </div>
 
-        {/* Seu Personal IA Daily Tip */}
-        <Card className="glass-effect p-6 border-[#CEF17B]/20 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#CEF17B]/20 to-transparent rounded-full -mr-16 -mt-16" />
-          <div className="relative z-10 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 p-1 flex items-center justify-center flex-shrink-0">
-              <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                <span className="text-2xl">🤖</span>
-              </div>
+        {/* 2️⃣ DICA PERSONALIZADA (DESTAQUE PRINCIPAL) */}
+        <Card className="gradient-card p-6 relative overflow-hidden border-0">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-[#084734]/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-3xl">🤖</span>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-bold text-white">Dica Personalizada</h3>
-                <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">
-                  {todayWorkouts.length > 0 ? 'Pós-Treino' : 'Hoje'}
+                <h3 className="font-bold text-[#084734] text-lg">Dica do Dia</h3>
+                <Badge className="bg-[#084734]/20 text-[#084734] border-0 text-xs">
+                  {todayWorkouts.length > 0 ? 'Pós-Treino' : 'Para Você'}
                 </Badge>
               </div>
               {tipLoading ? (
-                <p className="text-[#CEEDB2] text-sm animate-pulse">Gerando dica personalizada...</p>
+                <p className="text-[#084734]/70 animate-pulse">Gerando sua dica personalizada...</p>
               ) : (
-                <p className="text-[#CEEDB2] leading-relaxed">{personalAITip || "Mantenha o foco e a constância! 💪"}</p>
+                <p className="text-[#084734]/90 leading-relaxed">
+                  {personalAITip || "Mantenha o foco e a constância! 💪"}
+                </p>
               )}
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-2 mt-4">
                 <Button
                   onClick={() => refetchTip()}
                   variant="outline"
                   size="sm"
                   disabled={tipLoading}
-                  className="border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
+                  className="border-[#084734]/20 bg-white/50 hover:bg-white text-[#084734] font-semibold"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${tipLoading ? 'animate-spin' : ''}`} />
                   Nova Dica
@@ -196,7 +199,7 @@ Exemplo: "💧 Você já bebeu ${userContext.aguaHoje}ml hoje. Tente chegar aos 
                   onClick={() => setShowChat(true)}
                   variant="outline"
                   size="sm"
-                  className="border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
+                  className="border-[#084734]/20 bg-white/50 hover:bg-white text-[#084734] font-semibold"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Conversar
@@ -206,58 +209,50 @@ Exemplo: "💧 Você já bebeu ${userContext.aguaHoje}ml hoje. Tente chegar aos 
           </div>
         </Card>
 
-        {/* Water Goal Tracker */}
+        {/* 3️⃣ AÇÕES RÁPIDAS (CHECK-INS DIÁRIOS) */}
+        <QuickCheckIns userEmail={user.email} today={today} />
+
+        {/* 4️⃣ META DE ÁGUA (COMPACTA) */}
         <WaterGoalTracker 
           userEmail={user.email} 
           nutritionData={nutritionData}
           userProfile={userProfile}
         />
 
-        {/* Dashboard Cards */}
-        <RoutineConsistency userEmail={user.email} />
-
-        {/* Energy & Mood Log */}
+        {/* 5️⃣ ENERGIA E HUMOR */}
         <EnergyMoodLog userEmail={user.email} today={today} />
 
-        {/* Learning Section */}
-        <LearningCards />
+        {/* 6️⃣ ROTINA E CONSISTÊNCIA */}
+        <RoutineConsistency userEmail={user.email} />
 
-        {/* Quick Stats */}
-        <Card className="glass-effect p-6 border-[#CEF17B]/20">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#CEF17B]" />
-              <h3 className="font-bold text-white">Seu Progresso</h3>
+        {/* 7️⃣ LINK PARA CONTEÚDOS EDUCATIVOS */}
+        <Link to={createPageUrl("Learning")}>
+          <Card className="glass-effect border-[#CEF17B]/20 p-6 cursor-pointer hover:scale-[1.01] hover:bg-white/5 transition-all">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#CEF17B]/20 flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-[#CEF17B]" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white mb-1">Biblioteca de Conteúdos</h3>
+                  <p className="text-sm text-[#CEEDB2]">Aprenda sobre nutrição e saúde</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[#CEF17B]">
+                <span className="text-sm font-semibold">Explorar</span>
+                <ChevronRight className="w-5 h-5" />
+              </div>
             </div>
-            {todayWorkouts.length > 0 && (
-              <Badge className="bg-orange-500/20 text-orange-400 border-0 text-xs">
-                Treinou hoje! 🔥
-              </Badge>
-            )}
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-white/5 rounded-lg">
-              <p className="text-2xl font-bold text-[#CEF17B]">7</p>
-              <p className="text-xs text-[#CEEDB2] mt-1">Dias Consistente</p>
-            </div>
-            <div className="text-center p-4 bg-white/5 rounded-lg">
-              <p className="text-2xl font-bold text-[#CEF17B]">85%</p>
-              <p className="text-xs text-[#CEEDB2] mt-1">Score de Rotina</p>
-            </div>
-            <div className="text-center p-4 bg-white/5 rounded-lg">
-              <p className="text-2xl font-bold text-[#CEF17B]">12</p>
-              <p className="text-xs text-[#CEEDB2] mt-1">Conteúdos Lidos</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
 
-        {/* Assistente Personal Message */}
-        <Card className="glass-effect p-6 border-[#CEF17B]/20 text-center">
-          <Lightbulb className="w-12 h-12 text-[#CEF17B] mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-white mb-2">
+        {/* 8️⃣ MENSAGEM MOTIVACIONAL */}
+        <Card className="glass-effect p-5 border-[#CEF17B]/20 text-center">
+          <div className="text-3xl mb-3">💡</div>
+          <p className="text-sm text-white/90 leading-relaxed">
             "Entender o que você come é mais importante do que contar calorias."
-          </h3>
-          <p className="text-sm text-[#CEEDB2]">
+          </p>
+          <p className="text-xs text-white/60 mt-2">
             — Seu Assistente Personal
           </p>
         </Card>
