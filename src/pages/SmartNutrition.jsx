@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
   Clock, Zap, Lightbulb, BookOpen, 
-  Brain, TrendingUp, Trophy, MessageCircle, Loader2, RefreshCw
+  Brain, TrendingUp, Trophy, MessageCircle, Loader2, RefreshCw, ChevronRight
 } from "lucide-react";
 import { format } from "date-fns";
 import RoutineConsistency from "../components/nutrition/RoutineConsistency";
