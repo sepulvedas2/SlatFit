@@ -216,9 +216,9 @@ export default function CardioWeekly() {
             {isActive && (
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${currentColors.bg} ${currentColors.border} border`}>
                 {selectedCardio?.icon ? (
-                  <selectedCardio.icon className={`w-4 h-4 ${currentColors.text}`} />
+                  React.createElement(selectedCardio.icon, { className: `w-4 h-4 ${currentColors.text}` })
                 ) : (
-                  <span>{selectedCardio?.emoji}</span>
+                  <span className="text-lg">{selectedCardio?.emoji}</span>
                 )}
                 <span className={`text-sm font-semibold ${currentColors.text}`}>
                   {selectedCardio?.name}
@@ -293,7 +293,7 @@ export default function CardioWeekly() {
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl ${colors.bg} flex items-center justify-center`}>
                             {cardioInfo.icon ? (
-                              <cardioInfo.icon className={`w-5 h-5 ${colors.text}`} />
+                              React.createElement(cardioInfo.icon, { className: `w-5 h-5 ${colors.text}` })
                             ) : (
                               <span className="text-xl">{cardioInfo.emoji}</span>
                             )}
