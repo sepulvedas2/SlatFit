@@ -134,10 +134,10 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       exercises: [
         { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
         { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
-        { name: "Puxada alta", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
+        { name: "Puxada Alta à Frente", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
         { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" },
         { name: "Bíceps alternado", sets: "3x", reps: "12-15", image_placeholder: "biceps_alternado" },
-        { name: "Bíceps martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" }
+        { name: "Mergulho no Banco", sets: "3x", reps: "10-12", image_placeholder: "mergulho_banco" }
       ]
     },
     quarta: { 
@@ -145,12 +145,12 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🦵",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Agachamento", sets: "4x", reps: "8-12", image_placeholder: "agachamento" },
-        { name: "Leg press", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
+        { name: "Agachamento Livre", sets: "4x", reps: "8-12", image_placeholder: "agachamento" },
+        { name: "Leg Press Horizontal", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
         { name: "Cadeira extensora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_extensora" },
         { name: "Cadeira flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
         { name: "Agachamento sumo", sets: "3x", reps: "10-12", image_placeholder: "agachamento_sumo" },
-        { name: "Panturrilha", sets: "3x", reps: "12-15", image_placeholder: "panturrilha" }
+        { name: "Panturrilha no Leg Press Horizontal", sets: "3x", reps: "12-15", image_placeholder: "panturrilha" }
       ]
     },
     quinta: { 
@@ -160,7 +160,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       exercises: [
         { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
         { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
-        { name: "Puxada alta", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
+        { name: "Puxada Alta à Frente", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
         { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" },
         { name: "Bíceps alternado", sets: "3x", reps: "12-15", image_placeholder: "biceps_alternado" },
         { name: "Bíceps martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" }
@@ -184,9 +184,9 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🏋️",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Elevação lateral", sets: "3x", reps: "10-12", image_placeholder: "elevacao_lateral" },
-        { name: "Elevação frontal", sets: "3x", reps: "10-12", image_placeholder: "elevacao_frontal" },
-        { name: "Rotação de ombro", sets: "3x", reps: "12-15", image_placeholder: "rotacao_ombro" },
+        { name: "Elevação Lateral Sentado", sets: "3x", reps: "10-12", image_placeholder: "elevacao_lateral" },
+        { name: "Elevação Frontal com Anilha", sets: "3x", reps: "10-12", image_placeholder: "elevacao_frontal" },
+        { name: "Desenvolvimento com Rotação de Ombro", sets: "3x", reps: "12-15", image_placeholder: "rotacao_ombro" },
         { name: "Prancha", sets: "3x", reps: "30-60s", image_placeholder: "prancha" },
         { name: "Abdominal infra", sets: "3x", reps: "12-15", image_placeholder: "abdominal_infra" },
         { name: "Abdominal reto", sets: "3x", reps: "10-12", image_placeholder: "abdominal_reto" }
@@ -197,81 +197,77 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
   // Semana 2 - Nível Intermediário
   2: {
     segunda: { 
-      muscle: "Costas / Bíceps", 
-      icon: "🦾",
+      muscle: "Peito / Ombro", 
+      icon: "💪",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
-        { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
-        { name: "Puxada alta", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
-        { name: "Bíceps martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" },
-        { name: "Bíceps alternado", sets: "3x", reps: "12-15", image_placeholder: "biceps_alternado" },
-        { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" }
+        { name: "Supino Inclinado", sets: "4x", reps: "8-12", image_placeholder: "supino_inclinado" },
+        { name: "Supino com Halteres", sets: "3x", reps: "10-15", image_placeholder: "supino_halteres" },
+        { name: "Desenvolvimento com Halteres", sets: "3x", reps: "8-12", image_placeholder: "desenvolvimento_halteres" },
+        { name: "Elevação Lateral", sets: "3x", reps: "10-12", image_placeholder: "elevacao_lateral" },
+        { name: "Elevação Frontal", sets: "3x", reps: "12-15", image_placeholder: "elevacao_frontal" }
       ]
     },
     terca: { 
-      muscle: "Pernas", 
-      icon: "🦵",
-      restTime: "30-60 segundos",
-      exercises: [
-        { name: "Agachamento livre", sets: "4x", reps: "8-12", image_placeholder: "agachamento" },
-        { name: "Leg press", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
-        { name: "Cadeira extensora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_extensora" },
-        { name: "Cadeira flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
-        { name: "Agachamento sumo", sets: "3x", reps: "10-12", image_placeholder: "agachamento_sumo" },
-        { name: "Panturrilha", sets: "3x", reps: "10-15", image_placeholder: "panturrilha" }
-      ]
-    },
-    quarta: { 
-      muscle: "Peito / Tríceps", 
-      icon: "💪",
-      restTime: "30-60 segundos",
-      exercises: [
-        { name: "Supino inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
-        { name: "Supino reto", sets: "4x", reps: "8-12", image_placeholder: "supino_reto" },
-        { name: "Supino no banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
-        { name: "Tríceps corda", sets: "3x", reps: "12-15", image_placeholder: "triceps_corda" },
-        { name: "Tríceps pulley", sets: "3x", reps: "12-15", image_placeholder: "triceps_pulley" },
-        { name: "Tríceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "triceps_barra" }
-      ]
-    },
-    quinta: { 
-      muscle: "Pernas", 
-      icon: "🦵",
-      restTime: "30-60 segundos",
-      exercises: [
-        { name: "Agachamento livre", sets: "4x", reps: "8-12", image_placeholder: "agachamento" },
-        { name: "Leg press", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
-        { name: "Cadeira extensora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_extensora" },
-        { name: "Cadeira flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
-        { name: "Agachamento sumo", sets: "3x", reps: "10-12", image_placeholder: "agachamento_sumo" },
-        { name: "Panturrilha", sets: "3x", reps: "10-15", image_placeholder: "panturrilha" }
-      ]
-    },
-    sexta: { 
-      muscle: "Peito / Tríceps", 
-      icon: "💪",
-      restTime: "30-60 segundos",
-      exercises: [
-        { name: "Supino inclinado", sets: "3x", reps: "10-15", image_placeholder: "supino_inclinado" },
-        { name: "Supino reto", sets: "4x", reps: "8-12", image_placeholder: "supino_reto" },
-        { name: "Supino no banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
-        { name: "Tríceps corda", sets: "3x", reps: "12-15", image_placeholder: "triceps_corda" },
-        { name: "Tríceps pulley", sets: "3x", reps: "12-15", image_placeholder: "triceps_pulley" },
-        { name: "Tríceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "triceps_barra" }
-      ]
-    },
-    sabado: { 
-      muscle: "Costas / Bíceps", 
+      muscle: "Costas / Tríceps", 
       icon: "🦾",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
-        { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
-        { name: "Puxada alta", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
-        { name: "Bíceps martelo", sets: "3x", reps: "10-12", image_placeholder: "biceps_martelo" },
-        { name: "Bíceps alternado", sets: "3x", reps: "12-15", image_placeholder: "biceps_alternado" },
-        { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" }
+        { name: "Supino no Rack", sets: "4x", reps: "8-12", image_placeholder: "supino_rack" },
+        { name: "Remada Baixa com Triângulo", sets: "3x", reps: "10-15", image_placeholder: "remada_baixa" },
+        { name: "Puxada Alta à Frente", sets: "3x", reps: "10-12", image_placeholder: "puxada_alta" },
+        { name: "Tríceps Pulley", sets: "3x", reps: "10-12", image_placeholder: "triceps_pulley" },
+        { name: "Rosca Direta no Banco Deitado", sets: "3x", reps: "10-12", image_placeholder: "rosca_banco" }
+      ]
+    },
+    quarta: { 
+      muscle: "Costas / Ombro", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Tríceps com Barra V", sets: "3x", reps: "10-15", image_placeholder: "triceps_barra_v" },
+        { name: "Remada Baixa com Triângulo", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
+        { name: "Puxada Alta à Frente", sets: "3x", reps: "12-15", image_placeholder: "puxada_alta" },
+        { name: "Elevação Frontal com Halteres", sets: "3x", reps: "12-15", image_placeholder: "elevacao_frontal" },
+        { name: "Elevação Lateral", sets: "3x", reps: "12-15", image_placeholder: "elevacao_lateral" }
+      ]
+    },
+    quinta: { 
+      muscle: "Peito / Tríceps", 
+      icon: "💪",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Supino Inclinado", sets: "4x", reps: "8-12", image_placeholder: "supino_inclinado" },
+        { name: "Supino com Halteres", sets: "3x", reps: "10-15", image_placeholder: "supino_halteres" },
+        { name: "Tríceps Pulley", sets: "3x", reps: "10-12", image_placeholder: "triceps_pulley" },
+        { name: "Tríceps com Barra V", sets: "3x", reps: "10-12", image_placeholder: "triceps_barra_v" },
+        { name: "Desenvolvimento com Halteres", sets: "3x", reps: "10-12", image_placeholder: "desenvolvimento_halteres" }
+      ]
+    },
+    sexta: { 
+      muscle: "Pernas", 
+      icon: "🦵",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Agachamento Frontal", sets: "3x", reps: "10-15", image_placeholder: "agachamento_frontal" },
+        { name: "Leg Press Horizontal", sets: "4x", reps: "8-12", image_placeholder: "leg_press" },
+        { name: "Cadeira Extensora", sets: "3x", reps: "12-15", image_placeholder: "cadeira_extensora" },
+        { name: "Cadeira Flexora", sets: "3x", reps: "12-15", image_placeholder: "cadeira_flexora" },
+        { name: "Agachamento Sumô", sets: "3x", reps: "12-15", image_placeholder: "agachamento_sumo" },
+        { name: "Panturrilha no Leg Press Horizontal", sets: "3x", reps: "10-12", image_placeholder: "panturrilha" }
+      ]
+    },
+    sabado: { 
+      muscle: "Costas / Posterior", 
+      icon: "🦾",
+      restTime: "30-60 segundos",
+      exercises: [
+        { name: "Puxada Alta Aberta", sets: "4x", reps: "8-12", image_placeholder: "puxada_alta_aberta" },
+        { name: "Remada Baixa com Triângulo", sets: "3x", reps: "10-15", image_placeholder: "remada_baixa" },
+        { name: "Stiff", sets: "3x", reps: "8-12", image_placeholder: "stiff" },
+        { name: "Mesa Flexora", sets: "3x", reps: "10-12", image_placeholder: "mesa_flexora" },
+        { name: "Bíceps Martelo", sets: "3x", reps: "12-15", image_placeholder: "biceps_martelo" },
+        { name: "Rosca Direta no Banco Deitado", sets: "3x", reps: "10-12", image_placeholder: "rosca_banco" }
       ]
     }
   },
