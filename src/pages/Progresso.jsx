@@ -5,32 +5,36 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { format, startOfWeek } from "date-fns";
-import { Trophy, Flame, Zap, Star, Target, Calendar, Dumbbell, TrendingUp } from "lucide-react";
+import { Flame, Zap, Target, Calendar, Dumbbell, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-
-const ACHIEVEMENT_META = {
-  first_workout: { title: "Primeira Conquista", icon: "🏆", desc: "Completou o primeiro treino" },
-  streak_7: { title: "7 Dias Seguidos", icon: "🔥", desc: "7 dias consecutivos treinando" },
-  streak_30: { title: "30 Dias Forte", icon: "💎", desc: "30 dias consecutivos" },
-  "100_workouts": { title: "Centenário", icon: "💯", desc: "100 treinos realizados" },
-  "1000_calories": { title: "Queimador", icon: "⚡", desc: "1000 calorias queimadas" },
-  perfect_week: { title: "Semana Perfeita", icon: "⭐", desc: "Treinou todos os dias da semana" },
-  early_bird: { title: "Madrugador", icon: "🌅", desc: "Treinou de manhã cedo" },
-  night_owl: { title: "Coruja Noturna", icon: "🦉", desc: "Treinou à noite" },
-  protein_king: { title: "Rei da Proteína", icon: "🥩", desc: "Meta de proteína atingida" },
-  consistency_master: { title: "Mestre da Consistência", icon: "🎯", desc: "Consistência exemplar" },
-};
+import AchievementsGrid from "../components/progress/AchievementsGrid";
+import { WorkoutsModal, CaloriesModal, StreakModal } from "../components/progress/StatsModals";
 
 const RANK_META = {
-  bronze: { label: "Bronze", color: "text-orange-400", bg: "bg-orange-400/20" },
-  silver: { label: "Prata", color: "text-gray-300", bg: "bg-gray-300/20" },
-  gold: { label: "Ouro", color: "text-yellow-400", bg: "bg-yellow-400/20" },
-  platinum: { label: "Platina", color: "text-cyan-300", bg: "bg-cyan-300/20" },
-  diamond: { label: "Diamante", color: "text-blue-300", bg: "bg-blue-300/20" },
+  bronze:   { label: "Bronze",   color: "text-orange-400", bg: "bg-orange-400/20" },
+  silver:   { label: "Prata",    color: "text-gray-300",   bg: "bg-gray-300/20" },
+  gold:     { label: "Ouro",     color: "text-yellow-400", bg: "bg-yellow-400/20" },
+  platinum: { label: "Platina",  color: "text-cyan-300",   bg: "bg-cyan-300/20" },
+  diamond:  { label: "Diamante", color: "text-blue-300",   bg: "bg-blue-300/20" },
 };
+
+// Dynamic level calculation
+function calcLevel(totalPoints) {
+  if (totalPoints < 500) return { level: 1, xpCurrent: totalPoints, xpNext: 500 };
+  if (totalPoints < 1500) return { level: 2, xpCurrent: totalPoints - 500, xpNext: 1000 };
+  if (totalPoints < 3000) return { level: 3, xpCurrent: totalPoints - 1500, xpNext: 1500 };
+  if (totalPoints < 5000) return { level: 4, xpCurrent: totalPoints - 3000, xpNext: 2000 };
+  if (totalPoints < 8000) return { level: 5, xpCurrent: totalPoints - 5000, xpNext: 3000 };
+  if (totalPoints < 12000) return { level: 6, xpCurrent: totalPoints - 8000, xpNext: 4000 };
+  if (totalPoints < 17000) return { level: 7, xpCurrent: totalPoints - 12000, xpNext: 5000 };
+  if (totalPoints < 23000) return { level: 8, xpCurrent: totalPoints - 17000, xpNext: 6000 };
+  if (totalPoints < 30000) return { level: 9, xpCurrent: totalPoints - 23000, xpNext: 7000 };
+  return { level: 10, xpCurrent: totalPoints - 30000, xpNext: 10000 };
+}
 
 export default function Progresso() {
   const [user, setUser] = useState(null);
+  const [modal, setModal] = useState(null); // "streak" | "workouts" | "calories"
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -108,16 +112,22 @@ export default function Progresso() {
 
   const streak = calculateStreak();
   const totalCaloriesBurned = allWorkoutLogs.reduce((sum, log) => sum + (log.calories_burned || 0), 0);
-  const level = userPoints?.level || 1;
-  const xpCurrent = userPoints?.xp_current || 0;
-  const xpNext = userPoints?.xp_next_level || 100;
+  const totalPoints = userPoints?.total_points || 0;
+  const { level, xpCurrent, xpNext } = calcLevel(totalPoints);
   const xpProgress = Math.round((xpCurrent / xpNext) * 100);
   const rank = userPoints?.rank || 'bronze';
   const rankInfo = RANK_META[rank] || RANK_META.bronze;
   const waterDays = weekNutrition.filter(d => d.water_goal_reached).length;
+  const isActiveToday = allWorkoutLogs.some(l => l.completed_date === today);
+
+  const statCards = [
+    { icon: <Flame className="w-6 h-6 text-orange-400" />, value: streak, label: "dias seguidos", onClick: () => setModal("streak") },
+    { icon: <Dumbbell className="w-6 h-6 text-[#CEF17B]" />, value: allWorkoutLogs.length, label: "treinos feitos", onClick: () => setModal("workouts") },
+    { icon: <Zap className="w-6 h-6 text-yellow-400" />, value: `${Math.round(totalCaloriesBurned / 1000)}k`, label: "kcal queimadas", onClick: () => setModal("calories") },
+  ];
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-28">
       <div className="max-w-lg mx-auto px-4 pt-8 space-y-5">
 
         {/* Header */}
@@ -131,49 +141,50 @@ export default function Progresso() {
           <Card className="glass-effect border-[#CEF17B]/20 p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-[#CEF17B]/20 flex items-center justify-center">
-                  <span className="text-2xl font-black text-[#CEF17B]">{level}</span>
+                <div className={`w-14 h-14 rounded-2xl bg-[#CEF17B]/20 flex items-center justify-center relative ${isActiveToday ? "ring-2 ring-[#CEF17B]/60" : ""}`}>
+                  {isActiveToday && (
+                    <div className="absolute inset-0 rounded-2xl animate-pulse bg-[#CEF17B]/10" />
+                  )}
+                  <span className="text-2xl font-black text-[#CEF17B] relative z-10">{level}</span>
                 </div>
                 <div>
                   <p className="text-white font-bold text-lg">Nível {level}</p>
-                  <Badge className={`${rankInfo.bg} ${rankInfo.color} border-0 text-xs`}>
-                    {rankInfo.label}
+                  <Badge className={`${rankInfo.bg} ${rankInfo.color} border-0 text-xs ${isActiveToday ? "animate-pulse" : ""}`}>
+                    {rankInfo.label} {isActiveToday ? "• Ativo hoje ✓" : ""}
                   </Badge>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[#CEF17B] font-bold text-lg">{userPoints?.total_points || 0}</p>
+                <p className="text-[#CEF17B] font-bold text-lg">{totalPoints}</p>
                 <p className="text-[#CEEDB2] text-xs">pontos totais</p>
               </div>
             </div>
             <div className="space-y-1">
               <div className="flex justify-between text-xs text-[#CEEDB2]">
                 <span>XP: {xpCurrent}</span>
-                <span>Próximo nível: {xpNext}</span>
+                <span>Faltam: {xpNext - xpCurrent} para Nível {level + 1}</span>
               </div>
-              <Progress value={xpProgress} className="h-2 bg-white/10 [&>div]:bg-[#CEF17B]" />
+              <motion.div initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 0.8, ease: "easeOut" }}>
+                <Progress value={xpProgress} className="h-2 bg-white/10 [&>div]:bg-[#CEF17B] [&>div]:transition-all [&>div]:duration-1000" />
+              </motion.div>
             </div>
           </Card>
         </motion.div>
 
-        {/* Streak + Stats */}
+        {/* Stat Cards — clicáveis */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <div className="grid grid-cols-3 gap-3">
-            <Card className="glass-effect border-[#CEF17B]/20 p-4 text-center">
-              <Flame className="w-6 h-6 text-orange-400 mx-auto mb-1" />
-              <p className="text-2xl font-black text-white">{streak}</p>
-              <p className="text-[#CEEDB2] text-xs">dias seguidos</p>
-            </Card>
-            <Card className="glass-effect border-[#CEF17B]/20 p-4 text-center">
-              <Dumbbell className="w-6 h-6 text-[#CEF17B] mx-auto mb-1" />
-              <p className="text-2xl font-black text-white">{allWorkoutLogs.length}</p>
-              <p className="text-[#CEEDB2] text-xs">treinos feitos</p>
-            </Card>
-            <Card className="glass-effect border-[#CEF17B]/20 p-4 text-center">
-              <Zap className="w-6 h-6 text-yellow-400 mx-auto mb-1" />
-              <p className="text-2xl font-black text-white">{Math.round(totalCaloriesBurned / 1000)}k</p>
-              <p className="text-[#CEEDB2] text-xs">kcal queimadas</p>
-            </Card>
+            {statCards.map((card, i) => (
+              <button
+                key={i}
+                onClick={card.onClick}
+                className="glass-effect border border-[#CEF17B]/20 p-4 rounded-xl text-center active:scale-95 transition-transform hover:bg-white/5"
+              >
+                <div className="flex justify-center mb-1">{card.icon}</div>
+                <p className="text-2xl font-black text-white">{card.value}</p>
+                <p className="text-[#CEEDB2] text-xs">{card.label}</p>
+              </button>
+            ))}
           </div>
         </motion.div>
 
@@ -190,55 +201,27 @@ export default function Progresso() {
                   <span className="text-[#CEEDB2]">Treinos</span>
                   <span className="text-white font-semibold">{weekWorkouts.length}/6</span>
                 </div>
-                <Progress value={(weekWorkouts.length / 6) * 100} className="h-2 bg-white/10 [&>div]:bg-[#CEF17B]" />
+                <Progress value={(weekWorkouts.length / 6) * 100} className="h-2 bg-white/10 [&>div]:bg-[#CEF17B] [&>div]:transition-all [&>div]:duration-1000" />
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-[#CEEDB2]">Hidratação</span>
                   <span className="text-white font-semibold">{waterDays}/7 dias</span>
                 </div>
-                <Progress value={(waterDays / 7) * 100} className="h-2 bg-white/10 [&>div]:bg-blue-400" />
+                <Progress value={(waterDays / 7) * 100} className="h-2 bg-white/10 [&>div]:bg-blue-400 [&>div]:transition-all [&>div]:duration-1000" />
               </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* Conquistas */}
+        {/* Conquistas — biblioteca completa */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <Card className="glass-effect border-[#CEF17B]/20 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="w-5 h-5 text-yellow-400" />
-              <h3 className="text-white font-bold">Conquistas</h3>
-              <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs ml-auto">
-                {achievements.length} desbloqueadas
-              </Badge>
-            </div>
-
-            {achievements.length === 0 ? (
-              <div className="text-center py-6">
-                <Star className="w-10 h-10 text-[#CEEDB2]/30 mx-auto mb-2" />
-                <p className="text-[#CEEDB2] text-sm">Complete treinos para desbloquear conquistas!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {achievements.map((ach, i) => {
-                  const meta = ACHIEVEMENT_META[ach.achievement_type] || { icon: "🏅", title: ach.title, desc: ach.description };
-                  return (
-                    <div key={i} className="flex items-center gap-2 p-2 bg-white/5 rounded-xl">
-                      <span className="text-2xl">{meta.icon}</span>
-                      <div className="min-w-0">
-                        <p className="text-white text-xs font-semibold truncate">{meta.title || ach.title}</p>
-                        <p className="text-[#CEEDB2] text-[10px] truncate">{meta.desc}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            <AchievementsGrid achievements={achievements} />
           </Card>
         </motion.div>
 
-        {/* Metas */}
+        {/* Objetivo */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <Card className="glass-effect border-[#CEF17B]/20 p-5">
             <div className="flex items-center gap-2 mb-4">
@@ -262,6 +245,11 @@ export default function Progresso() {
         </motion.div>
 
       </div>
+
+      {/* Modais */}
+      {modal === "streak" && <StreakModal logs={allWorkoutLogs} onClose={() => setModal(null)} />}
+      {modal === "workouts" && <WorkoutsModal logs={allWorkoutLogs} onClose={() => setModal(null)} />}
+      {modal === "calories" && <CaloriesModal logs={allWorkoutLogs} onClose={() => setModal(null)} />}
     </div>
   );
 }
