@@ -1,86 +1,57 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { Dumbbell, Droplets, Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Flame, Dumbbell, Droplet } from "lucide-react";
-import { motion } from "framer-motion";
 
-export default function TodayGoals({ 
-  todayCalories, 
-  calorieTarget, 
-  todayWorkouts,
-  waterProgress
-}) {
-  const goals = [
-    {
-      icon: Flame,
-      label: "Calorias",
-      current: Math.round(todayCalories),
-      target: calorieTarget,
-      unit: "kcal",
-      color: "orange"
-    },
+export default function TodayGoals({ todayCalories, calorieTarget, todayWorkouts, waterProgress }) {
+  const workoutDone = todayWorkouts?.length > 0;
+  const waterPct = Math.min(Math.round(waterProgress || 0), 100);
+  const calPct = Math.min(Math.round((todayCalories / (calorieTarget || 2000)) * 100), 100);
+
+  const items = [
     {
       icon: Dumbbell,
       label: "Treino",
-      current: todayWorkouts?.length || 0,
-      target: 1,
-      unit: todayWorkouts?.length === 1 ? "concluído" : "pendente",
-      color: "blue",
-      isBoolean: true
+      value: workoutDone ? "Feito ✓" : "Pendente",
+      color: workoutDone ? "text-green-400" : "text-[#CEEDB2]",
+      dot: workoutDone ? "bg-green-400" : "bg-white/20",
+      href: createPageUrl("Workouts"),
     },
     {
-      icon: Droplet,
+      icon: Droplets,
       label: "Hidratação",
-      current: waterProgress || 0,
-      target: 100,
-      unit: "%",
-      color: "cyan"
-    }
+      value: `${waterPct}%`,
+      color: waterPct >= 100 ? "text-green-400" : waterPct > 50 ? "text-blue-300" : "text-[#CEEDB2]",
+      dot: waterPct >= 100 ? "bg-green-400" : "bg-blue-400",
+      href: createPageUrl("SmartNutrition"),
+    },
+    {
+      icon: Flame,
+      label: "Calorias",
+      value: `${Math.round(todayCalories)} kcal`,
+      color: calPct >= 80 ? "text-green-400" : "text-[#CEEDB2]",
+      dot: calPct >= 80 ? "bg-green-400" : "bg-orange-400",
+      href: createPageUrl("FoodScanner"),
+    },
   ];
 
-  const iconColors = {
-    orange: "text-orange-400 bg-orange-500/20",
-    blue: "text-blue-400 bg-blue-500/20",
-    cyan: "text-cyan-400 bg-cyan-500/20"
-  };
-
   return (
-    <motion.div
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
-    >
-      <Card className="glass-effect border-[#CEF17B]/20 p-5">
-        <h3 className="font-bold text-white mb-4 text-sm">Metas de Hoje</h3>
-        
-        <div className="space-y-4">
-          {goals.map((goal, index) => {
-            const Icon = goal.icon;
-            const progress = goal.isBoolean 
-              ? (goal.current >= goal.target ? 100 : 0)
-              : Math.min((goal.current / goal.target) * 100, 100);
-
-            return (
-              <div key={index}>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`w-8 h-8 rounded-lg ${iconColors[goal.color]} flex items-center justify-center flex-shrink-0`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-white font-medium">{goal.label}</span>
-                      <span className="text-xs text-white/60">
-                        {goal.isBoolean ? goal.unit : `${goal.current} / ${goal.target} ${goal.unit}`}
-                      </span>
-                    </div>
-                    <Progress value={progress} className="h-1.5 bg-white/10" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
-    </motion.div>
+    <Card className="glass-effect border-[#CEF17B]/20 p-5">
+      <p className="text-[#CEEDB2] text-xs font-semibold uppercase tracking-wider mb-3">Status do Dia</p>
+      <div className="space-y-3">
+        {items.map((item, i) => {
+          const Icon = item.icon;
+          return (
+            <Link key={i} to={item.href} className="flex items-center gap-3 group">
+              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.dot}`} />
+              <Icon className={`w-4 h-4 flex-shrink-0 ${item.color}`} />
+              <span className="text-[#CEEDB2] text-sm flex-1">{item.label}</span>
+              <span className={`text-sm font-bold ${item.color}`}>{item.value}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
