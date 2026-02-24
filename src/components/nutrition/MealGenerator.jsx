@@ -18,45 +18,86 @@ export default function MealGenerator({ userProfile }) {
   const [loading, setLoading] = useState(false);
 
   const goal = GOAL_MAP[userProfile?.goal] || "Manutenção";
-  const weight = userProfile?.current_weight || "";
-  const gender = userProfile?.gender === "male" ? "Masculino" : userProfile?.gender === "female" ? "Feminino" : "";
+  const weight = userProfile?.current_weight ? `${userProfile.current_weight}kg` : "não informado";
+  const gender = userProfile?.gender === "male" ? "Masculino" : userProfile?.gender === "female" ? "Feminino" : "não informado";
   const level = userProfile?.fitness_level || "Iniciante";
+
+  function buildPrompt(m) {
+    const goalStrategy = userProfile?.goal === "weight_loss"
+      ? "Porções moderadas, preparações grelhadas/cozidas/assadas, meta de 300–500 kcal por refeição."
+      : userProfile?.goal === "muscle_gain"
+      ? "Porções maiores, proteína elevada, combinação proteína + carboidrato, meta de 500–800 kcal por refeição."
+      : "Porções equilibradas, refeições variadas.";
+
+    const base = `Você é um agente de nutrição inteligente. Siga EXATAMENTE o formato abaixo. Responda em português brasileiro.
+
+OBJETIVO DO USUÁRIO (lido automaticamente do perfil): ${goal}
+Estratégia: ${goalStrategy}
+Peso: ${weight} | Sexo: ${gender} | Nível de treino: ${level}
+
+REGRAS OBRIGATÓRIAS:
+- Use APENAS os ingredientes informados + sal, alho, cebola, pimenta, azeite como temperos padrão.
+- NUNCA invente ou substitua ingredientes.
+- Linguagem simples e brasileira. Sem termos técnicos.
+- Respostas objetivas e diretas.
+- Após cada refeição, calcule automaticamente a estimativa nutricional usando valores médios por 100g.
+- Use "~" para indicar estimativa. Mostre APENAS calorias e proteína.
+- Indicador visual: 🟢 Alta proteína (>25g) | 🟡 Proteína moderada (15–25g) | 🔴 Proteína baixa (<15g)
+
+FORMATO OBRIGATÓRIO (siga exatamente esta estrutura):
+
+OBJETIVO: [objetivo lido do perfil]
+
+CAFÉ DA MANHÃ
+Receita: [nome]
+Ingredientes usados: [lista]
+Modo de preparo:
+1. [passo]
+2. [passo]
+3. [passo]
+Estimativa nutricional:
+Calorias: ~XXX kcal
+Proteína: ~XX g
+[indicador 🟢/🟡/🔴]
+
+ALMOÇO
+Receita: [nome]
+Ingredientes usados: [lista]
+Modo de preparo:
+1. [passo]
+2. [passo]
+3. [passo]
+Estimativa nutricional:
+Calorias: ~XXX kcal
+Proteína: ~XX g
+[indicador 🟢/🟡/🔴]
+
+JANTAR
+Receita: [nome]
+Ingredientes usados: [lista]
+Modo de preparo:
+1. [passo]
+2. [passo]
+3. [passo]
+Estimativa nutricional:
+Calorias: ~XXX kcal
+Proteína: ~XX g
+[indicador 🟢/🟡/🔴]
+
+JUSTIFICATIVA
+[máximo 3 linhas explicando por que as refeições ajudam no objetivo do usuário]`;
+
+    if (m === "ingredients") {
+      return `${base}\n\nIngredientes disponíveis informados pelo usuário: ${ingredients || "arroz, feijão, ovo, frango"}`;
+    }
+    return `${base}\n\nUse ingredientes brasileiros acessíveis e comuns (arroz, feijão, frango, ovo, legumes, frutas, aveia, etc).`;
+  }
 
   async function generate(m) {
     setLoading(true);
     setResult(null);
     setMode(m);
-
-    let prompt = "";
-    if (m === "ingredients") {
-      prompt = `Você é um nutricionista brasileiro. O usuário tem os seguintes ingredientes disponíveis em casa: ${ingredients || "arroz, feijão, ovo, frango"}.
-
-Objetivo: ${goal}
-Gere sugestões práticas de refeições (café da manhã, almoço e jantar) usando esses ingredientes.
-Adicione uma breve explicação nutricional de cada refeição em linguagem simples e brasileira.
-Formato da resposta:
-☀️ Café da manhã: [refeição] — [explicação curta]
-🍽️ Almoço: [refeição] — [explicação curta]
-🌙 Jantar: [refeição] — [explicação curta]
-💡 Dica: [uma dica nutricional rápida baseada no objetivo]`;
-    } else {
-      prompt = `Você é um nutricionista brasileiro. Gere um cardápio diário personalizado.
-
-Objetivo: ${goal}
-${weight ? `Peso: ${weight}kg` : ""}
-${gender ? `Sexo: ${gender}` : ""}
-Nível de treino: ${level}
-
-Gere sugestões de café da manhã, almoço e jantar com ingredientes brasileiros acessíveis.
-Seja didático, direto e use linguagem simples.
-Formato da resposta:
-☀️ Café da manhã: [refeição] — [explicação curta]
-🍽️ Almoço: [refeição] — [explicação curta]
-🌙 Jantar: [refeição] — [explicação curta]
-💡 Dica: [uma dica nutricional rápida baseada no objetivo]`;
-    }
-
-    const res = await base44.integrations.Core.InvokeLLM({ prompt });
+    const res = await base44.integrations.Core.InvokeLLM({ prompt: buildPrompt(m) });
     setResult(res);
     setLoading(false);
   }
