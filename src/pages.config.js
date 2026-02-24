@@ -60,12 +60,12 @@ import Home from './pages/Home';
 import Learning from './pages/Learning';
 import MealPlans from './pages/MealPlans';
 import Profile from './pages/Profile';
+import Progresso from './pages/Progresso';
 import Running from './pages/Running';
 import SmartNutrition from './pages/SmartNutrition';
 import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
 import Workouts from './pages/Workouts';
-import Progresso from './pages/Progresso';
 import __Layout from './Layout.jsx';
 
 
@@ -83,12 +83,12 @@ export const PAGES = {
     "Learning": Learning,
     "MealPlans": MealPlans,
     "Profile": Profile,
+    "Progresso": Progresso,
     "Running": Running,
     "SmartNutrition": SmartNutrition,
     "Subscription": Subscription,
     "WorkoutProgress": WorkoutProgress,
     "Workouts": Workouts,
-    "Progresso": Progresso,
 }
 
 export const pagesConfig = {
