@@ -174,17 +174,21 @@ Responda SOMENTE com JSON válido neste formato exato:
 
     setGeneratedPlan(result);
     setIsGenerating(false);
+    
+    // Salvar automaticamente após geração
+    setTimeout(() => savePlan(result), 500);
   };
 
-  const savePlan = async () => {
-    if (!generatedPlan || !userEmail) return;
+  const savePlan = async (planToSave) => {
+    const plan = planToSave || generatedPlan;
+    if (!plan || !userEmail) return;
     setIsSaving(true);
 
     const dayOrder = ["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"];
-    const days = dayOrder.filter((_, i) => i < generatedPlan.workouts.length);
+    const days = dayOrder.filter((_, i) => i < plan.workouts.length);
 
-    for (let i = 0; i < generatedPlan.workouts.length; i++) {
-      const workout = generatedPlan.workouts[i];
+    for (let i = 0; i < plan.workouts.length; i++) {
+      const workout = plan.workouts[i];
       const dayOfWeek = days[i];
 
       const savedWorkout = await base44.entities.CustomWorkout.create({
@@ -280,26 +284,28 @@ Responda SOMENTE com JSON válido neste formato exato:
               ))}
             </div>
 
-            <div className="flex gap-3">
-              <Button
-                onClick={savePlan}
-                disabled={isSaving}
-                className="flex-1 bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold py-6"
-              >
-                {isSaving ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
-                ) : (
-                  <><CheckCircle className="w-4 h-4 mr-2" /> Salvar Plano</>
-                )}
-              </Button>
-              <Button
-                onClick={() => setGeneratedPlan(null)}
-                variant="outline"
-                className="border-[#CEF17B]/20 text-white hover:bg-white/10"
-              >
-                Refazer
-              </Button>
-            </div>
+            {isSaving ? (
+              <div className="flex items-center justify-center gap-2 p-4">
+                <Loader2 className="w-5 h-5 text-[#CEF17B] animate-spin" />
+                <span className="text-white">Salvando treino automaticamente...</span>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setGeneratedPlan(null)}
+                  variant="outline"
+                  className="flex-1 border-[#CEF17B]/20 text-white hover:bg-white/10"
+                >
+                  Refazer
+                </Button>
+                <Button
+                  onClick={onClose}
+                  className="flex-1 bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" /> Treino Salvo!
+                </Button>
+              </div>
+            )}
           </div>
         </motion.div>
       </motion.div>
@@ -353,7 +359,7 @@ Responda SOMENTE com JSON válido neste formato exato:
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Brain className="w-5 h-5 text-[#CEF17B]" />
-              <span className="text-white font-bold">Personal Trainer IA</span>
+              <span className="text-white font-bold">Personal Trainer SlatFit</span>
             </div>
             <button onClick={onClose} className="text-white/50 hover:text-white">
               <X className="w-5 h-5" />
