@@ -119,15 +119,24 @@ export default function MyWorkouts({ userEmail }) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Meus Treinos</h2>
-          <p className="text-[#CEEDB2]">Crie seus treinos personalizados</p>
+          <p className="text-[#CEEDB2]">Personalizados para você</p>
         </div>
-        <Button
-          onClick={() => setCreateModalOpen(true)}
-          className="bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Criar Treino
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setAiWizardOpen(true)}
+            className="bg-gradient-to-r from-[#CEF17B] to-[#CEEDB2] hover:opacity-90 text-[#084734] font-bold"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Criar com IA
+          </Button>
+          <Button
+            onClick={() => setCreateModalOpen(true)}
+            variant="outline"
+            className="border-[#CEF17B]/30 text-[#CEF17B] hover:bg-[#CEF17B]/10"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {customWorkouts.length === 0 ? (
