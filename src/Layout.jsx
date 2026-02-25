@@ -56,6 +56,7 @@ function AppLayout({ children, currentPageName }) {
           background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(20px);
           border: 1px solid rgba(200, 200, 200, 0.2);
+          box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .bottom-navigation {
