@@ -130,20 +130,10 @@ export default function Dashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: subscription } = useQuery({
-    queryKey: ['subscription', user?.email],
-    queryFn: async () => {
-      const subs = await base44.entities.Subscription.filter({ user_email: user.email });
-      return subs[0] || null;
-    },
-    enabled: !!user?.email,
-    staleTime: 10 * 60 * 1000,
-  });
-
   useEffect(() => {
     if (user && profile === null) setShowOnboarding(true);
-    else if (user && profile && subscription === null) setShowWelcome(true);
-  }, [user, profile, subscription]);
+    else if (user && profile) setShowWelcome(true);
+  }, [user, profile]);
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
