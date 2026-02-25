@@ -309,6 +309,14 @@ export default function MyWorkouts({ userEmail }) {
         existingExercises={editingExercises}
       />
 
+      {aiWizardOpen && (
+        <AIWorkoutWizard
+          userEmail={userEmail}
+          onClose={() => setAiWizardOpen(false)}
+          onWorkoutsGenerated={() => setAiWizardOpen(false)}
+        />
+      )}
+
       {prModalOpen && selectedExercise && (
         <PRModal
           isOpen={prModalOpen}
