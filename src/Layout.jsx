@@ -76,6 +76,7 @@ export default function Layout({ children, currentPageName }) {
           borderTop: '1px solid rgba(206, 241, 123, 0.15)',
           paddingTop: '10px',
           paddingBottom: 'max(env(safe-area-inset-bottom), 14px)',
+          height: 'auto',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
