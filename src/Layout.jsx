@@ -15,6 +15,7 @@ export default function Layout({ children, currentPageName }) {
   const navItems = [
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
     { name: "Treinos", icon: Dumbbell, path: createPageUrl("Workouts") },
+    { name: "Scanner", icon: ScanLine, path: createPageUrl("FoodScanner") },
     { name: "Nutrição", icon: UtensilsCrossed, path: createPageUrl("SmartNutrition") },
     { name: "Perfil", icon: User, path: createPageUrl("Profile") },
   ];
