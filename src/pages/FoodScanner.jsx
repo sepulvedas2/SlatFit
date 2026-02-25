@@ -58,16 +58,6 @@ export default function FoodScanner() {
     return () => stopCamera();
   }, [showCamera]);
 
-  const { data: subscription } = useQuery({
-    queryKey: ['subscription', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      const subs = await base44.entities.Subscription.filter({ user_email: user.email });
-      return subs[0] || null;
-    },
-    enabled: !!user?.email,
-  });
-
   const { data: todayFoods } = useQuery({
     queryKey: ['todayScans', user?.email],
     queryFn: async () => {
