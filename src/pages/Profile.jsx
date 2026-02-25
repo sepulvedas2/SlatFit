@@ -255,34 +255,34 @@ export default function Profile() {
         </motion.div>
 
         {/* BLOCO 6 — CONFIGURAÇÕES */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <div className="glass-effect rounded-2xl p-5 space-y-1" style={cardStyle}>
-            <h3 className="text-white font-bold mb-4 text-sm">Configurações</h3>
+         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+           <div className="glass-effect rounded-2xl p-5 space-y-1" style={cardStyle}>
+             <h3 className="text-white font-bold mb-4 text-sm">Configurações</h3>
 
-            <div className="flex items-center justify-between py-3 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                {isDark ? <Moon className="w-5 h-5 text-[#CEF17B]" /> : <Sun className="w-5 h-5 text-yellow-400" />}
-                <div>
-                  <p className="text-white text-sm font-medium">Modo Noturno</p>
-                  <p className="text-[#A0B5B2] text-xs">{isDark ? "Ativado" : "Desativado"}</p>
-                </div>
-              </div>
-              <Switch
-                checked={isDark}
-                onCheckedChange={toggleTheme}
-                className="data-[state=checked]:bg-[#CEF17B]"
-              />
-            </div>
+             <div className="flex items-center justify-between py-3 border-b border-white/10">
+               <div className="flex items-center gap-3">
+                 {!isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-[#A0B5B2]" />}
+                 <div>
+                   <p className="text-white text-sm font-medium">Modo Claro</p>
+                   <p className="text-[#A0B5B2] text-xs">{!isDark ? "Ativado" : "Desativado"}</p>
+                 </div>
+               </div>
+               <Switch
+                 checked={!isDark}
+                 onCheckedChange={toggleTheme}
+                 className="data-[state=checked]:bg-yellow-400"
+               />
+             </div>
 
-            <button
-              onClick={() => setEditing(true)}
-              className="w-full flex items-center gap-3 py-3 text-left"
-            >
-              <Pencil className="w-5 h-5 text-[#A0B5B2]" />
-              <span className="text-white text-sm">Editar Dados</span>
-            </button>
-          </div>
-        </motion.div>
+             <button
+               onClick={() => setEditing(true)}
+               className="w-full flex items-center gap-3 py-3 text-left"
+             >
+               <Pencil className="w-5 h-5 text-[#A0B5B2]" />
+               <span className="text-white text-sm">Editar Dados</span>
+             </button>
+           </div>
+         </motion.div>
 
       </div>
 
