@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Home, Dumbbell, UtensilsCrossed, User, ScanLine, Calendar } from "lucide-react";
+import { Home, Dumbbell, UtensilsCrossed, User, ScanLine } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { ThemeProvider, useTheme } from "@/components/ThemeContext";
 
@@ -12,7 +12,6 @@ function AppLayout({ children, currentPageName }) {
   const navItems = [
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
     { name: "Treinos", icon: Dumbbell, path: createPageUrl("Workouts") },
-    { name: "Rotina", icon: Calendar, path: createPageUrl("MyRoutine") },
     { name: "Scanner", icon: ScanLine, path: createPageUrl("FoodScanner") },
     { name: "Nutrição", icon: UtensilsCrossed, path: createPageUrl("SmartNutrition") },
     { name: "Perfil", icon: User, path: createPageUrl("Profile") },
@@ -20,10 +19,18 @@ function AppLayout({ children, currentPageName }) {
 
   const isActive = (path) => location.pathname === path;
 
-  const appBg = "#0F1C1B";
-  const navBg = "rgba(15, 28, 27, 0.98)";
-  const navBorderColor = "rgba(206, 241, 123, 0.2)";
-  const navBoxShadow = "none";
+  const appBg = isDark ? "#0F1C1B" : "#F5F6F7";
+  const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "#FFFFFF";
+  const navBorderColor = isDark ? "rgba(206, 241, 123, 0.2)" : "#E5E5E5";
+  const navBoxShadow = isDark ? "none" : "0px -2px 8px rgba(0, 0, 0, 0.05)";
+
+  // Light Mode Colors
+  const lightTextPrimary = "#000000";
+  const lightTextSecondary = "#000000";
+  const lightTextTitle = "#000000";
+  const lightIconDefault = "#0E3B34";
+  const lightIconInactive = "#0E3B34";
+  const lightIconActive = "#0E3B34";
 
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
@@ -135,7 +142,7 @@ function AppLayout({ children, currentPageName }) {
                   padding: '6px 4px',
                   borderRadius: '12px',
                   backgroundColor: active 
-                    ? 'rgba(206, 241, 123, 0.15)'
+                    ? (isDark ? 'rgba(206, 241, 123, 0.15)' : 'rgba(206, 241, 123, 0.2)')
                     : 'transparent',
                   textDecoration: 'none',
                   transition: 'background 0.2s',
@@ -144,7 +151,7 @@ function AppLayout({ children, currentPageName }) {
                 <Icon style={{ 
                   width: '24px', 
                   height: '24px', 
-                  color: active ? '#CEF17B' : '#0E3B34'
+                  color: isDark && active ? '#CEF17B' : '#0E3B34'
                 }} />
                 <span style={{ 
                   fontSize: '11px', 
