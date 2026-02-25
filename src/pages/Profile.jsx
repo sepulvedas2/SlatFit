@@ -172,7 +172,7 @@ export default function Profile() {
             )}
           </div>
           <h1 className="text-2xl font-bold text-white">{user?.full_name || "Meu Perfil"}</h1>
-          <p className="text-[#A0B5B2] text-sm mt-0.5">{user?.email}</p>
+
           <Badge className={`mt-3 ${goalMeta.color} border text-sm px-3 py-1`}>
             {goalMeta.emoji} {goalMeta.label}
           </Badge>
