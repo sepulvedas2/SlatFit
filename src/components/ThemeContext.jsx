@@ -1,30 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-const ThemeContext = createContext({ isDark: true, toggleTheme: () => {} });
+const ThemeContext = createContext({ isDark: true, toggleTheme: () => null });
 
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => {
-    try {
-      const saved = localStorage.getItem("fitlens_theme");
-      // Dark é o padrão — só ativa light se explicitamente salvo como "light"
-      return saved === "light" ? false : true;
-    } catch {
-      return true;
-    }
-  });
+  const isDark = true; // Sempre modo escuro
 
   useEffect(() => {
-    try {
-      localStorage.setItem("fitlens_theme", isDark ? "dark" : "light");
-    } catch {}
-    if (isDark) {
-      document.documentElement.setAttribute("data-theme", "dark");
-    } else {
-      document.documentElement.setAttribute("data-theme", "light");
-    }
-  }, [isDark]);
+    document.documentElement.setAttribute("data-theme", "dark");
+  }, []);
 
-  const toggleTheme = () => setIsDark(prev => !prev);
+  const toggleTheme = () => {}; // Desabilitado
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>
