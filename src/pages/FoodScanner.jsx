@@ -77,8 +77,7 @@ export default function FoodScanner() {
     }
   }, [todayFoods]);
 
-  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
-  const scanLimit = isPremium ? 999 : 5;
+  const scanLimit = 999;
   const canScan = dailyScans < scanLimit;
 
   const startCamera = async () => {
