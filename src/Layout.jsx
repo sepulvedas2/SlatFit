@@ -80,7 +80,7 @@ function AppLayout({ children, currentPageName }) {
           right: 0,
           zIndex: 99999,
           backgroundColor: navBg,
-          borderTop: '1px solid rgba(206, 241, 123, 0.2)',
+          borderTop: `1px solid ${navBorderColor}`,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
