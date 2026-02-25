@@ -130,7 +130,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user && profile === null) setShowOnboarding(true);
-    else if (user && profile) setShowWelcome(true);
   }, [user, profile]);
 
   const handleOnboardingComplete = () => {
