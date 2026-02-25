@@ -64,7 +64,6 @@ import SmartNutrition from './pages/SmartNutrition';
 import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
 import Workouts from './pages/Workouts';
-import Profile from './pages/Profile';
 import Progresso from './pages/Progresso';
 import __Layout from './Layout.jsx';
 
@@ -87,7 +86,6 @@ export const PAGES = {
     "Subscription": Subscription,
     "WorkoutProgress": WorkoutProgress,
     "Workouts": Workouts,
-    "Profile": Profile,
     "Progresso": Progresso,
 }
 
