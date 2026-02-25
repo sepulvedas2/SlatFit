@@ -87,9 +87,9 @@ export default function AIWorkoutWizard({ userEmail, onClose, onWorkoutsGenerate
     if (currentStep > 0) setCurrentStep(prev => prev - 1);
   };
 
-  const generateWorkoutPlan = async () => {
+  const generateWorkoutPlan = async (answersOverride) => {
     setIsGenerating(true);
-    const { objetivo, frequencia, nivel, local, tempo, lesao } = answers;
+    const { objetivo, frequencia, nivel, local, tempo, lesao } = answersOverride || answers;
 
     const prompt = `Você é um personal trainer de elite. Crie um plano de treino semanal personalizado e profissional.
 
