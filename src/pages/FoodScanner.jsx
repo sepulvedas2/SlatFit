@@ -274,11 +274,7 @@ REGRAS CRÍTICAS:
             Calorias precisas com IA e ajuste de porção
           </p>
 
-          {!isPremium && (
-            <Badge className="mt-2 bg-orange-500/20 text-orange-400 border-orange-500/30">
-              {dailyScans}/{scanLimit} scans hoje
-            </Badge>
-          )}
+
         </div>
 
         {/* 2️⃣ BOTÕES DE AÇÃO (CTA) */}
