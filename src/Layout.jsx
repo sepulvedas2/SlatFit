@@ -77,7 +77,7 @@ export default function Layout({ children, currentPageName }) {
           backgroundColor: '#084734',
           borderTop: '1px solid rgba(206, 241, 123, 0.15)',
           paddingTop: '10px',
-          paddingBottom: '14px',
+          paddingBottom: 'calc(14px + env(safe-area-inset-bottom, 16px))',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
