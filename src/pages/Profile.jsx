@@ -10,8 +10,8 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
-  User, Target, Activity, Save, Loader2, Crown,
-  Droplets, Flame, Dumbbell, RefreshCw, Bell, Pencil, Moon, Sun, Scale, ArrowRight, TrendingUp
+  User, Target, Activity, Save, Loader2,
+  Droplets, Flame, Dumbbell, Pencil, Moon, Sun, Scale, ArrowRight, TrendingUp
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
