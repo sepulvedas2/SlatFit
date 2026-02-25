@@ -62,7 +62,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Main Content */}
-      <main style={{ paddingBottom: "90px", minHeight: "100vh", overflowX: "hidden" }}>
+      <main style={{ paddingBottom: "calc(70px + env(safe-area-inset-bottom, 0px))", minHeight: "100dvh", overflowX: "hidden" }}>
         {children}
       </main>
 
@@ -78,10 +78,10 @@ export default function Layout({ children, currentPageName }) {
           borderTop: '1px solid rgba(206, 241, 123, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          paddingBottom: '12px',
+          paddingBottom: 'env(safe-area-inset-bottom, 12px)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '6px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '8px' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
