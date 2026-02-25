@@ -78,7 +78,7 @@ export default function Layout({ children, currentPageName }) {
           borderTop: '1px solid rgba(206, 241, 123, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          paddingBottom: '12px',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '6px' }}>
