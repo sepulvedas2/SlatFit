@@ -62,7 +62,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Main Content */}
-      <main style={{ paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))", minHeight: "100vh", overflowX: "hidden" }}>
+      <main style={{ paddingBottom: "80px", minHeight: "100vh", overflowX: "hidden" }}>
         {children}
       </main>
 
@@ -78,10 +78,10 @@ export default function Layout({ children, currentPageName }) {
           borderTop: '1px solid rgba(206, 241, 123, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          paddingBottom: '16px',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '12px', paddingBottom: '4px' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -93,32 +93,39 @@ export default function Layout({ children, currentPageName }) {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '4px',
+                  justifyContent: 'center',
                   flex: 1,
                   padding: '6px 4px',
-                  borderRadius: '12px',
-                  backgroundColor: active ? 'rgba(206, 241, 123, 0.15)' : 'transparent',
                   textDecoration: 'none',
-                  transition: 'background 0.2s',
                 }}
               >
-                <Icon
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)',
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {item.name}
-                </span>
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  backgroundColor: active ? 'rgba(206, 241, 123, 0.2)' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background 0.2s',
+                }}>
+                  <Icon
+                    style={{
+                      width: '22px',
+                      height: '22px',
+                      color: active ? '#CEF17B' : 'rgba(255,255,255,0.5)',
+                    }}
+                  />
+                </div>
+                {active && (
+                  <div style={{
+                    width: '4px',
+                    height: '4px',
+                    borderRadius: '50%',
+                    backgroundColor: '#CEF17B',
+                    marginTop: '2px',
+                  }} />
+                )}
               </Link>
             );
           })}
