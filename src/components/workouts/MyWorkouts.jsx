@@ -141,19 +141,19 @@ export default function MyWorkouts({ userEmail }) {
 
       {customWorkouts.length === 0 ? (
         <Card className="glass-effect border-[#CEF17B]/20 p-12 text-center">
-          <Dumbbell className="w-16 h-16 text-[#CEF17B]/50 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">
-            Nenhum treino personalizado ainda
-          </h3>
-          <p className="text-[#CEEDB2] mb-6">
-            Crie seu primeiro treino e comece a evoluir!
+          <div className="w-16 h-16 rounded-2xl bg-[#CEF17B]/10 flex items-center justify-center mx-auto mb-4">
+            <Dumbbell className="w-8 h-8 text-[#CEF17B]/60" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">Nenhum treino ainda</h3>
+          <p className="text-[#CEEDB2] mb-6 text-sm">
+            Use a IA para criar um plano completo personalizado para você
           </p>
           <Button
-            onClick={() => setCreateModalOpen(true)}
-            className="bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold"
+            onClick={() => setAiWizardOpen(true)}
+            className="bg-gradient-to-r from-[#CEF17B] to-[#CEEDB2] hover:opacity-90 text-[#084734] font-bold"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Criar Primeiro Treino
+            <Sparkles className="w-4 h-4 mr-2" />
+            Criar com IA
           </Button>
         </Card>
       ) : (
