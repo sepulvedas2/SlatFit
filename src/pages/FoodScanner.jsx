@@ -425,7 +425,7 @@ REGRAS CRÍTICAS:
           </Card>
         )}
 
-        {mode === "scan" && (isPremium || dailyScans < scanLimit) && (
+        {mode === "scan" && (
           <>
             {!showCamera && !imagePreview && (
               <>
