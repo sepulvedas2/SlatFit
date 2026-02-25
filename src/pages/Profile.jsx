@@ -287,25 +287,12 @@ export default function Profile() {
               />
             </div>
 
-            <button className="w-full flex items-center gap-3 py-3 border-b border-white/10 text-left">
-              <Bell className="w-5 h-5 text-[#A0B5B2]" />
-              <span className="text-white text-sm">Notificações</span>
-            </button>
-
             <button
               onClick={() => setEditing(true)}
-              className="w-full flex items-center gap-3 py-3 border-b border-white/10 text-left"
+              className="w-full flex items-center gap-3 py-3 text-left"
             >
               <Pencil className="w-5 h-5 text-[#A0B5B2]" />
               <span className="text-white text-sm">Editar Dados</span>
-            </button>
-
-            <button
-              onClick={handleReset}
-              className="w-full flex items-center gap-3 py-3 text-left"
-            >
-              <RefreshCw className="w-5 h-5 text-[#A0B5B2]" />
-              <span className="text-white text-sm">Restaurar Perfil</span>
             </button>
           </div>
         </motion.div>
