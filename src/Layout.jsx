@@ -62,7 +62,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Main Content */}
-      <main style={{ paddingBottom: "90px", minHeight: "100vh", overflowX: "hidden" }}>
+      <main style={{ paddingBottom: "120px", minHeight: "100vh", overflowX: "hidden" }}>
         {children}
       </main>
 
