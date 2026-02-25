@@ -156,11 +156,7 @@ export default function Profile() {
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#CEF17B]/40 to-[#084734] flex items-center justify-center ring-4 ring-[#CEF17B]/30 mx-auto">
               <User className="w-12 h-12 text-[#CEF17B]" />
             </div>
-            {isPremium && (
-              <div className="absolute -top-1 -right-1 w-7 h-7 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-                <Crown className="w-4 h-4 text-white" />
-              </div>
-            )}
+  
           </div>
           <h1 className="text-2xl font-bold text-white">{user?.full_name || "Meu Perfil"}</h1>
 
