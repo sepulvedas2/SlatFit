@@ -51,11 +51,17 @@ export default function Layout({ children, currentPageName }) {
           border: 1px solid rgba(206, 241, 123, 0.2);
         }
 
-        * {
-          -webkit-tap-highlight-color: transparent;
+        html, body {
+          height: 100%;
+          overflow: hidden;
         }
-        body {
-          overscroll-behavior: none;
+        .bottom-navigation {
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          z-index: 2147483647 !important;
+          pointer-events: auto !important;
         }
       `}</style>
 
@@ -71,11 +77,11 @@ export default function Layout({ children, currentPageName }) {
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 99999,
+          zIndex: 2147483647,
           backgroundColor: '#084734',
           borderTop: '1px solid rgba(206, 241, 123, 0.15)',
           paddingTop: '10px',
-          paddingBottom: 'max(env(safe-area-inset-bottom), 14px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
