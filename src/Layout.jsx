@@ -51,16 +51,12 @@ export default function Layout({ children, currentPageName }) {
           border: 1px solid rgba(206, 241, 123, 0.2);
         }
 
-        html, body {
-          height: 100%;
-          overflow: hidden;
-        }
         .bottom-navigation {
           position: fixed !important;
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          z-index: 2147483647 !important;
+          z-index: 99999 !important;
           pointer-events: auto !important;
         }
       `}</style>
@@ -81,7 +77,7 @@ export default function Layout({ children, currentPageName }) {
           backgroundColor: '#084734',
           borderTop: '1px solid rgba(206, 241, 123, 0.15)',
           paddingTop: '10px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
+          paddingBottom: 'calc(14px + env(safe-area-inset-bottom, 16px))',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
