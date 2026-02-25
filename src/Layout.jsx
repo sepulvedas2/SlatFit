@@ -121,7 +121,7 @@ function AppLayout({ children, currentPageName }) {
                 <span style={{ 
                   fontSize: '11px', 
                   fontWeight: 500, 
-                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'),
+                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#555555'),
                   whiteSpace: 'nowrap' 
                 }}>
                   {item.name}
