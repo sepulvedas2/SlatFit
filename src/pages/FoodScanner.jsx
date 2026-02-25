@@ -10,6 +10,7 @@ import NutritionResults from "../components/scanner/NutritionResults";
 import MealTypeSelector from "../components/scanner/MealTypeSelector";
 import RecentScans from "../components/scanner/RecentScans";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { Badge } from "@/components/ui/badge";
 
 export default function FoodScanner() {
