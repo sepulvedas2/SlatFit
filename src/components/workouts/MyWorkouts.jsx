@@ -237,49 +237,57 @@ export default function MyWorkouts({ userEmail }) {
                               transition={{ duration: 0.3 }}
                             >
                               <div className="px-6 pb-6 border-t border-white/10 pt-4 space-y-3">
-                                {exercises.map((exercise, idx) => {
-                                  const latestPR = getLatestPR(exercise.exercise_name);
-                                  
-                                  return (
-                                    <div
-                                      key={idx}
-                                      className="p-4 bg-white/5 rounded-lg border border-white/10"
-                                    >
-                                      <div className="flex items-center justify-between gap-4">
-                                        <div className="flex-1">
-                                          <h4 className="font-semibold text-white">
-                                            {exercise.exercise_name}
-                                          </h4>
-                                          <div className="flex items-center gap-2 mt-1 text-sm text-[#CEEDB2]">
-                                            <span>{exercise.series} séries</span>
-                                            <span>•</span>
-                                            <span>{exercise.repeticoes} reps</span>
-                                          </div>
-                                          {latestPR && (
-                                            <p className="text-xs text-[#CEF17B] mt-1 flex items-center gap-1">
-                                              <Trophy className="w-3 h-3" />
-                                              Último PR: {latestPR.peso_kg}kg x {latestPR.repeticoes} reps
-                                            </p>
-                                          )}
-                                          {exercise.observacoes && (
-                                            <p className="text-xs text-white/60 mt-1">
-                                              {exercise.observacoes}
-                                            </p>
-                                          )}
-                                        </div>
-                                        <Button
-                                          size="sm"
-                                          onClick={() => handleOpenPRModal(exercise.exercise_name)}
-                                          className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 text-xs h-8 px-3"
-                                        >
-                                          <Trophy className="w-3 h-3 mr-1" />
-                                          PR
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
+                                 {exercises.map((exercise, idx) => {
+                                   const latestPR = getLatestPR(exercise.exercise_name);
+
+                                   return (
+                                     <div
+                                       key={idx}
+                                       className="p-4 bg-white/5 rounded-lg border border-white/10"
+                                     >
+                                       <div className="flex items-center justify-between gap-4">
+                                         <div className="flex-1">
+                                           <h4 className="font-semibold text-white">
+                                             {exercise.exercise_name}
+                                           </h4>
+                                           <div className="flex items-center gap-2 mt-1 text-sm text-[#CEEDB2]">
+                                             <span>{exercise.series} séries</span>
+                                             <span>•</span>
+                                             <span>{exercise.repeticoes} reps</span>
+                                           </div>
+                                           {latestPR && (
+                                             <p className="text-xs text-[#CEF17B] mt-1 flex items-center gap-1">
+                                               <Trophy className="w-3 h-3" />
+                                               Último PR: {latestPR.peso_kg}kg x {latestPR.repeticoes} reps
+                                             </p>
+                                           )}
+                                           {exercise.observacoes && (
+                                             <p className="text-xs text-white/60 mt-1">
+                                               {exercise.observacoes}
+                                             </p>
+                                           )}
+                                         </div>
+                                         <Button
+                                           size="sm"
+                                           onClick={() => handleOpenPRModal(exercise.exercise_name)}
+                                           className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 text-xs h-8 px-3"
+                                         >
+                                           <Trophy className="w-3 h-3 mr-1" />
+                                           PR
+                                         </Button>
+                                       </div>
+                                     </div>
+                                   );
+                                 })}
+                                 <div className="pt-2">
+                                   <CompleteWorkoutButton
+                                     workout={workout}
+                                     exercises={exercises}
+                                     userEmail={userEmail}
+                                     onCompleted={() => setExpandedWorkout(null)}
+                                   />
+                                 </div>
+                               </div>
                             </motion.div>
                           )}
                         </AnimatePresence>
