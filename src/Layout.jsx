@@ -19,18 +19,10 @@ function AppLayout({ children, currentPageName }) {
 
   const isActive = (path) => location.pathname === path;
 
-  const appBg = isDark ? "#0F1C1B" : "#F5F6F7";
-  const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "#FFFFFF";
-  const navBorderColor = isDark ? "rgba(206, 241, 123, 0.2)" : "#E5E5E5";
-  const navBoxShadow = isDark ? "none" : "0px -2px 8px rgba(0, 0, 0, 0.05)";
-
-  // Light Mode Colors
-  const lightTextPrimary = "#000000";
-  const lightTextSecondary = "#000000";
-  const lightTextTitle = "#000000";
-  const lightIconDefault = "#0E3B34";
-  const lightIconInactive = "#0E3B34";
-  const lightIconActive = "#0E3B34";
+  const appBg = "#0F1C1B";
+  const navBg = "rgba(15, 28, 27, 0.98)";
+  const navBorderColor = "rgba(206, 241, 123, 0.2)";
+  const navBoxShadow = "none";
 
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
@@ -142,7 +134,7 @@ function AppLayout({ children, currentPageName }) {
                   padding: '6px 4px',
                   borderRadius: '12px',
                   backgroundColor: active 
-                    ? (isDark ? 'rgba(206, 241, 123, 0.15)' : 'rgba(206, 241, 123, 0.2)')
+                    ? 'rgba(206, 241, 123, 0.15)'
                     : 'transparent',
                   textDecoration: 'none',
                   transition: 'background 0.2s',
@@ -151,7 +143,7 @@ function AppLayout({ children, currentPageName }) {
                 <Icon style={{ 
                   width: '24px', 
                   height: '24px', 
-                  color: isDark && active ? '#CEF17B' : '#0E3B34'
+                  color: active ? '#CEF17B' : '#0E3B34'
                 }} />
                 <span style={{ 
                   fontSize: '11px', 
