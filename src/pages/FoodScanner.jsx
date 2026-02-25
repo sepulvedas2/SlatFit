@@ -309,10 +309,6 @@ REGRAS CRÍTICAS:
           </Alert>
         )}
 
-        {!isPremium && dailyScans >= scanLimit && mode === "scan" && (
-          <PremiumFeatureLock featureName="Scanner Ilimitado" />
-        )}
-
         {mode === "manual" && (
           <Card className="p-6 rounded-3xl glass-effect border-[#CEF17B]/20">
             <div className="space-y-5">
