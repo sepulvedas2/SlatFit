@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// page: Progresso
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
