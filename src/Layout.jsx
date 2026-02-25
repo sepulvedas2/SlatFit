@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Home, Dumbbell, UtensilsCrossed, User, ScanLine } from "lucide-react";
+import { Home, Dumbbell, UtensilsCrossed, User, ScanLine, Calendar } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { ThemeProvider, useTheme } from "@/components/ThemeContext";
 
@@ -12,6 +12,7 @@ function AppLayout({ children, currentPageName }) {
   const navItems = [
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
     { name: "Treinos", icon: Dumbbell, path: createPageUrl("Workouts") },
+    { name: "Rotina", icon: Calendar, path: createPageUrl("MyRoutine") },
     { name: "Scanner", icon: ScanLine, path: createPageUrl("FoodScanner") },
     { name: "Nutrição", icon: UtensilsCrossed, path: createPageUrl("SmartNutrition") },
     { name: "Perfil", icon: User, path: createPageUrl("Profile") },
