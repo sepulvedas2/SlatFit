@@ -4,10 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Dumbbell, Trophy, Trash2, ChevronDown, ChevronUp, Edit } from "lucide-react";
+import { Plus, Dumbbell, Trophy, Trash2, ChevronDown, ChevronUp, Edit, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomWorkoutModal from "./CustomWorkoutModal";
 import PRModal from "./PRModal";
+import AIWorkoutWizard from "./AIWorkoutWizard";
+import CompleteWorkoutButton from "./CompleteWorkoutButton";
 
 export default function MyWorkouts({ userEmail }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
