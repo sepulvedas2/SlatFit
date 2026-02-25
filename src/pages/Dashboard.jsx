@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { UtensilsCrossed, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { format, startOfWeek, differenceInDays } from "date-fns";
+import { format, startOfWeek } from "date-fns";
 import WelcomeModal from "../components/onboarding/WelcomeModal";
 import OnboardingModal from "../components/onboarding/OnboardingModal";
 import HeroHeader from "../components/dashboard/HeroHeader";
