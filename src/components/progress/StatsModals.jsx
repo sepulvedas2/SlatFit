@@ -62,7 +62,8 @@ export function CaloriesModal({ logs, onClose }) {
     const key = format(d, "yyyy-MM-dd");
     const dayLogs = logs.filter(l => l.completed_date === key);
     const kcal = dayLogs.reduce((s, l) => s + (l.calories_burned || 0), 0);
-    return { day: format(d, "EEE", { locale: ptBR }), kcal };
+    const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    return { day: dayNames[d.getDay()], kcal };
   });
 
   return (
