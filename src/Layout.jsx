@@ -68,7 +68,6 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Bottom Navigation */}
       <nav
-        className="bottom-navigation"
         style={{
           position: 'fixed',
           bottom: 0,
