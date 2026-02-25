@@ -5,45 +5,44 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   User, Target, Activity, Save, Loader2, Crown,
-  Moon, Sun, Bell, Edit, RotateCcw, Droplets, Flame, TrendingUp, Zap
+  Droplets, Flame, Dumbbell, RefreshCw, Bell, Pencil, Moon, Sun, Scale, ArrowRight, TrendingUp
 } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from "recharts";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
-import { useTheme } from "@/components/ThemeContext";
+import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { motion } from "framer-motion";
+import { useTheme } from "../components/ThemeContext";
 
-const goalLabels = {
-  weight_loss: "Emagrecimento",
-  muscle_gain: "Ganho de Massa",
-  maintenance: "Manutenção",
+const GOAL_META = {
+  weight_loss:  { label: "Emagrecimento",   emoji: "🔥", phrase: "Cada treino te aproxima da melhor versão de você!", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
+  muscle_gain:  { label: "Ganho de Massa",  emoji: "💪", phrase: "Músculo se constrói com consistência. Continue!", color: "bg-[#CEF17B]/20 text-[#CEF17B] border-[#CEF17B]/30" },
+  maintenance:  { label: "Manutenção",      emoji: "⚖️", phrase: "Manter é também evoluir. Você está no caminho!", color: "bg-blue-400/20 text-blue-300 border-blue-400/30" },
 };
-const goalEmoji = {
-  weight_loss: "🔥",
-  muscle_gain: "💪",
-  maintenance: "⚖️",
+
+const ACTIVITY_LABELS = {
+  sedentary: "Sedentário", light: "Leve", moderate: "Moderado", active: "Ativo", very_active: "Muito Ativo"
 };
-const goalMotivation = {
-  weight_loss: "Cada treino é um passo em direção à melhor versão de você!",
-  muscle_gain: "Força se constrói com consistência. Continue!",
-  maintenance: "Equilíbrio é a chave para uma vida saudável e longeva.",
-};
-const activityLabels = {
-  sedentary: "Sedentário",
-  light: "Leve (1–3x/sem)",
-  moderate: "Moderado (3–5x/sem)",
-  active: "Ativo (6–7x/sem)",
-  very_active: "Muito Ativo (2x/dia)",
-};
+
+const WATER_BY_BIOTYPE = { ectomorph: 2200, mesomorph: 2500, endomorph: 3000 };
 
 function calcIMC(weight, height) {
   if (!weight || !height) return null;
   return (weight / ((height / 100) ** 2)).toFixed(1);
+}
+
+function imcLabel(imc) {
+  if (!imc) return "";
+  const v = parseFloat(imc);
+  if (v < 18.5) return "Abaixo do peso";
+  if (v < 25) return "Normal";
+  if (v < 30) return "Sobrepeso";
+  return "Obesidade";
 }
 
 export default function Profile() {
@@ -59,7 +58,7 @@ export default function Profile() {
   }, []);
 
   const { data: profile } = useQuery({
-    queryKey: ["userProfile", user?.email],
+    queryKey: ['userProfile', user?.email],
     queryFn: async () => {
       const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
@@ -68,7 +67,7 @@ export default function Profile() {
   });
 
   const { data: subscription } = useQuery({
-    queryKey: ["subscription", user?.email],
+    queryKey: ['subscription', user?.email],
     queryFn: async () => {
       const subs = await base44.entities.Subscription.filter({ user_email: user.email });
       return subs[0] || null;
@@ -76,9 +75,9 @@ export default function Profile() {
     enabled: !!user?.email,
   });
 
-  const { data: workoutLogs = [] } = useQuery({
-    queryKey: ["profileWorkoutLogs", user?.email],
-    queryFn: () => base44.entities.WorkoutLog.filter({ user_email: user.email }),
+  const { data: progressPhotos = [] } = useQuery({
+    queryKey: ['progressPhotos', user?.email],
+    queryFn: () => base44.entities.ProgressPhoto.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -89,18 +88,11 @@ export default function Profile() {
     } else if (user) {
       setFormData({
         user_email: user.email,
-        height: 170,
-        current_weight: 70,
-        target_weight: 70,
-        goal: "maintenance",
-        activity_level: "moderate",
-        gender: "male",
-        age: 25,
-        body_type: "mesomorph",
-        daily_calorie_target: 2000,
-        protein_target: 150,
-        carbs_target: 200,
-        fats_target: 60,
+        height: 170, current_weight: 70, target_weight: 70,
+        goal: 'maintenance', activity_level: 'moderate',
+        gender: 'male', age: 25, body_type: 'mesomorph',
+        daily_calorie_target: 2000, protein_target: 150,
+        carbs_target: 200, fats_target: 60
       });
     }
   }, [profile, user]);
@@ -111,334 +103,313 @@ export default function Profile() {
       return base44.entities.UserProfile.create(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       setEditing(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     },
   });
 
+  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
+  const goalMeta = GOAL_META[formData.goal] || GOAL_META.maintenance;
+  const imc = calcIMC(formData.current_weight, formData.height);
+  const diff = formData.target_weight && formData.current_weight
+    ? (formData.target_weight - formData.current_weight).toFixed(1)
+    : null;
+  const waterGoal = WATER_BY_BIOTYPE[formData.body_type] || 2500;
+
+  // Weight progress bar
+  const startWeight = progressPhotos.length > 0
+    ? (progressPhotos.sort((a, b) => a.photo_date > b.photo_date ? 1 : -1)[0]?.weight || formData.current_weight)
+    : formData.current_weight;
+
+  const totalChange = Math.abs((formData.target_weight || 0) - (startWeight || 0));
+  const currentChange = Math.abs((formData.current_weight || 0) - (startWeight || 0));
+  const progressPercent = totalChange > 0 ? Math.min(100, Math.round((currentChange / totalChange) * 100)) : 0;
+
+  // Weight chart data from progress photos
+  const chartData = progressPhotos.length > 1
+    ? progressPhotos
+        .filter(p => p.weight)
+        .sort((a, b) => a.photo_date > b.photo_date ? 1 : -1)
+        .slice(-8)
+        .map(p => ({ date: format(new Date(p.photo_date), 'dd/MM'), peso: p.weight }))
+    : [
+        { date: "Início", peso: formData.current_weight || 70 },
+        { date: "Hoje", peso: formData.current_weight || 70 },
+      ];
+
+  const cardStyle = isDark
+    ? { backgroundColor: "#162A28", border: "1px solid rgba(206,241,123,0.15)" }
+    : {};
+
   const handleReset = () => {
-    if (window.confirm("Tem certeza que deseja restaurar os dados do perfil? Isso recarregará as informações salvas.")) {
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-      setEditing(false);
+    if (window.confirm("Tem certeza que deseja restaurar o perfil para os dados padrão?")) {
+      setFormData({
+        user_email: user?.email,
+        height: 170, current_weight: 70, target_weight: 70,
+        goal: 'maintenance', activity_level: 'moderate',
+        gender: 'male', age: 25, body_type: 'mesomorph',
+        daily_calorie_target: 2000, protein_target: 150,
+        carbs_target: 200, fats_target: 60
+      });
+      setEditing(true);
     }
   };
 
-  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
-  const imc = calcIMC(profile?.current_weight, profile?.height);
-  const diff = profile ? Math.abs((profile.target_weight || 0) - (profile.current_weight || 0)).toFixed(1) : null;
-  const isGain = profile && profile.target_weight > profile.current_weight;
-
-  // Progress bar (current -> target)
-  let progressPct = 0;
-  if (profile?.current_weight && profile?.target_weight) {
-    if (profile.goal === "weight_loss") {
-      // assume started 10kg above target as baseline
-      const start = profile.target_weight + 10;
-      progressPct = Math.min(100, Math.max(0, ((start - profile.current_weight) / (start - profile.target_weight)) * 100));
-    } else {
-      const start = Math.max(0, profile.target_weight - 10);
-      progressPct = Math.min(100, Math.max(0, ((profile.current_weight - start) / (profile.target_weight - start)) * 100));
-    }
-  }
-
-  // Weight chart data from workout logs (last 10 entries with a calories proxy)
-  const chartData = workoutLogs.slice(-10).map((log, i) => ({
-    day: i + 1,
-    peso: (profile?.current_weight || 70) - i * 0.2,
-  })).reverse();
-
-  const waterGoal = profile?.body_type === "endomorph" ? 3000 : profile?.body_type === "ectomorph" ? 2000 : 2500;
-
-  // Theme-aware classes
-  const bg = isDark ? "bg-[#0F1C1B]" : "bg-[#084734]";
-  const cardBg = isDark ? "bg-[#162A28] border-white/10" : "glass-effect border-[#CEF17B]/20";
-  const textPrimary = "text-white";
-  const textSecondary = isDark ? "text-[#A0B5B2]" : "text-[#CEEDB2]";
-
   return (
-    <div className={`min-h-screen pb-28 transition-colors duration-200 ${bg}`}>
+    <div className="min-h-screen pb-28" style={{ backgroundColor: isDark ? "#0F1C1B" : undefined, transition: "background-color 0.2s ease" }}>
       <div className="max-w-lg mx-auto px-4 pt-8 space-y-5">
 
-        {/* ─── BLOCO 1: HEADER PREMIUM ─── */}
-        <div className="flex flex-col items-center text-center space-y-3">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-[#CEF17B]/20 border-2 border-[#CEF17B]/40 flex items-center justify-center">
-              <User className="w-10 h-10 text-[#CEF17B]" />
+        {/* BLOCO 1 — HEADER PREMIUM */}
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="text-center py-4">
+          <div className="relative inline-block mb-4">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#CEF17B]/40 to-[#084734] flex items-center justify-center ring-4 ring-[#CEF17B]/30 mx-auto">
+              <User className="w-12 h-12 text-[#CEF17B]" />
             </div>
             {isPremium && (
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#CEF17B] flex items-center justify-center">
-                <Crown className="w-3.5 h-3.5 text-[#084734]" />
+              <div className="absolute -top-1 -right-1 w-7 h-7 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                <Crown className="w-4 h-4 text-white" />
               </div>
             )}
           </div>
+          <h1 className="text-2xl font-bold text-white">{user?.full_name || "Meu Perfil"}</h1>
+          <p className="text-[#A0B5B2] text-sm mt-0.5">{user?.email}</p>
+          <Badge className={`mt-3 ${goalMeta.color} border text-sm px-3 py-1`}>
+            {goalMeta.emoji} {goalMeta.label}
+          </Badge>
+          <p className="text-[#CEEDB2] text-xs mt-3 italic max-w-xs mx-auto">"{goalMeta.phrase}"</p>
+        </motion.div>
 
-          <div>
-            <h1 className="text-xl font-bold text-white">{user?.full_name || "Usuário"}</h1>
-            <p className={`text-sm ${textSecondary}`}>{user?.email}</p>
-          </div>
+        {success && (
+          <Alert className="bg-green-500/20 border-green-500/30">
+            <AlertDescription className="text-green-400">Perfil atualizado com sucesso! ✓</AlertDescription>
+          </Alert>
+        )}
 
-          {profile?.goal && (
-            <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border border-[#CEF17B]/30 text-xs px-3 py-1">
-              {goalEmoji[profile.goal]} {goalLabels[profile.goal]}
-            </Badge>
-          )}
-
-          {profile?.goal && (
-            <p className={`text-xs ${textSecondary} max-w-xs`}>
-              {goalMotivation[profile.goal]}
-            </p>
-          )}
-        </div>
-
-        {/* ─── BLOCO 2: RESUMO FÍSICO 2x2 ─── */}
-        {profile && (
+        {/* BLOCO 2 — RESUMO FÍSICO (GRID 2x2) */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <h2 className="text-white font-bold mb-3 flex items-center gap-2">
+            <Scale className="w-5 h-5 text-[#CEF17B]" /> Resumo Físico
+          </h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: <Activity className="w-5 h-5 text-blue-400" />, value: `${profile.current_weight} kg`, label: "Peso Atual", bg: "bg-blue-400/10" },
-              { icon: <Target className="w-5 h-5 text-[#CEF17B]" />, value: `${profile.target_weight} kg`, label: "Peso Meta", bg: "bg-[#CEF17B]/10" },
-              { icon: <TrendingUp className="w-5 h-5 text-purple-400" />, value: imc ? `IMC ${imc}` : "—", label: "Índice de Massa", bg: "bg-purple-400/10" },
-              { icon: <Zap className="w-5 h-5 text-orange-400" />, value: diff ? `${isGain ? "+" : "-"}${diff} kg` : "—", label: "Faltam para a meta", bg: "bg-orange-400/10" },
+              { label: "Peso Atual", value: `${formData.current_weight || "—"} kg`, icon: <Activity className="w-5 h-5 text-blue-400" />, sub: "Registrado" },
+              { label: "Peso Meta", value: `${formData.target_weight || "—"} kg`, icon: <Target className="w-5 h-5 text-[#CEF17B]" />, sub: "Objetivo" },
+              { label: "IMC", value: imc || "—", icon: <TrendingUp className="w-5 h-5 text-purple-400" />, sub: imcLabel(imc) },
+              { label: "Diferença", value: diff !== null ? `${diff > 0 ? "+" : ""}${diff} kg` : "—", icon: <ArrowRight className="w-5 h-5 text-orange-400" />, sub: "Para a meta" },
             ].map((card, i) => (
-              <Card key={i} className={`${cardBg} p-4`}>
-                <div className={`w-9 h-9 rounded-xl ${card.bg} flex items-center justify-center mb-2`}>
-                  {card.icon}
-                </div>
-                <p className="text-xl font-black text-white">{card.value}</p>
-                <p className={`text-xs ${textSecondary}`}>{card.label}</p>
-              </Card>
+              <div key={i} className="glass-effect rounded-2xl p-4" style={cardStyle}>
+                <div className="flex items-center gap-2 mb-2">{card.icon}<span className="text-[#A0B5B2] text-xs">{card.label}</span></div>
+                <p className="text-3xl font-black text-white leading-tight">{card.value}</p>
+                <p className="text-[#A0B5B2] text-xs mt-1">{card.sub}</p>
+              </div>
             ))}
           </div>
-        )}
+        </motion.div>
 
-        {/* ─── BLOCO 3: BARRA DE PROGRESSO ─── */}
-        {profile && (
-          <Card className={`${cardBg} p-5`}>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-4 h-4 text-[#CEF17B]" />
-              <h3 className="text-white font-bold text-sm">Progresso Visual</h3>
-            </div>
-            <div className="flex justify-between text-xs mb-2">
-              <span className={textSecondary}>{profile.current_weight} kg</span>
-              <span className={`text-[#CEF17B] font-semibold`}>{Math.round(progressPct)}%</span>
-              <span className={textSecondary}>{profile.target_weight} kg</span>
+        {/* BLOCO 3 — BARRA DE PROGRESSO */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <div className="glass-effect rounded-2xl p-5" style={cardStyle}>
+            <h3 className="text-white font-bold mb-4 text-sm">Progresso até a Meta</h3>
+            <div className="flex justify-between text-xs text-[#A0B5B2] mb-2">
+              <span>{startWeight} kg</span>
+              <span className="text-[#CEF17B] font-bold">{progressPercent}%</span>
+              <span>{formData.target_weight} kg</span>
             </div>
             <Progress
-              value={progressPct}
-              className="h-3 bg-white/10 [&>div]:bg-gradient-to-r [&>div]:from-[#CEF17B] [&>div]:to-green-400 [&>div]:transition-all [&>div]:duration-1000"
+              value={progressPercent}
+              className="h-3 bg-white/10 [&>div]:bg-gradient-to-r [&>div]:from-[#CEF17B] [&>div]:to-green-400 [&>div]:transition-all [&>div]:duration-1000 rounded-full"
             />
-            <p className={`text-xs ${textSecondary} mt-2 text-center`}>
-              {progressPct >= 100 ? "🎉 Meta atingida!" : `${diff} kg ${isGain ? "para ganhar" : "para perder"}`}
+            <p className="text-[#A0B5B2] text-xs mt-2 text-center">
+              {Math.abs(diff || 0)} kg {parseFloat(diff) > 0 ? "para ganhar" : "para perder"}
             </p>
-          </Card>
-        )}
+          </div>
+        </motion.div>
 
-        {/* ─── BLOCO 4: MINI GRÁFICO ─── */}
-        {chartData.length > 2 && (
-          <Card className={`${cardBg} p-5`}>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-4 h-4 text-[#CEF17B]" />
-              <h3 className="text-white font-bold text-sm">Evolução do Peso</h3>
-            </div>
-            <ResponsiveContainer width="100%" height={80}>
-              <LineChart data={chartData}>
-                <YAxis domain={["auto", "auto"]} hide />
+        {/* BLOCO 4 — GRÁFICO DE EVOLUÇÃO */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <div className="glass-effect rounded-2xl p-5" style={cardStyle}>
+            <h3 className="text-white font-bold mb-4 text-sm flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#CEF17B]" /> Evolução do Peso
+            </h3>
+            <ResponsiveContainer width="100%" height={100}>
+              <LineChart data={chartData} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#A0B5B2" }} axisLine={false} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ background: "#162A28", border: "1px solid rgba(206,241,123,0.2)", borderRadius: 8, color: "#fff", fontSize: 12 }}
+                  contentStyle={{ backgroundColor: "#162A28", border: "1px solid rgba(206,241,123,0.2)", borderRadius: 8, color: "#fff", fontSize: 12 }}
                   formatter={(v) => [`${v} kg`, "Peso"]}
-                  labelFormatter={() => ""}
                 />
-                <Line
-                  type="monotone"
-                  dataKey="peso"
-                  stroke="#CEF17B"
-                  strokeWidth={2}
-                  dot={{ fill: "#CEF17B", r: 3 }}
-                  activeDot={{ r: 5 }}
-                />
+                <Line type="monotone" dataKey="peso" stroke="#CEF17B" strokeWidth={2.5} dot={{ fill: "#CEF17B", r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
-          </Card>
-        )}
+          </div>
+        </motion.div>
 
-        {/* ─── BLOCO 5: INDICADORES INTELIGENTES ─── */}
-        {profile && (
-          <Card className={`${cardBg} p-5`}>
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="w-4 h-4 text-[#CEF17B]" />
-              <h3 className="text-white font-bold text-sm">Indicadores Inteligentes</h3>
-            </div>
+        {/* BLOCO 5 — INDICADORES INTELIGENTES */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          <div className="glass-effect rounded-2xl p-5" style={cardStyle}>
+            <h3 className="text-white font-bold mb-4 text-sm">Metas Diárias</h3>
             <div className="space-y-3">
               {[
-                { icon: <Flame className="w-4 h-4 text-orange-400" />, label: "Calorias diárias", value: `${profile.daily_calorie_target || 2000} kcal` },
-                { icon: <TrendingUp className="w-4 h-4 text-blue-400" />, label: "Proteína diária", value: `${profile.protein_target || 150} g` },
-                { icon: <Droplets className="w-4 h-4 text-cyan-400" />, label: "Meta de água", value: `${(waterGoal / 1000).toFixed(1)} L/dia` },
-                { icon: <Activity className="w-4 h-4 text-purple-400" />, label: "Nível de atividade", value: activityLabels[profile.activity_level] || "—" },
+                { icon: <Flame className="w-5 h-5 text-orange-400" />, label: "Calorias", value: `${formData.daily_calorie_target || 2000} kcal` },
+                { icon: <Dumbbell className="w-5 h-5 text-[#CEF17B]" />, label: "Proteína", value: `${formData.protein_target || 150}g` },
+                { icon: <Droplets className="w-5 h-5 text-blue-400" />, label: "Água", value: `${waterGoal}ml` },
+                { icon: <Activity className="w-5 h-5 text-purple-400" />, label: "Atividade", value: ACTIVITY_LABELS[formData.activity_level] || "Moderado" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {item.icon}
-                    <span className={`text-sm ${textSecondary}`}>{item.label}</span>
+                    <span className="text-[#A0B5B2] text-sm">{item.label}</span>
                   </div>
-                  <span className="text-sm font-bold text-white">{item.value}</span>
+                  <span className="text-white font-bold text-sm">{item.value}</span>
                 </div>
               ))}
             </div>
-          </Card>
-        )}
-
-        {/* ─── BLOCO 6: CONFIGURAÇÕES ─── */}
-        <Card className={`${cardBg} p-5`}>
-          <div className="flex items-center gap-2 mb-4">
-            <User className="w-4 h-4 text-[#CEF17B]" />
-            <h3 className="text-white font-bold text-sm">Configurações</h3>
           </div>
+        </motion.div>
 
-          <div className="space-y-3">
+        {/* BLOCO 6 — CONFIGURAÇÕES */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <div className="glass-effect rounded-2xl p-5 space-y-1" style={cardStyle}>
+            <h3 className="text-white font-bold mb-4 text-sm">Configurações</h3>
+
             {/* Dark mode toggle */}
-            <button
-              onClick={toggleTheme}
-              className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-            >
+            <div className="flex items-center justify-between py-3 border-b border-white/10">
               <div className="flex items-center gap-3">
                 {isDark ? <Moon className="w-5 h-5 text-[#CEF17B]" /> : <Sun className="w-5 h-5 text-yellow-400" />}
-                <span className="text-white text-sm font-medium">Modo Noturno</span>
+                <div>
+                  <p className="text-white text-sm font-medium">Modo Noturno</p>
+                  <p className="text-[#A0B5B2] text-xs">{isDark ? "Ativado" : "Desativado"}</p>
+                </div>
               </div>
-              <div className={`w-10 h-6 rounded-full relative transition-colors duration-200 ${isDark ? "bg-[#CEF17B]" : "bg-white/20"}`}>
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-200 ${isDark ? "left-5" : "left-1"}`} />
-              </div>
+              <Switch
+                checked={isDark}
+                onCheckedChange={toggleTheme}
+                className="data-[state=checked]:bg-[#CEF17B]"
+              />
+            </div>
+
+            <button className="w-full flex items-center gap-3 py-3 border-b border-white/10 text-left">
+              <Bell className="w-5 h-5 text-[#A0B5B2]" />
+              <span className="text-white text-sm">Notificações</span>
             </button>
 
-            {/* Edit Profile */}
             <button
-              onClick={() => setEditing(!editing)}
-              className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+              onClick={() => setEditing(true)}
+              className="w-full flex items-center gap-3 py-3 border-b border-white/10 text-left"
             >
-              <Edit className="w-5 h-5 text-blue-400" />
-              <span className="text-white text-sm font-medium">Editar Dados</span>
+              <Pencil className="w-5 h-5 text-[#A0B5B2]" />
+              <span className="text-white text-sm">Editar Dados</span>
             </button>
 
-            {/* Notifications */}
-            <button className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-              <Bell className="w-5 h-5 text-purple-400" />
-              <span className="text-white text-sm font-medium">Notificações</span>
-            </button>
-
-            {/* Reset */}
             <button
               onClick={handleReset}
-              className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-red-500/10 transition-colors"
+              className="w-full flex items-center gap-3 py-3 text-left"
             >
-              <RotateCcw className="w-5 h-5 text-red-400" />
-              <span className="text-red-400 text-sm font-medium">Restaurar Dados</span>
+              <RefreshCw className="w-5 h-5 text-[#A0B5B2]" />
+              <span className="text-white text-sm">Restaurar Perfil</span>
             </button>
           </div>
-        </Card>
+        </motion.div>
 
-        {/* ─── FORMULÁRIO DE EDIÇÃO (inline, quando editing=true) ─── */}
+        {/* MODAL DE EDIÇÃO */}
         {editing && (
-          <Card className={`${cardBg} p-5`}>
-            <h3 className="text-white font-bold mb-4">Editar Dados</h3>
-            {success && (
-              <div className="mb-4 p-3 rounded-xl bg-green-500/20 text-green-400 text-sm">
-                ✓ Perfil atualizado com sucesso!
+          <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }}>
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              className="w-full max-w-lg rounded-t-3xl p-6 overflow-y-auto max-h-[90vh]"
+              style={{ backgroundColor: isDark ? "#162A28" : "#0a3d2b", border: "1px solid rgba(206,241,123,0.2)" }}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-white font-bold text-lg">Editar Dados</h3>
+                <button onClick={() => setEditing(false)} className="text-[#A0B5B2] text-2xl leading-none">×</button>
               </div>
-            )}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-[#CEEDB2] text-xs">Altura (cm)</Label>
-                  <Input type="number" value={formData.height || ""} onChange={e => setFormData({ ...formData, height: parseFloat(e.target.value) })} className="bg-white/5 border-white/10 text-white h-10" />
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-[#A0B5B2] text-xs">Altura (cm)</Label>
+                    <Input type="number" value={formData.height || ''} onChange={(e) => setFormData({...formData, height: parseFloat(e.target.value)})} className="bg-white/10 border-white/10 text-white" />
+                  </div>
+                  <div>
+                    <Label className="text-[#A0B5B2] text-xs">Idade</Label>
+                    <Input type="number" value={formData.age || ''} onChange={(e) => setFormData({...formData, age: parseInt(e.target.value)})} className="bg-white/10 border-white/10 text-white" />
+                  </div>
+                  <div>
+                    <Label className="text-[#A0B5B2] text-xs">Peso Atual (kg)</Label>
+                    <Input type="number" step="0.1" value={formData.current_weight || ''} onChange={(e) => setFormData({...formData, current_weight: parseFloat(e.target.value)})} className="bg-white/10 border-white/10 text-white" />
+                  </div>
+                  <div>
+                    <Label className="text-[#A0B5B2] text-xs">Peso Meta (kg)</Label>
+                    <Input type="number" step="0.1" value={formData.target_weight || ''} onChange={(e) => setFormData({...formData, target_weight: parseFloat(e.target.value)})} className="bg-white/10 border-white/10 text-white" />
+                  </div>
                 </div>
+
                 <div>
-                  <Label className="text-[#CEEDB2] text-xs">Idade</Label>
-                  <Input type="number" value={formData.age || ""} onChange={e => setFormData({ ...formData, age: parseInt(e.target.value) })} className="bg-white/5 border-white/10 text-white h-10" />
+                  <Label className="text-[#A0B5B2] text-xs">Gênero</Label>
+                  <Select value={formData.gender} onValueChange={(v) => setFormData({...formData, gender: v})}>
+                    <SelectTrigger className="bg-white/10 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Masculino</SelectItem>
+                      <SelectItem value="female">Feminino</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
                 <div>
-                  <Label className="text-[#CEEDB2] text-xs">Peso Atual (kg)</Label>
-                  <Input type="number" step="0.1" value={formData.current_weight || ""} onChange={e => setFormData({ ...formData, current_weight: parseFloat(e.target.value) })} className="bg-white/5 border-white/10 text-white h-10" />
+                  <Label className="text-[#A0B5B2] text-xs">Objetivo</Label>
+                  <Select value={formData.goal} onValueChange={(v) => setFormData({...formData, goal: v})}>
+                    <SelectTrigger className="bg-white/10 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weight_loss">Emagrecimento</SelectItem>
+                      <SelectItem value="muscle_gain">Ganho de Massa</SelectItem>
+                      <SelectItem value="maintenance">Manutenção</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
                 <div>
-                  <Label className="text-[#CEEDB2] text-xs">Peso Meta (kg)</Label>
-                  <Input type="number" step="0.1" value={formData.target_weight || ""} onChange={e => setFormData({ ...formData, target_weight: parseFloat(e.target.value) })} className="bg-white/5 border-white/10 text-white h-10" />
+                  <Label className="text-[#A0B5B2] text-xs">Biotipo</Label>
+                  <Select value={formData.body_type} onValueChange={(v) => setFormData({...formData, body_type: v})}>
+                    <SelectTrigger className="bg-white/10 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ectomorph">Ectomorfo</SelectItem>
+                      <SelectItem value="mesomorph">Mesomorfo</SelectItem>
+                      <SelectItem value="endomorph">Endomorfo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-[#A0B5B2] text-xs">Nível de Atividade</Label>
+                  <Select value={formData.activity_level} onValueChange={(v) => setFormData({...formData, activity_level: v})}>
+                    <SelectTrigger className="bg-white/10 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sedentary">Sedentário</SelectItem>
+                      <SelectItem value="light">Leve</SelectItem>
+                      <SelectItem value="moderate">Moderado</SelectItem>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="very_active">Muito Ativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    onClick={() => saveProfileMutation.mutate(formData)}
+                    disabled={saveProfileMutation.isPending}
+                    className="flex-1 bg-[#CEF17B] text-[#084734] hover:bg-[#b8e05a] font-bold h-12"
+                  >
+                    {saveProfileMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5 mr-2" /> Salvar</>}
+                  </Button>
+                  <Button onClick={() => setEditing(false)} variant="outline" className="border-white/20 text-white h-12">
+                    Cancelar
+                  </Button>
                 </div>
               </div>
-
-              <div>
-                <Label className="text-[#CEEDB2] text-xs">Objetivo</Label>
-                <Select value={formData.goal} onValueChange={v => setFormData({ ...formData, goal: v })}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weight_loss">Emagrecimento</SelectItem>
-                    <SelectItem value="muscle_gain">Ganho de Massa</SelectItem>
-                    <SelectItem value="maintenance">Manutenção</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-[#CEEDB2] text-xs">Nível de Atividade</Label>
-                <Select value={formData.activity_level} onValueChange={v => setFormData({ ...formData, activity_level: v })}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sedentary">Sedentário</SelectItem>
-                    <SelectItem value="light">Leve (1–3x/sem)</SelectItem>
-                    <SelectItem value="moderate">Moderado (3–5x/sem)</SelectItem>
-                    <SelectItem value="active">Ativo (6–7x/sem)</SelectItem>
-                    <SelectItem value="very_active">Muito Ativo (2x/dia)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-[#CEEDB2] text-xs">Biotipo</Label>
-                <Select value={formData.body_type} onValueChange={v => setFormData({ ...formData, body_type: v })}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ectomorph">Ectomorfo (Metabolismo Rápido)</SelectItem>
-                    <SelectItem value="mesomorph">Mesomorfo (Equilibrado)</SelectItem>
-                    <SelectItem value="endomorph">Endomorfo (Ganha Peso Fácil)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <Button onClick={() => saveProfileMutation.mutate(formData)} disabled={saveProfileMutation.isPending} className="flex-1 h-11 bg-[#CEF17B] hover:bg-[#b8d965] text-[#084734] font-bold">
-                  {saveProfileMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                  Salvar
-                </Button>
-                <Button onClick={() => setEditing(false)} variant="outline" className="h-11 border-white/10 text-white hover:bg-white/10">
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Assinatura */}
-        {subscription && (
-          <Card className={`${cardBg} p-4`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Crown className="w-4 h-4 text-[#CEF17B]" />
-                <span className="text-white text-sm font-semibold">
-                  {subscription.plan === "premium" ? "Plano Premium" : "Teste Grátis"}
-                </span>
-              </div>
-              <Link to={createPageUrl("Subscription")}>
-                <Button size="sm" variant="outline" className="border-[#CEF17B]/30 text-[#CEF17B] hover:bg-[#CEF17B]/10 text-xs h-8">
-                  Gerenciar
-                </Button>
-              </Link>
-            </div>
-          </Card>
+            </motion.div>
+          </div>
         )}
 
       </div>
