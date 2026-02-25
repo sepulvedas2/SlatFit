@@ -103,13 +103,24 @@ function AppLayout({ children, currentPageName }) {
                   flex: 1,
                   padding: '6px 4px',
                   borderRadius: '12px',
-                  backgroundColor: active ? 'rgba(206, 241, 123, 0.15)' : 'transparent',
+                  backgroundColor: active 
+                    ? (isDark ? 'rgba(206, 241, 123, 0.15)' : 'rgba(206, 241, 123, 0.2)')
+                    : 'transparent',
                   textDecoration: 'none',
                   transition: 'background 0.2s',
                 }}
               >
-                <Icon style={{ width: '24px', height: '24px', color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)' }} />
-                <span style={{ fontSize: '11px', fontWeight: 500, color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap' }}>
+                <Icon style={{ 
+                  width: '24px', 
+                  height: '24px', 
+                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)')
+                }} />
+                <span style={{ 
+                  fontSize: '11px', 
+                  fontWeight: 500, 
+                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'),
+                  whiteSpace: 'nowrap' 
+                }}>
                   {item.name}
                 </span>
               </Link>
