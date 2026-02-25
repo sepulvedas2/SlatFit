@@ -82,6 +82,7 @@ function AppLayout({ children, currentPageName }) {
           zIndex: 99999,
           backgroundColor: navBg,
           borderTop: `1px solid ${navBorderColor}`,
+          boxShadow: navBoxShadow,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
