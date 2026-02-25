@@ -189,10 +189,6 @@ export default function Dashboard() {
         {showOnboarding && user && (
           <OnboardingModal user={user} isOpen={showOnboarding} onComplete={handleOnboardingComplete} />
         )}
-        {showWelcome && user && !showOnboarding && (
-          <WelcomeModal user={user} onClose={() => setShowWelcome(false)} />
-        )}
-
         {user && profile && (
           <>
             {/* 1. Saudação */}
