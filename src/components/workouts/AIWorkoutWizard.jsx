@@ -70,15 +70,17 @@ export default function AIWorkoutWizard({ userEmail, onClose, onWorkoutsGenerate
   const progress = ((currentStep) / STEPS.length) * 100;
 
   const handleSelect = (value) => {
-    setAnswers(prev => ({ ...prev, [stepKey]: value }));
-  };
+    const newAnswers = { ...answers, [stepKey]: value };
+    setAnswers(newAnswers);
 
-  const handleNext = async () => {
-    if (currentStep < STEPS.length - 1) {
-      setCurrentStep(prev => prev + 1);
-    } else {
-      await generateWorkoutPlan();
-    }
+    // Auto-advance after short delay
+    setTimeout(() => {
+      if (currentStep < STEPS.length - 1) {
+        setCurrentStep(prev => prev + 1);
+      } else {
+        generateWorkoutPlan(newAnswers);
+      }
+    }, 280);
   };
 
   const handleBack = () => {
