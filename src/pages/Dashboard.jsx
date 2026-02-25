@@ -135,7 +135,6 @@ export default function Dashboard() {
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
     queryClient.invalidateQueries(['userProfile']);
-    setTimeout(() => setShowWelcome(true), 500);
   };
 
   const today = format(new Date(), 'yyyy-MM-dd');
