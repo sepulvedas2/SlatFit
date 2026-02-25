@@ -62,66 +62,68 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Main Content */}
-      <main style={{ paddingBottom: "120px", minHeight: "100vh", overflowX: "hidden" }}>
+      <main className="pb-28 min-h-screen">
         {children}
       </main>
 
       {/* Bottom Navigation */}
       <nav
+        className="bottom-navigation"
         style={{
           position: 'fixed',
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 2147483647,
-          backgroundColor: '#084734',
-          borderTop: '1px solid rgba(206, 241, 123, 0.15)',
-          paddingTop: '10px',
-          paddingBottom: 'calc(14px + env(safe-area-inset-bottom, 16px))',
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
+          zIndex: 99999,
+          backgroundColor: 'rgba(8, 71, 52, 0.97)',
+          borderTop: '1px solid rgba(206, 241, 123, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.path);
-          return (
-            <Link
-              key={item.name}
-              to={item.path}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                flex: 1,
-                textDecoration: 'none',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            >
-              <Icon
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '10px' }}>
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
                 style={{
-                  width: '26px',
-                  height: '26px',
-                  color: active ? '#CEF17B' : 'rgba(255,255,255,0.5)',
-                  strokeWidth: active ? 2.2 : 1.6,
-                }}
-              />
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: active ? 600 : 400,
-                  color: active ? '#CEF17B' : 'rgba(255,255,255,0.5)',
-                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '4px',
+                  flex: 1,
+                  padding: '6px 4px',
+                  borderRadius: '12px',
+                  backgroundColor: active ? 'rgba(206, 241, 123, 0.15)' : 'transparent',
+                  textDecoration: 'none',
+                  transition: 'background 0.2s',
                 }}
               >
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
+                <Icon
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)',
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {item.name}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
     </div>
   );

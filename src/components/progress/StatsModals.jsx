@@ -1,6 +1,7 @@
 import React from "react";
 import { format } from "date-fns";
-import { X, Dumbbell } from "lucide-react";
+import { ptBR } from "date-fns/locale";
+import { X, Dumbbell, Flame } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 function Modal({ onClose, title, children }) {
@@ -44,7 +45,7 @@ export function WorkoutsModal({ logs, onClose }) {
               <div style={{ flex: 1 }}>
                 <p style={{ color: "white", fontWeight: 600, fontSize: 14, margin: 0 }}>{log.workout_name}</p>
                 <p style={{ color: "#CEEDB2", fontSize: 12, margin: 0 }}>
-                  {log.completed_date ? format(new Date(log.completed_date + "T12:00:00"), "dd/MM/yyyy") : ""} · {log.duration_minutes || 0} min · {log.calories_burned || 0} kcal
+                  {log.completed_date ? format(new Date(log.completed_date), "dd 'de' MMM", { locale: ptBR }) : ""} · {log.duration_minutes || 0} min · {log.calories_burned || 0} kcal
                 </p>
               </div>
             </div>
@@ -62,8 +63,7 @@ export function CaloriesModal({ logs, onClose }) {
     const key = format(d, "yyyy-MM-dd");
     const dayLogs = logs.filter(l => l.completed_date === key);
     const kcal = dayLogs.reduce((s, l) => s + (l.calories_burned || 0), 0);
-    const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-    return { day: dayNames[d.getDay()], kcal };
+    return { day: format(d, "EEE", { locale: ptBR }), kcal };
   });
 
   return (
