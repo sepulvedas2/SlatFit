@@ -65,6 +65,7 @@ import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
 import Workouts from './pages/Workouts';
 import Progresso from './pages/Progresso';
+import Profile from './pages/Profile';
 import __Layout from './Layout.jsx';
 
 
@@ -87,6 +88,7 @@ export const PAGES = {
     "WorkoutProgress": WorkoutProgress,
     "Workouts": Workouts,
     "Progresso": Progresso,
+    "Profile": Profile,
 }
 
 export const pagesConfig = {
