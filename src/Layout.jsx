@@ -116,12 +116,12 @@ function AppLayout({ children, currentPageName }) {
                 <Icon style={{ 
                   width: '24px', 
                   height: '24px', 
-                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#444444')
+                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#111111')
                 }} />
                 <span style={{ 
                   fontSize: '11px', 
                   fontWeight: 500, 
-                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#555555'),
+                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#111111'),
                   whiteSpace: 'nowrap' 
                 }}>
                   {item.name}
