@@ -29,6 +29,16 @@ export default function Layout({ children, currentPageName }) {
         * {
           font-family: 'Inter', sans-serif;
         }
+
+        html, body, #root {
+          height: 100%;
+          overflow: hidden;
+        }
+
+        #root {
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
         
         h1, h2, h3, h4, h5, h6 {
           font-family: 'Poppins', sans-serif;
