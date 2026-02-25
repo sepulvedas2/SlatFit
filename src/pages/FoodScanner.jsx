@@ -132,10 +132,6 @@ export default function FoodScanner() {
   };
 
   const analyzeFood = async () => {
-    if (!canScan) {
-      setError(`Limite diário atingido (${scanLimit} scans). Assine Premium para scans ilimitados!`);
-      return;
-    }
     if (!selectedImage) return;
 
     setAnalyzing(true);
