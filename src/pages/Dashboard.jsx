@@ -194,12 +194,6 @@ export default function Dashboard() {
     ? (nutritionData.water_intake_ml / nutritionData.water_goal_ml) * 100
     : 0;
 
-  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
-  const isFreeTrial = subscription?.plan === "free_trial";
-  const daysLeft = subscription?.end_date
-    ? differenceInDays(new Date(subscription.end_date), new Date())
-    : 30;
-
   const { nextWorkout, allDone } = getNextWorkout(allDailyWorkouts);
 
   return (
