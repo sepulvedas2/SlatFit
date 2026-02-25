@@ -207,19 +207,6 @@ export default function Dashboard() {
           <WelcomeModal user={user} onClose={() => setShowWelcome(false)} />
         )}
 
-        {/* Premium Badge */}
-        {isPremium && (
-          <div className="flex justify-end">
-            <Link to={createPageUrl("Subscription")}>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-effect border border-[#CEF17B]/20 hover:scale-105 transition-transform cursor-pointer">
-                <Crown className="w-3.5 h-3.5 text-[#CEF17B]" />
-                <span className="text-xs font-bold text-white">{isFreeTrial ? 'Teste Grátis' : 'Premium'}</span>
-                <span className="text-xs text-[#CEEDB2]">· {daysLeft}d</span>
-              </div>
-            </Link>
-          </div>
-        )}
-
         {user && profile && (
           <>
             {/* 1. Saudação */}
