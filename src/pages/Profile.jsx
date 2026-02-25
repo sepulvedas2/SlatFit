@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { format } from "date-fns";
-import { useTheme } from "../components/ThemeContext";
+import { useTheme } from "@/components/ThemeContext";
 
 const goalLabels = {
   weight_loss: "Emagrecimento",
