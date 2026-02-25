@@ -102,7 +102,6 @@ export default function Profile() {
     },
   });
 
-  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
   const goalMeta = GOAL_META[formData.goal] || GOAL_META.maintenance;
   const imc = calcIMC(formData.current_weight, formData.height);
   const diff = formData.target_weight && formData.current_weight
