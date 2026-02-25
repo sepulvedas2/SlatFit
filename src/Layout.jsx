@@ -116,7 +116,7 @@ function AppLayout({ children, currentPageName }) {
                 <Icon style={{ 
                   width: '24px', 
                   height: '24px', 
-                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)')
+                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#444444')
                 }} />
                 <span style={{ 
                   fontSize: '11px', 
