@@ -29,7 +29,6 @@ export default function Layout({ children, currentPageName }) {
         * {
           font-family: 'Inter', sans-serif;
         }
-
         
         h1, h2, h3, h4, h5, h6 {
           font-family: 'Poppins', sans-serif;
@@ -82,7 +81,7 @@ export default function Layout({ children, currentPageName }) {
           paddingBottom: '12px',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '6px' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
