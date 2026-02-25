@@ -432,7 +432,7 @@ Responda SOMENTE com JSON válido neste formato exato:
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation */}
+          {/* Navigation — only back button, flow is automatic */}
           <div className="flex gap-3 mt-6">
             {currentStep > 0 && (
               <Button
@@ -444,17 +444,6 @@ Responda SOMENTE com JSON válido neste formato exato:
                 Voltar
               </Button>
             )}
-            <Button
-              onClick={handleNext}
-              disabled={!selectedValue}
-              className="flex-1 bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold py-6 disabled:opacity-40"
-            >
-              {currentStep === STEPS.length - 1 ? (
-                <><Sparkles className="w-4 h-4 mr-2" /> Gerar Meu Plano</>
-              ) : (
-                <><ArrowRight className="w-4 h-4 mr-2" /> Próximo</>
-              )}
-            </Button>
           </div>
         </div>
       </motion.div>
