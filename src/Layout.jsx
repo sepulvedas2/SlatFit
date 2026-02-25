@@ -51,6 +51,12 @@ function AppLayout({ children, currentPageName }) {
           border: 1px solid rgba(206, 241, 123, 0.15);
         }
 
+        [data-theme="light"] .glass-effect {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(200, 200, 200, 0.2);
+        }
+
         .bottom-navigation {
           position: fixed !important;
           bottom: 0 !important;
