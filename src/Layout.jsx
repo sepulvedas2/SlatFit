@@ -73,55 +73,55 @@ export default function Layout({ children, currentPageName }) {
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 99999,
-          backgroundColor: 'rgba(8, 71, 52, 0.97)',
-          borderTop: '1px solid rgba(206, 241, 123, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          zIndex: 2147483647,
+          backgroundColor: '#084734',
+          borderTop: '1px solid rgba(206, 241, 123, 0.15)',
+          paddingTop: '10px',
+          paddingBottom: '14px',
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '6px' }}>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            return (
-              <Link
-                key={item.name}
-                to={item.path}
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
+          return (
+            <Link
+              key={item.name}
+              to={item.path}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                flex: 1,
+                textDecoration: 'none',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <Icon
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                  flex: 1,
-                  padding: '4px 4px',
-                  textDecoration: 'none',
+                  width: '26px',
+                  height: '26px',
+                  color: active ? '#CEF17B' : 'rgba(255,255,255,0.5)',
+                  strokeWidth: active ? 2.2 : 1.6,
+                }}
+              />
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: active ? 600 : 400,
+                  color: active ? '#CEF17B' : 'rgba(255,255,255,0.5)',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                <Icon
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    color: active ? '#CEF17B' : 'rgba(255,255,255,0.55)',
-                    strokeWidth: active ? 2.2 : 1.8,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: active ? 600 : 400,
-                    color: active ? '#CEF17B' : 'rgba(255,255,255,0.55)',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {item.name}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+                {item.name}
+              </span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );
