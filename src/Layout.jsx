@@ -83,7 +83,7 @@ export default function Layout({ children, currentPageName }) {
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '8px', paddingBottom: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '10px' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -95,33 +95,28 @@ export default function Layout({ children, currentPageName }) {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '3px',
+                  gap: '4px',
                   flex: 1,
-                  padding: '5px 2px',
-                  borderRadius: '10px',
+                  padding: '6px 4px',
+                  borderRadius: '12px',
                   backgroundColor: active ? 'rgba(206, 241, 123, 0.15)' : 'transparent',
                   textDecoration: 'none',
                   transition: 'background 0.2s',
-                  minWidth: 0,
                 }}
               >
                 <Icon
                   style={{
-                    width: '22px',
-                    height: '22px',
+                    width: '24px',
+                    height: '24px',
                     color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)',
-                    flexShrink: 0,
                   }}
                 />
                 <span
                   style={{
-                    fontSize: '10px',
+                    fontSize: '11px',
                     fontWeight: 500,
                     color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)',
                     whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: '100%',
                   }}
                 >
                   {item.name}
