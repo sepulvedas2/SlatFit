@@ -61,12 +61,8 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("darkMode", darkMode);
-    if (darkMode) {
-      document.documentElement.classList.add("dark-mode-app");
-    } else {
-      document.documentElement.classList.remove("dark-mode-app");
-    }
+    // Dispatch global event so Layout applies the theme everywhere
+    window.dispatchEvent(new CustomEvent("app-dark-mode-change", { detail: { darkMode } }));
   }, [darkMode]);
 
   const { data: profile } = useQuery({
