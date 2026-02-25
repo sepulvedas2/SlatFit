@@ -81,7 +81,7 @@ export default function Layout({ children, currentPageName }) {
           paddingBottom: '16px',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '12px', paddingBottom: '4px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '6px' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -94,38 +94,30 @@ export default function Layout({ children, currentPageName }) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  gap: '4px',
                   flex: 1,
-                  padding: '6px 4px',
+                  padding: '4px 4px',
                   textDecoration: 'none',
                 }}
               >
-                <div style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  backgroundColor: active ? 'rgba(206, 241, 123, 0.2)' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background 0.2s',
-                }}>
-                  <Icon
-                    style={{
-                      width: '22px',
-                      height: '22px',
-                      color: active ? '#CEF17B' : 'rgba(255,255,255,0.5)',
-                    }}
-                  />
-                </div>
-                {active && (
-                  <div style={{
-                    width: '4px',
-                    height: '4px',
-                    borderRadius: '50%',
-                    backgroundColor: '#CEF17B',
-                    marginTop: '2px',
-                  }} />
-                )}
+                <Icon
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    color: active ? '#CEF17B' : 'rgba(255,255,255,0.55)',
+                    strokeWidth: active ? 2.2 : 1.8,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: active ? 600 : 400,
+                    color: active ? '#CEF17B' : 'rgba(255,255,255,0.55)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {item.name}
+                </span>
               </Link>
             );
           })}
