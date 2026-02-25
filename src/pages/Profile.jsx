@@ -6,79 +6,52 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { User, Target, Activity, LogOut, Save, Loader2, Crown } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { format } from "date-fns";
-import {
-  User, Target, Activity, Save, Loader2, Crown, Droplets,
-  Flame, Dumbbell, Moon, Sun, Bell, RefreshCw, Edit3, ChevronRight, Scale
-} from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
-
-const goalLabels = {
-  weight_loss: "Emagrecimento",
-  muscle_gain: "Ganho de Massa",
-  maintenance: "Manutenção",
+import { format } from 'date-fns';
+// Helper function to create page URLs. In a real app, this would likely be imported from a utility.
+const createPageUrl = (pageName) => {
+  switch (pageName) {
+    case "Subscription":
+      return "/subscription"; // Example path for the Subscription page
+    case "BillingHistory":
+      return "/billing-history"; // Example path for Billing History page
+    default:
+      return `/${pageName.toLowerCase()}`; // Generic fallback for other pages
+  }
 };
-
-const goalMotivation = {
-  weight_loss: "Cada treino te aproxima da melhor versão de você 🔥",
-  muscle_gain: "Músculo se constrói com consistência e dedicação 💪",
-  maintenance: "Equilíbrio é a chave para uma vida saudável ⚖️",
-};
-
-const activityLabels = {
-  sedentary: "Sedentário",
-  light: "Leve",
-  moderate: "Moderado",
-  active: "Ativo",
-  very_active: "Muito Ativo",
-};
-
-// Simulated weight evolution data (last 6 weeks)
-function buildWeightChart(currentWeight) {
-  const weeks = ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5", "Agora"];
-  return weeks.map((week, i) => ({
-    week,
-    peso: +(currentWeight - (5 - i) * 0.4 + (Math.random() * 0.3 - 0.15)).toFixed(1),
-  }));
-}
 
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [success, setSuccess] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("darkMode") === "true";
-  });
-
+  
   const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    // Dispatch global event so Layout applies the theme everywhere
-    window.dispatchEvent(new CustomEvent("app-dark-mode-change", { detail: { darkMode } }));
-  }, [darkMode]);
-
   const { data: profile } = useQuery({
-    queryKey: ["userProfile", user?.email],
+    queryKey: ['userProfile', user?.email],
     queryFn: async () => {
+      if (!user?.email) return null;
       const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
     },
     enabled: !!user?.email,
   });
 
+  // NEW: Fetch subscription data
   const { data: subscription } = useQuery({
-    queryKey: ["subscription", user?.email],
+    queryKey: ['subscription', user?.email],
     queryFn: async () => {
+      if (!user?.email) return null;
       const subs = await base44.entities.Subscription.filter({ user_email: user.email });
-      return subs[0] || null;
+      return subs[0] || null; // Assuming a user has at most one active subscription
     },
     enabled: !!user?.email,
   });
@@ -92,316 +65,267 @@ export default function Profile() {
         height: 170,
         current_weight: 70,
         target_weight: 70,
-        goal: "maintenance",
-        activity_level: "moderate",
-        gender: "male",
+        goal: 'maintenance',
+        activity_level: 'moderate',
+        gender: 'male',
         age: 25,
-        body_type: "mesomorph",
+        body_type: 'mesomorph', // NEW: Default body type
         daily_calorie_target: 2000,
         protein_target: 150,
         carbs_target: 200,
-        fats_target: 60,
+        fats_target: 60
       });
     }
   }, [profile, user]);
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
-      if (profile) return base44.entities.UserProfile.update(profile.id, data);
-      return base44.entities.UserProfile.create(data);
+      if (profile) {
+        return base44.entities.UserProfile.update(profile.id, data);
+      } else {
+        return base44.entities.UserProfile.create(data);
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       setEditing(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     },
   });
 
+  const handleSave = () => {
+    saveProfileMutation.mutate(formData);
+  };
+
+  const handleLogout = () => {
+    base44.auth.logout();
+  };
+
+  const goalLabels = {
+    weight_loss: 'Emagrecimento',
+    muscle_gain: 'Ganho de Massa',
+    maintenance: 'Manutenção'
+  };
+
+  const activityLabels = {
+    sedentary: 'Sedentário',
+    light: 'Leve',
+    moderate: 'Moderado',
+    active: 'Ativo',
+    very_active: 'Muito Ativo'
+  };
+
+  const bodyTypeLabels = {
+    ectomorph: 'Ectomorfo (Metabolismo Rápido)',
+    mesomorph: 'Mesomorfo (Equilibrado)',
+    endomorph: 'Endomorfo (Ganha Peso Fácil)'
+  };
+
+  // NEW: Determine if the user is premium or on trial
   const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
 
-  // Calculations
-  const heightM = (profile?.height || 170) / 100;
-  const imc = profile?.current_weight
-    ? (profile.current_weight / (heightM * heightM)).toFixed(1)
-    : "--";
-  const weightDiff = profile
-    ? (profile.target_weight - profile.current_weight).toFixed(1)
-    : "--";
-  const weightProgress = profile
-    ? Math.min(100, Math.max(0,
-        profile.goal === "weight_loss"
-          ? ((profile.current_weight - profile.target_weight) /
-              (profile.current_weight - profile.target_weight + Math.abs(weightDiff))) * 100
-          : ((profile.current_weight / profile.target_weight) * 100)
-      ))
-    : 0;
-
-  const chartData = profile?.current_weight ? buildWeightChart(profile.current_weight) : [];
-
-  const waterGoal = profile?.body_type === "endomorph" ? 3.5
-    : profile?.body_type === "ectomorph" ? 2.5 : 3.0;
-
   return (
-    <div className="min-h-screen pb-32" style={{ background: darkMode ? "#0F1C1B" : undefined }}>
-      <style>{`
-        .dark-mode-app { --dm-bg: #0F1C1B; --dm-card: #162A28; --dm-text: #FFFFFF; --dm-sub: #A0B5B2; }
-      `}</style>
-
-      <div className="max-w-lg mx-auto px-4 pt-8 space-y-5">
-
-        {/* ── BLOCO 1: HEADER ── */}
-        <div className="text-center space-y-3 py-4">
-          <div className="relative inline-block">
-            <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center mx-auto shadow-lg shadow-[#CEF17B]/20">
-              <User className="w-12 h-12 text-white" />
-            </div>
-            {isPremium && (
-              <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#CEF17B] rounded-full flex items-center justify-center">
-                <Crown className="w-4 h-4 text-[#084734]" />
-              </div>
-            )}
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-3xl mx-auto space-y-6">
+        
+        {/* Header */}
+        <div className="text-center">
+          {/* Updated avatar styling */}
+          <div className="w-24 h-24 mx-auto mb-4 rounded-full gradient-primary flex items-center justify-center">
+            <User className="w-12 h-12 text-white" />
           </div>
-
-          <div>
-            <h1 className="text-2xl font-bold text-white">{user?.full_name || "Atleta"}</h1>
-            <p className="text-white/50 text-sm">{user?.email}</p>
-          </div>
-
-          {profile?.goal && (
-            <div className="space-y-1">
-              <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-[#CEF17B]/30 px-3 py-1">
-                {goalLabels[profile.goal]}
+          <h1 className="text-3xl font-bold text-white">{user?.full_name}</h1>
+          <p className="text-white/70 mt-1">{user?.email}</p>
+          
+          {/* NEW: Premium/Trial Badge */}
+          {isPremium && (
+            <Link to={createPageUrl("Subscription")}>
+              <Badge className="mt-2 bg-[#CEF17B]/20 text-[#CEF17B] border-[#CEF17B]/30 hover:bg-[#CEF17B]/30 transition-colors cursor-pointer">
+                <Crown className="w-3 h-3 mr-1" />
+                {subscription.plan === "premium" ? "Premium" : "Teste Grátis"}
               </Badge>
-              <p className="text-white/60 text-sm italic">{goalMotivation[profile.goal]}</p>
-            </div>
+            </Link>
           )}
         </div>
 
-        {/* ── BLOCO 2: GRID 2x2 FÍSICO ── */}
-        {profile && (
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { label: "Peso Atual", value: `${profile.current_weight} kg`, icon: Scale, color: "#CEF17B" },
-              { label: "Peso Meta", value: `${profile.target_weight} kg`, icon: Target, color: "#6EE7B7" },
-              {
-                label: "IMC",
-                value: imc,
-                sub: imc < 18.5 ? "Abaixo" : imc < 25 ? "Normal" : imc < 30 ? "Sobrepeso" : "Obesidade",
-                icon: Activity,
-                color: "#A78BFA",
-              },
-              {
-                label: weightDiff > 0 ? "Faltam ganhar" : "Faltam perder",
-                value: `${Math.abs(weightDiff)} kg`,
-                icon: Dumbbell,
-                color: "#FB923C",
-              },
-            ].map((card) => {
-              const Icon = card.icon;
-              return (
-                <Card
-                  key={card.label}
-                  className="p-4 border-white/8"
-                  style={{ background: darkMode ? "#162A28" : "rgba(206, 237, 178, 0.07)", backdropFilter: "blur(20px)" }}
+        {success && (
+          <Alert className="bg-green-500/20 border-green-500/30">
+            <AlertDescription className="text-green-400">
+              Perfil atualizado com sucesso!
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Stats Cards */}
+        {profile && !editing && (
+          <div className="grid md:grid-cols-3 gap-4">
+            <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-blue-500/20 rounded-xl">
+                  <Activity className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">{profile.current_weight} kg</p>
+                  <p className="text-xs text-gray-400">Peso Atual</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-green-500/20 rounded-xl">
+                  <Target className="w-6 h-6 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">{profile.target_weight} kg</p>
+                  <p className="text-xs text-gray-400">Meta</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-purple-500/20 rounded-xl">
+                  <User className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-white">{goalLabels[profile.goal]}</p>
+                  <p className="text-xs text-gray-400">Objetivo</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Subscription Card */}
+        {subscription && (
+          <Card className="glass-effect p-6 border-[#CEF17B]/20">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-white">Minha Assinatura</h3>
+              <Link to={createPageUrl("Subscription")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-[#CEF17B]/20 hover:bg-[#CEF17B]/10"
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <Icon className="w-4 h-4" style={{ color: card.color }} />
-                  </div>
-                  <p className="text-2xl font-bold text-white leading-tight">{card.value}</p>
-                  {card.sub && <p className="text-xs mt-0.5" style={{ color: card.color }}>{card.sub}</p>}
-                  <p className="text-xs text-white/40 mt-1">{card.label}</p>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-
-        {/* ── BLOCO 3: BARRA DE PROGRESSO ── */}
-        {profile && (
-          <Card
-            className="p-5 border-white/8"
-            style={{ background: darkMode ? "#162A28" : "rgba(206, 237, 178, 0.07)", backdropFilter: "blur(20px)" }}
-          >
-            <p className="text-sm font-semibold text-white/70 mb-3">Progresso até a meta</p>
-            <div className="flex justify-between text-xs text-white/50 mb-2">
-              <span>{profile.current_weight} kg</span>
-              <span>{profile.target_weight} kg</span>
+                  Gerenciar
+                </Button>
+              </Link>
             </div>
-            <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
-              <div
-                className="h-3 rounded-full transition-all duration-700"
-                style={{
-                  width: `${Math.min(weightProgress, 100)}%`,
-                  background: "linear-gradient(90deg, #CEF17B, #6EE7B7)",
-                }}
-              />
-            </div>
-            <p className="text-right text-xs text-[#CEF17B] mt-1 font-semibold">
-              {Math.round(weightProgress)}% concluído
-            </p>
-          </Card>
-        )}
-
-        {/* ── BLOCO 4: GRÁFICO ── */}
-        {profile?.current_weight && chartData.length > 0 && (
-          <Card
-            className="p-5 border-white/8"
-            style={{ background: darkMode ? "#162A28" : "rgba(206, 237, 178, 0.07)", backdropFilter: "blur(20px)" }}
-          >
-            <p className="text-sm font-semibold text-white/70 mb-4">Evolução de Peso</p>
-            <ResponsiveContainer width="100%" height={90}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="week" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ background: "#162A28", border: "none", borderRadius: 8, color: "#fff", fontSize: 12 }}
-                  formatter={(v) => [`${v} kg`, "Peso"]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="peso"
-                  stroke="#CEF17B"
-                  strokeWidth={2.5}
-                  dot={{ fill: "#CEF17B", r: 3 }}
-                  activeDot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
-
-        {/* ── BLOCO 5: INDICADORES ── */}
-        {profile && (
-          <Card
-            className="p-5 border-white/8"
-            style={{ background: darkMode ? "#162A28" : "rgba(206, 237, 178, 0.07)", backdropFilter: "blur(20px)" }}
-          >
-            <p className="text-sm font-semibold text-white/70 mb-4">Metas Diárias</p>
+            
             <div className="space-y-3">
-              {[
-                { icon: Flame, color: "#FB923C", label: "Calorias", value: `${profile.daily_calorie_target || 2000} kcal` },
-                { icon: Dumbbell, color: "#A78BFA", label: "Proteína", value: `${profile.protein_target || 150} g` },
-                { icon: Droplets, color: "#38BDF8", label: "Água", value: `${waterGoal} L` },
-                { icon: Activity, color: "#6EE7B7", label: "Atividade", value: activityLabels[profile.activity_level] || "Moderado" },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.label} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${item.color}20` }}>
-                        <Icon className="w-4 h-4" style={{ color: item.color }} />
-                      </div>
-                      <span className="text-sm text-white/60">{item.label}</span>
-                    </div>
-                    <span className="text-sm font-bold text-white">{item.value}</span>
-                  </div>
-                );
-              })}
+              <div className="flex items-center justify-between">
+                <span className="text-[#CEEDB2]">Plano Atual:</span>
+                <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0">
+                  {subscription.plan === "premium" ? "Premium" : "Teste Grátis"}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-[#CEEDB2]">Status:</span>
+                <span className={`text-sm font-semibold ${
+                  subscription.is_active ? "text-green-400" : "text-red-400"
+                }`}>
+                  {subscription.is_active ? "Ativo" : "Inativo"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-[#CEEDB2]">Vencimento:</span>
+                <span className="text-white font-semibold">
+                  {format(new Date(subscription.end_date), 'dd/MM/yyyy')}
+                </span>
+              </div>
+
+              <div className="pt-3 border-t border-white/10">
+                <Link to={createPageUrl("BillingHistory")}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-white/10 hover:bg-white/5"
+                  >
+                    Ver Histórico de Pagamentos
+                  </Button>
+                </Link>
+              </div>
             </div>
           </Card>
         )}
 
-        {/* ── BLOCO 6: CONFIGURAÇÕES ── */}
-        <Card
-          className="p-5 border-white/8"
-          style={{ background: darkMode ? "#162A28" : "rgba(206, 237, 178, 0.07)", backdropFilter: "blur(20px)" }}
-        >
-          <p className="text-sm font-semibold text-white/70 mb-4">Configurações</p>
-          <div className="space-y-1">
-
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#A78BFA]/20 flex items-center justify-center">
-                  {darkMode ? <Sun className="w-4 h-4 text-[#A78BFA]" /> : <Moon className="w-4 h-4 text-[#A78BFA]" />}
-                </div>
-                <span className="text-sm text-white">{darkMode ? "Modo Claro" : "Modo Noturno"}</span>
-              </div>
-              <div className={`w-11 h-6 rounded-full transition-colors relative ${darkMode ? "bg-[#CEF17B]" : "bg-white/20"}`}>
-                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${darkMode ? "left-6" : "left-1"}`} />
-              </div>
-            </button>
-
-            {/* Notificações */}
-            <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#FB923C]/20 flex items-center justify-center">
-                  <Bell className="w-4 h-4 text-[#FB923C]" />
-                </div>
-                <span className="text-sm text-white">Notificações</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-white/30" />
-            </button>
-
-            {/* Editar Dados */}
-            <button
-              onClick={() => setEditing(true)}
-              className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#6EE7B7]/20 flex items-center justify-center">
-                  <Edit3 className="w-4 h-4 text-[#6EE7B7]" />
-                </div>
-                <span className="text-sm text-white">Editar Dados</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-white/30" />
-            </button>
-
-            {/* Restaurar Perfil */}
-            <button
-              onClick={() => {
-                if (window.confirm("Deseja restaurar os dados padrão do perfil?")) {
-                  setFormData({ user_email: user?.email, goal: "maintenance", activity_level: "moderate", gender: "male", age: 25, height: 170, current_weight: 70, target_weight: 70, body_type: "mesomorph", daily_calorie_target: 2000, protein_target: 150 });
-                  setEditing(true);
-                }
-              }}
-              className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                  <RefreshCw className="w-4 h-4 text-white/50" />
-                </div>
-                <span className="text-sm text-white/70">Restaurar Perfil</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-white/30" />
-            </button>
+        {/* Profile Form */}
+        <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Informações do Perfil</h2>
+            {!editing && (
+              <Button
+                onClick={() => setEditing(true)}
+                variant="outline"
+                className="border-white/10"
+              >
+                Editar
+              </Button>
+            )}
           </div>
-        </Card>
 
-        {/* ── FORMULÁRIO DE EDIÇÃO ── */}
-        {editing && (
-          <Card
-            className="p-6 border-[#CEF17B]/20"
-            style={{ background: darkMode ? "#162A28" : "rgba(206, 237, 178, 0.07)", backdropFilter: "blur(20px)" }}
-          >
-            <h2 className="text-lg font-bold text-white mb-5">Editar Perfil</h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-white/60 text-xs mb-1 block">Altura (cm)</Label>
-                  <Input type="number" value={formData.height || ""} onChange={(e) => setFormData({ ...formData, height: parseFloat(e.target.value) })} className="bg-white/5 border-white/10 text-white" />
-                </div>
-                <div>
-                  <Label className="text-white/60 text-xs mb-1 block">Idade</Label>
-                  <Input type="number" value={formData.age || ""} onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) })} className="bg-white/5 border-white/10 text-white" />
-                </div>
-                <div>
-                  <Label className="text-white/60 text-xs mb-1 block">Peso Atual (kg)</Label>
-                  <Input type="number" step="0.1" value={formData.current_weight || ""} onChange={(e) => setFormData({ ...formData, current_weight: parseFloat(e.target.value) })} className="bg-white/5 border-white/10 text-white" />
-                </div>
-                <div>
-                  <Label className="text-white/60 text-xs mb-1 block">Peso Meta (kg)</Label>
-                  <Input type="number" step="0.1" value={formData.target_weight || ""} onChange={(e) => setFormData({ ...formData, target_weight: parseFloat(e.target.value) })} className="bg-white/5 border-white/10 text-white" />
-                </div>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-300">Altura (cm)</Label>
+                <Input
+                  type="number"
+                  value={formData.height || ''}
+                  onChange={(e) => setFormData({...formData, height: parseFloat(e.target.value)})}
+                  disabled={!editing}
+                  className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60"
+                />
               </div>
 
               <div>
-                <Label className="text-white/60 text-xs mb-1 block">Gênero</Label>
-                <Select value={formData.gender} onValueChange={(v) => setFormData({ ...formData, gender: v })}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                <Label className="text-gray-300">Idade</Label>
+                <Input
+                  type="number"
+                  value={formData.age || ''}
+                  onChange={(e) => setFormData({...formData, age: parseInt(e.target.value)})}
+                  disabled={!editing}
+                  className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60"
+                />
+              </div>
+
+              <div>
+                <Label className="text-gray-300">Peso Atual (kg)</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={formData.current_weight || ''}
+                  onChange={(e) => setFormData({...formData, current_weight: parseFloat(e.target.value)})}
+                  disabled={!editing}
+                  className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60"
+                />
+              </div>
+
+              <div>
+                <Label className="text-gray-300">Peso Meta (kg)</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={formData.target_weight || ''}
+                  onChange={(e) => setFormData({...formData, target_weight: parseFloat(e.target.value)})}
+                  disabled={!editing}
+                  className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60"
+                />
+              </div>
+
+              <div>
+                <Label className="text-gray-300">Gênero</Label>
+                <Select
+                  value={formData.gender}
+                  onValueChange={(value) => setFormData({...formData, gender: value})}
+                  disabled={!editing}
+                >
+                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="male">Masculino</SelectItem>
                     <SelectItem value="female">Feminino</SelectItem>
@@ -410,9 +334,15 @@ export default function Profile() {
               </div>
 
               <div>
-                <Label className="text-white/60 text-xs mb-1 block">Objetivo</Label>
-                <Select value={formData.goal} onValueChange={(v) => setFormData({ ...formData, goal: v })}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                <Label className="text-gray-300">Objetivo</Label>
+                <Select
+                  value={formData.goal}
+                  onValueChange={(value) => setFormData({...formData, goal: value})}
+                  disabled={!editing}
+                >
+                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="weight_loss">Emagrecimento</SelectItem>
                     <SelectItem value="muscle_gain">Ganho de Massa</SelectItem>
@@ -421,22 +351,38 @@ export default function Profile() {
                 </Select>
               </div>
 
-              <div>
-                <Label className="text-white/60 text-xs mb-1 block">Biotipo</Label>
-                <Select value={formData.body_type} onValueChange={(v) => setFormData({ ...formData, body_type: v })}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
+              {/* NEW: Body Type Selector */}
+              <div className="md:col-span-2">
+                <Label className="text-gray-300">🧬 Seu Biotipo Corporal</Label>
+                <Select
+                  value={formData.body_type}
+                  onValueChange={(value) => setFormData({...formData, body_type: value})}
+                  disabled={!editing}
+                >
+                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ectomorph">Ectomorfo (Metabolismo Rápido)</SelectItem>
                     <SelectItem value="mesomorph">Mesomorfo (Equilibrado)</SelectItem>
                     <SelectItem value="endomorph">Endomorfo (Ganha Peso Fácil)</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-gray-400 mt-2">
+                  Seu biotipo ajuda a calcular sua meta de hidratação diária personalizada
+                </p>
               </div>
 
-              <div>
-                <Label className="text-white/60 text-xs mb-1 block">Nível de Atividade</Label>
-                <Select value={formData.activity_level} onValueChange={(v) => setFormData({ ...formData, activity_level: v })}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
+              <div className="md:col-span-2">
+                <Label className="text-gray-300">Nível de Atividade</Label>
+                <Select
+                  value={formData.activity_level}
+                  onValueChange={(value) => setFormData({...formData, activity_level: value})}
+                  disabled={!editing}
+                >
+                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white disabled:opacity-60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="sedentary">Sedentário</SelectItem>
                     <SelectItem value="light">Leve (1-3 dias/semana)</SelectItem>
@@ -446,25 +392,43 @@ export default function Profile() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
 
-              <div className="flex gap-3 pt-2">
-                <Button onClick={() => saveProfileMutation.mutate(formData)} disabled={saveProfileMutation.isPending} className="flex-1 bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90 font-bold">
-                  {saveProfileMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+            {editing && (
+              <div className="flex gap-3 pt-4">
+                <Button
+                  onClick={handleSave}
+                  disabled={saveProfileMutation.isPending}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600"
+                >
+                  {saveProfileMutation.isPending ? (
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-5 h-5 mr-2" />
+                  )}
                   Salvar
                 </Button>
-                <Button onClick={() => setEditing(false)} variant="outline" className="border-white/10 text-white">
+                <Button
+                  onClick={() => setEditing(false)}
+                  variant="outline"
+                  className="border-white/10"
+                >
                   Cancelar
                 </Button>
               </div>
-            </div>
-          </Card>
-        )}
-
-        {success && (
-          <div className="text-center py-2">
-            <span className="text-[#CEF17B] text-sm font-semibold">✓ Perfil atualizado!</span>
+            )}
           </div>
-        )}
+        </Card>
+
+        {/* Logout */}
+        <Button
+          onClick={handleLogout}
+          variant="outline"
+          className="w-full glass-effect border-red-500/30 text-red-400 hover:bg-red-500/20"
+        >
+          <LogOut className="w-5 h-5 mr-2" />
+          Sair da Conta
+        </Button>
 
       </div>
     </div>
