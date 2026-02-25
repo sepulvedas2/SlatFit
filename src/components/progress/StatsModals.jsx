@@ -44,7 +44,7 @@ export function WorkoutsModal({ logs, onClose }) {
               <div style={{ flex: 1 }}>
                 <p style={{ color: "white", fontWeight: 600, fontSize: 14, margin: 0 }}>{log.workout_name}</p>
                 <p style={{ color: "#CEEDB2", fontSize: 12, margin: 0 }}>
-                  {log.completed_date ? format(new Date(log.completed_date), "dd 'de' MMM", { locale: ptBR }) : ""} · {log.duration_minutes || 0} min · {log.calories_burned || 0} kcal
+                  {log.completed_date ? format(new Date(log.completed_date + "T12:00:00"), "dd/MM/yyyy") : ""} · {log.duration_minutes || 0} min · {log.calories_burned || 0} kcal
                 </p>
               </div>
             </div>
