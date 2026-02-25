@@ -13,6 +13,7 @@ import CompleteWorkoutButton from "./CompleteWorkoutButton";
 
 export default function MyWorkouts({ userEmail }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [aiWizardOpen, setAiWizardOpen] = useState(false);
   const [prModalOpen, setPrModalOpen] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [expandedWorkout, setExpandedWorkout] = useState(null);
