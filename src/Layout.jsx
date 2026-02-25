@@ -62,7 +62,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Main Content */}
-      <main className="pb-28 min-h-screen">
+      <main style={{ paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))", minHeight: "100vh", overflowX: "hidden" }}>
         {children}
       </main>
 
