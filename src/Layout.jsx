@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Dumbbell, UtensilsCrossed, User, ScanLine } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { ThemeProvider, useTheme } from "./components/ThemeContext";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
