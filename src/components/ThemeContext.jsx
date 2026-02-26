@@ -1,33 +1,31 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-const ThemeContext = createContext({ isDark: true, toggleTheme: () => {} });
+// Dark é a identidade principal. isLight = modo claro opcional.
+const ThemeContext = createContext({ isDark: true, isLight: false, toggleTheme: () => {} });
 
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => {
+  const [isLight, setIsLight] = useState(() => {
     try {
-      const saved = localStorage.getItem("fitlens_theme");
-      // Dark é o padrão — só ativa light se explicitamente salvo como "light"
-      return saved === "light" ? false : true;
+      return localStorage.getItem("fitlens_theme") === "light";
     } catch {
-      return true;
+      return false;
     }
   });
 
+  const isDark = !isLight;
+
   useEffect(() => {
     try {
-      localStorage.setItem("fitlens_theme", isDark ? "dark" : "light");
+      localStorage.setItem("fitlens_theme", isLight ? "light" : "dark");
     } catch {}
-    if (isDark) {
-      document.documentElement.setAttribute("data-theme", "dark");
-    } else {
-      document.documentElement.setAttribute("data-theme", "light");
-    }
-  }, [isDark]);
+    document.documentElement.setAttribute("data-theme", isLight ? "light" : "dark");
+  }, [isLight]);
 
-  const toggleTheme = () => setIsDark(prev => !prev);
+  // toggleTheme alterna entre dark (padrão) e light (opcional)
+  const toggleTheme = () => setIsLight(prev => !prev);
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark, isLight, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
