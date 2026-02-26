@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Dumbbell, UtensilsCrossed, User, ScanLine } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import { ThemeProvider, useTheme } from "@/components/ThemeContext";
 
 function AppLayout({ children, currentPageName }) {
@@ -19,53 +18,13 @@ function AppLayout({ children, currentPageName }) {
 
   const isActive = (path) => location.pathname === path;
 
-  const appBg = isDark ? "#0F1C1B" : "#F5F6F7";
-  const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "#FFFFFF";
-  const navBorderColor = isDark ? "rgba(206, 241, 123, 0.2)" : "#E5E5E5";
-  const navBoxShadow = isDark ? "none" : "0px -2px 8px rgba(0, 0, 0, 0.05)";
-
-  // Light Mode Colors
-  const lightTextPrimary = "#000000";
-  const lightTextSecondary = "#000000";
-  const lightTextTitle = "#000000";
-  const lightIconDefault = "#0E3B34";
-  const lightIconInactive = "#0E3B34";
-  const lightIconActive = "#0E3B34";
-
   return (
-    <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
+    <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: "#0F1C1B" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
         
         * { font-family: 'Inter', sans-serif; }
         h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; font-weight: 700; }
-        
-        [data-theme="light"] {
-          --text-primary: #000000;
-          --text-secondary: #000000;
-          --text-title: #000000;
-          --icon-default: #0E3B34;
-          --icon-inactive: #0E3B34;
-          --icon-active: #0E3B34;
-          color: #000000;
-        }
-        
-        [data-theme="light"] svg,
-        [data-theme="light"] [role="img"],
-        [data-theme="light"] .lucide-react {
-          fill: #0E3B34 !important;
-          stroke: #0E3B34 !important;
-          color: #0E3B34 !important;
-        }
-        
-        [data-theme="dark"] {
-          --text-primary: #FFFFFF;
-          --text-secondary: rgba(255, 255, 255, 0.7);
-          --text-title: #FFFFFF;
-          --icon-default: #FFFFFF;
-          --icon-inactive: rgba(255, 255, 255, 0.5);
-          --icon-active: #CEF17B;
-        }
         
         .gradient-primary { background: linear-gradient(135deg, #084734, #CEF17B); }
         
@@ -76,22 +35,9 @@ function AppLayout({ children, currentPageName }) {
         }
         
         .glass-effect {
-          background: rgba(206, 237, 178, 0.1);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(206, 241, 123, 0.2);
-        }
-
-        [data-theme="dark"] .glass-effect {
           background: rgba(22, 42, 40, 0.8);
           backdrop-filter: blur(20px);
           border: 1px solid rgba(206, 241, 123, 0.15);
-        }
-
-        [data-theme="light"] .glass-effect {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(200, 200, 200, 0.2);
-          box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .bottom-navigation {
@@ -116,13 +62,11 @@ function AppLayout({ children, currentPageName }) {
           left: 0,
           right: 0,
           zIndex: 99999,
-          backgroundColor: navBg,
-          borderTop: `1px solid ${navBorderColor}`,
-          boxShadow: navBoxShadow,
+          backgroundColor: "rgba(15, 28, 27, 0.98)",
+          borderTop: "1px solid rgba(206, 241, 123, 0.2)",
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          transition: 'background-color 0.2s',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -141,9 +85,7 @@ function AppLayout({ children, currentPageName }) {
                   flex: 1,
                   padding: '6px 4px',
                   borderRadius: '12px',
-                  backgroundColor: active 
-                    ? (isDark ? 'rgba(206, 241, 123, 0.15)' : 'rgba(206, 241, 123, 0.2)')
-                    : 'transparent',
+                  backgroundColor: active ? 'rgba(206, 241, 123, 0.15)' : 'transparent',
                   textDecoration: 'none',
                   transition: 'background 0.2s',
                 }}
@@ -151,12 +93,12 @@ function AppLayout({ children, currentPageName }) {
                 <Icon style={{ 
                   width: '24px', 
                   height: '24px', 
-                  color: isDark && active ? '#CEF17B' : '#0E3B34'
+                  color: active ? '#CEF17B' : 'rgba(255,255,255,0.5)'
                 }} />
                 <span style={{ 
                   fontSize: '11px', 
                   fontWeight: 500, 
-                  color: '#000000',
+                  color: active ? '#CEF17B' : 'rgba(255,255,255,0.5)',
                   whiteSpace: 'nowrap' 
                 }}>
                   {item.name}
