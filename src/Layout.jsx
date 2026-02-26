@@ -25,12 +25,12 @@ function AppLayout({ children, currentPageName }) {
   const navBoxShadow = isDark ? "none" : "0px -2px 8px rgba(0, 0, 0, 0.05)";
 
   // Light Mode Colors
-  const lightTextPrimary = "#000000";
-  const lightTextSecondary = "#000000";
+  const lightTextPrimary = "#111111";
+  const lightTextSecondary = "#444444";
   const lightTextTitle = "#000000";
-  const lightIconDefault = "#000000";
-  const lightIconInactive = "#000000";
-  const lightIconActive = "#000000";
+  const lightIconDefault = "#111111";
+  const lightIconInactive = "#555555";
+  const lightIconActive = "#0E3B34";
 
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
@@ -41,21 +41,12 @@ function AppLayout({ children, currentPageName }) {
         h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; font-weight: 700; }
         
         [data-theme="light"] {
-          --text-primary: #000000;
-          --text-secondary: #000000;
+          --text-primary: #111111;
+          --text-secondary: #444444;
           --text-title: #000000;
-          --icon-default: #000000;
-          --icon-inactive: #000000;
-          --icon-active: #000000;
-          color: #000000;
-          fill: #000000;
-          stroke: #000000;
-        }
-        
-        [data-theme="light"] * {
-          color: #000000 !important;
-          fill: #000000 !important;
-          stroke: #000000 !important;
+          --icon-default: #111111;
+          --icon-inactive: #555555;
+          --icon-active: #0E3B34;
         }
         
         [data-theme="dark"] {
@@ -151,12 +142,12 @@ function AppLayout({ children, currentPageName }) {
                 <Icon style={{ 
                   width: '24px', 
                   height: '24px', 
-                  color: isDark && active ? '#CEF17B' : '#000000'
+                  color: active ? (isDark ? '#CEF17B' : lightIconActive) : (isDark ? 'rgba(255,255,255,0.6)' : lightIconInactive)
                 }} />
                 <span style={{ 
                   fontSize: '11px', 
                   fontWeight: 500, 
-                  color: isDark && active ? '#CEF17B' : '#000000',
+                  color: active ? (isDark ? '#CEF17B' : lightIconActive) : (isDark ? 'rgba(255,255,255,0.6)' : lightIconInactive),
                   whiteSpace: 'nowrap' 
                 }}>
                   {item.name}
