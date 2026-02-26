@@ -261,14 +261,14 @@ export default function Profile() {
 
             <div className="flex items-center justify-between py-3 border-b border-white/10">
               <div className="flex items-center gap-3">
-                {isDark ? <Moon className="w-5 h-5 text-[#CEF17B]" /> : <Sun className="w-5 h-5 text-yellow-400" />}
+                <Sun className="w-5 h-5 text-yellow-400" />
                 <div>
-                  <p className="text-white text-sm font-medium">Modo Noturno</p>
-                  <p className="text-[#A0B5B2] text-xs">{isDark ? "Ativado" : "Desativado"}</p>
+                  <p className="text-white text-sm font-medium">Modo Claro</p>
+                  <p className="text-[#A0B5B2] text-xs">{isDark ? "Desativado" : "Ativado"}</p>
                 </div>
               </div>
               <Switch
-                checked={isDark}
+                checked={!isDark}
                 onCheckedChange={toggleTheme}
                 className="data-[state=checked]:bg-[#CEF17B]"
               />
