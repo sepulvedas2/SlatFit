@@ -177,6 +177,43 @@ export default function Dashboard() {
     staleTime: 2 * 60 * 1000,
   });
 
+  const { data: userPoints } = useQuery({
+    queryKey: ['userPoints', user?.email],
+    queryFn: async () => {
+      const list = await base44.entities.UserPoints.filter({ user_email: user.email });
+      return list[0] || null;
+    },
+    enabled: !!user?.email,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Auto-reset streak if user hasn't trained in 2+ days
+  useEffect(() => {
+    if (!userPoints || !userPoints.id) return;
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+    const last = userPoints.last_workout_date;
+    if (last && last !== today && last !== yesterday && (userPoints.daily_streak || 0) > 0) {
+      base44.entities.UserPoints.update(userPoints.id, { daily_streak: 0 }).then(() => {
+        queryClient.invalidateQueries(['userPoints']);
+      });
+    }
+  }, [userPoints]);
+
+  const saveWeeklyGoalMutation = useMutation({
+    mutationFn: async (goal) => {
+      if (userPoints?.id) {
+        return base44.entities.UserPoints.update(userPoints.id, { weekly_goal: goal });
+      } else if (user?.email) {
+        return base44.entities.UserPoints.create({ user_email: user.email, weekly_goal: goal });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['userPoints']);
+      setShowGoalModal(false);
+    },
+  });
+
   const todayCalories = todayFoods.reduce((sum, f) => sum + (f.calories || 0), 0);
   const calorieTarget = profile?.daily_calorie_target || 2000;
   const waterProgress = nutritionData?.water_intake_ml && nutritionData?.water_goal_ml
