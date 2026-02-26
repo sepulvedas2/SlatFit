@@ -182,6 +182,14 @@ export default function Dashboard() {
 
   const { nextWorkout, allDone } = getNextWorkout(allDailyWorkouts);
 
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#CEF17B]" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto px-4 pt-8 space-y-6">
