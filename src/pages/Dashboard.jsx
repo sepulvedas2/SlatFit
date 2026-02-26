@@ -237,7 +237,13 @@ export default function Dashboard() {
             {/* 2. Próximo treino inteligente + CTA */}
             <HeroAction nextWorkout={nextWorkout} allDone={allDone} />
 
-            {/* 3. Status do dia */}
+            {/* 3. Streak + Meta Semanal */}
+            <StreakWeeklyCard
+              points={userPoints}
+              onEditGoal={() => setShowGoalModal(true)}
+            />
+
+            {/* 4. Status do dia */}
             <TodayGoals
               todayCalories={todayCalories}
               calorieTarget={calorieTarget}
@@ -245,7 +251,7 @@ export default function Dashboard() {
               waterProgress={waterProgress}
             />
 
-            {/* 4. Botões secundários */}
+            {/* 5. Botões secundários */}
             <div className="grid grid-cols-2 gap-3">
               <Link to={createPageUrl("Progresso")}>
                 <Button variant="outline" className="w-full h-12 glass-effect border-[#CEF17B]/20 text-[#CEF17B] hover:bg-[#CEF17B]/10 text-sm font-semibold">
