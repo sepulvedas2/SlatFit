@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { UtensilsCrossed, TrendingUp } from "lucide-react";
@@ -10,6 +10,8 @@ import OnboardingModal from "../components/onboarding/OnboardingModal";
 import HeroHeader from "../components/dashboard/HeroHeader";
 import HeroAction from "../components/dashboard/HeroAction";
 import TodayGoals from "../components/dashboard/TodayGoals";
+import StreakWeeklyCard from "../components/dashboard/StreakWeeklyCard";
+import WeeklyGoalModal from "../components/dashboard/WeeklyGoalModal";
 
 // Minimal plan map to determine next workout (mirrors WeeklyPlan data)
 const WEEK_PLANS = {
