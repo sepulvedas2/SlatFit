@@ -17,7 +17,9 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     try {
       localStorage.setItem("fitlens_theme", isLight ? "light" : "dark");
-    } catch {}
+    } catch (e) {
+      // ignore
+    }
     document.documentElement.setAttribute("data-theme", isLight ? "light" : "dark");
   }, [isLight]);
 
