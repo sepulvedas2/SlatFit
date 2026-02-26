@@ -259,6 +259,21 @@ export default function Profile() {
            <div className="glass-effect rounded-2xl p-5 space-y-1" style={cardStyle}>
              <h3 className="text-white font-bold mb-4 text-sm">Configurações</h3>
 
+             <div className="flex items-center justify-between py-3 border-b border-white/10">
+               <div className="flex items-center gap-3">
+                 {!isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-[#A0B5B2]" />}
+                 <div>
+                   <p className="text-white text-sm font-medium">Modo Claro</p>
+                   <p className="text-[#A0B5B2] text-xs">{!isDark ? "Ativado" : "Desativado"}</p>
+                 </div>
+               </div>
+               <Switch
+                 checked={!isDark}
+                 onCheckedChange={toggleTheme}
+                 className="data-[state=checked]:bg-yellow-400"
+               />
+             </div>
+
              <button
                onClick={() => setEditing(true)}
                className="w-full flex items-center gap-3 py-3 text-left"
