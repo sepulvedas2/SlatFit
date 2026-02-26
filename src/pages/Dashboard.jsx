@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { UtensilsCrossed, TrendingUp } from "lucide-react";
+import { UtensilsCrossed, TrendingUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, startOfWeek } from "date-fns";
 import OnboardingModal from "../components/onboarding/OnboardingModal";
