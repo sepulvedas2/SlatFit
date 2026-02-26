@@ -115,7 +115,9 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => {
+      base44.auth.redirectToLogin();
+    });
   }, []);
 
   const { data: profile } = useQuery({
