@@ -229,6 +229,13 @@ export default function Dashboard() {
         {showOnboarding && user && (
           <OnboardingModal user={user} isOpen={showOnboarding} onComplete={handleOnboardingComplete} />
         )}
+        {showGoalModal && (
+          <WeeklyGoalModal
+            currentGoal={userPoints?.weekly_goal || 4}
+            onSave={(goal) => saveWeeklyGoalMutation.mutate(goal)}
+            onClose={() => setShowGoalModal(false)}
+          />
+        )}
         {user && profile && (
           <>
             {/* 1. Saudação */}
