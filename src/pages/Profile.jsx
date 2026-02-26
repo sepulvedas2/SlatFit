@@ -50,7 +50,7 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [success, setSuccess] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -258,21 +258,6 @@ export default function Profile() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <div className="glass-effect rounded-2xl p-5 space-y-1" style={cardStyle}>
             <h3 className="text-white font-bold mb-4 text-sm">Configurações</h3>
-
-            <div className="flex items-center justify-between py-3 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <Sun className="w-5 h-5 text-yellow-400" />
-                <div>
-                  <p className="text-white text-sm font-medium">Modo Claro</p>
-                  <p className="text-[#A0B5B2] text-xs">{isDark ? "Desativado" : "Ativado"}</p>
-                </div>
-              </div>
-              <Switch
-                checked={!isDark}
-                onCheckedChange={toggleTheme}
-                className="data-[state=checked]:bg-[#CEF17B]"
-              />
-            </div>
 
             <button
               onClick={() => setEditing(true)}
