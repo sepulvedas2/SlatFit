@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import {
   User, Target, Activity, Save, Loader2,
-  Droplets, Flame, Dumbbell, Pencil, Moon, Sun, Scale, ArrowRight, TrendingUp
+  Droplets, Flame, Dumbbell, Pencil, Sun, Scale, ArrowRight, TrendingUp
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
