@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { UtensilsCrossed, TrendingUp, Loader2 } from "lucide-react";
+import { UtensilsCrossed, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, startOfWeek } from "date-fns";
 import OnboardingModal from "../components/onboarding/OnboardingModal";
@@ -115,9 +115,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {
-      base44.auth.redirectToLogin();
-    });
+    base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
   const { data: profile } = useQuery({
@@ -183,14 +181,6 @@ export default function Dashboard() {
     : 0;
 
   const { nextWorkout, allDone } = getNextWorkout(allDailyWorkouts);
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#CEF17B]" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen pb-24">

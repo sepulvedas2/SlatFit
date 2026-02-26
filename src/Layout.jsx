@@ -19,10 +19,8 @@ function AppLayout({ children, currentPageName }) {
 
   const isActive = (path) => location.pathname === path;
 
-  const appBg = isDark ? "#0F1C1B" : "#F5F6F7";
-  const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "#FFFFFF";
-  const navBorderColor = isDark ? "rgba(206, 241, 123, 0.2)" : "#E5E5E5";
-  const navBoxShadow = isDark ? "none" : "0px -2px 8px rgba(0, 0, 0, 0.05)";
+  const appBg = isDark ? "#0F1C1B" : "#084734";
+  const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "rgba(8, 71, 52, 0.97)";
 
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
@@ -52,13 +50,6 @@ function AppLayout({ children, currentPageName }) {
           border: 1px solid rgba(206, 241, 123, 0.15);
         }
 
-        [data-theme="light"] .glass-effect {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(200, 200, 200, 0.2);
-          box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
         .bottom-navigation {
           position: fixed !important;
           bottom: 0 !important;
@@ -82,8 +73,7 @@ function AppLayout({ children, currentPageName }) {
           right: 0,
           zIndex: 99999,
           backgroundColor: navBg,
-          borderTop: `1px solid ${navBorderColor}`,
-          boxShadow: navBoxShadow,
+          borderTop: '1px solid rgba(206, 241, 123, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -106,24 +96,13 @@ function AppLayout({ children, currentPageName }) {
                   flex: 1,
                   padding: '6px 4px',
                   borderRadius: '12px',
-                  backgroundColor: active 
-                    ? (isDark ? 'rgba(206, 241, 123, 0.15)' : 'rgba(206, 241, 123, 0.2)')
-                    : 'transparent',
+                  backgroundColor: active ? 'rgba(206, 241, 123, 0.15)' : 'transparent',
                   textDecoration: 'none',
                   transition: 'background 0.2s',
                 }}
               >
-                <Icon style={{ 
-                  width: '24px', 
-                  height: '24px', 
-                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#111111')
-                }} />
-                <span style={{ 
-                  fontSize: '11px', 
-                  fontWeight: 500, 
-                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#111111'),
-                  whiteSpace: 'nowrap' 
-                }}>
+                <Icon style={{ width: '24px', height: '24px', color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)' }} />
+                <span style={{ fontSize: '11px', fontWeight: 500, color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap' }}>
                   {item.name}
                 </span>
               </Link>
