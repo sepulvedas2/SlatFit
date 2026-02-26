@@ -24,14 +24,6 @@ function AppLayout({ children, currentPageName }) {
   const navBorderColor = isDark ? "rgba(206, 241, 123, 0.2)" : "#E5E5E5";
   const navBoxShadow = isDark ? "none" : "0px -2px 8px rgba(0, 0, 0, 0.05)";
 
-  // Light Mode Colors
-  const lightTextPrimary = "#111111";
-  const lightTextSecondary = "#444444";
-  const lightTextTitle = "#000000";
-  const lightIconDefault = "#111111";
-  const lightIconInactive = "#555555";
-  const lightIconActive = "#0E3B34";
-
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
       <style>{`
@@ -39,24 +31,6 @@ function AppLayout({ children, currentPageName }) {
         
         * { font-family: 'Inter', sans-serif; }
         h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; font-weight: 700; }
-        
-        [data-theme="light"] {
-          --text-primary: #111111;
-          --text-secondary: #444444;
-          --text-title: #000000;
-          --icon-default: #111111;
-          --icon-inactive: #555555;
-          --icon-active: #0E3B34;
-        }
-        
-        [data-theme="dark"] {
-          --text-primary: #FFFFFF;
-          --text-secondary: rgba(255, 255, 255, 0.7);
-          --text-title: #FFFFFF;
-          --icon-default: #FFFFFF;
-          --icon-inactive: rgba(255, 255, 255, 0.5);
-          --icon-active: #CEF17B;
-        }
         
         .gradient-primary { background: linear-gradient(135deg, #084734, #CEF17B); }
         
@@ -142,12 +116,12 @@ function AppLayout({ children, currentPageName }) {
                 <Icon style={{ 
                   width: '24px', 
                   height: '24px', 
-                  color: active ? (isDark ? '#CEF17B' : lightIconActive) : (isDark ? 'rgba(255,255,255,0.6)' : lightIconInactive)
+                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#111111')
                 }} />
                 <span style={{ 
                   fontSize: '11px', 
                   fontWeight: 500, 
-                  color: active ? (isDark ? '#CEF17B' : lightIconActive) : (isDark ? 'rgba(255,255,255,0.6)' : lightIconInactive),
+                  color: active ? '#CEF17B' : (isDark ? 'rgba(255,255,255,0.6)' : '#111111'),
                   whiteSpace: 'nowrap' 
                 }}>
                   {item.name}
