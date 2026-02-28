@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { X, Send, Loader2, Sparkles } from "lucide-react";
+import { X, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import AIChatInput from "./AIChatInput";
 
 export default function AssistantChatModal({ user, onClose }) {
   const [messages, setMessages] = useState([
