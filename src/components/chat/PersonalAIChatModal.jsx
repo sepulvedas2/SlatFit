@@ -260,23 +260,13 @@ Responda de forma personalizada, natural e útil:`,
 
         {/* Input */}
         <div className="p-4 border-t border-[#CEF17B]/20">
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Digite sua pergunta..."
-              disabled={loading}
-              className="flex-1 bg-white/10 border-[#CEF17B]/20 text-white placeholder:text-white/50"
-            />
-            <Button
-              onClick={sendMessage}
-              disabled={!input.trim() || loading}
-              className="gradient-button text-[#084734]"
-            >
-              <Send className="w-5 h-5" />
-            </Button>
-          </div>
+          <AIChatInput
+            value={input}
+            onChange={setInput}
+            onSend={sendMessage}
+            loading={loading}
+            placeholder="Digite sua pergunta..."
+          />
           <p className="text-xs text-[#CEEDB2] mt-2 text-center">
             <Sparkles className="w-3 h-3 inline mr-1" />
             Orientações gerais. Não substitui acompanhamento profissional.
