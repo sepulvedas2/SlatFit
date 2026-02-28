@@ -158,7 +158,7 @@ Assistente:`,
               {loading && (
                 <div style={{ display: "flex" }}>
                   <div style={{ padding: "10px 14px", background: "rgba(255,255,255,0.08)", borderRadius: "18px 18px 18px 4px" }}>
-                    <Loader2 style={{ width: "16px", height: "16px", color: "#CEF17B", animation: "spin 1s linear infinite" }} />
+                    <span className="w-4 h-4 border-2 border-[#CEF17B]/40 border-t-[#CEF17B] rounded-full animate-spin block" />
                   </div>
                 </div>
               )}
@@ -166,50 +166,14 @@ Assistente:`,
             </div>
 
             {/* Input */}
-            <div
-              style={{
-                padding: "12px 16px",
-                borderTop: "1px solid rgba(206,241,123,0.2)",
-                display: "flex",
-                gap: "10px",
-                alignItems: "center",
-                paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
-              }}
-            >
-              <input
+            <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(206,241,123,0.2)", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))" }}>
+              <AIChatInput
                 value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && send()}
+                onChange={setInput}
+                onSend={send}
+                loading={loading}
                 placeholder="Pergunte sobre alimentação ou treino..."
-                style={{
-                  flex: 1,
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(206,241,123,0.2)",
-                  borderRadius: "12px",
-                  padding: "10px 14px",
-                  color: "white",
-                  fontSize: "14px",
-                  outline: "none",
-                }}
               />
-              <button
-                onClick={send}
-                disabled={loading || !input.trim()}
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "50%",
-                  background: input.trim() && !loading ? "#CEF17B" : "rgba(206,241,123,0.2)",
-                  border: "none",
-                  cursor: input.trim() && !loading ? "pointer" : "default",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Send style={{ width: "18px", height: "18px", color: "#084734" }} />
-              </button>
             </div>
           </div>
         </div>
