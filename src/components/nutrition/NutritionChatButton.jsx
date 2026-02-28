@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MessageCircle, X } from "lucide-react";
+import AIChatInput from "../chat/AIChatInput";
 
 export default function NutritionChatButton({ userProfile }) {
   const [open, setOpen] = useState(false);
