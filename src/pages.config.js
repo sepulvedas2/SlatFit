@@ -55,7 +55,6 @@ import Checkout from './pages/Checkout';
 import Community from './pages/Community';
 import DailySummary from './pages/DailySummary';
 import Dashboard from './pages/Dashboard';
-import FoodScanner from './pages/FoodScanner';
 import Home from './pages/Home';
 import Learning from './pages/Learning';
 import MealPlans from './pages/MealPlans';
@@ -78,7 +77,6 @@ export const PAGES = {
     "Community": Community,
     "DailySummary": DailySummary,
     "Dashboard": Dashboard,
-    "FoodScanner": FoodScanner,
     "Home": Home,
     "Learning": Learning,
     "MealPlans": MealPlans,
