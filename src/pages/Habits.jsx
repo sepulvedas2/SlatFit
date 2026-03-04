@@ -311,8 +311,8 @@ export default function Habits() {
               {habits.length === 0 && (
                 <button
                   onClick={() => setShowForm(true)}
-                  className="w-full h-16 rounded-2xl font-bold text-lg text-[#084734]"
-                  style={{ background: "linear-gradient(135deg, #CEF17B, #CEEDB2)" }}
+                  className="w-full h-16 rounded-2xl font-bold text-lg text-white"
+                  style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", boxShadow: "0 4px 20px rgba(255,106,0,0.4)" }}
                 >
                   <div className="flex items-center justify-center gap-3">
                     <Plus className="w-5 h-5" />
