@@ -177,9 +177,9 @@ export default function Habits() {
           <button
             onClick={() => setShowForm(true)}
             className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #CEF17B, #CEEDB2)" }}
+            style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", boxShadow: "0 4px 16px rgba(255,106,0,0.35)" }}
           >
-            <Plus className="w-5 h-5 text-[#084734]" />
+            <Plus className="w-5 h-5 text-white" />
           </button>
         </div>
 
