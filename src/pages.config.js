@@ -56,6 +56,7 @@ import Community from './pages/Community';
 import DailySummary from './pages/DailySummary';
 import Dashboard from './pages/Dashboard';
 import FoodScanner from './pages/FoodScanner';
+import Habits from './pages/Habits';
 import Home from './pages/Home';
 import Learning from './pages/Learning';
 import MealPlans from './pages/MealPlans';
@@ -66,7 +67,6 @@ import SmartNutrition from './pages/SmartNutrition';
 import Subscription from './pages/Subscription';
 import WorkoutProgress from './pages/WorkoutProgress';
 import Workouts from './pages/Workouts';
-import Habits from './pages/Habits';
 import __Layout from './Layout.jsx';
 
 
@@ -80,6 +80,7 @@ export const PAGES = {
     "DailySummary": DailySummary,
     "Dashboard": Dashboard,
     "FoodScanner": FoodScanner,
+    "Habits": Habits,
     "Home": Home,
     "Learning": Learning,
     "MealPlans": MealPlans,
@@ -90,7 +91,6 @@ export const PAGES = {
     "Subscription": Subscription,
     "WorkoutProgress": WorkoutProgress,
     "Workouts": Workouts,
-    "Habits": Habits,
 }
 
 export const pagesConfig = {
