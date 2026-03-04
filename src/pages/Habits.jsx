@@ -139,12 +139,11 @@ export default function Habits() {
       }
     },
     onSuccess: (result, variables) => {
-      queryClient.invalidateQueries(["habitLogs"]);
-      if (result?.added && result?.xpDelta > 0) {
-        // Animação XP
-        setXpAnimation({ value: result.xpDelta });
-        setTimeout(() => setXpAnimation(null), 1500);
-      }
+    queryClient.invalidateQueries(["habitLogs"]);
+    if (result?.added && result?.xpDelta > 0) {
+      setXpAnimation({ value: result.xpDelta });
+      setTimeout(() => setXpAnimation(null), 1500);
+    }
     },
   });
 
