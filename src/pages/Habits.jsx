@@ -190,10 +190,26 @@ export default function Habits() {
               initial={{ opacity: 0, y: 0, scale: 0.8 }}
               animate={{ opacity: 1, y: -30, scale: 1.2 }}
               exit={{ opacity: 0, y: -60 }}
-              className="fixed top-24 right-6 z-50 px-3 py-1.5 rounded-full font-bold text-sm text-[#084734]"
-              style={{ background: "#CEF17B", pointerEvents: "none" }}
+              className="fixed top-24 right-6 z-50 px-3 py-1.5 rounded-full font-bold text-sm text-white"
+              style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", pointerEvents: "none", boxShadow: "0 4px 16px rgba(255,106,0,0.4)" }}
             >
               +{xpAnimation.value} XP ⚡
+            </motion.div>
+          )}
+          {perfectDayToast && (
+            <motion.div
+              key="perfect"
+              initial={{ opacity: 0, y: 60, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-32 left-4 right-4 z-50 mx-auto max-w-sm rounded-2xl p-4 flex items-center gap-3"
+              style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", boxShadow: "0 8px 32px rgba(255,106,0,0.5)" }}
+            >
+              <span className="text-2xl">🎉</span>
+              <div>
+                <p className="text-white font-bold text-sm">Dia 100% concluído!</p>
+                <p className="text-white/80 text-xs">Você está evoluindo. Consistência é poder.</p>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
