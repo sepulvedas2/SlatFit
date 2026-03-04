@@ -144,6 +144,12 @@ export default function Habits() {
     if (result?.added && result?.xpDelta > 0) {
       setXpAnimation({ value: result.xpDelta });
       setTimeout(() => setXpAnimation(null), 1500);
+      // Verificar 100% no dia
+      const todayLogs = (allLogs.filter(l => l.log_date === today && l.completed)).length + 1;
+      if (todayLogs >= habits.length && habits.length > 0) {
+        setPerfectDayToast(true);
+        setTimeout(() => setPerfectDayToast(false), 3000);
+      }
     }
     },
   });
