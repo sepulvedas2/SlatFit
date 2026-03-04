@@ -304,6 +304,14 @@ export default function Habits() {
           {/* STATS / PROGRESSO */}
           {activeTab === "stats" && (
             <motion.div key="stats" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
+              <ProgressChart
+                logsByDate={logsByDate}
+                habits={habits}
+                streak={streak}
+                bestStreak={bestStreak}
+                weekConsistency={weekConsistency}
+                totalXp={totalHabitXp}
+              />
               <HabitStats
                 totalXp={totalHabitXp}
                 streak={streak}
