@@ -42,7 +42,8 @@ export default function Habits() {
   const [userPoints, setUserPoints] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState("grid"); // grid | stats
-  const [xpAnimation, setXpAnimation] = useState(null); // { x, y, value }
+  const [xpAnimation, setXpAnimation] = useState(null);
+  const [perfectDayToast, setPerfectDayToast] = useState(false);
   const queryClient = useQueryClient();
 
   const today = format(new Date(), "yyyy-MM-dd");
