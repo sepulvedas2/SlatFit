@@ -292,7 +292,10 @@ export default function Workouts() {
               </p>
             </div>
             <Link to={createPageUrl("WorkoutProgress")}>
-              <Button className="gradient-button text-[#084734]">
+              <Button
+                className="font-bold text-white border-0"
+                style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", boxShadow: "0 4px 16px rgba(255,106,0,0.35)" }}
+              >
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Meu Progresso
               </Button>
