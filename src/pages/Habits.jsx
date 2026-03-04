@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, Zap, BarChart3, Grid3X3, Settings } from "lucide-react";
+import { Plus, Trash2, BarChart3, Grid3X3, Settings, PartyPopper } from "lucide-react";
 import { format, startOfWeek, subDays } from "date-fns";
 
 import HabitGrid from "../components/habits/HabitGrid";
