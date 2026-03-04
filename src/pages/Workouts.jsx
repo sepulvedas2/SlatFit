@@ -300,12 +300,30 @@ export default function Workouts() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-[#CEF17B]/20">
-              <TabsTrigger value="app-workouts" className="data-[state=active]:bg-[#CEF17B]/20 data-[state=active]:text-[#CEF17B]">
-                Planilhas do App
+            <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-[#FF6A00]/30">
+              <TabsTrigger
+                value="app-workouts"
+                className="data-[state=active]:text-white data-[state=active]:font-bold text-white/50 transition-all"
+                style={{ "--tw-ring-color": "transparent" }}
+                data-active={activeTab === "app-workouts"}
+              >
+                <span
+                  className="px-2 py-1 rounded-lg transition-all"
+                  style={activeTab === "app-workouts" ? { background: "linear-gradient(135deg, #FF6A00, #FF8C00)", color: "white", padding: "4px 12px", borderRadius: "8px" } : {}}
+                >
+                  Planilhas do App
+                </span>
               </TabsTrigger>
-              <TabsTrigger value="my-workouts" className="data-[state=active]:bg-[#CEF17B]/20 data-[state=active]:text-[#CEF17B]">
-                Meus Treinos
+              <TabsTrigger
+                value="my-workouts"
+                className="data-[state=active]:text-white data-[state=active]:font-bold text-white/50 transition-all"
+              >
+                <span
+                  className="px-2 py-1 rounded-lg transition-all"
+                  style={activeTab === "my-workouts" ? { background: "linear-gradient(135deg, #FF6A00, #FF8C00)", color: "white", padding: "4px 12px", borderRadius: "8px" } : {}}
+                >
+                  Meus Treinos
+                </span>
               </TabsTrigger>
             </TabsList>
 
