@@ -9,6 +9,7 @@ import HabitGrid from "../components/habits/HabitGrid";
 import HabitStats from "../components/habits/HabitStats";
 import HabitFormModal from "../components/habits/HabitFormModal";
 import WeeklyReport from "../components/habits/WeeklyReport";
+import ProgressChart from "../components/habits/ProgressChart";
 
 // XP com multiplicador de streak
 function calcXP(baseXp, streak) {
