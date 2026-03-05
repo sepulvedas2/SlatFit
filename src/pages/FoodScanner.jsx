@@ -5,21 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Edit, BarChart3, ScanLine } from "lucide-react";
+import { Edit, BarChart3, ScanLine, Camera, Pencil, Star, Droplets, Flame, ChevronRight } from "lucide-react";
 import { format, startOfWeek, subDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-import ScannerHero from "../components/scanner/ScannerHero";
 import CameraCapture from "../components/scanner/CameraCapture";
 import AnalyzingLoader from "../components/scanner/AnalyzingLoader";
-import NutritionResultsPremium from "../components/scanner/NutritionResultsPremium";
 import ScannerResultScreen from "../components/scanner/ScannerResultScreen";
 import DailyTimeline from "../components/scanner/DailyTimeline";
 import MealTypeSelector from "../components/scanner/MealTypeSelector";
-import WeeklyCalendar from "../components/scanner/WeeklyCalendar";
-import DailyMacrosPanel from "../components/scanner/DailyMacrosPanel";
-import SmartInsight from "../components/scanner/SmartInsight";
 import WeeklyView from "../components/scanner/WeeklyView";
-import StreakBadges from "../components/scanner/StreakBadges";
 
 function computeStreak(foodsByDate) {
   let streak = 0;
