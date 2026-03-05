@@ -76,7 +76,7 @@ export default function FoodScanner() {
   }, [weekFoods, today]);
 
   const streak = useMemo(() => computeStreak(foodsByDate), [foodsByDate]);
-  const todayFoods = foodsByDate[selectedDate] || [];
+  const todayFoods = foodsByDate[today] || [];
   const calorieTarget = userProfile?.daily_calorie_target || 2000;
 
   const handleFileSelect = (file) => {
