@@ -180,9 +180,24 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
 
   const mealTypeLabel = { breakfast: "Café da manhã", lunch: "Almoço", dinner: "Jantar", snack: "Lanche" }[selectedMealType];
 
+  // Format date header
+  const dateHeader = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
+  const dateCapitalized = dateHeader.charAt(0).toUpperCase() + dateHeader.slice(1);
+
+  const calTarget = userProfile?.daily_calorie_target || 2000;
+  const protTarget = userProfile?.protein_target || 120;
+  const carbsTarget = userProfile?.carbs_target || 250;
+  const fatsTarget = userProfile?.fats_target || 65;
+  const waterTarget = 2000;
+
+  const dayCalories = todayFoods.reduce((s, f) => s + (f.calories || 0), 0);
+  const dayProtein = todayFoods.reduce((s, f) => s + (f.protein || 0), 0);
+  const dayCarbs = todayFoods.reduce((s, f) => s + (f.carbs || 0), 0);
+  const dayFats = todayFoods.reduce((s, f) => s + (f.fats || 0), 0);
+
   return (
-    <div className="min-h-screen pb-28 pt-6">
-      <div className="max-w-lg mx-auto px-4 space-y-4">
+    <div className="min-h-screen pb-28">
+      <div className="max-w-lg mx-auto px-4 space-y-4 pt-6">
 
         {error && (
           <div className="p-3 rounded-xl text-sm text-red-300" style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)" }}>
@@ -194,22 +209,92 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
 
           {/* HOME — visão principal */}
           {view === "home" && (
-            <motion.div key="home" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-4">
+            <motion.div key="home" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-5">
 
-              {/* Calendário semanal */}
-              <WeeklyCalendar
-                selectedDate={selectedDate}
-                onSelectDate={setSelectedDate}
-                foodsByDate={foodsByDate}
-                calorieTarget={calorieTarget}
-                streak={streak}
-              />
+              {/* HEADER */}
+              <div>
+                <h1 className="text-2xl font-black text-white">Scanner Inteligente</h1>
+                <p className="text-sm text-white/50 mt-0.5">{dateCapitalized}</p>
+              </div>
+
+              {/* METAS NUTRICIONAIS DO DIA */}
+              <div className="rounded-3xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold text-white">Metas do Dia</h2>
+                  <span className="text-xs text-white/40">{Math.round(dayCalories)} / {calTarget} kcal</span>
+                </div>
+
+                {/* Calorie ring */}
+                <div className="flex items-center gap-4">
+                  <div className="relative w-20 h-20 flex-shrink-0">
+                    <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                      <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                      <circle
+                        cx="40" cy="40" r="32" fill="none"
+                        stroke="#f97316" strokeWidth="8"
+                        strokeDasharray={`${2 * Math.PI * 32}`}
+                        strokeDashoffset={`${2 * Math.PI * 32 * (1 - Math.min(dayCalories / calTarget, 1))}`}
+                        strokeLinecap="round"
+                        style={{ transition: "stroke-dashoffset 0.8s ease" }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-lg font-black text-white">{Math.round((dayCalories / calTarget) * 100)}%</span>
+                      <span className="text-[9px] text-white/40">calorias</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    {[
+                      { label: "🥩 Proteína", consumed: dayProtein, target: protTarget, unit: "g", color: "#4ade80" },
+                      { label: "🍞 Carboidr.", consumed: dayCarbs, target: carbsTarget, unit: "g", color: "#facc15" },
+                      { label: "🥑 Gorduras", consumed: dayFats, target: fatsTarget, unit: "g", color: "#60a5fa" },
+                    ].map(({ label, consumed, target, unit, color }) => (
+                      <div key={label}>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-white/60">{label}</span>
+                          <span className="text-white/80 font-semibold">{Math.round(consumed)}/{target}{unit}</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ backgroundColor: color }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min((consumed / (target || 1)) * 100, 100)}%` }}
+                            transition={{ duration: 0.7, ease: "easeOut" }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* BOTÕES DE AÇÃO PRINCIPAL */}
+              <div className="space-y-3">
+                <button
+                  onClick={() => setView("camera")}
+                  className="w-full h-16 rounded-2xl font-bold text-lg text-[#084734] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
+                  style={{ background: "linear-gradient(135deg, #CEF17B, #CEEDB2)" }}
+                >
+                  <Camera className="w-6 h-6" />
+                  Escanear Alimento com IA
+                </button>
+
+                <button
+                  onClick={() => setView("manual")}
+                  className="w-full h-13 py-4 rounded-2xl font-semibold text-sm text-white active:scale-95 transition-all flex items-center justify-center gap-2"
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+                >
+                  <Pencil className="w-4 h-4 text-white/60" />
+                  Inserir manualmente
+                </button>
+              </div>
 
               {/* Tabs dia / semana */}
               <div className="flex gap-2 p-1 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)" }}>
                 {[
-                  { key: "day", label: "📋 Hoje", icon: ScanLine },
-                  { key: "week", label: "📊 Semana", icon: BarChart3 },
+                  { key: "day", label: "📋 Hoje" },
+                  { key: "week", label: "📊 Semana" },
                 ].map(({ key, label }) => (
                   <button
                     key={key}
@@ -228,50 +313,14 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
 
               {activeTab === "day" && (
                 <div className="space-y-4">
-                  {/* Insight inteligente */}
-                  <SmartInsight foods={todayFoods} userProfile={userProfile} />
-
-                  {/* Macros do dia */}
-                  <DailyMacrosPanel foods={todayFoods} userProfile={userProfile} />
-
-                  {/* Linha do tempo */}
                   <DailyTimeline foods={todayFoods} />
-
-                  {/* Botão de escanear */}
-                  <button
-                    onClick={() => setView("camera")}
-                    className="w-full h-16 rounded-2xl font-bold text-lg text-[#084734] shadow-xl active:scale-95 transition-all"
-                    style={{ background: "linear-gradient(135deg, #CEF17B, #CEEDB2)" }}
-                  >
-                    <div className="flex items-center justify-center gap-3">
-                      <span className="text-2xl">📸</span>
-                      Escanear Alimento
+                  {todayFoods.length === 0 && (
+                    <div className="py-10 text-center text-white/30 text-sm space-y-2">
+                      <div className="text-4xl">🍽️</div>
+                      <p>Nenhuma refeição registrada hoje.</p>
+                      <p className="text-xs text-white/20">Escaneie ou insira manualmente para começar.</p>
                     </div>
-                  </button>
-
-                  {/* Demo: ver tela de resultado */}
-                  <button
-                    onClick={() => {
-                      setNutritionData({ food_name: "Arroz com Frango Grelhado", portion_size: "300g", calories: 420, protein: 38, carbs: 45, fats: 8, image_url: null });
-                      setImagePreview(null);
-                      setView("result");
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold transition-colors"
-                    style={{ background: "rgba(206,241,123,0.07)", border: "1px solid rgba(206,241,123,0.2)", color: "#CEF17B" }}
-                  >
-                    ✨ Ver prévia do novo resultado
-                  </button>
-
-                  <button
-                    onClick={() => setView("manual")}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm text-white/60 hover:text-white/90 transition-colors"
-                    style={{ border: "1px solid rgba(255,255,255,0.1)" }}
-                  >
-                    <Edit className="w-4 h-4" />
-                    Inserir manualmente
-                  </button>
-
-                  <StreakBadges streak={streak} />
+                  )}
                 </div>
               )}
 
