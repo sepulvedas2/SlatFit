@@ -38,7 +38,7 @@ export default function FoodScanner() {
   const [imagePreview, setImagePreview] = useState(null);
   const [nutritionData, setNutritionData] = useState(null);
   const [selectedMealType, setSelectedMealType] = useState("lunch");
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [selectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [error, setError] = useState(null);
   const [manualData, setManualData] = useState({ food_name: "", portion_size: "", calories: "", protein: "", carbs: "", fats: "" });
   const [saving, setSaving] = useState(false);
