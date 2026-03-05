@@ -215,9 +215,6 @@ export default function Dashboard() {
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto px-4 pt-8 space-y-6">
 
-        {showOnboarding && user && (
-          <OnboardingModal user={user} isOpen={showOnboarding} onComplete={handleOnboardingComplete} />
-        )}
         {showGoalModal && (
           <WeeklyGoalModal
             currentGoal={userPoints?.weekly_goal || 4}
