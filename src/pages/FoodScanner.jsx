@@ -316,6 +316,12 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
                   mealType={mealTypeLabel}
                   onSave={handleSaveAndReset}
                   onReset={reset}
+                  todayTotals={{
+                    cal: todayFoods.reduce((s, f) => s + (f.calories || 0), 0),
+                    prot: todayFoods.reduce((s, f) => s + (f.protein || 0), 0),
+                    carbs: todayFoods.reduce((s, f) => s + (f.carbs || 0), 0),
+                    fats: todayFoods.reduce((s, f) => s + (f.fats || 0), 0),
+                  }}
                 />
               </div>
             </motion.div>
