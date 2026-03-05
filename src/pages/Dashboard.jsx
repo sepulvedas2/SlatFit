@@ -6,7 +6,6 @@ import { createPageUrl } from "@/utils";
 import { UtensilsCrossed, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, startOfWeek } from "date-fns";
-import OnboardingModal from "../components/onboarding/OnboardingModal";
 import HeroHeader from "../components/dashboard/HeroHeader";
 import HeroAction from "../components/dashboard/HeroAction";
 import TodayGoals from "../components/dashboard/TodayGoals";
