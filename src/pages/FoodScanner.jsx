@@ -254,6 +254,19 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
                     </div>
                   </button>
 
+                  {/* Demo: ver tela de resultado */}
+                  <button
+                    onClick={() => {
+                      setNutritionData({ food_name: "Arroz com Frango Grelhado", portion_size: "300g", calories: 420, protein: 38, carbs: 45, fats: 8, image_url: null });
+                      setImagePreview(null);
+                      setView("result");
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold transition-colors"
+                    style={{ background: "rgba(206,241,123,0.07)", border: "1px solid rgba(206,241,123,0.2)", color: "#CEF17B" }}
+                  >
+                    ✨ Ver prévia do novo resultado
+                  </button>
+
                   <button
                     onClick={() => setView("manual")}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm text-white/60 hover:text-white/90 transition-colors"
