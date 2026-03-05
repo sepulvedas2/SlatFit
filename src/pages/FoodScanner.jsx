@@ -12,6 +12,7 @@ import ScannerHero from "../components/scanner/ScannerHero";
 import CameraCapture from "../components/scanner/CameraCapture";
 import AnalyzingLoader from "../components/scanner/AnalyzingLoader";
 import NutritionResultsPremium from "../components/scanner/NutritionResultsPremium";
+import ScannerResultScreen from "../components/scanner/ScannerResultScreen";
 import DailyTimeline from "../components/scanner/DailyTimeline";
 import MealTypeSelector from "../components/scanner/MealTypeSelector";
 import WeeklyCalendar from "../components/scanner/WeeklyCalendar";
@@ -316,12 +317,6 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
                   mealType={mealTypeLabel}
                   onSave={handleSaveAndReset}
                   onReset={reset}
-                  todayTotals={{
-                    cal: todayFoods.reduce((s, f) => s + (f.calories || 0), 0),
-                    prot: todayFoods.reduce((s, f) => s + (f.protein || 0), 0),
-                    carbs: todayFoods.reduce((s, f) => s + (f.carbs || 0), 0),
-                    fats: todayFoods.reduce((s, f) => s + (f.fats || 0), 0),
-                  }}
                 />
               </div>
             </motion.div>
