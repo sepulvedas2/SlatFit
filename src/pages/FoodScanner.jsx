@@ -301,24 +301,17 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
           {/* RESULT */}
           {view === "result" && nutritionData && (
             <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
-              {imagePreview && (
-                <div className="relative overflow-hidden rounded-3xl">
-                  <img src={imagePreview} alt="Food" className="w-full aspect-video object-cover" />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(8,71,52,0.9))" }} />
-                  <div className="absolute bottom-3 left-4">
-                    <MealTypeSelector selected={selectedMealType} onChange={setSelectedMealType} />
-                  </div>
-                </div>
-              )}
-              <div className="p-4 rounded-3xl" style={{ background: "rgba(8,71,52,0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(206,241,123,0.15)" }}>
-                <NutritionResultsPremium
-                  data={nutritionData}
-                  userProfile={userProfile}
-                  mealType={mealTypeLabel}
-                  onSave={handleSaveAndReset}
-                  onReset={reset}
-                />
-              </div>
+              {/* Meal type selector */}
+              <MealTypeSelector selected={selectedMealType} onChange={setSelectedMealType} />
+              <ScannerResultScreen
+                data={nutritionData}
+                imagePreview={imagePreview}
+                userProfile={userProfile}
+                mealType={mealTypeLabel}
+                todayFoods={todayFoods}
+                onSave={handleSaveAndReset}
+                onReset={reset}
+              />
             </motion.div>
           )}
 
