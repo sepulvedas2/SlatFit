@@ -222,7 +222,7 @@ export default function Dashboard() {
             onClose={() => setShowGoalModal(false)}
           />
         )}
-        {user && profile && (
+        {user && (
           <>
             {/* 1. Saudação */}
             <HeroHeader user={user} />
