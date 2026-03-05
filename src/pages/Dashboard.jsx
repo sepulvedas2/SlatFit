@@ -112,7 +112,6 @@ function getNextWorkout(dailyWorkouts) {
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const queryClient = useQueryClient();
 
