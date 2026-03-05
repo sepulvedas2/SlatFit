@@ -129,15 +129,6 @@ export default function Dashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
-  useEffect(() => {
-    if (user && profile === null) setShowOnboarding(true);
-  }, [user, profile]);
-
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    queryClient.invalidateQueries(['userProfile']);
-  };
-
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data: todayFoods = [] } = useQuery({
