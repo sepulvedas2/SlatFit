@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { Loader2, BookOpen, ChevronRight } from "lucide-react";
+import { Loader2, BookOpen, ChevronRight, Utensils } from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -51,59 +50,75 @@ export default function SmartNutrition() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="glass-effect p-6 border-[#CEF17B]/20 text-center">
+        <div className="p-6 rounded-3xl text-center" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(206,241,123,0.2)" }}>
           <p className="text-white">Faça login para acessar esta página.</p>
-        </Card>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen pb-28 px-4 pt-8">
-      <div className="max-w-lg mx-auto space-y-6">
+  const goalLabel = {
+    weight_loss: "Emagrecimento",
+    muscle_gain: "Hipertrofia",
+    maintenance: "Manutenção",
+  }[userProfile?.goal] || "Manutenção";
 
-        {/* 1. Cabeçalho */}
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-1">Nutrição Inteligente</h1>
-          <p className="text-[#CEEDB2] text-sm">Simples, prática e personalizada para você.</p>
+  return (
+    <div className="min-h-screen pb-28 pt-8">
+      <div className="max-w-lg mx-auto px-4 space-y-6">
+
+        {/* ── 1. CABEÇALHO ── */}
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-white tracking-tight">Nutrição Inteligente</h1>
+          <p className="text-sm text-white/50">Simples, prática e personalizada para você.</p>
         </div>
 
-        {/* 2. Gerador de Refeições com IA */}
-        <Card className="glass-effect border-[#CEF17B]/20 p-5 space-y-4">
-          <div>
-            <h2 className="text-white font-bold text-lg">🥗 Gerar Refeições com IA</h2>
-            <p className="text-[#CEEDB2] text-sm mt-0.5">
-              Baseado no seu objetivo: <span className="text-[#CEF17B] font-semibold">
-                {userProfile?.goal === "weight_loss" ? "Emagrecimento" : userProfile?.goal === "muscle_gain" ? "Hipertrofia" : "Manutenção"}
-              </span>
-            </p>
+        {/* ── 2. GERADOR DE REFEIÇÕES ── */}
+        <div className="rounded-3xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(206,241,123,0.15)" }}>
+          <div className="px-5 pt-5 pb-4">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(206,241,123,0.15)" }}>
+                <Utensils className="w-5 h-5 text-[#CEF17B]" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-white">Gerar Refeições com IA</h2>
+                <p className="text-xs text-white/40">
+                  Objetivo: <span className="text-[#CEF17B] font-semibold">{goalLabel}</span>
+                </p>
+              </div>
+            </div>
           </div>
-          <MealGenerator userProfile={userProfile} />
-        </Card>
+          <div className="px-5 pb-5">
+            <MealGenerator userProfile={userProfile} />
+          </div>
+        </div>
 
-        {/* 3. Meta de Água */}
+        {/* ── 3. HIDRATAÇÃO ── */}
         <WaterGoalTracker
           userEmail={user.email}
           nutritionData={nutritionData}
           userProfile={userProfile}
         />
 
-        {/* 4. Biblioteca de conteúdos */}
+        {/* ── 4. BIBLIOTECA ── */}
         <Link to={createPageUrl("Learning")}>
-          <Card className="glass-effect border-[#CEF17B]/20 p-5 cursor-pointer hover:bg-white/5 transition-all">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#CEF17B]/20 flex items-center justify-center">
-                  <BookOpen className="w-6 h-6 text-[#CEF17B]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white">Biblioteca Nutricional</h3>
-                  <p className="text-sm text-[#CEEDB2]">Aprenda sobre nutrição e saúde</p>
-                </div>
+          <div
+            className="rounded-3xl p-5 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(206,241,123,0.15)" }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "rgba(206,241,123,0.12)" }}>
+                <BookOpen className="w-6 h-6 text-[#CEF17B]" />
               </div>
-              <ChevronRight className="w-5 h-5 text-[#CEF17B]" />
+              <div>
+                <h3 className="text-base font-bold text-white">Biblioteca Nutricional</h3>
+                <p className="text-xs text-white/40 mt-0.5">90 conteúdos · 9 categorias</p>
+              </div>
             </div>
-          </Card>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.07)" }}>
+              <ChevronRight className="w-4 h-4 text-white/40" />
+            </div>
+          </div>
         </Link>
 
       </div>
