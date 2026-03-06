@@ -101,7 +101,7 @@ export default function SmartNutrition() {
         />
 
         {/* ── 4. BIBLIOTECA ── */}
-        <Link to={createPageUrl("Learning")}>
+        <Link to={createPageUrl("Learning")} className="mt-4 block">
           <div
             className="rounded-3xl p-5 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
             style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(206,241,123,0.15)" }}
