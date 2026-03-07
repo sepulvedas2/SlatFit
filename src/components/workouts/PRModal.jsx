@@ -98,7 +98,7 @@ export default function PRModal({ isOpen, onClose, exercise, userEmail }) {
                 background: "linear-gradient(180deg, #0D2B22 0%, #08211A 100%)",
                 border: "1px solid rgba(206,241,123,0.15)",
                 borderBottom: "none",
-                maxHeight: "82vh",
+                maxHeight: "90vh",
               }}
             >
               {/* Drag handle */}
