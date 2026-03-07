@@ -202,7 +202,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       restTime: "30-60 segundos",
       exercises: [
         { name: "Supino Inclinado", sets: "4x", reps: "8-12", image_placeholder: "supino_inclinado" },
-        { name: "Supino com Halteres", sets: "3x", reps: "10-15", image_placeholder: "supino_halteres" },
+        { name: "Supino reto", sets: "3x", reps: "10-15", image_placeholder: "supino_halteres" },
         { name: "Desenvolvimento com Halteres", sets: "3x", reps: "8-12", image_placeholder: "desenvolvimento_halteres" },
         { name: "Elevação Lateral", sets: "3x", reps: "10-12", image_placeholder: "elevacao_lateral" },
         { name: "Elevação Frontal", sets: "3x", reps: "12-15", image_placeholder: "elevacao_frontal" }
