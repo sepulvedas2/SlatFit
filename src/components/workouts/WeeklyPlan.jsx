@@ -352,7 +352,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         { name: "Supino reto com halteres", sets: "4x", reps: "10-12", image_placeholder: "supino_halteres" },
         { name: "Supino com Barra", sets: "3x", reps: "12-15", image_placeholder: "supino_barra" },
         { name: "Crucifixo com Halteres", sets: "3x", reps: "12-15", image_placeholder: "crucifixo_halteres" },
-        { name: "Supino no Banco", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
+        { name: "Supino no banco declinado", sets: "3x", reps: "12-15", image_placeholder: "supino_banco" },
         { name: "Tríceps Mergulho", sets: "3x", reps: "10-12", image_placeholder: "triceps_mergulho" },
         { name: "Tríceps Testa na Polia", sets: "3x", reps: "10-12", image_placeholder: "triceps_testa" },
         { name: "Tríceps Barra Invertida", sets: "3x", reps: "10-12", image_placeholder: "triceps_invertida" }
