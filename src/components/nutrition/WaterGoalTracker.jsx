@@ -183,7 +183,7 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
 
         {/* Quick add buttons */}
         <div className="px-5 pb-4">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {[100, 250, 500].map(amount => (
               <button
                 key={amount}
@@ -195,15 +195,6 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
                 +{amount}ml
               </button>
             ))}
-            <button
-              onClick={() => setShowIntakeModal(true)}
-              disabled={isGoalReached}
-              className="py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1 transition-all active:scale-95 disabled:opacity-40"
-              style={{ background: "rgba(206,241,123,0.1)", border: "1px solid rgba(206,241,123,0.25)", color: "#CEF17B" }}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Outro
-            </button>
           </div>
         </div>
 
