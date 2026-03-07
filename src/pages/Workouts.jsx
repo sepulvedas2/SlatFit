@@ -498,12 +498,6 @@ export default function Workouts() {
           </div>
         </div>
 
-        <Card className="glass-effect border-[#CEF17B]/20 p-4">
-          <p className="text-white/60 text-sm text-center">
-            💡 Clique em qualquer exercício para ver a demonstração
-          </p>
-        </Card>
-
         {/* Workout Blocks Grid */}
         <div className="grid md:grid-cols-2 gap-4">
           {hiitWorkout.blocks.map((block, index) => (
@@ -583,7 +577,6 @@ export default function Workouts() {
             <li>• Foque na execução correta dos movimentos</li>
             <li>• Ajuste a intensidade ao seu condicionamento físico</li>
             <li>• Use um tapete ou colchonete para exercícios no chão</li>
-            <li>• Clique em cada exercício para ver a demonstração visual</li>
           </ul>
         </Card>
 
