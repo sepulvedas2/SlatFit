@@ -77,8 +77,9 @@ export default function MyWorkouts({ userEmail }) {
     setPrModalOpen(true);
   };
 
-  const handleDeleteWorkout = (workoutId) => {
-    if (window.confirm("Deseja excluir este treino?")) deleteWorkoutMutation.mutate(workoutId);
+  const handleDeleteWorkout = (e, workoutId) => {
+    e.stopPropagation();
+    deleteWorkoutMutation.mutate(workoutId);
   };
 
   const handleEditWorkout = (e, workout) => {
