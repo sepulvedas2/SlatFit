@@ -191,7 +191,8 @@ Responda SOMENTE com JSON válido neste formato exato:
         user_email: userEmail,
         nome_treino: workout.name,
         dia_semana: dayOfWeek,
-        observacoes: `${workout.muscle_group} • ${workout.intensity} • ${workout.duration_minutes}min | Gerado por IA`
+        observacoes: `${workout.muscle_group} • ${workout.intensity} • ${workout.duration_minutes}min | Gerado por IA`,
+        source: "ai"
       });
 
       for (let j = 0; j < workout.exercises.length; j++) {
