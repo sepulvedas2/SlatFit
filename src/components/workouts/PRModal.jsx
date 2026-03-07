@@ -87,6 +87,7 @@ export default function PRModal({ isOpen, onClose, exercise, userEmail }) {
           {/* Bottom Sheet */}
           <motion.div
             className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-lg"
+            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
