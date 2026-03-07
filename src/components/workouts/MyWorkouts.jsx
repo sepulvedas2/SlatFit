@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Dumbbell, Trophy, Trash2, ChevronDown, Edit, Sparkles, Brain, Calendar, RotateCcw, ChevronRight } from "lucide-react";
+import { Dumbbell, Trophy, Trash2, ChevronDown, Edit, Sparkles, Brain, Calendar, RotateCcw, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import CustomWorkoutModal from "./CustomWorkoutModal";
 import PRModal from "./PRModal";
 import AIWorkoutWizard from "./AIWorkoutWizard";
