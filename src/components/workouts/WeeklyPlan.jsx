@@ -335,7 +335,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🦵",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Agachamento Lateral", sets: "3x", reps: "10-12", image_placeholder: "agachamento_lateral" },
+        { name: "Avanço", sets: "3x", reps: "10-12", image_placeholder: "agachamento_lateral" },
         { name: "Leg Press", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
         { name: "Cadeira Extensora", sets: "3x", reps: "10-15", image_placeholder: "cadeira_extensora" },
         { name: "Cadeira Flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
