@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import WaterGoalModal from "./WaterGoalModal";
-import WaterIntakeModal from "./WaterIntakeModal";
 
 const calculateWaterGoalByBodyType = (bodyType, weight = 70) => {
   const baseWater = weight * 35;
