@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Dumbbell, CheckCircle, PartyPopper } from "lucide-react";
+import { Dumbbell, CheckCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function HeroAction({ nextWorkout, allDone }) {
