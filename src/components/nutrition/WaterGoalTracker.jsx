@@ -15,7 +15,6 @@ const calculateWaterGoalByBodyType = (bodyType, weight = 70) => {
 
 export default function WaterGoalTracker({ userEmail, nutritionData, userProfile }) {
   const [showGoalModal, setShowGoalModal] = useState(false);
-  const [showIntakeModal, setShowIntakeModal] = useState(false);
   const [celebrateGoal, setCelebrateGoal] = useState(false);
   const queryClient = useQueryClient();
   const today = format(new Date(), 'yyyy-MM-dd');
