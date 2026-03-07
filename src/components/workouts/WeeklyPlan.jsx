@@ -158,7 +158,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🦾",
       restTime: "30-60 segundos",
       exercises: [
-        { name: "Remada baixa", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
+        { name: "Remada baixa aberta", sets: "4x", reps: "8-12", image_placeholder: "remada_baixa" },
         { name: "Remada alta", sets: "3x", reps: "10-15", image_placeholder: "remada_alta" },
         { name: "Puxada Alta à Frente", sets: "3x", reps: "8-12", image_placeholder: "puxada_alta" },
         { name: "Bíceps barra reta", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" },
