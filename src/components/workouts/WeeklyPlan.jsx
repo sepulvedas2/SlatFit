@@ -429,7 +429,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         { name: "Remada Baixa Barra", sets: "3x", reps: "10-15", image_placeholder: "remada_baixa" },
         { name: "Puxada Alta Fechada", sets: "4x", reps: "10-12", image_placeholder: "puxada_fechada" },
         { name: "Bíceps na Barra", sets: "3x", reps: "10-12", image_placeholder: "biceps_barra" },
-        { name: "Bíceps Alternado com Peso", sets: "3x", reps: "10-12", image_placeholder: "biceps_alternado" },
+        { name: "Bíceps Alternado", sets: "3x", reps: "10-12", image_placeholder: "biceps_alternado" },
         { name: "Rosca Scott Máquina", sets: "3x", reps: "10-12", image_placeholder: "rosca_scott" }
       ]
     },
