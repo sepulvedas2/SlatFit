@@ -210,11 +210,7 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
         userProfile={userProfile}
         waterStreak={0}
       />
-      <WaterIntakeModal
-        isOpen={showIntakeModal}
-        onClose={() => setShowIntakeModal(false)}
-        onAdd={handleAddWater}
-      />
+
     </>
   );
 }
