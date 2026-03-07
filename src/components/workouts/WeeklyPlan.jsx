@@ -459,7 +459,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       exercises: [
         { name: "Agachamento a Fundo", sets: "4x", reps: "12-15", image_placeholder: "agachamento_fundo" },
         { name: "Avanço Parado", sets: "3x", reps: "10-12 (cada perna)", image_placeholder: "avanco_parado" },
-        { name: "Abdução de Quadril em Pé com Elástico", sets: "3x", reps: "15-20", image_placeholder: "abducao_pe" },
+        { name: "Adução na polia baixa", sets: "3x", reps: "15-20", image_placeholder: "abducao_pe" },
         { name: "Elevação Lateral de Coxa no Solo", sets: "3x", reps: "15-20", image_placeholder: "elevacao_lateral_solo" },
         { name: "Extensão de Quadril no Solo com Elástico", sets: "3x", reps: "15", image_placeholder: "extensao_quadril_elastico" },
         { name: "Elevação de Pelve no Solo", sets: "4x", reps: "12-15", image_placeholder: "elevacao_pelve" }
