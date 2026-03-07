@@ -96,7 +96,13 @@ export default function MyWorkouts({ userEmail }) {
     setEditingExercises([]);
   };
 
-  const groupedWorkouts = customWorkouts.reduce((acc, w) => {
+  // Separar treinos por origem
+  const aiWorkouts = customWorkouts.filter(w => w.source === "ai");
+  const manualWorkouts = customWorkouts.filter(w => w.source === "manual" || !w.source);
+
+  const activeWorkouts = activeTab === "ai" ? aiWorkouts : manualWorkouts;
+
+  const groupedWorkouts = activeWorkouts.reduce((acc, w) => {
     if (!acc[w.dia_semana]) acc[w.dia_semana] = [];
     acc[w.dia_semana].push(w);
     return acc;
