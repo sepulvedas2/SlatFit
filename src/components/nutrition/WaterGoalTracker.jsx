@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Droplets, Settings, Plus, Sparkles } from "lucide-react";
+import { Droplets, Settings, Sparkles } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
