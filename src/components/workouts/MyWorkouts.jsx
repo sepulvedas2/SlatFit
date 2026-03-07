@@ -62,6 +62,7 @@ export default function MyWorkouts({ userEmail }) {
     onSuccess: () => {
       queryClient.invalidateQueries(['customWorkouts']);
       queryClient.invalidateQueries(['customWorkoutExercises']);
+      toast.success("Treino excluído");
     },
   });
 
