@@ -149,7 +149,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         { name: "Leg press 45", sets: "3x", reps: "10-15", image_placeholder: "leg_press" },
         { name: "Cadeira extensora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_extensora" },
         { name: "Cadeira flexora", sets: "3x", reps: "10-12", image_placeholder: "cadeira_flexora" },
-        { name: "Agachamento sumo", sets: "3x", reps: "10-12", image_placeholder: "agachamento_sumo" },
+        { name: "Agachamento sumô", sets: "3x", reps: "10-12", image_placeholder: "agachamento_sumo" },
         { name: "Panturrilha no Leg Press Horizontal", sets: "3x", reps: "12-15", image_placeholder: "panturrilha" }
       ]
     },
