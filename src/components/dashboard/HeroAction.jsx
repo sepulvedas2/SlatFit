@@ -14,7 +14,7 @@ export default function HeroAction({ nextWorkout, allDone }) {
         </div>
         <Link to={createPageUrl("Workouts")} className="block">
           <Button className="w-full h-14 text-base font-bold rounded-2xl bg-green-500/20 border border-green-500/40 text-green-400 cursor-default" disabled>
-            <PartyPopper className="w-5 h-5 mr-2" />
+            <Star className="w-5 h-5 mr-2" />
             Semana Completa — Parabéns!
           </Button>
         </Link>
