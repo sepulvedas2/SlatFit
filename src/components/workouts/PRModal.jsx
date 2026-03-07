@@ -108,7 +108,7 @@ export default function PRModal({ isOpen, onClose, exercise, userEmail }) {
               </div>
 
               {/* Conteúdo com scroll */}
-              <div className="overflow-y-auto flex-1 px-5 pb-8 space-y-5">
+              <div className="overflow-y-auto flex-1 px-5 pb-10 space-y-4" style={{ WebkitOverflowScrolling: "touch" }}>
 
                 {/* Header */}
                 <div className="flex items-start justify-between pt-2">
