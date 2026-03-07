@@ -16,6 +16,7 @@ const dayLabels = {
 const days = ["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"];
 
 export default function MyWorkouts({ userEmail }) {
+  const [activeTab, setActiveTab] = useState("ai");
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [aiWizardOpen, setAiWizardOpen] = useState(false);
   const [prModalOpen, setPrModalOpen] = useState(false);
