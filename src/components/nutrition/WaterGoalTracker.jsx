@@ -218,6 +218,8 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
         onClose={() => setShowGoalModal(false)}
         currentGoal={goalAmount}
         onSave={(g) => updateGoalMutation.mutate(g)}
+        userProfile={userProfile}
+        waterStreak={0}
       />
       <WaterIntakeModal
         isOpen={showIntakeModal}
