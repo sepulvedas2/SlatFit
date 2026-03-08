@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function WorkoutAICoach({ profile, weekWorkouts, onStartWorkout }) {
   const [recommendation, setRecommendation] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     if (profile) {
