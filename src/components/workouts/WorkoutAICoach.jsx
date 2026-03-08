@@ -240,97 +240,102 @@ export default function WorkoutAICoach({ profile, weekWorkouts, onStartWorkout }
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="bg-gradient-to-br from-[#084734] to-[#063528] border-[#CEF17B]/20 p-6 mb-6 overflow-hidden relative">
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#CEF17B]/5 rounded-full blur-3xl" />
-        
-        <div className="relative">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-xl ${recommendation.bgColor} flex items-center justify-center`}>
-                <Icon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs mb-1">
-                  🧠 Personal Trainer IA
-                </Badge>
-                <h3 className="text-white font-bold text-xl">{recommendation.title}</h3>
-                <p className="text-[#CEF17B] text-sm">{recommendation.category}</p>
-              </div>
-            </div>
+      <Card className="bg-gradient-to-br from-[#084734] to-[#063528] border-[#CEF17B]/20 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#CEF17B]/5 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Header resumido — sempre visível */}
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="relative w-full p-4 flex items-center gap-3 text-left"
+        >
+          <div className={`w-10 h-10 rounded-xl ${recommendation.bgColor} flex items-center justify-center flex-shrink-0`}>
+            <Icon className="w-5 h-5 text-white" />
           </div>
-
-          {/* Motivo da escolha */}
-          <div className="bg-[#CEF17B]/10 rounded-lg p-3 mb-4 border border-[#CEF17B]/20">
-            <p className="text-xs text-[#CEF17B] font-semibold mb-1">💡 Por que este treino?</p>
-            <p className="text-white/90 text-sm">{recommendation.reason}</p>
-          </div>
-
-          {/* Explicação detalhada */}
-          <div className="mb-4">
-            <p className="text-white/80 text-sm leading-relaxed">{recommendation.explanation}</p>
-          </div>
-
-          {/* Detalhes do treino */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-              <p className="text-white/60 text-xs mb-1">Duração</p>
-              <p className="text-white font-semibold text-sm">{recommendation.duration}</p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-xs">🧠 Personal IA</Badge>
             </div>
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-              <p className="text-white/60 text-xs mb-1">Intensidade</p>
-              <p className="text-white font-semibold text-sm">{recommendation.intensity}</p>
-            </div>
+            <p className="text-white font-bold text-base leading-tight">{recommendation.title}</p>
+            <p className="text-[#CEEDB2] text-xs truncate">{recommendation.reason}</p>
           </div>
+          <div className="flex-shrink-0 text-[#CEF17B]">
+            {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          </div>
+        </button>
 
-          {recommendation.split && (
-            <div className="bg-white/5 rounded-lg p-3 mb-4 border border-white/10">
-              <p className="text-white/60 text-xs mb-1">Divisão do Treino</p>
-              <p className="text-white font-semibold text-sm">{recommendation.split}</p>
-            </div>
-          )}
-
-          {/* Benefícios */}
-          <div className="mb-4">
-            <p className="text-white font-semibold text-sm mb-2">✅ Benefícios Comprovados:</p>
-            <div className="space-y-1.5">
-              {recommendation.benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start gap-2">
-                  <div className="w-1 h-1 rounded-full bg-[#CEF17B] mt-1.5 flex-shrink-0" />
-                  <p className="text-white/80 text-xs leading-relaxed">{benefit}</p>
+        {/* Conteúdo expandido */}
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              key="content"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="relative px-4 pb-4 space-y-4">
+                {/* Motivo da escolha */}
+                <div className="bg-[#CEF17B]/10 rounded-lg p-3 border border-[#CEF17B]/20">
+                  <p className="text-xs text-[#CEF17B] font-semibold mb-1">💡 Por que este treino?</p>
+                  <p className="text-white/90 text-sm">{recommendation.explanation}</p>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Ajuste por biotipo */}
-          {recommendation.biotipo_adjustment && (
-            <div className="bg-[#CEF17B]/5 rounded-lg p-3 mb-4 border border-[#CEF17B]/10">
-              <p className="text-[#CEF17B] text-xs font-semibold mb-1">🧬 Ajuste para seu Biotipo</p>
-              <p className="text-white/70 text-xs">{recommendation.biotipo_adjustment}</p>
-            </div>
+                {/* Detalhes */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <p className="text-white/60 text-xs mb-1">Duração</p>
+                    <p className="text-white font-semibold text-sm">{recommendation.duration}</p>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <p className="text-white/60 text-xs mb-1">Intensidade</p>
+                    <p className="text-white font-semibold text-sm">{recommendation.intensity}</p>
+                  </div>
+                </div>
+
+                {recommendation.split && (
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <p className="text-white/60 text-xs mb-1">Divisão do Treino</p>
+                    <p className="text-white font-semibold text-sm">{recommendation.split}</p>
+                  </div>
+                )}
+
+                {/* Benefícios */}
+                <div>
+                  <p className="text-white font-semibold text-sm mb-2">✅ Benefícios Comprovados:</p>
+                  <div className="space-y-1.5">
+                    {recommendation.benefits.map((benefit, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <div className="w-1 h-1 rounded-full bg-[#CEF17B] mt-1.5 flex-shrink-0" />
+                        <p className="text-white/80 text-xs leading-relaxed">{benefit}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {recommendation.biotipo_adjustment && (
+                  <div className="bg-[#CEF17B]/5 rounded-lg p-3 border border-[#CEF17B]/10">
+                    <p className="text-[#CEF17B] text-xs font-semibold mb-1">🧬 Ajuste para seu Biotipo</p>
+                    <p className="text-white/70 text-xs">{recommendation.biotipo_adjustment}</p>
+                  </div>
+                )}
+
+                <div className="bg-gradient-to-r from-[#CEF17B]/20 to-transparent rounded-lg p-3 border-l-4 border-[#CEF17B]">
+                  <p className="text-white/60 text-xs mb-0.5">Foco Principal</p>
+                  <p className="text-white font-bold text-sm">{recommendation.focus}</p>
+                </div>
+
+                <Button
+                  onClick={() => onStartWorkout?.(recommendation.workout_type)}
+                  className="w-full bg-gradient-to-r from-[#CEF17B] to-[#CEEDB2] hover:from-[#CEEDB2] hover:to-[#CEF17B] text-[#084734] font-bold py-5 text-base shadow-lg"
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  Começar Treino Recomendado
+                </Button>
+              </div>
+            </motion.div>
           )}
-
-          {/* Foco */}
-          <div className="bg-gradient-to-r from-[#CEF17B]/20 to-transparent rounded-lg p-3 mb-4 border-l-4 border-[#CEF17B]">
-            <p className="text-white/60 text-xs mb-0.5">Foco Principal</p>
-            <p className="text-white font-bold text-sm">{recommendation.focus}</p>
-          </div>
-
-          {/* CTA Button */}
-          <Button
-            onClick={() => onStartWorkout?.(recommendation.workout_type)}
-            className="w-full bg-gradient-to-r from-[#CEF17B] to-[#CEEDB2] hover:from-[#CEEDB2] hover:to-[#CEF17B] text-[#084734] font-bold py-6 text-base shadow-lg"
-          >
-            <Zap className="w-5 h-5 mr-2" />
-            Começar Treino Recomendado
-          </Button>
-
-          <p className="text-center text-white/50 text-xs mt-3">
-            Treino personalizado baseado no seu perfil e objetivo
-          </p>
-        </div>
+        </AnimatePresence>
       </Card>
     </motion.div>
   );
