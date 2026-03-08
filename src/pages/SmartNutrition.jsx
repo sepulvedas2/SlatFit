@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WaterGoalTracker from "../components/nutrition/WaterGoalTracker";
 import MealGenerator from "../components/nutrition/MealGenerator";
-import NutritionChatButton from "../components/nutrition/NutritionChatButton";
+import SlatFitAssistant from "../components/chat/SlatFitAssistant";
 
 export default function SmartNutrition() {
   const [user, setUser] = useState(null);

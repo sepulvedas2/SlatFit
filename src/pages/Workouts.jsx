@@ -19,6 +19,7 @@ import MyWorkouts from "../components/workouts/MyWorkouts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TodayWorkout from "../components/dashboard/TodayWorkout";
 import WorkoutAICoach from "../components/workouts/WorkoutAICoach";
+import SlatFitAssistant from "../components/chat/SlatFitAssistant";
 
 export default function Workouts() {
   const [user, setUser] = useState(null);
