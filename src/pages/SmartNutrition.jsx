@@ -123,8 +123,8 @@ export default function SmartNutrition() {
 
       </div>
 
-      {/* Chat flutuante */}
-      <NutritionChatButton userProfile={userProfile} />
+      {/* Assistente SlatFit */}
+      <SlatFitAssistant user={user} userProfile={userProfile} context="nutrition" />
     </div>
   );
 }
