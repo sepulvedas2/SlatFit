@@ -16,7 +16,7 @@ import ExerciseBlock from "../components/workouts/ExerciseBlock";
 import WorkoutSummary from "../components/workouts/WorkoutSummary";
 import WeeklyPlan from "../components/workouts/WeeklyPlan";
 import MyWorkouts from "../components/workouts/MyWorkouts";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import TodayWorkout from "../components/dashboard/TodayWorkout";
 import WorkoutAICoach from "../components/workouts/WorkoutAICoach";
 import SlatFitAssistant from "../components/chat/SlatFitAssistant";
