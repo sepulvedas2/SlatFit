@@ -283,7 +283,8 @@ export default function Workouts() {
     ];
 
     return (
-      <div className="min-h-screen p-4 md:p-8">
+      <div className="min-h-screen p-4 md:p-8" style={{ position: "relative" }}>
+        <SlatFitAssistant user={user} userProfile={profile} context="workout" />
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
