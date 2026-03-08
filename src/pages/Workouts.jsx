@@ -282,84 +282,97 @@ export default function Workouts() {
       { number: 5, title: "Planilha 5", subtitle: "Feminino | Inferiores (ABC)" }
     ];
 
+    const weekDescriptions = {
+      1: "Treino base para iniciantes",
+      2: "Aumente a intensidade",
+      3: "Desafio de alto nível",
+      4: "Para atletas experientes",
+      5: "Foco em membros inferiores"
+    };
+
     return (
-      <div className="min-h-screen p-4 md:p-8" style={{ position: "relative" }}>
+      <div className="min-h-screen p-4 md:p-6" style={{ position: "relative" }}>
         <SlatFitAssistant user={user} userProfile={profile} context="workout" />
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
+        <div className="max-w-4xl mx-auto space-y-7">
+
+          {/* Header */}
+          <div className="flex items-start justify-between pt-2">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Treinos</h1>
-              <p className="text-[#CEEDB2]">
-                Treinos prontos ou crie os seus! 💪
-              </p>
+              <h1 className="text-3xl font-bold text-white leading-tight">Treinos</h1>
+              <p className="text-[#CEEDB2]/80 text-sm mt-1">Prontos ou crie os seus 💪</p>
             </div>
             <Link to={createPageUrl("WorkoutProgress")}>
-              <Button
-                className="font-bold text-white border-0"
-                style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", boxShadow: "0 4px 16px rgba(255,106,0,0.35)" }}
+              <button
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-[#CEF17B] transition-all active:scale-95"
+                style={{ background: "rgba(206,241,123,0.1)", border: "1px solid rgba(206,241,123,0.25)" }}
               >
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Meu Progresso
-              </Button>
+                <TrendingUp className="w-4 h-4" />
+                <span className="hidden sm:inline">Meu Progresso</span>
+              </button>
             </Link>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-[#FF6A00]/30">
-              <TabsTrigger
-                value="app-workouts"
-                className="data-[state=active]:text-white data-[state=active]:font-bold text-white/50 transition-all"
-                style={{ "--tw-ring-color": "transparent" }}
-                data-active={activeTab === "app-workouts"}
+          {/* Segmented Control */}
+          <div
+            className="flex p-1 rounded-2xl gap-1"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            {[
+              { value: "app-workouts", label: "Planilhas do App" },
+              { value: "my-workouts", label: "Meus Treinos" }
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.97]"
+                style={activeTab === tab.value
+                  ? { background: "linear-gradient(135deg, #FF6A00, #FF8C00)", color: "white", boxShadow: "0 2px 12px rgba(255,106,0,0.35)" }
+                  : { color: "rgba(255,255,255,0.45)" }
+                }
               >
-                <span
-                  className="px-2 py-1 rounded-lg transition-all"
-                  style={activeTab === "app-workouts" ? { background: "linear-gradient(135deg, #FF6A00, #FF8C00)", color: "white", padding: "4px 12px", borderRadius: "8px" } : {}}
-                >
-                  Planilhas do App
-                </span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="my-workouts"
-                className="data-[state=active]:text-white data-[state=active]:font-bold text-white/50 transition-all"
-              >
-                <span
-                  className="px-2 py-1 rounded-lg transition-all"
-                  style={activeTab === "my-workouts" ? { background: "linear-gradient(135deg, #FF6A00, #FF8C00)", color: "white", padding: "4px 12px", borderRadius: "8px" } : {}}
-                >
-                  Meus Treinos
-                </span>
-              </TabsTrigger>
-            </TabsList>
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-            <TabsContent value="app-workouts" className="space-y-5 mt-6">
+          {activeTab === "my-workouts" && (
+            <MyWorkouts userEmail={user?.email} />
+          )}
+
+          {activeTab === "app-workouts" && <div className="space-y-7">
 
           {/* 1. Planilha Selector */}
           <div>
-            <p className="text-[#CEEDB2] text-xs font-semibold uppercase tracking-wider mb-3 px-1">Escolha sua planilha</p>
+            <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3 px-0.5">Escolha sua planilha</p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {weekOptions.map((week) => (
-                <Card 
+                <motion.div
                   key={week.number}
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => setSelectedWeek(week.number)}
-                  className={`p-4 cursor-pointer transition-all hover:scale-[1.02] ${
-                    selectedWeek === week.number 
-                      ? 'glass-effect border-[#CEF17B] ring-2 ring-[#CEF17B]' 
-                      : 'glass-effect border-[#CEF17B]/20'
-                  }`}
+                  className="cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      selectedWeek === week.number ? 'bg-[#CEF17B]/30' : 'bg-[#CEF17B]/10'
-                    }`}>
-                      <span className="text-[#CEF17B] font-bold">{week.number}</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white text-sm">{week.title}</h3>
-                      <p className="text-xs text-[#CEEDB2]">{week.subtitle}</p>
+                  <div
+                    className="p-4 rounded-2xl transition-all duration-200"
+                    style={selectedWeek === week.number
+                      ? { background: "rgba(206,241,123,0.12)", border: "1.5px solid #CEF17B", boxShadow: "0 0 16px rgba(206,241,123,0.15)" }
+                      : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(206,241,123,0.15)" }
+                    }
+                  >
+                    <div className="flex flex-col gap-2.5">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                        selectedWeek === week.number ? 'bg-[#CEF17B]/25' : 'bg-white/8'
+                      }`} style={{ background: selectedWeek === week.number ? "rgba(206,241,123,0.2)" : "rgba(255,255,255,0.06)" }}>
+                        <span className="text-[#CEF17B] font-bold text-base">{week.number}</span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-white text-sm leading-tight">{week.title}</h3>
+                        <p className="text-xs text-[#CEF17B]/70 mt-0.5">{week.subtitle}</p>
+                        <p className="text-xs text-white/40 mt-1 leading-tight hidden md:block">{weekDescriptions[week.number]}</p>
+                      </div>
                     </div>
                   </div>
-                </Card>
+                </motion.div>
               ))}
             </div>
           </div>
