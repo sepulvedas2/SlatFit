@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Zap, Target, TrendingUp, Flame, Dumbbell, Activity } from "lucide-react";
-import { motion } from "framer-motion";
+import { Brain, Zap, Target, TrendingUp, Flame, Dumbbell, Activity, ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function WorkoutAICoach({ profile, weekWorkouts, onStartWorkout }) {
   const [recommendation, setRecommendation] = useState(null);
