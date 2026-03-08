@@ -426,7 +426,7 @@ export default function Workouts() {
         </div>
       </div>
       <SlatFitAssistant user={user} userProfile={profile} context="workout" />
-      </>
+    </div>
     );
   }
 
