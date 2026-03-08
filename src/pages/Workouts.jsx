@@ -428,18 +428,17 @@ export default function Workouts() {
             }}
           />
 
-          <Card className="glass-effect border-[#CEF17B]/20 p-4">
-            <p className="text-sm text-[#CEEDB2] text-center">
-              💡 Clique em cada dia para ver todos os exercícios detalhados
+          <div
+            className="rounded-2xl p-3 text-center"
+            style={{ background: "rgba(206,241,123,0.05)", border: "1px solid rgba(206,241,123,0.12)" }}
+          >
+            <p className="text-sm text-[#CEEDB2]/70">
+              💡 Toque em cada dia para ver os exercícios detalhados
             </p>
-          </Card>
-            </TabsContent>
+          </div>
 
+          </div>}
 
-            <TabsContent value="my-workouts" className="mt-6">
-              <MyWorkouts userEmail={user?.email} />
-            </TabsContent>
-          </Tabs>
         </div>
       </div>
     );
