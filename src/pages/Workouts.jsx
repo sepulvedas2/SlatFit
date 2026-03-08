@@ -425,7 +425,6 @@ export default function Workouts() {
           </Tabs>
         </div>
       </div>
-      <SlatFitAssistant user={user} userProfile={profile} context="workout" />
     );
   }
 
