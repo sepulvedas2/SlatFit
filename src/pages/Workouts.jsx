@@ -418,6 +418,7 @@ export default function Workouts() {
           </Card>
             </TabsContent>
 
+
             <TabsContent value="my-workouts" className="mt-6">
               <MyWorkouts userEmail={user?.email} />
             </TabsContent>
