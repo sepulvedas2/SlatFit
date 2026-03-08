@@ -332,56 +332,50 @@ export default function Workouts() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="app-workouts" className="space-y-6 mt-6">
+            <TabsContent value="app-workouts" className="space-y-5 mt-6">
 
-          {/* Agente de IA - Personal Trainer Inteligente */}
-          <WorkoutAICoach 
-            profile={profile}
-            weekWorkouts={weekWorkouts}
-            onStartWorkout={(workoutType) => {
-              if (workoutType === 'hiit' || workoutType?.includes('hiit')) {
-                setView('hiit');
-              } else {
-                // Para muscle splits, full body, etc - scroll até o plano semanal
-                setTimeout(() => {
-                  const weeklyPlanElement = document.getElementById('weekly-plan-section');
-                  if (weeklyPlanElement) {
-                    weeklyPlanElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 100);
-              }
-            }}
-          />
-
-          {/* Planilha Selector */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {weekOptions.map((week) => (
-              <Card 
-                key={week.number}
-                onClick={() => setSelectedWeek(week.number)}
-                className={`p-4 cursor-pointer transition-all hover:scale-[1.02] ${
-                  selectedWeek === week.number 
-                    ? 'glass-effect border-[#CEF17B] ring-2 ring-[#CEF17B]' 
-                    : 'glass-effect border-[#CEF17B]/20'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    selectedWeek === week.number ? 'bg-[#CEF17B]/30' : 'bg-[#CEF17B]/10'
-                  }`}>
-                    <span className="text-[#CEF17B] font-bold">{week.number}</span>
+          {/* 1. Planilha Selector */}
+          <div>
+            <p className="text-[#CEEDB2] text-xs font-semibold uppercase tracking-wider mb-3 px-1">Escolha sua planilha</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {weekOptions.map((week) => (
+                <Card 
+                  key={week.number}
+                  onClick={() => setSelectedWeek(week.number)}
+                  className={`p-4 cursor-pointer transition-all hover:scale-[1.02] ${
+                    selectedWeek === week.number 
+                      ? 'glass-effect border-[#CEF17B] ring-2 ring-[#CEF17B]' 
+                      : 'glass-effect border-[#CEF17B]/20'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      selectedWeek === week.number ? 'bg-[#CEF17B]/30' : 'bg-[#CEF17B]/10'
+                    }`}>
+                      <span className="text-[#CEF17B] font-bold">{week.number}</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white text-sm">{week.title}</h3>
+                      <p className="text-xs text-[#CEEDB2]">{week.subtitle}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-white">{week.title}</h3>
-                    <p className="text-xs text-[#CEEDB2]">{week.subtitle}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
 
-          {/* HIIT Quick Access */}
-          <Card className="glass-effect border-[#CEF17B]/20 p-4">
+          {/* 2. Treinos da Semana */}
+          <div id="weekly-plan-section">
+            <WeeklyPlan 
+              weekNumber={selectedWeek}
+              dailyWorkouts={dailyWorkouts}
+              onStartWorkout={handleStartWorkout}
+              onCompleteDay={handleCompleteDay}
+            />
+          </div>
+
+          {/* 3. HIIT Quick Access */}
+          <Card className="glass-effect border-orange-500/30 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
@@ -403,14 +397,23 @@ export default function Workouts() {
             </div>
           </Card>
 
-          <div id="weekly-plan-section">
-            <WeeklyPlan 
-              weekNumber={selectedWeek}
-              dailyWorkouts={dailyWorkouts}
-              onStartWorkout={handleStartWorkout}
-              onCompleteDay={handleCompleteDay}
-            />
-          </div>
+          {/* 4. Personal Trainer IA (accordion) */}
+          <WorkoutAICoach 
+            profile={profile}
+            weekWorkouts={weekWorkouts}
+            onStartWorkout={(workoutType) => {
+              if (workoutType === 'hiit' || workoutType?.includes('hiit')) {
+                setView('hiit');
+              } else {
+                setTimeout(() => {
+                  const weeklyPlanElement = document.getElementById('weekly-plan-section');
+                  if (weeklyPlanElement) {
+                    weeklyPlanElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }
+            }}
+          />
 
           <Card className="glass-effect border-[#CEF17B]/20 p-4">
             <p className="text-sm text-[#CEEDB2] text-center">
