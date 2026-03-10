@@ -3,43 +3,49 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_KEY");
-
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { action, table, query, data, bucket, path, fileBase64, mimeType } = await req.json();
+    const now = new Date().toISOString();
 
     // ── DATABASE ──────────────────────────────────────────────────────────────
     if (action === 'select') {
       let q = supabase.from(table).select(query?.select || '*');
       if (query?.filter) {
         for (const [col, val] of Object.entries(query.filter)) {
-          q = q.eq(col, val);
+          if (val === null) q = q.is(col, null);
+          else q = q.eq(col, val);
         }
       }
+      if (query?.order) q = q.order(query.order.column, { ascending: query.order.ascending ?? false });
       if (query?.limit) q = q.limit(query.limit);
-      if (query?.order) q = q.order(query.order.column, { ascending: query.order.ascending ?? true });
       const { data: rows, error } = await q;
       if (error) return Response.json({ error: error.message }, { status: 400 });
       return Response.json({ data: rows });
     }
 
     if (action === 'insert') {
-      const { data: inserted, error } = await supabase.from(table).insert(data).select();
+      const addMeta = (item) => ({
+        ...item,
+        created_date: item.created_date || now,
+        updated_date: now,
+        created_by: item.created_by || user.email,
+      });
+      const dataToInsert = Array.isArray(data) ? data.map(addMeta) : addMeta(data);
+      const { data: inserted, error } = await supabase.from(table).insert(dataToInsert).select();
       if (error) return Response.json({ error: error.message }, { status: 400 });
       return Response.json({ data: inserted });
     }
 
     if (action === 'update') {
-      let q = supabase.from(table).update(data);
+      const dataToUpdate = { ...data, updated_date: now };
+      let q = supabase.from(table).update(dataToUpdate);
       if (query?.filter) {
         for (const [col, val] of Object.entries(query.filter)) {
           q = q.eq(col, val);
@@ -66,8 +72,7 @@ Deno.serve(async (req) => {
     if (action === 'storage_upload') {
       const bytes = Uint8Array.from(atob(fileBase64), c => c.charCodeAt(0));
       const { data: uploaded, error } = await supabase.storage
-        .from(bucket)
-        .upload(path, bytes, { contentType: mimeType || 'application/octet-stream', upsert: true });
+        .from(bucket).upload(path, bytes, { contentType: mimeType || 'application/octet-stream', upsert: true });
       if (error) return Response.json({ error: error.message }, { status: 400 });
       const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path);
       return Response.json({ data: uploaded, publicUrl });
@@ -91,7 +96,6 @@ Deno.serve(async (req) => {
     }
 
     return Response.json({ error: 'Action not found' }, { status: 400 });
-
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
