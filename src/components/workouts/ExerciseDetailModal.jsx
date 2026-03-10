@@ -34,7 +34,6 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
     category: exercise?.category || "cardio"
   });
   
-  const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
 
   // Check if exercise exists in DB when modal opens
