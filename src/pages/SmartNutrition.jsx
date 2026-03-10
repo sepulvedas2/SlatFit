@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/components/supabaseApi";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, BookOpen, ChevronRight, Utensils } from "lucide-react";
 import { format } from "date-fns";

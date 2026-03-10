@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Droplets, Settings, Sparkles } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/components/supabaseApi";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";

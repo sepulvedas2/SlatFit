@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/components/supabaseApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Play, Pause, Square, MapPin, Timer, Zap, 

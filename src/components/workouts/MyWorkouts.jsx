@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dumbbell, Trophy, Trash2, ChevronDown, Edit, Sparkles, Brain, Calendar, RotateCcw, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

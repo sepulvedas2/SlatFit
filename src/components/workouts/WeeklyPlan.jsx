@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Image, Upload, Loader2, X, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/components/supabaseApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import PRModal from "./PRModal";
