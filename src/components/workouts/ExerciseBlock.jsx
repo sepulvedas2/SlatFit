@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, CheckCircle, ChevronRight, Trophy } from "lucide-react";
 import ExerciseDetailModal from "./ExerciseDetailModal";
+import { getExerciseImage } from "./exerciseImages";
 import PRModal from "./PRModal";
 
 export default function ExerciseBlock({ block, exercises = [] }) {
