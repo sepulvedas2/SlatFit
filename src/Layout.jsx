@@ -1,12 +1,43 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Dumbbell, UtensilsCrossed, User, ScanLine, CheckSquare } from "lucide-react";
 import { ThemeProvider, useTheme } from "@/components/ThemeContext";
+import { getStoredUser, clearUser } from "@/components/auth";
+import LoginScreen from "@/components/auth/LoginScreen";
 
 function AppLayout({ children, currentPageName }) {
   const location = useLocation();
   const { isDark } = useTheme();
+  const [authUser, setAuthUser] = useState(undefined); // undefined = loading
+
+  useEffect(() => {
+    const user = getStoredUser();
+    setAuthUser(user || null);
+  }, []);
+
+  const handleLogin = (user) => {
+    setAuthUser(user);
+  };
+
+  const handleLogout = () => {
+    clearUser();
+    setAuthUser(null);
+  };
+
+  // Loading
+  if (authUser === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0F1C1B" }}>
+        <div className="w-10 h-10 border-2 border-[#CEF17B] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Não autenticado
+  if (authUser === null) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
 
   const navItems = [
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
@@ -18,7 +49,6 @@ function AppLayout({ children, currentPageName }) {
   ];
 
   const isActive = (path) => location.pathname === path;
-
   const appBg = isDark ? "#0F1C1B" : "#084734";
   const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "rgba(8, 71, 52, 0.97)";
 
@@ -26,30 +56,24 @@ function AppLayout({ children, currentPageName }) {
     <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
-        
         * { font-family: 'Inter', sans-serif; }
         h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; font-weight: 700; }
-        
         .gradient-primary { background: linear-gradient(135deg, #084734, #CEF17B); }
-        
         .gradient-card {
           background: linear-gradient(180deg, #CEEDB2, #CEF17B);
           backdrop-filter: blur(20px);
           border: 1px solid rgba(206, 241, 123, 0.2);
         }
-        
         .glass-effect {
           background: rgba(206, 237, 178, 0.1);
           backdrop-filter: blur(20px);
           border: 1px solid rgba(206, 241, 123, 0.2);
         }
-
         [data-theme="dark"] .glass-effect {
           background: rgba(22, 42, 40, 0.8);
           backdrop-filter: blur(20px);
           border: 1px solid rgba(206, 241, 123, 0.15);
         }
-
         .bottom-navigation {
           position: fixed !important;
           bottom: 0 !important;
@@ -61,17 +85,13 @@ function AppLayout({ children, currentPageName }) {
       `}</style>
 
       <main className="pb-28 min-h-screen">
-        {children}
+        {React.cloneElement(children, { onLogout: handleLogout })}
       </main>
 
       <nav
         className="bottom-navigation"
         style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 99999,
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99999,
           backgroundColor: navBg,
           borderTop: '1px solid rgba(206, 241, 123, 0.2)',
           backdropFilter: 'blur(20px)',
@@ -89,16 +109,10 @@ function AppLayout({ children, currentPageName }) {
                 key={item.name}
                 to={item.path}
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '4px',
-                  flex: 1,
-                  padding: '6px 4px',
-                  borderRadius: '12px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  gap: '4px', flex: 1, padding: '6px 4px', borderRadius: '12px',
                   backgroundColor: active ? 'rgba(206, 241, 123, 0.15)' : 'transparent',
-                  textDecoration: 'none',
-                  transition: 'background 0.2s',
+                  textDecoration: 'none', transition: 'background 0.2s',
                 }}
               >
                 <Icon style={{ width: '24px', height: '24px', color: active ? '#CEF17B' : 'rgba(255,255,255,0.6)' }} />
