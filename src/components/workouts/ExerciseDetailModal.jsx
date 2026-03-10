@@ -42,7 +42,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
       if (isOpen && exercise) {
         // First, check if this exercise already exists in DB by name
         try {
-          const existingExercises = await base44.entities.Exercise.filter({ name: exercise.name });
+          const existingExercises = await base44.entities.Exercise.filter({ name: exercise.name }, '-created_date', 10);
           if (existingExercises && existingExercises.length > 0) {
             const dbExercise = existingExercises[0];
             setCurrentExercise(dbExercise);
