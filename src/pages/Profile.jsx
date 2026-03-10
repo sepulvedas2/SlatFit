@@ -268,6 +268,20 @@ export default function Profile({ onLogout }) {
               <Pencil className="w-5 h-5 text-[#A0B5B2]" />
               <span className="text-white text-sm">Editar Dados</span>
             </button>
+
+            <div style={{ height: '1px', backgroundColor: 'rgba(206,241,123,0.1)' }} />
+
+            <button
+              onClick={() => {
+                clearUser();
+                if (onLogout) onLogout();
+                else window.location.reload();
+              }}
+              className="w-full flex items-center gap-3 py-3 text-left"
+            >
+              <LogOut className="w-5 h-5 text-red-400" />
+              <span className="text-red-400 text-sm">Sair da Conta</span>
+            </button>
           </div>
         </motion.div>
 
