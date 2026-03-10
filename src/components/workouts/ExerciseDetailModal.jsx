@@ -206,84 +206,20 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
             </Alert>
           )}
           
-          {/* Image Section - Hidden for HIIT exercises */}
-          {!isHIIT && (
-            <div className="space-y-3">
-              <Label className="text-white">Imagem Demonstrativa (300x400px)</Label>
-              
-              {formData.image_url ? (
-                <div className="relative w-full aspect-[3/4] max-w-[300px] mx-auto rounded-lg overflow-hidden border-2 border-[#CEF17B]/30">
-                  <img
-                    src={formData.image_url}
-                    alt={formData.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {isAdmin && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        className="bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90"
-                      >
-                        {uploading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Enviando...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="w-4 h-4 mr-2" />
-                            Trocar Imagem
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div 
-                  className="w-full aspect-[3/4] max-w-[300px] mx-auto rounded-lg border-2 border-dashed border-[#CEF17B]/30 flex flex-col items-center justify-center bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
-                  onClick={() => isAdmin && fileInputRef.current?.click()}
-                >
-                  <ImageIcon className="w-12 h-12 text-white/40 mb-2" />
-                  <p className="text-white/60 text-sm text-center px-4">
-                    {isAdmin ? "Clique para adicionar uma imagem" : "Sem imagem disponível"}
-                  </p>
-                  <p className="text-white/40 text-xs mt-1">Recomendado: 300x400px</p>
-                  {isAdmin && (
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fileInputRef.current?.click();
-                      }}
-                      disabled={uploading}
-                      className="mt-4 bg-[#CEF17B] text-[#084734] hover:bg-[#CEF17B]/90"
-                    >
-                      {uploading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Enviando...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Selecionar Imagem
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              )}
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e.target.files[0])}
-                className="hidden"
+          {/* Image Section - Native image from code */}
+          <div className="space-y-3">
+            <div className="relative w-full aspect-[3/4] max-w-[280px] mx-auto rounded-xl overflow-hidden border-2 border-[#CEF17B]/30">
+              <img
+                src={formData.image_url || getExerciseImage(formData.name)}
+                alt={formData.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = getExerciseImage(formData.name);
+                }}
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
-          )}
+          </div>
 
           {/* Exercise Info */}
           <div className="space-y-4">
