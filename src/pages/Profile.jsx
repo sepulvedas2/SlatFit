@@ -45,7 +45,7 @@ function imcLabel(imc) {
   return "Obesidade";
 }
 
-export default function Profile() {
+export default function Profile({ onLogout }) {
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});

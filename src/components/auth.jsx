@@ -30,8 +30,7 @@ export function getStoredToken() {
   }
 }
 
-// Substitui base44.auth.me() pelo usuário do Supabase salvo no localStorage.
-// Isso permite que todas as páginas existentes funcionem sem alteração.
+// Sobrescreve base44.auth.me() para usar o usuário do Supabase salvo no localStorage
 base44.auth.me = async () => {
   const user = getStoredUser();
   if (!user) throw new Error('Not authenticated');
