@@ -11,8 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { 
-  Upload, X, Loader2, Image as ImageIcon, 
-  Info, Zap, Target, Check
+  X, Info, Zap, Target, Check, Loader2
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
