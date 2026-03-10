@@ -18,6 +18,8 @@ import { format } from "date-fns";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { motion } from "framer-motion";
 import { useTheme } from "@/components/ThemeContext";
+import { clearUser } from "@/components/auth";
+import { LogOut } from "lucide-react";
 
 const GOAL_META = {
   weight_loss:  { label: "Emagrecimento",   emoji: "🔥", phrase: "Cada treino te aproxima da melhor versão de você!", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
