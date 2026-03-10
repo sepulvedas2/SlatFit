@@ -77,10 +77,10 @@ export default function Workouts() {
     initialData: [],
   });
 
-  // Fetch all exercises from database
+  // Fetch all exercises from base44 entities (where images are stored)
   const { data: exercises = [] } = useQuery({
     queryKey: ['exercises'],
-    queryFn: () => db.Exercise.list(),
+    queryFn: () => base44.entities.Exercise.list(),
     initialData: [],
   });
 
