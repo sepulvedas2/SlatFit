@@ -51,7 +51,7 @@ export default function FoodScanner() {
   useEffect(() => {
     base44.auth.me().then(async (u) => {
       setUser(u);
-      const profiles = await base44.entities.UserProfile.filter({ user_email: u.email });
+      const profiles = await db.UserProfile.filter({ user_email: u.email });
       setUserProfile(profiles[0] || null);
     }).catch(() => {});
   }, []);
@@ -61,7 +61,7 @@ export default function FoodScanner() {
 
   const { data: weekFoods = [] } = useQuery({
     queryKey: ["weekFoods", user?.email, weekStart],
-    queryFn: () => base44.entities.FoodLog.filter({ user_email: user.email }),
+    queryFn: () => db.FoodLog.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -130,7 +130,7 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
 
   const saveFood = async (data) => {
     if (!user) return;
-    await base44.entities.FoodLog.create({
+    await db.FoodLog.create({
       user_email: user.email,
       food_name: data.food_name,
       meal_type: selectedMealType,

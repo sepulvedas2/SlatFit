@@ -60,7 +60,7 @@ export default function Profile() {
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
-      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      const profiles = await db.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
     },
     enabled: !!user?.email,
@@ -69,7 +69,7 @@ export default function Profile() {
 
   const { data: progressPhotos = [] } = useQuery({
     queryKey: ['progressPhotos', user?.email],
-    queryFn: () => base44.entities.ProgressPhoto.filter({ user_email: user.email }),
+    queryFn: () => db.ProgressPhoto.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -91,8 +91,8 @@ export default function Profile() {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
-      if (profile) return base44.entities.UserProfile.update(profile.id, data);
-      return base44.entities.UserProfile.create(data);
+      if (profile) return db.UserProfile.update(profile.id, data);
+      return db.UserProfile.create(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });

@@ -32,7 +32,7 @@ export default function WorkoutProgress() {
 
   const { data: weeklyProgress } = useQuery({
     queryKey: ['weeklyProgress', user?.email],
-    queryFn: () => base44.entities.WeeklyProgress.filter({ 
+    queryFn: () => db.WeeklyProgress.filter({ 
       user_email: user.email,
       current_week: true 
     }),
@@ -42,7 +42,7 @@ export default function WorkoutProgress() {
 
   const { data: dailyWorkouts } = useQuery({
     queryKey: ['dailyWorkouts', user?.email],
-    queryFn: () => base44.entities.DailyWorkout.filter({ user_email: user.email }),
+    queryFn: () => db.DailyWorkout.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -50,7 +50,7 @@ export default function WorkoutProgress() {
   // Fetch workout logs for detailed stats
   const { data: workoutLogs = [] } = useQuery({
     queryKey: ['workoutLogs', user?.email],
-    queryFn: () => base44.entities.WorkoutLog.filter({ user_email: user.email }),
+    queryFn: () => db.WorkoutLog.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });

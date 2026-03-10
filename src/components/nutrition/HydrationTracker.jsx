@@ -26,7 +26,7 @@ export default function HydrationTracker({ userEmail, today }) {
     queryKey: ['nutritionData', userEmail, today],
     queryFn: async () => {
       if (!userEmail) return null;
-      const data = await base44.entities.NutritionData.filter({
+      const data = await db.NutritionData.filter({
         user_email: userEmail,
         log_date: today
       });
@@ -39,7 +39,7 @@ export default function HydrationTracker({ userEmail, today }) {
     queryKey: ['nutritionData', userEmail, yesterday],
     queryFn: async () => {
       if (!userEmail) return null;
-      const data = await base44.entities.NutritionData.filter({
+      const data = await db.NutritionData.filter({
         user_email: userEmail,
         log_date: yesterday
       });
@@ -70,12 +70,12 @@ export default function HydrationTracker({ userEmail, today }) {
       const goalReached = newIntake >= waterGoal;
       
       if (nutritionData) {
-        return base44.entities.NutritionData.update(nutritionData.id, {
+        return db.NutritionData.update(nutritionData.id, {
           water_intake_ml: newIntake,
           water_goal_reached: goalReached
         });
       } else {
-        return base44.entities.NutritionData.create({
+        return db.NutritionData.create({
           user_email: userEmail,
           log_date: today,
           water_intake_ml: newIntake,
@@ -96,11 +96,11 @@ export default function HydrationTracker({ userEmail, today }) {
       if (!userEmail) throw new Error("User email is required");
       
       if (nutritionData) {
-        return base44.entities.NutritionData.update(nutritionData.id, {
+        return db.NutritionData.update(nutritionData.id, {
           water_goal_ml: newGoal
         });
       } else {
-        return base44.entities.NutritionData.create({
+        return db.NutritionData.create({
           user_email: userEmail,
           log_date: today,
           water_goal_ml: newGoal,

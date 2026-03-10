@@ -33,7 +33,7 @@ export default function Agenda() {
     queryKey: ['agendaTasks', user?.email, formattedDate],
     queryFn: async () => {
       if (!user?.email) return [];
-      return base44.entities.AgendaTask.filter({
+      return db.AgendaTask.filter({
         user_email: user.email,
         task_date: formattedDate
       });
@@ -45,7 +45,7 @@ export default function Agenda() {
     queryKey: ['weekAgendaTasks', user?.email, format(weekStart, 'yyyy-MM-dd')],
     queryFn: async () => {
       if (!user?.email) return [];
-      const allTasks = await base44.entities.AgendaTask.filter({
+      const allTasks = await db.AgendaTask.filter({
         user_email: user.email
       });
       // Filter tasks for the current week
@@ -59,7 +59,7 @@ export default function Agenda() {
 
   const addTaskMutation = useMutation({
     mutationFn: async (taskData) => {
-      return base44.entities.AgendaTask.create({
+      return db.AgendaTask.create({
         user_email: user.email,
         task_date: formattedDate,
         task_time: taskData.time || "00:00",
@@ -75,7 +75,7 @@ export default function Agenda() {
 
   const completeTaskMutation = useMutation({
     mutationFn: async (taskId) => {
-      return base44.entities.AgendaTask.update(taskId, {
+      return db.AgendaTask.update(taskId, {
         is_completed: true,
         completed_at: new Date().toISOString()
       });
@@ -88,7 +88,7 @@ export default function Agenda() {
 
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId) => {
-      return base44.entities.AgendaTask.delete(taskId);
+      return db.AgendaTask.delete(taskId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['agendaTasks']);

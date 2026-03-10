@@ -14,13 +14,13 @@ export default function ActivityFeed({ userCity, limit = 20 }) {
     queryKey: ['activityFeed', userCity],
     queryFn: async () => {
       // Get all activities from the city
-      const allActivities = await base44.entities.RunningActivity.list('-activity_date', limit);
+      const allActivities = await db.RunningActivity.list('-activity_date', limit);
       
       // Get user profiles to filter by city
       const userEmails = [...new Set(allActivities.map(a => a.user_email))];
       const profiles = await Promise.all(
         userEmails.map(email => 
-          base44.entities.UserProfile.filter({ user_email: email })
+          db.UserProfile.filter({ user_email: email })
             .then(p => p[0])
             .catch(() => null)
         )

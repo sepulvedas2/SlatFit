@@ -34,7 +34,7 @@ export default function Running() {
     queryKey: ['runningActivities', user?.email],
     queryFn: async () => {
       if (!user?.email) return [];
-      const activities = await base44.entities.RunningActivity.filter({ 
+      const activities = await db.RunningActivity.filter({ 
         user_email: user.email 
       }, '-activity_date', 10);
       return activities;
@@ -47,7 +47,7 @@ export default function Running() {
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
       if (!user?.email) return null;
-      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      const profiles = await db.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
     },
     enabled: !!user?.email,

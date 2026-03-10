@@ -49,12 +49,12 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
   const updateWaterMutation = useMutation({
     mutationFn: async (newIntake) => {
       if (nutritionData?.id) {
-        return base44.entities.NutritionData.update(nutritionData.id, {
+        return db.NutritionData.update(nutritionData.id, {
           water_intake_ml: newIntake,
           water_goal_reached: newIntake >= goalAmount,
         });
       }
-      return base44.entities.NutritionData.create({
+      return db.NutritionData.create({
         user_email: userEmail,
         log_date: today,
         water_intake_ml: newIntake,
@@ -68,9 +68,9 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
   const updateGoalMutation = useMutation({
     mutationFn: async (newGoal) => {
       if (nutritionData?.id) {
-        return base44.entities.NutritionData.update(nutritionData.id, { water_goal_ml: newGoal });
+        return db.NutritionData.update(nutritionData.id, { water_goal_ml: newGoal });
       }
-      return base44.entities.NutritionData.create({
+      return db.NutritionData.create({
         user_email: userEmail,
         log_date: today,
         water_goal_ml: newGoal,
@@ -85,9 +85,9 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
 
   const awardPointsMutation = useMutation({
     mutationFn: async () => {
-      const points = await base44.entities.UserPoints.filter({ user_email: userEmail });
+      const points = await db.UserPoints.filter({ user_email: userEmail });
       if (points[0]) {
-        return base44.entities.UserPoints.update(points[0].id, {
+        return db.UserPoints.update(points[0].id, {
           total_points: points[0].total_points + 20,
           xp_current: points[0].xp_current + 20,
         });

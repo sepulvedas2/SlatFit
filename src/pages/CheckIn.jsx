@@ -40,7 +40,7 @@ export default function CheckIn() {
   const { data: todayCheckIn } = useQuery({
     queryKey: ['checkIn', user?.email, today],
     queryFn: async () => {
-      const checkIns = await base44.entities.DailyCheckIn.filter({
+      const checkIns = await db.DailyCheckIn.filter({
         user_email: user.email,
         check_in_date: today
       });
@@ -93,12 +93,12 @@ export default function CheckIn() {
     
     try {
       if (todayCheckIn) {
-        await base44.entities.DailyCheckIn.update(todayCheckIn.id, {
+        await db.DailyCheckIn.update(todayCheckIn.id, {
           ...checkInData,
           ai_recommendation: recommendation
         });
       } else {
-        await base44.entities.DailyCheckIn.create({
+        await db.DailyCheckIn.create({
           user_email: user.email,
           check_in_date: today,
           ...checkInData,
@@ -107,14 +107,14 @@ export default function CheckIn() {
       }
       
       // Award points for daily check-in
-      const pointsData = await base44.entities.UserPoints.filter({ user_email: user.email });
+      const pointsData = await db.UserPoints.filter({ user_email: user.email });
       if (pointsData[0]) {
-        await base44.entities.UserPoints.update(pointsData[0].id, {
+        await db.UserPoints.update(pointsData[0].id, {
           total_points: (pointsData[0].total_points || 0) + 10,
           xp_current: (pointsData[0].xp_current || 0) + 10
         });
       } else {
-        await base44.entities.UserPoints.create({
+        await db.UserPoints.create({
           user_email: user.email,
           total_points: 10,
           xp_current: 10

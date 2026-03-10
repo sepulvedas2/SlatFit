@@ -16,7 +16,7 @@ export default function RunningChallenges({ userEmail, onBack }) {
     queryKey: ['runningChallenges', userEmail],
     queryFn: async () => {
       if (!userEmail) return [];
-      return base44.entities.RunningChallenge.filter({ 
+      return db.RunningChallenge.filter({ 
         user_email: userEmail 
       }, '-start_date');
     },
@@ -28,7 +28,7 @@ export default function RunningChallenges({ userEmail, onBack }) {
     queryKey: ['runningActivities', userEmail],
     queryFn: async () => {
       if (!userEmail) return [];
-      return base44.entities.RunningActivity.filter({ 
+      return db.RunningActivity.filter({ 
         user_email: userEmail 
       }, '-activity_date', 30);
     },
@@ -38,7 +38,7 @@ export default function RunningChallenges({ userEmail, onBack }) {
 
   const createChallengeMutation = useMutation({
     mutationFn: async (challengeData) => {
-      return base44.entities.RunningChallenge.create(challengeData);
+      return db.RunningChallenge.create(challengeData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['runningChallenges']);

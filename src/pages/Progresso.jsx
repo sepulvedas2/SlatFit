@@ -51,7 +51,7 @@ export default function Progresso() {
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
-      const p = await base44.entities.UserProfile.filter({ user_email: user.email });
+      const p = await db.UserProfile.filter({ user_email: user.email });
       return p[0] || null;
     },
     enabled: !!user?.email,
@@ -60,7 +60,7 @@ export default function Progresso() {
   const { data: userPoints, refetch: refetchPoints } = useQuery({
     queryKey: ['userPoints', user?.email],
     queryFn: async () => {
-      const pts = await base44.entities.UserPoints.filter({ user_email: user.email });
+      const pts = await db.UserPoints.filter({ user_email: user.email });
       return pts[0] || null;
     },
     enabled: !!user?.email,
@@ -68,21 +68,21 @@ export default function Progresso() {
 
   const { data: userChallenges = [], refetch: refetchChallenges } = useQuery({
     queryKey: ['userChallenges', user?.email],
-    queryFn: () => base44.entities.UserChallenge.filter({ user_email: user.email }),
+    queryFn: () => db.UserChallenge.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
 
   const { data: achievements = [] } = useQuery({
     queryKey: ['achievements', user?.email],
-    queryFn: () => base44.entities.Achievement.filter({ user_email: user.email }),
+    queryFn: () => db.Achievement.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
 
   const { data: allWorkoutLogs = [] } = useQuery({
     queryKey: ['allWorkoutLogs', user?.email],
-    queryFn: () => base44.entities.WorkoutLog.filter({ user_email: user.email }),
+    queryFn: () => db.WorkoutLog.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -90,7 +90,7 @@ export default function Progresso() {
   const { data: weekNutrition = [] } = useQuery({
     queryKey: ['weekNutrition', user?.email, weekStart],
     queryFn: async () => {
-      const data = await base44.entities.NutritionData.filter({ user_email: user.email });
+      const data = await db.NutritionData.filter({ user_email: user.email });
       return data.filter(d => d.log_date >= weekStart);
     },
     enabled: !!user?.email,
@@ -141,7 +141,7 @@ export default function Progresso() {
       alert("Você já tem 3 desafios ativos. Conclua um antes de iniciar outro.");
       return;
     }
-    await base44.entities.UserChallenge.create({
+    await db.UserChallenge.create({
       user_email: user.email,
       challenge_id: challenge.id,
       challenge_title: challenge.title,
@@ -161,7 +161,7 @@ export default function Progresso() {
     const prevRank = getRankByXP(totalXP);
 
     // Complete the challenge
-    await base44.entities.UserChallenge.update(uc.id, {
+    await db.UserChallenge.update(uc.id, {
       status: "completed",
       points_earned: challenge.xp,
     });
@@ -169,14 +169,14 @@ export default function Progresso() {
     // Add XP to UserPoints
     if (userPoints) {
       const newTotal = totalXP + challenge.xp;
-      await base44.entities.UserPoints.update(userPoints.id, { total_points: newTotal });
+      await db.UserPoints.update(userPoints.id, { total_points: newTotal });
 
       const newRank = getRankByXP(newTotal);
       if (newRank.key !== prevRank.key) {
         setLevelUpRank(newRank);
       }
     } else {
-      await base44.entities.UserPoints.create({
+      await db.UserPoints.create({
         user_email: user.email,
         total_points: challenge.xp,
         rank: currentRank.key,

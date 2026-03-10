@@ -14,7 +14,7 @@ export default function RunningLeaderboard({ userEmail, userCity }) {
     queryKey: ['cityLeaderboard', userCity, period],
     queryFn: async () => {
       if (!userCity) return [];
-      const leaders = await base44.entities.CityLeaderboard.filter({ city: userCity });
+      const leaders = await db.CityLeaderboard.filter({ city: userCity });
       
       // Sort by appropriate metric
       const sorted = leaders.sort((a, b) => {

@@ -15,7 +15,7 @@ export default function RouteComparison({ userEmail }) {
     queryKey: ['savedRoutes', userEmail],
     queryFn: async () => {
       if (!userEmail) return [];
-      return base44.entities.SavedRoute.filter({ user_email: userEmail }, '-times_completed');
+      return db.SavedRoute.filter({ user_email: userEmail }, '-times_completed');
     },
     enabled: !!userEmail,
     initialData: [],
@@ -25,7 +25,7 @@ export default function RouteComparison({ userEmail }) {
     queryKey: ['routeActivities', selectedRoute?.id],
     queryFn: async () => {
       if (!selectedRoute) return [];
-      const activities = await base44.entities.RunningActivity.filter({ user_email: userEmail });
+      const activities = await db.RunningActivity.filter({ user_email: userEmail });
       return activities.filter(a => selectedRoute.activity_ids?.includes(a.id));
     },
     enabled: !!selectedRoute,

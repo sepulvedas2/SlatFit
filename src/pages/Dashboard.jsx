@@ -123,7 +123,7 @@ export default function Dashboard() {
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
-      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      const profiles = await db.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
     },
     enabled: !!user?.email,
@@ -134,7 +134,7 @@ export default function Dashboard() {
 
   const { data: todayFoods = [] } = useQuery({
     queryKey: ['todayFoods', user?.email, today],
-    queryFn: () => base44.entities.FoodLog.filter({ user_email: user.email, log_date: today }),
+    queryFn: () => db.FoodLog.filter({ user_email: user.email, log_date: today }),
     enabled: !!user?.email && !!profile,
     initialData: [],
     staleTime: 2 * 60 * 1000,
@@ -142,7 +142,7 @@ export default function Dashboard() {
 
   const { data: todayWorkouts = [] } = useQuery({
     queryKey: ['todayWorkouts', user?.email, today],
-    queryFn: () => base44.entities.WorkoutLog.filter({ user_email: user.email, completed_date: today }),
+    queryFn: () => db.WorkoutLog.filter({ user_email: user.email, completed_date: today }),
     enabled: !!user?.email && !!profile,
     initialData: [],
     staleTime: 2 * 60 * 1000,
@@ -151,7 +151,7 @@ export default function Dashboard() {
   const { data: nutritionData } = useQuery({
     queryKey: ['nutritionData', user?.email, today],
     queryFn: async () => {
-      const data = await base44.entities.NutritionData.filter({ user_email: user.email, log_date: today });
+      const data = await db.NutritionData.filter({ user_email: user.email, log_date: today });
       return data[0] || null;
     },
     enabled: !!user?.email && !!profile,
@@ -161,7 +161,7 @@ export default function Dashboard() {
   // Fetch all daily workouts to determine next workout
   const { data: allDailyWorkouts = [] } = useQuery({
     queryKey: ['allDailyWorkouts', user?.email],
-    queryFn: () => base44.entities.DailyWorkout.filter({ user_email: user.email }),
+    queryFn: () => db.DailyWorkout.filter({ user_email: user.email }),
     enabled: !!user?.email && !!profile,
     initialData: [],
     staleTime: 2 * 60 * 1000,
@@ -170,7 +170,7 @@ export default function Dashboard() {
   const { data: userPoints } = useQuery({
     queryKey: ['userPoints', user?.email],
     queryFn: async () => {
-      const list = await base44.entities.UserPoints.filter({ user_email: user.email });
+      const list = await db.UserPoints.filter({ user_email: user.email });
       return list[0] || null;
     },
     enabled: !!user?.email,
@@ -184,7 +184,7 @@ export default function Dashboard() {
     const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
     const last = userPoints.last_workout_date;
     if (last && last !== today && last !== yesterday && (userPoints.daily_streak || 0) > 0) {
-      base44.entities.UserPoints.update(userPoints.id, { daily_streak: 0 }).then(() => {
+      db.UserPoints.update(userPoints.id, { daily_streak: 0 }).then(() => {
         queryClient.invalidateQueries(['userPoints']);
       });
     }
@@ -193,9 +193,9 @@ export default function Dashboard() {
   const saveWeeklyGoalMutation = useMutation({
     mutationFn: async (goal) => {
       if (userPoints?.id) {
-        return base44.entities.UserPoints.update(userPoints.id, { weekly_goal: goal });
+        return db.UserPoints.update(userPoints.id, { weekly_goal: goal });
       } else if (user?.email) {
-        return base44.entities.UserPoints.create({ user_email: user.email, weekly_goal: goal });
+        return db.UserPoints.create({ user_email: user.email, weekly_goal: goal });
       }
     },
     onSuccess: () => {

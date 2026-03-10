@@ -39,13 +39,13 @@ export default function Challenges() {
 
   const { data: allChallenges } = useQuery({
     queryKey: ['challenges'],
-    queryFn: () => base44.entities.Challenge.filter({ is_active: true }),
+    queryFn: () => db.Challenge.filter({ is_active: true }),
     initialData: [],
   });
 
   const { data: userChallenges } = useQuery({
     queryKey: ['userChallenges', user?.email],
-    queryFn: () => base44.entities.UserChallenge.filter({ user_email: user.email }),
+    queryFn: () => db.UserChallenge.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -53,7 +53,7 @@ export default function Challenges() {
   const { data: userPoints } = useQuery({
     queryKey: ['userPoints', user?.email],
     queryFn: async () => {
-      const points = await base44.entities.UserPoints.filter({ user_email: user.email });
+      const points = await db.UserPoints.filter({ user_email: user.email });
       return points[0] || null;
     },
     enabled: !!user?.email
@@ -61,7 +61,7 @@ export default function Challenges() {
 
   const joinChallengeMutation = useMutation({
     mutationFn: async (challenge) => {
-      return base44.entities.UserChallenge.create({
+      return db.UserChallenge.create({
         user_email: user.email,
         challenge_id: challenge.id,
         challenge_title: challenge.title,
@@ -84,7 +84,7 @@ export default function Challenges() {
       const currentDay = completedDays.length;
       const status = currentDay >= userChallenge.total_days ? "completed" : "active";
 
-      return base44.entities.UserChallenge.update(userChallenge.id, {
+      return db.UserChallenge.update(userChallenge.id, {
         completed_days: completedDays,
         current_day: currentDay + 1,
         status: status,

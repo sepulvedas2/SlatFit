@@ -53,21 +53,21 @@ export default function Habits() {
   useEffect(() => {
     base44.auth.me().then(async (u) => {
       setUser(u);
-      const pts = await base44.entities.UserPoints.filter({ user_email: u.email });
+      const pts = await db.UserPoints.filter({ user_email: u.email });
       setUserPoints(pts[0] || null);
     }).catch(() => {});
   }, []);
 
   const { data: habits = [] } = useQuery({
     queryKey: ["habits", user?.email],
-    queryFn: () => base44.entities.Habit.filter({ user_email: user.email, is_active: true }),
+    queryFn: () => db.Habit.filter({ user_email: user.email, is_active: true }),
     enabled: !!user?.email,
     initialData: [],
   });
 
   const { data: allLogs = [] } = useQuery({
     queryKey: ["habitLogs", user?.email],
-    queryFn: () => base44.entities.HabitLog.filter({ user_email: user.email }),
+    queryFn: () => db.HabitLog.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -105,7 +105,7 @@ export default function Habits() {
   // Create habit
   const createHabitMutation = useMutation({
     mutationFn: async (data) => {
-      await base44.entities.Habit.create({ ...data, user_email: user.email });
+      await db.Habit.create({ ...data, user_email: user.email });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["habits"]);
@@ -121,14 +121,14 @@ export default function Habits() {
       if (existingLog) {
         // Toggle: se já está completo, remove; se não, marca como completo
         if (existingLog.completed) {
-          await base44.entities.HabitLog.delete(existingLog.id);
+          await db.HabitLog.delete(existingLog.id);
           return { xpDelta: -xpEarned, added: false };
         } else {
-          await base44.entities.HabitLog.update(existingLog.id, { completed: true, xp_earned: xpEarned });
+          await db.HabitLog.update(existingLog.id, { completed: true, xp_earned: xpEarned });
           return { xpDelta: xpEarned, added: true };
         }
       } else {
-        await base44.entities.HabitLog.create({
+        await db.HabitLog.create({
           user_email: user.email,
           habit_id: habit.id,
           habit_name: habit.name,
@@ -157,7 +157,7 @@ export default function Habits() {
 
   // Delete habit
   const deleteHabitMutation = useMutation({
-    mutationFn: (habitId) => base44.entities.Habit.update(habitId, { is_active: false }),
+    mutationFn: (habitId) => db.Habit.update(habitId, { is_active: false }),
     onSuccess: () => queryClient.invalidateQueries(["habits"]),
   });
 

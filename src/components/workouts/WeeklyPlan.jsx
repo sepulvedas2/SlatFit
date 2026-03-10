@@ -27,13 +27,13 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
   // Fetch all exercises from database to get saved images
   const { data: savedExercises = [] } = useQuery({
     queryKey: ['exercises'],
-    queryFn: () => base44.entities.Exercise.list(),
+    queryFn: () => db.Exercise.list(),
   });
 
   // Fetch all PR records for current user
   const { data: prRecords = [] } = useQuery({
     queryKey: ['prRecords', user?.email],
-    queryFn: () => base44.entities.PRRecord.filter({ user_email: user.email }),
+    queryFn: () => db.PRRecord.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -63,14 +63,14 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       
       // Check if exercise already exists in DB
-      const existingExercises = await base44.entities.Exercise.filter({ name: exerciseName });
+      const existingExercises = await db.Exercise.filter({ name: exerciseName });
       
       if (existingExercises && existingExercises.length > 0) {
         // Update existing exercise
-        await base44.entities.Exercise.update(existingExercises[0].id, { image_url: file_url });
+        await db.Exercise.update(existingExercises[0].id, { image_url: file_url });
       } else {
         // Create new exercise record
-        await base44.entities.Exercise.create({
+        await db.Exercise.create({
           name: exerciseName,
           image_url: file_url,
           reps_suggestion: "3x10",
@@ -101,9 +101,9 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   const removeImage = async (exerciseName) => {
     try {
-      const existingExercises = await base44.entities.Exercise.filter({ name: exerciseName });
+      const existingExercises = await db.Exercise.filter({ name: exerciseName });
       if (existingExercises && existingExercises.length > 0) {
-        await base44.entities.Exercise.update(existingExercises[0].id, { image_url: "" });
+        await db.Exercise.update(existingExercises[0].id, { image_url: "" });
         queryClient.invalidateQueries(['exercises']);
       }
     } catch (error) {
@@ -557,7 +557,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   const savePRMutation = useMutation({
     mutationFn: async (prData) => {
-      return base44.entities.PRRecord.create({
+      return db.PRRecord.create({
         user_email: user.email,
         exercise_name: selectedPRExercise,
         weight_kg: parseFloat(prData.weight_kg),

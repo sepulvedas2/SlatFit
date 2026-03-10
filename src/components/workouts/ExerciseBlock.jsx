@@ -22,7 +22,7 @@ export default function ExerciseBlock({ block, exercises = [] }) {
 
   const { data: prRecords = [] } = useQuery({
     queryKey: ['prRecords', user?.email],
-    queryFn: () => base44.entities.PRRecord.filter({ user_email: user.email }),
+    queryFn: () => db.PRRecord.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
   });

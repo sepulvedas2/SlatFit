@@ -16,7 +16,7 @@ export default function CityChallenges({ userEmail, userCity }) {
     queryKey: ['cityChallenges', userCity],
     queryFn: async () => {
       if (!userCity) return [];
-      return base44.entities.CityChallenge.filter({ 
+      return db.CityChallenge.filter({ 
         city: userCity,
         status: 'active'
       });
@@ -33,7 +33,7 @@ export default function CityChallenges({ userEmail, userCity }) {
       const updatedParticipants = [...(challenge.participants || [])];
       if (!updatedParticipants.includes(userEmail)) {
         updatedParticipants.push(userEmail);
-        return base44.entities.CityChallenge.update(challengeId, {
+        return db.CityChallenge.update(challengeId, {
           participants: updatedParticipants
         });
       }
@@ -50,7 +50,7 @@ export default function CityChallenges({ userEmail, userCity }) {
     const nextWeek = new Date(today);
     nextWeek.setDate(today.getDate() + 7);
 
-    await base44.entities.CityChallenge.create({
+    await db.CityChallenge.create({
       city: userCity,
       challenge_title: `Desafio Semanal - ${userCity}`,
       challenge_type: "weekly_distance",

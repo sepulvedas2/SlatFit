@@ -30,7 +30,7 @@ export default function MyWorkouts({ userEmail }) {
 
   const { data: customWorkouts = [] } = useQuery({
     queryKey: ['customWorkouts', userEmail],
-    queryFn: () => base44.entities.CustomWorkout.filter({ user_email: userEmail }),
+    queryFn: () => db.CustomWorkout.filter({ user_email: userEmail }),
     enabled: !!userEmail,
     initialData: [],
   });
@@ -38,9 +38,9 @@ export default function MyWorkouts({ userEmail }) {
   const { data: workoutExercises = [] } = useQuery({
     queryKey: ['customWorkoutExercises', userEmail],
     queryFn: async () => {
-      const workouts = await base44.entities.CustomWorkout.filter({ user_email: userEmail });
+      const workouts = await db.CustomWorkout.filter({ user_email: userEmail });
       if (workouts.length === 0) return [];
-      const allExercises = await base44.entities.CustomWorkoutExercise.list();
+      const allExercises = await db.CustomWorkoutExercise.list();
       return allExercises.filter(ex => workouts.map(w => w.id).includes(ex.custom_workout_id));
     },
     enabled: !!userEmail,
@@ -49,7 +49,7 @@ export default function MyWorkouts({ userEmail }) {
 
   const { data: prRecords = [] } = useQuery({
     queryKey: ['prRecords', userEmail],
-    queryFn: () => base44.entities.PRRecord.filter({ user_email: userEmail }),
+    queryFn: () => db.PRRecord.filter({ user_email: userEmail }),
     enabled: !!userEmail,
     initialData: [],
   });
@@ -57,8 +57,8 @@ export default function MyWorkouts({ userEmail }) {
   const deleteWorkoutMutation = useMutation({
     mutationFn: async (workoutId) => {
       const exercises = workoutExercises.filter(ex => ex.custom_workout_id === workoutId);
-      await Promise.all(exercises.map(ex => base44.entities.CustomWorkoutExercise.delete(ex.id)));
-      await base44.entities.CustomWorkout.delete(workoutId);
+      await Promise.all(exercises.map(ex => db.CustomWorkoutExercise.delete(ex.id)));
+      await db.CustomWorkout.delete(workoutId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['customWorkouts']);

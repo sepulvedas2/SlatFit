@@ -49,7 +49,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
       const fats = (calories * 0.25) / 9;
       const carbs = (calories - (protein * 4) - (fats * 9)) / 4;
 
-      return base44.entities.UserProfile.create({
+      return db.UserProfile.create({
         user_email: user.email,
         ...data,
         daily_calorie_target: Math.round(calories),

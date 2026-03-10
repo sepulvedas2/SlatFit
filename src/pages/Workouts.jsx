@@ -42,7 +42,7 @@ export default function Workouts() {
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
       if (!user?.email) return null;
-      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      const profiles = await db.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
     },
     enabled: !!user?.email,
@@ -52,7 +52,7 @@ export default function Workouts() {
     queryKey: ['todayWorkouts', user?.email],
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
-      const logs = await base44.entities.WorkoutLog.filter({ 
+      const logs = await db.WorkoutLog.filter({ 
         user_email: user.email,
         completed_date: today
       });
@@ -70,7 +70,7 @@ export default function Workouts() {
       weekStart.setDate(today.getDate() - today.getDay() + 1);
       const weekStartStr = weekStart.toISOString().split('T')[0];
       
-      const logs = await base44.entities.WorkoutLog.filter({ user_email: user.email });
+      const logs = await db.WorkoutLog.filter({ user_email: user.email });
       return logs.filter(log => log.completed_date >= weekStartStr);
     },
     enabled: !!user?.email,
@@ -80,14 +80,14 @@ export default function Workouts() {
   // Fetch all exercises from database
   const { data: exercises = [] } = useQuery({
     queryKey: ['exercises'],
-    queryFn: () => base44.entities.Exercise.list(),
+    queryFn: () => db.Exercise.list(),
     initialData: [],
   });
 
   // Fetch daily workouts
   const { data: dailyWorkouts = [] } = useQuery({
     queryKey: ['dailyWorkouts', user?.email, selectedWeek],
-    queryFn: () => base44.entities.DailyWorkout.filter({ 
+    queryFn: () => db.DailyWorkout.filter({ 
       user_email: user.email,
       week_number: selectedWeek 
     }),
@@ -167,7 +167,7 @@ export default function Workouts() {
 
   const saveWorkoutMutation = useMutation({
     mutationFn: async (workoutData) => {
-      return base44.entities.WorkoutLog.create({
+      return db.WorkoutLog.create({
         user_email: user.email,
         workout_id: "hiit_emagrecimento",
         workout_name: "HIIT para Emagrecimento",
@@ -182,10 +182,10 @@ export default function Workouts() {
       
       // Award points
       if (user?.email) {
-        base44.entities.UserPoints.filter({ user_email: user.email })
+        db.UserPoints.filter({ user_email: user.email })
           .then(points => {
             if (points[0]) {
-              base44.entities.UserPoints.update(points[0].id, {
+              db.UserPoints.update(points[0].id, {
                 total_points: (points[0].total_points || 0) + 50,
                 xp_current: (points[0].xp_current || 0) + 50
               });
@@ -233,9 +233,9 @@ export default function Workouts() {
       // Check if already exists
       const existing = dailyWorkouts.find(w => w.day_of_week === dayOfWeek);
       if (existing) {
-        return base44.entities.DailyWorkout.update(existing.id, { completed: true, completed_date: new Date().toISOString().split('T')[0] });
+        return db.DailyWorkout.update(existing.id, { completed: true, completed_date: new Date().toISOString().split('T')[0] });
       }
-      return base44.entities.DailyWorkout.create({
+      return db.DailyWorkout.create({
         user_email: user.email,
         week_number: weekNumber,
         day_of_week: dayOfWeek,

@@ -25,7 +25,7 @@ export default function SmartNutrition() {
   const { data: nutritionData } = useQuery({
     queryKey: ['nutritionData', user?.email, today],
     queryFn: async () => {
-      const data = await base44.entities.NutritionData.filter({ user_email: user.email, log_date: today });
+      const data = await db.NutritionData.filter({ user_email: user.email, log_date: today });
       return data[0] || null;
     },
     enabled: !!user?.email,
@@ -34,7 +34,7 @@ export default function SmartNutrition() {
   const { data: userProfile } = useQuery({
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
-      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      const profiles = await db.UserProfile.filter({ user_email: user.email });
       return profiles[0] || null;
     },
     enabled: !!user?.email,

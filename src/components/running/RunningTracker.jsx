@@ -352,20 +352,20 @@ export default function RunningTracker({ onFinish, userEmail }) {
 
   const stopMutation = useMutation({
     mutationFn: async (activityData) => {
-      const activity = await base44.entities.RunningActivity.create(activityData);
+      const activity = await db.RunningActivity.create(activityData);
       
       // Update city leaderboard
-      const profiles = await base44.entities.UserProfile.filter({ user_email: userEmail });
+      const profiles = await db.UserProfile.filter({ user_email: userEmail });
       const userCity = profiles[0]?.city;
       const userName = profiles[0]?.user_email?.split('@')[0] || 'Anônimo';
       
       if (userCity) {
-        const leaderboards = await base44.entities.CityLeaderboard.filter({ user_email: userEmail });
+        const leaderboards = await db.CityLeaderboard.filter({ user_email: userEmail });
         
         if (leaderboards[0]) {
           // Update existing
           const current = leaderboards[0];
-          await base44.entities.CityLeaderboard.update(current.id, {
+          await db.CityLeaderboard.update(current.id, {
             total_distance_km: (current.total_distance_km || 0) + activityData.distance_km,
             total_runs: (current.total_runs || 0) + 1,
             total_time_seconds: (current.total_time_seconds || 0) + activityData.duration_seconds,
@@ -379,7 +379,7 @@ export default function RunningTracker({ onFinish, userEmail }) {
           });
         } else {
           // Create new
-          await base44.entities.CityLeaderboard.create({
+          await db.CityLeaderboard.create({
             user_email: userEmail,
             user_name: userName,
             city: userCity,
@@ -396,14 +396,14 @@ export default function RunningTracker({ onFinish, userEmail }) {
         }
 
         // Update city challenges
-        const activeChallenges = await base44.entities.CityChallenge.filter({ 
+        const activeChallenges = await db.CityChallenge.filter({ 
           city: userCity,
           status: 'active'
         });
         
         for (const challenge of activeChallenges) {
           if (challenge.participants?.includes(userEmail)) {
-            await base44.entities.CityChallenge.update(challenge.id, {
+            await db.CityChallenge.update(challenge.id, {
               current_value: (challenge.current_value || 0) + activityData.distance_km
             });
           }
