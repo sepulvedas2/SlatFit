@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Dumbbell, UtensilsCrossed, User, ScanLine, CheckSquare } from "lucide-react";
 import { ThemeProvider, useTheme } from "@/components/ThemeContext";
+import "@/components/auth"; // inicializa override base44.auth.me
 import { getStoredUser, clearUser } from "@/components/auth";
 import LoginScreen from "@/components/auth/LoginScreen";
 
