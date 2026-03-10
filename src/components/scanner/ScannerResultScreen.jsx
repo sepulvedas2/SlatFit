@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/components/supabaseApi";
 import {
   Flame, Star, ChevronDown, ChevronUp,
   Lightbulb, Check, Plus, Trash2, Edit2, ArrowLeft

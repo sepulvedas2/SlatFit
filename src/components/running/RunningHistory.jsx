@@ -15,7 +15,7 @@ export default function RunningHistory({ userEmail, onBack }) {
     queryKey: ['runningActivities', userEmail],
     queryFn: async () => {
       if (!userEmail) return [];
-      return base44.entities.RunningActivity.filter({ 
+      return db.RunningActivity.filter({ 
         user_email: userEmail 
       }, '-activity_date');
     },
