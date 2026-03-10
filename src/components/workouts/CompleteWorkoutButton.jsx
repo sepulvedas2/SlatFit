@@ -42,7 +42,7 @@ export default function CompleteWorkoutButton({ workout, exercises, userEmail, o
     const currentWeekKey = `${d.getFullYear()}-${String(weekNum).padStart(2, "0")}`;
 
     // Save workout log
-    await base44.entities.WorkoutLog.create({
+    await db.WorkoutLog.create({
       user_email: userEmail,
       workout_id: workout.id,
       workout_name: workout.nome_treino,
@@ -52,7 +52,7 @@ export default function CompleteWorkoutButton({ workout, exercises, userEmail, o
     });
 
     // Update XP + rank + streak + weekly
-    const pointsList = await base44.entities.UserPoints.filter({ user_email: userEmail });
+    const pointsList = await db.UserPoints.filter({ user_email: userEmail });
     const RANKS = [
       { key: "bronze", minXP: 0 },
       { key: "silver", minXP: 500 },
@@ -84,7 +84,7 @@ export default function CompleteWorkoutButton({ workout, exercises, userEmail, o
       const isNewWeek = p.last_reset_week !== currentWeekKey;
       const weeklyCompleted = isNewWeek ? 1 : (lastDate === today ? (p.weekly_completed || 0) : (p.weekly_completed || 0) + 1);
 
-      await base44.entities.UserPoints.update(p.id, {
+      await db.UserPoints.update(p.id, {
         total_points: newTotal,
         xp_current: newXP,
         rank: newRank,
@@ -95,7 +95,7 @@ export default function CompleteWorkoutButton({ workout, exercises, userEmail, o
         last_reset_week: currentWeekKey,
       });
     } else {
-      await base44.entities.UserPoints.create({
+      await db.UserPoints.create({
         user_email: userEmail,
         total_points: xp,
         xp_current: xp,

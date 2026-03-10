@@ -188,7 +188,7 @@ Responda SOMENTE com JSON válido neste formato exato:
       const workout = generatedPlan.workouts[i];
       const dayOfWeek = days[i];
 
-      const savedWorkout = await base44.entities.CustomWorkout.create({
+      const savedWorkout = await db.CustomWorkout.create({
         user_email: userEmail,
         nome_treino: workout.name,
         dia_semana: dayOfWeek,
@@ -198,7 +198,7 @@ Responda SOMENTE com JSON válido neste formato exato:
 
       for (let j = 0; j < workout.exercises.length; j++) {
         const ex = workout.exercises[j];
-        await base44.entities.CustomWorkoutExercise.create({
+        await db.CustomWorkoutExercise.create({
           custom_workout_id: savedWorkout.id,
           exercise_name: ex.name,
           series: ex.sets,

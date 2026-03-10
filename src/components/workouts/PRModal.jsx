@@ -35,14 +35,14 @@ export default function PRModal({ isOpen, onClose, exercise, userEmail }) {
 
   const { data: prHistory = [] } = useQuery({
     queryKey: ['prRecords', exercise?.id, userEmail],
-    queryFn: () => base44.entities.PRRecord.filter({ user_email: userEmail, exercise_id: exercise.id }, '-data_pr', 5),
+    queryFn: () => db.PRRecord.filter({ user_email: userEmail, exercise_id: exercise.id }, '-data_pr', 5),
     enabled: !!exercise?.id && !!userEmail && isOpen,
   });
 
   const lastPR = prHistory[0] || null;
 
   const savePRMutation = useMutation({
-    mutationFn: async (data) => base44.entities.PRRecord.create({
+    mutationFn: async (data) => db.PRRecord.create({
       user_email: userEmail,
       exercise_id: exercise.id,
       exercise_name: exercise.name,

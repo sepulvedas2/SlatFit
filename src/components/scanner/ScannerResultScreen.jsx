@@ -160,8 +160,8 @@ export default function ScannerResultScreen({
   // XP + challenge check after saving
   const checkFoodChallenges = async (userEmail, savedData) => {
     const [pointsList, allFoods] = await Promise.all([
-      base44.entities.UserPoints.filter({ user_email: userEmail }),
-      base44.entities.FoodLog.filter({ user_email: userEmail }),
+      db.UserPoints.filter({ user_email: userEmail }),
+      db.FoodLog.filter({ user_email: userEmail }),
     ]);
     const points = pointsList[0];
     if (!points) return;
@@ -181,14 +181,14 @@ export default function ScannerResultScreen({
     const xpNeeded = points.xp_next_level || 100;
     const newTotal = (points.total_points || 0) + xpGain;
     if (newXp >= xpNeeded) {
-      await base44.entities.UserPoints.update(points.id, {
+      await db.UserPoints.update(points.id, {
         xp_current: newXp - xpNeeded,
         level: (points.level || 1) + 1,
         xp_next_level: Math.round(xpNeeded * 1.5),
         total_points: newTotal,
       });
     } else {
-      await base44.entities.UserPoints.update(points.id, {
+      await db.UserPoints.update(points.id, {
         xp_current: newXp,
         total_points: newTotal,
       });

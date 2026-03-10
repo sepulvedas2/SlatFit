@@ -44,13 +44,13 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail, editing
     mutationFn: async (data) => {
       let workout;
       if (editingWorkout) {
-        workout = await base44.entities.CustomWorkout.update(editingWorkout.id, data.workout);
-        await Promise.all(existingExercises.map(ex => base44.entities.CustomWorkoutExercise.delete(ex.id)));
+        workout = await db.CustomWorkout.update(editingWorkout.id, data.workout);
+        await Promise.all(existingExercises.map(ex => db.CustomWorkoutExercise.delete(ex.id)));
       } else {
-        workout = await base44.entities.CustomWorkout.create({ user_email: userEmail, ...data.workout });
+        workout = await db.CustomWorkout.create({ user_email: userEmail, ...data.workout });
       }
       await Promise.all(data.exercises.map((ex, idx) =>
-        base44.entities.CustomWorkoutExercise.create({
+        db.CustomWorkoutExercise.create({
           custom_workout_id: editingWorkout ? editingWorkout.id : workout.id,
           exercise_name: ex.exercise_name,
           series: ex.series,
