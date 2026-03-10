@@ -69,10 +69,13 @@ export default function ExerciseBlock({ block, exercises = [] }) {
                     onClick={() => handleExerciseClick(exerciseData)}
                     className="flex items-center gap-3 flex-1 text-left group"
                   >
-                    <div className="w-8 h-8 rounded-full bg-[#CEF17B]/20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-[#CEF17B] font-bold text-sm">
-                        {index + 1}
-                      </span>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#CEF17B]/20">
+                      <img
+                        src={exerciseData.image_url || getExerciseImage(exercise.name)}
+                        alt={exercise.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.src = getExerciseImage(exercise.name); }}
+                      />
                     </div>
                     
                     <div className="flex-1">
