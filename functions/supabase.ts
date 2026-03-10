@@ -4,9 +4,6 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_KEY");
 
-console.log("URL:", supabaseUrl?.substring(0, 30));
-console.log("KEY starts with:", supabaseServiceKey?.substring(0, 20));
-
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 Deno.serve(async (req) => {
