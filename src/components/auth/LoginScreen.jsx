@@ -71,17 +71,6 @@ export default function LoginScreen({ onLogin }) {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {tab === 'register' && (
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Seu nome completo"
-                required
-                className="login-input w-full px-4 h-11 rounded-lg text-gray-800 text-sm border border-gray-200 bg-white"
-              />
-            )}
-
             <input
               type="email"
               value={email}
