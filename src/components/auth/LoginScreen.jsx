@@ -121,7 +121,7 @@ export default function LoginScreen({ onLogin }) {
               type="submit"
               disabled={loading}
               className="w-full h-11 rounded-lg font-semibold text-white flex items-center justify-center gap-2 transition-all duration-200"
-              style={{ backgroundColor: loading ? "#86efac" : "#16a34a", boxShadow: loading ? "none" : "0 4px 14px rgba(22,163,74,0.35)" }}
+              style={{ backgroundColor: loading ? "rgba(11,57,54,0.5)" : "#0B3936", boxShadow: loading ? "none" : "0 4px 14px rgba(11,57,54,0.35)" }}
             >
               {loading
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Aguarde...</>
