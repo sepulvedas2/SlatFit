@@ -120,7 +120,7 @@ export default function LoginScreen({ onLogin }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-11 rounded-lg font-semibold text-white flex items-center justify-center gap-2 transition-all duration-200"
+              className="w-full h-11 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200"
               style={{ backgroundColor: loading ? "rgba(202,238,122,0.5)" : "#CAEE7A", color: "#0B3936", boxShadow: loading ? "none" : "0 4px 14px rgba(202,238,122,0.4)" }}
             >
               {loading
