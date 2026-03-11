@@ -47,7 +47,7 @@ export default function LoginScreen({ onLogin }) {
 
           {/* Logo */}
           <div className="text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight text-green-600" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h1 className="text-4xl font-extrabold tracking-tight text-black" style={{ fontFamily: 'Poppins, sans-serif' }}>
               SlatFit
             </h1>
             <p className="text-gray-400 mt-1 text-sm">Transforme seu corpo, transforme sua vida 💪</p>
