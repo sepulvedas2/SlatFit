@@ -24,6 +24,19 @@ Deno.serve(async (req) => {
 
     if (action === 'register') {
       const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
+      // Verificar se email já existe na tabela profiles
+      const { data: existingProfile } = await adminClient
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (existingProfile) {
+        return Response.json({ error: 'Esse email já foi registrado.' }, { status: 400 });
+      }
+
+      // Criar usuário no Supabase Auth
       const { data, error } = await adminClient.auth.admin.createUser({
         email,
         password,
@@ -32,6 +45,18 @@ Deno.serve(async (req) => {
       });
       if (error) return Response.json({ error: error.message }, { status: 400 });
 
+      // Criar perfil na tabela profiles
+      const { error: profileError } = await adminClient
+        .from('profiles')
+        .insert([{ id: data.user.id, email: email, plan: 'free' }]);
+
+      if (profileError) {
+        // Rollback: remover usuário criado se perfil falhou
+        await adminClient.auth.admin.deleteUser(data.user.id);
+        return Response.json({ error: 'Erro ao criar perfil: ' + profileError.message }, { status: 400 });
+      }
+
+      // Fazer login automaticamente
       const anonClient = createClient(supabaseUrl, supabaseAnonKey);
       const { data: loginData, error: loginError } = await anonClient.auth.signInWithPassword({ email, password });
       if (loginError) return Response.json({ error: loginError.message }, { status: 400 });
