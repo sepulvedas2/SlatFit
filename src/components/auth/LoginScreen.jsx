@@ -18,7 +18,7 @@ export default function LoginScreen({ onLogin }) {
     try {
       const payload = tab === 'login'
         ? { action: 'login', email, password }
-        : { action: 'register', email, password, full_name: name };
+        : { action: 'register', email, password };
 
       const resp = await base44.functions.invoke('supabaseAuth', payload);
       if (resp.data?.error) throw new Error(resp.data.error);
