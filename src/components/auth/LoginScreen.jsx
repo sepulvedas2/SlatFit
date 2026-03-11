@@ -135,7 +135,7 @@ export default function LoginScreen({ onLogin }) {
             {tab === 'login' ? 'Não possui conta?' : 'Já tem conta?'}{' '}
             <button
               onClick={() => { setTab(tab === 'login' ? 'register' : 'login'); setError(''); }}
-              className="text-green-600 font-semibold hover:underline"
+              className="font-semibold hover:underline" style={{ color: "#0B3936" }}
             >
               {tab === 'login' ? 'Criar conta' : 'Entrar'}
             </button>
