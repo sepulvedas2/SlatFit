@@ -61,7 +61,7 @@ export default function LoginScreen({ onLogin }) {
                 onClick={() => { setTab(t); setError(''); }}
                 className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
                 style={tab === t
-                  ? { backgroundColor: "#0B3936", color: "white", boxShadow: "0 2px 8px rgba(11,57,54,0.3)" }
+                  ? { backgroundColor: "#CAEE7A", color: "#0B3936", boxShadow: "0 2px 8px rgba(202,238,122,0.4)" }
                   : { backgroundColor: "transparent", color: "#6b7280" }
                 }
               >
