@@ -91,68 +91,7 @@ export default function Workouts() {
 
 
 
-  const saveWorkoutMutation = useMutation({
-    mutationFn: async (workoutData) => {
-      return db.WorkoutLog.create({
-        user_email: user.email,
-        workout_id: "hiit_emagrecimento",
-        workout_name: "HIIT para Emagrecimento",
-        completed_date: new Date().toISOString().split('T')[0],
-        duration_minutes: Math.round(workoutData.totalTime / 60),
-        calories_burned: workoutData.calories,
-        rating: 5
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['weekWorkouts']);
-      
-      // Award points
-      if (user?.email) {
-        db.UserPoints.filter({ user_email: user.email })
-          .then(points => {
-            if (points[0]) {
-              db.UserPoints.update(points[0].id, {
-                total_points: (points[0].total_points || 0) + 50,
-                xp_current: (points[0].xp_current || 0) + 50
-              });
-            }
-          });
-      }
-    },
-  });
 
-  const handleCompleteWorkout = () => {
-    const caloriesBurned = Math.round(250 + (totalTime / 60) * 10);
-    
-    if (user) {
-      saveWorkoutMutation.mutate({
-        totalTime,
-        calories: caloriesBurned
-      });
-    }
-    
-    setWorkoutCompleted(true);
-  };
-
-  const handleRestart = () => {
-    setWorkoutStarted(false);
-    setWorkoutCompleted(false);
-    setCurrentBlockIndex(0);
-    setSelectedBlockId(null);
-    setTotalTime(0);
-  };
-
-  const startSelectedBlock = (blockId) => {
-    const blockIndex = hiitWorkout.blocks.findIndex(b => b.id === blockId);
-    setSelectedBlockId(blockId);
-    setCurrentBlockIndex(blockIndex);
-    setWorkoutStarted(true);
-    setView("workout");
-  };
-
-  const handleStartWorkout = (weekNumber, dayOfWeek) => {
-    setView("hiit");
-  };
 
   const completeDayMutation = useMutation({
     mutationFn: async ({ weekNumber, dayOfWeek }) => {
