@@ -264,8 +264,4 @@ export default function Workouts() {
         </div>
       </div>
     );
-  }
-
-  // Default return for the component
-  return null;
 }
