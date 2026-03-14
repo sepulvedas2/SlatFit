@@ -242,21 +242,17 @@ export default function Workouts() {
 
           {/* 3. Personal Trainer IA (accordion) */}
           <WorkoutAICoach 
-            profile={profile}
-            weekWorkouts={weekWorkouts}
-            onStartWorkout={(workoutType) => {
-              if (workoutType === 'hiit' || workoutType?.includes('hiit')) {
-                setView('hiit');
-              } else {
-                setTimeout(() => {
-                  const weeklyPlanElement = document.getElementById('weekly-plan-section');
-                  if (weeklyPlanElement) {
-                    weeklyPlanElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 100);
-              }
-            }}
-          />
+             profile={profile}
+             weekWorkouts={weekWorkouts}
+             onStartWorkout={(workoutType) => {
+               setTimeout(() => {
+                 const weeklyPlanElement = document.getElementById('weekly-plan-section');
+                 if (weeklyPlanElement) {
+                   weeklyPlanElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                 }
+               }, 100);
+             }}
+           />
 
           <div
             className="rounded-2xl p-3 text-center"
