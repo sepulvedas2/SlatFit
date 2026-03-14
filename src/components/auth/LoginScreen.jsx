@@ -33,7 +33,7 @@ export default function LoginScreen({ onLogin }) {
   };
 
   return (
-    <section className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "linear-gradient(135deg, #004A4A 0%, #080626 100%)" }}>
+    <section className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "linear-gradient(135deg, #0F3936 0%, #3BA88F 100%)" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;800;900&family=Inter:wght@400;500;600&display=swap');
         .login-input { font-family: 'Inter', sans-serif; transition: all 0.2s; }
