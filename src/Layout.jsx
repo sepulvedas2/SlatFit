@@ -37,7 +37,11 @@ function AppLayout({ children, currentPageName }) {
 
   // Não autenticado
   if (authUser === null) {
-    return <LoginScreen onLogin={handleLogin} />;
+    return (
+      <div style={{ backgroundColor: '#0B3936', minHeight: '100vh' }}>
+        <LoginScreen onLogin={handleLogin} />
+      </div>
+    );
   }
 
   const navItems = [
