@@ -78,7 +78,7 @@ export const db = {
   IAGOConversation: createEntityAPI('iago_conversations'),
   NutritionData: createEntityAPI('nutrition_data'),
   AgendaTask: createEntityAPI('agenda_tasks'),
-  Exercise: createEntityAPI('exercises'),
+  Exercise: createEntityAPI('exercises', false), // false = não filtrar por user_email (global)
   WeeklyProgress: createEntityAPI('weekly_progress'),
   DailyWorkout: createEntityAPI('daily_workouts'),
   CustomWorkout: createEntityAPI('custom_workouts'),
