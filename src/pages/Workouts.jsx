@@ -126,19 +126,7 @@ export default function Workouts() {
     setWorkoutStarted(false);
   };
 
-  if (workoutCompleted) {
-    return (
-      <WorkoutSummary
-        totalTime={totalTime}
-        blocksCompleted={1}
-        caloriesBurned={Math.round(250 + (totalTime / 60) * 10)}
-        onRestart={handleRestart}
-      />
-    );
-  }
-
   // Weekly Plan View (Main View)
-  if (view === "plan") {
     const weekOptions = [
       { number: 1, title: "Planilha 1", subtitle: "Iniciante" },
       { number: 2, title: "Planilha 2", subtitle: "Intermediário" },
