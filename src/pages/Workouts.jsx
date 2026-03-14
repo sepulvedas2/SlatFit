@@ -240,30 +240,7 @@ export default function Workouts() {
             />
           </div>
 
-          {/* 3. HIIT Quick Access */}
-          <Card className="glass-effect border-orange-500/30 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
-                  <Flame className="w-5 h-5 text-orange-400" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white">Treino HIIT Rápido</h3>
-                  <p className="text-xs text-[#CEEDB2]">Alta intensidade • Queima de gordura</p>
-                </div>
-              </div>
-              <Button 
-                onClick={() => setView("hiit")}
-                size="sm"
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                <Flame className="w-4 h-4 mr-1" />
-                HIIT
-              </Button>
-            </div>
-          </Card>
-
-          {/* 4. Personal Trainer IA (accordion) */}
+          {/* 3. Personal Trainer IA (accordion) */}
           <WorkoutAICoach 
             profile={profile}
             weekWorkouts={weekWorkouts}
