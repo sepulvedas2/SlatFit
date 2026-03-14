@@ -149,7 +149,7 @@ export default function Profile({ onLogout }) {
   };
 
   return (
-    <div className="min-h-screen pb-28" style={{ backgroundColor: isDark ? "#0F1C1B" : undefined, transition: "background-color 0.2s ease" }}>
+    <div className="min-h-screen pb-28" style={{ backgroundColor: "#0E3934", transition: "background-color 0.2s ease" }}>
       <div className="max-w-lg mx-auto px-4 pt-8 space-y-5">
 
         {/* BLOCO 1 — HEADER PREMIUM */}
