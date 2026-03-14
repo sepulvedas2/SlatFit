@@ -4,23 +4,27 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
 import NavigationTracker from '@/lib/NavigationTracker'
-import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import AdminSetup from '@/pages/AdminSetup';
+import Layout from './Layout';
 
-const { Pages, Layout, mainPage } = pagesConfig;
-const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
+// Import pages
+import Dashboard from './pages/Dashboard';
+import FoodScanner from './pages/FoodScanner';
+import Habits from './pages/Habits';
+import Learning from './pages/Learning';
+import MealPlans from './pages/MealPlans';
+import Progresso from './pages/Progresso';
+import SmartNutrition from './pages/SmartNutrition';
+import WorkoutProgress from './pages/WorkoutProgress';
+import Workouts from './pages/Workouts';
+import Profile from './pages/Profile';
+import AdminSetup from './pages/AdminSetup';
 
 setupIframeMessaging();
-
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -47,22 +51,28 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <LayoutWrapper currentPageName={mainPageKey}>
+    <Layout currentPageName="Dashboard">
       <Routes>
-        <Route path="/" element={<MainPage />} />
-        {Object.entries(Pages).map(([path, Page]) => (
-          <Route key={path} path={`/${path}`} element={<Page />} />
-        ))}
+        <Route path="/" element={<Navigate to="/Dashboard" replace />} />
+        <Route path="/Dashboard" element={<Dashboard />} />
+        <Route path="/FoodScanner" element={<FoodScanner />} />
+        <Route path="/Habits" element={<Habits />} />
+        <Route path="/Learning" element={<Learning />} />
+        <Route path="/MealPlans" element={<MealPlans />} />
+        <Route path="/Progresso" element={<Progresso />} />
+        <Route path="/SmartNutrition" element={<SmartNutrition />} />
+        <Route path="/WorkoutProgress" element={<WorkoutProgress />} />
+        <Route path="/Workouts" element={<Workouts />} />
+        <Route path="/Profile" element={<Profile />} />
         <Route path="/AdminSetup" element={<AdminSetup />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
-    </LayoutWrapper>
+    </Layout>
   );
 };
 
 
 function App() {
-  // Clean build trigger
   return (
     <>
       <style>{`
