@@ -53,37 +53,54 @@ Deno.serve(async (req) => {
     // Verifica se os exercícios já existem
     const { data: existingExercises, error: checkError } = await supabase
       .from('exercises')
-      .select('id')
-      .limit(1);
+      .select('id, name, image_url')
+      .limit(100);
 
     if (checkError) {
       throw new Error(`Erro ao verificar exercícios: ${checkError.message}`);
     }
 
-    // Se já existem exercícios, não faz nada
-    if (existingExercises && existingExercises.length > 0) {
-      return Response.json({
-        success: true,
-        message: "Exercícios já existem no banco de dados",
-        count: existingExercises.length
-      });
-    }
+    let results = {
+      inserted: 0,
+      updated: 0,
+      total: 0
+    };
 
-    // Insere os exercícios permanentes
-    const { data, error } = await supabase
-      .from('exercises')
-      .insert(PERMANENT_EXERCISES)
-      .select();
+    // Processa cada exercício permanente
+    for (const exercise of PERMANENT_EXERCISES) {
+      const existing = existingExercises?.find(e => e.name === exercise.name);
 
-    if (error) {
-      throw new Error(`Erro ao inserir exercícios: ${error.message}`);
+      if (existing) {
+        // Se o exercício existe mas não tem imagem, atualiza
+        if (!existing.image_url || existing.image_url !== exercise.image_url) {
+          const { error: updateError } = await supabase
+            .from('exercises')
+            .update({ image_url: exercise.image_url })
+            .eq('id', existing.id);
+
+          if (!updateError) {
+            results.updated++;
+          }
+        }
+      } else {
+        // Insere novo exercício
+        const { error: insertError } = await supabase
+          .from('exercises')
+          .insert([exercise]);
+
+        if (!insertError) {
+          results.inserted++;
+        }
+      }
+      results.total++;
     }
 
     return Response.json({
       success: true,
-      message: "Exercícios criados com sucesso no banco de dados permanente",
-      count: data.length,
-      exercises: data
+      message: "Sincronização de exercícios e imagens concluída",
+      inserted: results.inserted,
+      updated: results.updated,
+      total: results.total
     });
 
   } catch (error) {
