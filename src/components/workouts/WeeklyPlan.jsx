@@ -9,6 +9,7 @@ import { db } from "@/components/supabaseApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import PRModal from "./PRModal";
+import { getExerciseImage } from "./exerciseImages";
 
 export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
   const [expandedDay, setExpandedDay] = useState(null);
@@ -689,41 +690,29 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                             >
                               {/* Imagem do exercício */}
                               <div className="relative group">
-                                {hasImage ? (
-                                  <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                                    <img 
-                                      src={hasImage} 
-                                      alt={exercise.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                      <button
-                                        onClick={() => triggerFileInput(exercise.name)}
-                                        className="p-1 bg-white/20 rounded hover:bg-white/30"
-                                      >
-                                        <Upload className="w-3 h-3 text-white" />
-                                      </button>
-                                      <button
-                                        onClick={() => removeImage(exercise.name)}
-                                        className="p-1 bg-red-500/50 rounded hover:bg-red-500/70"
-                                      >
-                                        <X className="w-3 h-3 text-white" />
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={() => triggerFileInput(exercise.name)}
-                                    disabled={isUploading}
-                                    className="w-14 h-14 rounded-lg bg-[#CEF17B]/10 flex items-center justify-center flex-shrink-0 border border-dashed border-[#CEF17B]/30 hover:border-[#CEF17B] hover:bg-[#CEF17B]/20 transition-all cursor-pointer"
-                                  >
-                                    {isUploading ? (
-                                      <Loader2 className="w-5 h-5 text-[#CEF17B] animate-spin" />
-                                    ) : (
-                                      <Upload className="w-5 h-5 text-[#CEF17B]/50" />
-                                    )}
-                                  </button>
-                                )}
+                               <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-[#CEF17B]/20">
+                                 <img 
+                                   src={hasImage || getExerciseImage(exercise.name)} 
+                                   alt={exercise.name}
+                                   className="w-full h-full object-cover"
+                                   onError={(e) => { e.target.src = getExerciseImage(exercise.name); }}
+                                 />
+                                 {hasImage && (
+                                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                     <button
+                                       onClick={() => triggerFileInput(exercise.name)}
+                                       className="p-1 bg-white/20 rounded hover:bg-white/30"
+                                     >
+                                       <Upload className="w-3 h-3 text-white" />
+                                     </button>
+                                     <button
+                                       onClick={() => removeImage(exercise.name)}
+                                       className="p-1 bg-red-500/50 rounded hover:bg-red-500/70"
+                                     >
+                                       <X className="w-3 h-3 text-white" />
+                                     </button>
+                                   </div>
+                                 )}
                               </div>
                               
                               <div className="flex-1">
