@@ -29,7 +29,7 @@ function AppLayout({ children, currentPageName }) {
   // Loading
   if (authUser === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0F1C1B" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0B3936" }}>
         <div className="w-10 h-10 border-2 border-[#CEF17B] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -38,7 +38,7 @@ function AppLayout({ children, currentPageName }) {
   // Não autenticado
   if (authUser === null) {
     return (
-      <div style={{ backgroundColor: '#0E3934', minHeight: '100vh' }}>
+      <div style={{ backgroundColor: '#0B3936', minHeight: '100vh' }}>
         <LoginScreen onLogin={handleLogin} />
       </div>
     );

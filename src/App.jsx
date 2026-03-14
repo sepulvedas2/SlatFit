@@ -65,7 +65,7 @@ function App() {
     <>
       <style>{`
         body {
-          background-color: #0E3934 !important;
+          background-color: #0B3936 !important;
         }
       `}</style>
       <AuthProvider>
