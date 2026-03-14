@@ -33,9 +33,9 @@ export default function LoginScreen({ onLogin }) {
   };
 
   return (
-    <section className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "#0B3936" }}>
+    <section className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "linear-gradient(135deg, #004A4A 0%, #080626 100%)" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Inter:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;800;900&family=Inter:wght@400;500;600&display=swap');
         .login-input { font-family: 'Inter', sans-serif; transition: all 0.2s; }
         .login-input::placeholder { color: #9ca3af; }
         .login-input:focus { outline: none; border-color: #16a34a !important; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
@@ -46,10 +46,10 @@ export default function LoginScreen({ onLogin }) {
 
           {/* Logo */}
           <div className="text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight text-black" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h1 className="text-4xl font-extrabold tracking-tight text-black" style={{ fontFamily: 'Red Hat Display, sans-serif' }}>
               SlatFit
             </h1>
-            <p className="text-gray-400 mt-1 text-sm">Transforme seu corpo, transforme sua vida 💪</p>
+            <p className="text-gray-600 mt-1 text-sm">Transforme seu corpo, transforme sua vida</p>
           </div>
 
           {/* Tabs */}
@@ -60,7 +60,7 @@ export default function LoginScreen({ onLogin }) {
                 onClick={() => { setTab(t); setError(''); }}
                 className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
                 style={tab === t
-                  ? { backgroundColor: "#CAEE7A", color: "#0B3936", boxShadow: "0 2px 8px rgba(202,238,122,0.4)" }
+                  ? { background: "linear-gradient(135deg, #FFFDEE 0%, #E3EF26 100%)", color: "#080626", boxShadow: "0 2px 8px rgba(227,239,38,0.4)" }
                   : { backgroundColor: "transparent", color: "#6b7280" }
                 }
               >
@@ -109,7 +109,7 @@ export default function LoginScreen({ onLogin }) {
               type="submit"
               disabled={loading}
               className="w-full h-11 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200"
-              style={{ backgroundColor: loading ? "rgba(202,238,122,0.5)" : "#CAEE7A", color: "#0B3936", boxShadow: loading ? "none" : "0 4px 14px rgba(202,238,122,0.4)" }}
+              style={{ background: loading ? "rgba(255,253,238,0.5)" : "linear-gradient(135deg, #FFFDEE 0%, #E3EF26 100%)", color: "#080626", boxShadow: loading ? "none" : "0 4px 14px rgba(227,239,38,0.4)" }}
             >
               {loading
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Aguarde...</>
