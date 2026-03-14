@@ -204,20 +204,22 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
             </Alert>
           )}
           
-          {/* Image Section - Native image from code */}
-          <div className="space-y-3">
-            <div className="relative w-full aspect-[3/4] max-w-[280px] mx-auto rounded-xl overflow-hidden border-2 border-[#CEF17B]/30">
-              <img
-                src={formData.image_url || getExerciseImage(formData.name)}
-                alt={formData.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.src = getExerciseImage(formData.name);
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          {/* Image Section - Hidden for HIIT */}
+          {!isHIIT && (
+            <div className="space-y-3">
+              <div className="relative w-full aspect-[3/4] max-w-[280px] mx-auto rounded-xl overflow-hidden border-2 border-[#CEF17B]/30">
+                <img
+                  src={formData.image_url || getExerciseImage(formData.name)}
+                  alt={formData.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = getExerciseImage(formData.name);
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Exercise Info */}
           <div className="space-y-4">
