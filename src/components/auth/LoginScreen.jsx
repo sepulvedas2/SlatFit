@@ -18,7 +18,7 @@ export default function LoginScreen({ onLogin }) {
     try {
       const payload = tab === 'login'
         ? { action: 'login', email, password }
-        : { action: 'register', email, password };
+        : { action: 'register', email, password, full_name: email.split('@')[0] };
 
       const resp = await base44.functions.invoke('supabaseAuth', payload);
       if (resp.data?.error) throw new Error(resp.data.error);
@@ -26,7 +26,8 @@ export default function LoginScreen({ onLogin }) {
       saveUser(resp.data.user, resp.data.token);
       onLogin(resp.data.user);
     } catch (err) {
-      setError(err.message || 'Erro ao autenticar. Tente novamente.');
+      const errorMsg = err.response?.data?.error || err.message || 'Erro ao autenticar. Verifique suas credenciais.';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
