@@ -29,7 +29,7 @@ function AppLayout({ children, currentPageName }) {
   // Loading
   if (authUser === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0B3936" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0F1C1B" }}>
         <div className="w-10 h-10 border-2 border-[#CEF17B] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -54,7 +54,7 @@ function AppLayout({ children, currentPageName }) {
   ];
 
   const isActive = (path) => location.pathname === path;
-  const appBg = "#0B3936";
+  const appBg = isDark ? "#0F1C1B" : "#0B3936";
   const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "rgba(11, 57, 54, 0.97)";
 
   return (
