@@ -62,7 +62,7 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-
+  // Clean build trigger
   return (
     <>
       <style>{`
