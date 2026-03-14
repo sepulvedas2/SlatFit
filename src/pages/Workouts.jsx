@@ -6,15 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Play, Pause, RotateCcw, Flame, Clock, 
-  Target, CheckCircle, Zap, Trophy, ArrowLeft, TrendingUp, Calendar, Dumbbell
+  TrendingUp
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import HIITTimer from "../components/workouts/HIITTimer";
-import ExerciseBlock from "../components/workouts/ExerciseBlock";
-import WorkoutSummary from "../components/workouts/WorkoutSummary";
+import { motion } from "framer-motion";
 import WeeklyPlan from "../components/workouts/WeeklyPlan";
 import MyWorkouts from "../components/workouts/MyWorkouts";
 
