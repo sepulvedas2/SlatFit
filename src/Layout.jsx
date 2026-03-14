@@ -51,7 +51,7 @@ function AppLayout({ children, currentPageName }) {
 
   const isActive = (path) => location.pathname === path;
   const appBg = isDark ? "#0F1C1B" : "#084734";
-  const navBg = "#0B3936";
+  const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "rgba(8, 71, 52, 0.97)";
 
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
