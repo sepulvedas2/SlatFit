@@ -50,8 +50,8 @@ function AppLayout({ children, currentPageName }) {
   ];
 
   const isActive = (path) => location.pathname === path;
-  const appBg = isDark ? "#0F1C1B" : "#084734";
-  const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "rgba(8, 71, 52, 0.97)";
+  const appBg = isDark ? "#0F1C1B" : "#0B3936";
+  const navBg = isDark ? "rgba(15, 28, 27, 0.98)" : "rgba(11, 57, 54, 0.97)";
 
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: appBg }}>
@@ -59,7 +59,7 @@ function AppLayout({ children, currentPageName }) {
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
         * { font-family: 'Inter', sans-serif; }
         h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; font-weight: 700; }
-        .gradient-primary { background: linear-gradient(135deg, #084734, #CEF17B); }
+        .gradient-primary { background: linear-gradient(135deg, #0B3936, #CEF17B); }
         .gradient-card {
           background: linear-gradient(180deg, #CEEDB2, #CEF17B);
           backdrop-filter: blur(20px);

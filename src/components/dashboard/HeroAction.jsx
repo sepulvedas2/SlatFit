@@ -30,7 +30,7 @@ export default function HeroAction({ nextWorkout, allDone }) {
           <p className="text-white text-xl font-bold mt-0.5">💪 Pronto para treinar?</p>
         </div>
         <Link to={createPageUrl("Workouts")} className="block">
-          <Button className="w-full h-16 text-lg font-black rounded-2xl shadow-lg bg-[#CEF17B] hover:bg-[#b8d966] text-[#084734] hover:scale-[1.02] active:scale-[0.98] transition-all">
+          <Button className="w-full h-16 text-lg font-black rounded-2xl shadow-lg bg-[#CEF17B] hover:bg-[#b8d966] text-[#0B3936] hover:scale-[1.02] active:scale-[0.98] transition-all">
             <Dumbbell className="w-6 h-6 mr-2" />
             Ver Planilhas de Treino
           </Button>
@@ -49,7 +49,7 @@ export default function HeroAction({ nextWorkout, allDone }) {
         <p className="text-[#CEEDB2] text-xs mt-0.5">{nextWorkout.dayLabel} · {nextWorkout.planTitle}</p>
       </div>
       <Link to={createPageUrl("Workouts")} className="block">
-        <Button className="w-full h-16 text-lg font-black rounded-2xl shadow-lg bg-[#CEF17B] hover:bg-[#b8d966] text-[#084734] hover:scale-[1.02] active:scale-[0.98] transition-all">
+        <Button className="w-full h-16 text-lg font-black rounded-2xl shadow-lg bg-[#CEF17B] hover:bg-[#b8d966] text-[#0B3936] hover:scale-[1.02] active:scale-[0.98] transition-all">
           <Dumbbell className="w-6 h-6 mr-2" />
           Iniciar Treino
         </Button>
