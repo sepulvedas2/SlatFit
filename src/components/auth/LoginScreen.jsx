@@ -53,7 +53,7 @@ export default function LoginScreen({ onLogin }) {
           </div>
 
           {/* Tabs */}
-          <div className="flex rounded-xl p-1 gap-1" style={{ backgroundColor: "#0F3936" }}>
+          <div className="flex rounded-xl p-1 gap-1" style={{ backgroundColor: "#0B3936" }}>
             {['login', 'register'].map((t) => (
               <button
                 key={t}
