@@ -226,7 +226,6 @@ export default function Workouts() {
             <WeeklyPlan 
               weekNumber={selectedWeek}
               dailyWorkouts={dailyWorkouts}
-              onStartWorkout={handleStartWorkout}
               onCompleteDay={handleCompleteDay}
             />
           </div>
