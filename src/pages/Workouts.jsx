@@ -117,11 +117,6 @@ export default function Workouts() {
     }
   };
 
-  const handleBackToPlan = () => {
-    setView("plan");
-    setWorkoutStarted(false);
-  };
-
   // Weekly Plan View (Main View)
     const weekOptions = [
       { number: 1, title: "Planilha 1", subtitle: "Iniciante" },
