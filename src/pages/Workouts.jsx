@@ -89,75 +89,7 @@ export default function Workouts() {
     initialData: [],
   });
 
-  const hiitWorkout = {
-    title: "HIIT para Emagrecimento",
-    description: "Treino intervalado de alta intensidade focado em queima de gordura",
-    duration: "25-35 min",
-    intensity: "Alta",
-    calories: "250-350 kcal",
-    blocks: [
-      {
-        id: 1,
-        title: "Bloco 1: Mobilidade do Quadril",
-        exercises: [
-          { name: "Agachamento livre", reps: "10x", duration: 30 },
-          { name: "Polichinelo", reps: "20x", duration: 30 },
-          { name: "Flexão de braço (joelho no chão)", reps: "10x", duration: 30 },
-          { name: "Prancha baixa", reps: '20"', duration: 20 }
-        ]
-      },
-      {
-        id: 2,
-        title: "Bloco 2: Flexão de Quadril Deitado",
-        exercises: [
-          { name: "Agachamento sumô", reps: "10x", duration: 30 },
-          { name: "Corrida no colchonete", reps: "20x", duration: 30 },
-          { name: "Abdominal curto", reps: "30x", duration: 30 },
-          { name: "Passada para trás", reps: "8/8", duration: 30 }
-        ]
-      },
-      {
-        id: 3,
-        title: "Bloco 3: Mergulho no Chão",
-        exercises: [
-          { name: "Agachamento lateral", reps: "10/10", duration: 30 },
-          { name: "Corrida curta", reps: "20x", duration: 30 },
-          { name: "Elevação pélvica", reps: "10x", duration: 30 },
-          { name: "Passada à frente", reps: "8/8", duration: 30 }
-        ]
-      },
-      {
-        id: 4,
-        title: "Bloco 4: Mobilidade Escápula + Rotação",
-        exercises: [
-          { name: "Agachamento livre", reps: "20x", duration: 30 },
-          { name: "Burpee (cadeira ou caixa)", reps: "10x", duration: 30 },
-          { name: "Elevação lateral de ombro", reps: "10x", duration: 30 },
-          { name: "Prancha alta", reps: '20"', duration: 20 }
-        ]
-      },
-      {
-        id: 5,
-        title: "Bloco 5: Rotação de Tronco Lateral",
-        exercises: [
-          { name: "Corrida na cadeira", reps: "30x", duration: 30 },
-          { name: "Prancha lateral", reps: "10x", duration: 30 },
-          { name: "Corrida curta", reps: "30x", duration: 30 },
-          { name: 'Mobilidade "Gato"', reps: '10"', duration: 10 }
-        ]
-      },
-      {
-        id: 6,
-        title: "Bloco 6: Mobilidade de Quadril Ajoelhado",
-        exercises: [
-          { name: "Agachamento", reps: "10x", duration: 30 },
-          { name: "Corrida com braços à frente", reps: "20x", duration: 30 },
-          { name: "Flexão com joelho", reps: "10x", duration: 30 },
-          { name: "Abdominal longo", reps: "30x", duration: 30 }
-        ]
-      }
-    ]
-  };
+
 
   const saveWorkoutMutation = useMutation({
     mutationFn: async (workoutData) => {
