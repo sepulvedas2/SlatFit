@@ -690,29 +690,30 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                             >
                               {/* Imagem do exercício */}
                               <div className="relative group">
-                               <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-[#CEF17B]/20">
-                                 <img 
-                                   src={hasImage || getExerciseImage(exercise.name)} 
-                                   alt={exercise.name}
-                                   className="w-full h-full object-cover"
-                                   onError={(e) => { e.target.src = getExerciseImage(exercise.name); }}
-                                 />
-                                 {hasImage && (
-                                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                     <button
-                                       onClick={() => triggerFileInput(exercise.name)}
-                                       className="p-1 bg-white/20 rounded hover:bg-white/30"
-                                     >
-                                       <Upload className="w-3 h-3 text-white" />
-                                     </button>
-                                     <button
-                                       onClick={() => removeImage(exercise.name)}
-                                       className="p-1 bg-red-500/50 rounded hover:bg-red-500/70"
-                                     >
-                                       <X className="w-3 h-3 text-white" />
-                                     </button>
-                                   </div>
-                                 )}
+                                <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-[#CEF17B]/20">
+                                  <img 
+                                    src={hasImage || getExerciseImage(exercise.name)} 
+                                    alt={exercise.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { e.target.src = getExerciseImage(exercise.name); }}
+                                  />
+                                  {hasImage && (
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                      <button
+                                        onClick={() => triggerFileInput(exercise.name)}
+                                        className="p-1 bg-white/20 rounded hover:bg-white/30"
+                                      >
+                                        <Upload className="w-3 h-3 text-white" />
+                                      </button>
+                                      <button
+                                        onClick={() => removeImage(exercise.name)}
+                                        className="p-1 bg-red-500/50 rounded hover:bg-red-500/70"
+                                      >
+                                        <X className="w-3 h-3 text-white" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                               
                               <div className="flex-1">
