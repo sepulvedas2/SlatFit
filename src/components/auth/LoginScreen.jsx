@@ -34,7 +34,7 @@ export default function LoginScreen({ onLogin }) {
   };
 
   return (
-    <section className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "#0E3934" }}>
+    <section className="min-h-screen w-full flex items-center justify-center px-4" style={{ backgroundColor: "#0E3934" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;800;900&family=Inter:wght@400;500;600&display=swap');
         .login-input { font-family: 'Inter', sans-serif; transition: all 0.2s; }
