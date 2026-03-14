@@ -308,8 +308,8 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
             )}
           </div>
 
-          {/* Actions */}
-          {isAdmin && !isHIIT && (
+          {/* Actions - Editing disabled for HIIT */}
+          {isAdmin && !isHIIT ? (
             <div className="flex gap-3 pt-4 border-t border-white/10">
               {editing ? (
                 <>
@@ -352,8 +352,16 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                   Editar Exercício
                 </Button>
               )}
-            </div>
-          )}
+              </div>
+              ) : (
+              isHIIT && (
+              <div className="flex gap-3 pt-4 border-t border-white/10">
+                <p className="text-sm text-white/60 text-center w-full py-2">
+                  💡 Imagens são fixas no sistema. Não é possível adicionar fotos na aba HIIT.
+                </p>
+              </div>
+              )
+              )}
 
         </div>
       </DialogContent>
