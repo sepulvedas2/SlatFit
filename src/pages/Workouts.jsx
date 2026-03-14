@@ -23,14 +23,8 @@ import SlatFitAssistant from "../components/chat/SlatFitAssistant";
 
 export default function Workouts() {
   const [user, setUser] = useState(null);
-  const [view, setView] = useState("plan"); // "plan", "hiit", "workout"
   const [activeTab, setActiveTab] = useState("app-workouts");
   const [selectedWeek, setSelectedWeek] = useState(1);
-  const [workoutStarted, setWorkoutStarted] = useState(false);
-  const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
-  const [selectedBlockId, setSelectedBlockId] = useState(null);
-  const [workoutCompleted, setWorkoutCompleted] = useState(false);
-  const [totalTime, setTotalTime] = useState(0);
 
   const queryClient = useQueryClient();
 
