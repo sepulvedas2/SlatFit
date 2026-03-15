@@ -30,7 +30,21 @@ Deno.serve(async (req) => {
       if (query?.order) q = q.order(query.order.column, { ascending: query.order.ascending ?? false });
       if (query?.limit) q = q.limit(query.limit);
       const { data: rows, error } = await q;
-      if (error) return Response.json({ error: error.message }, { status: 400 });
+      if (error) {
+        console.error(`[Supabase] SELECT ERROR em ${table}:`, {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        return Response.json({ 
+          error: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        }, { status: 400 });
+      }
+      console.log(`[Supabase] SELECT retornou ${rows?.length || 0} registros de ${table}`);
       return Response.json({ data: rows });
     }
 
@@ -111,6 +125,11 @@ Deno.serve(async (req) => {
 
     return Response.json({ error: 'Action not found' }, { status: 400 });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('[Supabase] Erro fatal:', error.message, error.stack);
+    return Response.json({ 
+      error: error.message,
+      details: error.toString(),
+      stack: error.stack 
+    }, { status: 500 });
   }
 });

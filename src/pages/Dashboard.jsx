@@ -123,11 +123,17 @@ export default function Dashboard() {
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
-      const profiles = await db.UserProfile.filter({ user_email: user.email });
-      return profiles[0] || null;
+      try {
+        const profiles = await db.UserProfile.filter({ user_email: user.email });
+        return profiles[0] || null;
+      } catch (error) {
+        console.error('[Dashboard] Erro ao buscar perfil:', error);
+        return null;
+      }
     },
     enabled: !!user?.email,
     staleTime: 5 * 60 * 1000,
+    retry: 1,
   });
 
   const today = format(new Date(), 'yyyy-MM-dd');

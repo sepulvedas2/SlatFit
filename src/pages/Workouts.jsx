@@ -32,10 +32,16 @@ export default function Workouts() {
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
       if (!user?.email) return null;
-      const profiles = await db.UserProfile.filter({ user_email: user.email });
-      return profiles[0] || null;
+      try {
+        const profiles = await db.UserProfile.filter({ user_email: user.email });
+        return profiles[0] || null;
+      } catch (error) {
+        console.error('[Workouts] Erro ao buscar perfil:', error);
+        return null;
+      }
     },
     enabled: !!user?.email,
+    retry: 1,
   });
 
   const { data: todayWorkouts = [] } = useQuery({
