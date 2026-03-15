@@ -48,7 +48,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   // Create a map of exercise names to their latest PR
   const prMap = prRecords.reduce((acc, pr) => {
-    if (!acc[pr.exercise_name] || new Date(pr.pr_date) > new Date(acc[pr.exercise_name].pr_date)) {
+    if (!acc[pr.exercise_name] || new Date(pr.data_pr) > new Date(acc[pr.exercise_name].data_pr)) {
       acc[pr.exercise_name] = pr;
     }
     return acc;
@@ -742,7 +742,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                                 {currentPR && (
                                   <p className="text-xs text-orange-400 mt-0.5 flex items-center gap-1">
                                     <Trophy className="w-3 h-3" />
-                                    PR: {currentPR.weight_kg}kg x {currentPR.reps} reps
+                                    PR: {currentPR.peso_kg}kg x {currentPR.repeticoes} reps
                                   </p>
                                 )}
                               </div>
