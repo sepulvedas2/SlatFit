@@ -10,53 +10,44 @@ Deno.serve(async (req) => {
 
     const setupResults = [];
 
-    // 1. USER_PROGRESS - Sistema centralizado de XP
+    // 1. USER_PROGRESS - Sistema de XP e Níveis
     try {
       await supabase.rpc('exec_sql', {
         sql: `
           CREATE TABLE IF NOT EXISTS user_progress (
             id uuid primary key default gen_random_uuid(),
             created_date timestamptz default now(),
-            user_id text not null unique,
-            user_email text not null,
+            updated_date timestamptz default now(),
+            updated_at timestamptz default now(),
+            user_id text,
+            user_email text not null unique,
             total_xp integer default 0,
             nivel integer default 1,
             xp_atual integer default 0,
             xp_para_proximo_nivel integer default 100,
+            xp_proximo_nivel integer default 100,
+            weekly_goal integer default 4,
             streak_dias integer default 0,
             longest_streak integer default 0,
             last_activity_date date,
             total_treinos integer default 0,
             total_missoes integer default 0,
             total_desafios integer default 0,
-            weekly_goal integer default 4,
-            weekly_completed integer default 0,
-            last_reset_week text,
-            updated_at timestamptz default now()
+            total_nutricao integer default 0
           );
 
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS user_id text;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS user_email text;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS total_xp integer default 0;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS nivel integer default 1;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS xp_atual integer default 0;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS xp_para_proximo_nivel integer default 100;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS streak_dias integer default 0;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS longest_streak integer default 0;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS last_activity_date date;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS total_treinos integer default 0;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS total_missoes integer default 0;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS total_desafios integer default 0;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS weekly_goal integer default 4;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS weekly_completed integer default 0;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS last_reset_week text;
           ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS updated_at timestamptz default now();
+          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS xp_para_proximo_nivel integer default 100;
+          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS xp_proximo_nivel integer default 100;
+          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS weekly_goal integer default 4;
+          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS total_nutricao integer default 0;
 
           ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "user_progress_all" ON user_progress;
           CREATE POLICY "user_progress_all" ON user_progress
-          FOR ALL USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
         `
       });
       setupResults.push({ table: 'user_progress', status: 'OK' });
@@ -64,34 +55,7 @@ Deno.serve(async (req) => {
       setupResults.push({ table: 'user_progress', status: 'ERROR', error: err.message });
     }
 
-    // 2. XP_EVENTS
-    try {
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS xp_events (
-            id uuid primary key default gen_random_uuid(),
-            user_id text not null,
-            user_email text not null,
-            tipo_acao text not null,
-            xp_ganho integer not null,
-            total_xp_apos integer default 0,
-            metadata jsonb default '{}'::jsonb,
-            created_at timestamptz default now()
-          );
-
-          ALTER TABLE xp_events ENABLE ROW LEVEL SECURITY;
-
-          DROP POLICY IF EXISTS "xp_events_all" ON xp_events;
-          CREATE POLICY "xp_events_all" ON xp_events
-          FOR ALL USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
-        `
-      });
-      setupResults.push({ table: 'xp_events', status: 'OK' });
-    } catch (err) {
-      setupResults.push({ table: 'xp_events', status: 'ERROR', error: err.message });
-    }
-
-    // 3. HABITS
+    // 2. HABITS
     try {
       await supabase.rpc('exec_sql', {
         sql: `
@@ -358,6 +322,10 @@ Deno.serve(async (req) => {
     } catch (err) {
       setupResults.push({ table: 'user_challenges', status: 'ERROR', error: err.message });
     }
+
+    await supabase.rpc('exec_sql', {
+      sql: `NOTIFY pgrst, 'reload schema';`
+    });
 
     console.log('[Database Setup] Configuração concluída');
 
