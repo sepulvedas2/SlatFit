@@ -172,6 +172,7 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
       tipo_acao: 'nutricao'
     });
     queryClient.invalidateQueries(['userProgress']);
+    queryClient.invalidateQueries(['globalUserProgress']);
     setManualData({ food_name: "", portion_size: "", calories: "", protein: "", carbs: "", fats: "" });
     setView("home");
     setSaving(false);

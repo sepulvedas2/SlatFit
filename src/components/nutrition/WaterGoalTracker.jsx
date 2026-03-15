@@ -87,7 +87,10 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
     mutationFn: async () => {
       return base44.functions.invoke('updateXP', { xp_ganho: 20, tipo_acao: 'nutricao' });
     },
-    onSuccess: () => queryClient.invalidateQueries(['userProgress']),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['userProgress']);
+      queryClient.invalidateQueries(['globalUserProgress']);
+    },
   });
 
   const handleAddWater = async (amount) => {

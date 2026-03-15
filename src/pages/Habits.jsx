@@ -189,7 +189,7 @@ export default function Habits() {
     console.log('[Habits] Hábito atualizado com sucesso:', result);
     queryClient.invalidateQueries(["habitLogs"]);
     queryClient.invalidateQueries(['userProgress']);
-    queryClient.invalidateQueries(['globalProgressRanking']);
+    queryClient.invalidateQueries(['globalUserProgress']);
     
     if (result?.added && result?.xpDelta > 0) {
       setXpAnimation({ value: result.xpDelta });
@@ -385,10 +385,10 @@ export default function Habits() {
                 streak={streak}
                 bestStreak={bestStreak}
                 weekConsistency={weekConsistency}
-                totalXp={userProgress?.total_xp || 0}
+                totalXp={totalHabitXp}
               />
               <HabitStats
-                totalXp={userProgress?.total_xp || 0}
+                totalXp={totalHabitXp}
                 streak={streak}
                 bestStreak={bestStreak}
                 weekConsistency={weekConsistency}
