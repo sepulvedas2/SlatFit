@@ -11,20 +11,20 @@ export default function DailyMissions({ userEmail }) {
 
   const { data: todayFoods } = useQuery({
     queryKey: ['todayFoods', userEmail, today],
-    queryFn: () => base44.entities.FoodLog.filter({ 
-      user_email: userEmail, 
-      log_date: today 
-    }),
+    queryFn: async () => {
+      const { db } = await import('@/components/supabaseApi');
+      return db.FoodLog.filter({ user_email: userEmail, log_date: today });
+    },
     enabled: !!userEmail,
     initialData: [],
   });
 
   const { data: todayWorkouts } = useQuery({
     queryKey: ['todayWorkouts', userEmail, today],
-    queryFn: () => base44.entities.WorkoutLog.filter({ 
-      user_email: userEmail, 
-      completed_date: today 
-    }),
+    queryFn: async () => {
+      const { db } = await import('@/components/supabaseApi');
+      return db.WorkoutLog.filter({ user_email: userEmail, completed_date: today });
+    },
     enabled: !!userEmail,
     initialData: [],
   });
@@ -32,10 +32,8 @@ export default function DailyMissions({ userEmail }) {
   const { data: todayCheckIn } = useQuery({
     queryKey: ['checkIn', userEmail, today],
     queryFn: async () => {
-      const checkIns = await base44.entities.DailyCheckIn.filter({
-        user_email: userEmail,
-        check_in_date: today
-      });
+      const { db } = await import('@/components/supabaseApi');
+      const checkIns = await db.DailyCheckIn.filter({ user_email: userEmail, check_in_date: today });
       return checkIns[0] || null;
     },
     enabled: !!userEmail
