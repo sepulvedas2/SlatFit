@@ -88,7 +88,7 @@ export const db = {
   IAGOConversation: createEntityAPI('iago_conversations'),
   NutritionData: createEntityAPI('nutrition_data'),
   AgendaTask: createEntityAPI('agenda_tasks'),
-  Exercise: createEntityAPI('exercises', false), // false = não filtrar por user_email (global)
+  Exercise: createEntityAPI('exercises', false),
   WeeklyProgress: createEntityAPI('weekly_progress'),
   DailyWorkout: createEntityAPI('daily_workouts'),
   CustomWorkout: createEntityAPI('custom_workouts'),
@@ -104,4 +104,8 @@ export const db = {
   SavedRoute: createEntityAPI('saved_routes'),
   Habit: createEntityAPI('habits'),
   HabitLog: createEntityAPI('habit_logs'),
+  UserProgress: createEntityAPI('user_progress'),
+  Ranking: createEntityAPI('ranking'),
+  Mission: createEntityAPI('missions'),
+  MissionProgress: createEntityAPI('missions_progress'),
 };

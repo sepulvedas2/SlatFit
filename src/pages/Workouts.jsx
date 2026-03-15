@@ -98,26 +98,50 @@ export default function Workouts() {
   const completeDayMutation = useMutation({
     mutationFn: async ({ weekNumber, dayOfWeek }) => {
       console.log('[Workouts] Completando dia:', dayOfWeek, 'semana:', weekNumber);
-      // Check if already exists
+      
+      // Verificar se já existe
       const existing = dailyWorkouts.find(w => w.day_of_week === dayOfWeek);
+      let result;
+      
       if (existing) {
         console.log('[Workouts] Atualizando treino existente:', existing.id);
-        return db.DailyWorkout.update(existing.id, { completed: true, completed_date: new Date().toISOString().split('T')[0] });
+        result = await db.DailyWorkout.update(existing.id, { 
+          completed: true, 
+          completed_date: new Date().toISOString().split('T')[0],
+          xp_earned: 50
+        });
+      } else {
+        console.log('[Workouts] Criando novo treino concluído');
+        result = await db.DailyWorkout.create({
+          user_email: user.email,
+          week_number: weekNumber,
+          day_of_week: dayOfWeek,
+          muscle_group: "treino",
+          completed: true,
+          completed_date: new Date().toISOString().split('T')[0],
+          xp_earned: 50
+        });
       }
-      console.log('[Workouts] Criando novo treino concluído');
-      return db.DailyWorkout.create({
-        user_email: user.email,
-        week_number: weekNumber,
-        day_of_week: dayOfWeek,
-        muscle_group: "treino",
-        completed: true,
-        completed_date: new Date().toISOString().split('T')[0]
-      });
+
+      // Adicionar XP ao usuário
+      try {
+        await base44.functions.invoke('updateXP', { 
+          xp_ganho: 50, 
+          tipo_acao: 'treino' 
+        });
+        console.log('[Workouts] XP adicionado com sucesso');
+      } catch (xpError) {
+        console.error('[Workouts] Erro ao adicionar XP:', xpError);
+      }
+
+      return result;
     },
     onSuccess: () => {
-      console.log('[Workouts] Treino salvo com sucesso');
+      console.log('[Workouts] Treino salvo e XP atualizado');
       queryClient.invalidateQueries(['dailyWorkouts']);
       queryClient.invalidateQueries(['weekWorkouts']);
+      queryClient.invalidateQueries(['userProgress']);
+      queryClient.invalidateQueries(['ranking']);
     },
     onError: (error) => {
       console.error('[Workouts] Erro ao salvar treino:', error);

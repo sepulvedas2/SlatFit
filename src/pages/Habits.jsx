@@ -141,16 +141,16 @@ export default function Habits() {
       const xpEarned = calcXP(habit.xp_per_completion || 10, streak);
       console.log('[Habits] Toggle hábito:', habit.name, 'data:', dateStr, 'existente:', !!existingLog);
 
+      let result;
       if (existingLog) {
-        // Toggle: se já está completo, remove; se não, marca como completo
         if (existingLog.completed) {
           console.log('[Habits] Removendo conclusão do hábito');
           await db.HabitLog.delete(existingLog.id);
-          return { xpDelta: -xpEarned, added: false };
+          result = { xpDelta: -xpEarned, added: false };
         } else {
           console.log('[Habits] Marcando hábito como completo');
           await db.HabitLog.update(existingLog.id, { completed: true, xp_earned: xpEarned });
-          return { xpDelta: xpEarned, added: true };
+          result = { xpDelta: xpEarned, added: true };
         }
       } else {
         console.log('[Habits] Criando novo log de hábito');
@@ -163,16 +163,33 @@ export default function Habits() {
           xp_earned: xpEarned,
           completed_at: new Date().toISOString(),
         });
-        return { xpDelta: xpEarned, added: true };
+        result = { xpDelta: xpEarned, added: true };
       }
+
+      // Adicionar XP ao sistema de progressão
+      if (result.added && result.xpDelta > 0) {
+        try {
+          await base44.functions.invoke('updateXP', { 
+            xp_ganho: result.xpDelta, 
+            tipo_acao: 'habito' 
+          });
+          console.log('[Habits] XP adicionado ao progresso');
+        } catch (xpError) {
+          console.error('[Habits] Erro ao adicionar XP:', xpError);
+        }
+      }
+
+      return result;
     },
     onSuccess: (result, variables) => {
     console.log('[Habits] Hábito atualizado com sucesso:', result);
     queryClient.invalidateQueries(["habitLogs"]);
+    queryClient.invalidateQueries(['userProgress']);
+    queryClient.invalidateQueries(['ranking']);
+    
     if (result?.added && result?.xpDelta > 0) {
       setXpAnimation({ value: result.xpDelta });
       setTimeout(() => setXpAnimation(null), 1500);
-      // Verificar 100% no dia
       const todayLogs = (allLogs.filter(l => l.log_date === today && l.completed)).length + 1;
       if (todayLogs >= habits.length && habits.length > 0) {
         setPerfectDayToast(true);
