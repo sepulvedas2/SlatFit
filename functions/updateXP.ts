@@ -17,7 +17,8 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { xp_ganho, tipo_acao } = await req.json();
-    
+    const userId = user.id || user.email;
+
     console.log(`[XP] ${user.email} ganhou ${xp_ganho} XP por ${tipo_acao}`);
 
     // 1. Buscar progresso atual
@@ -34,12 +35,16 @@ Deno.serve(async (req) => {
       const { data: newProgress, error: createError } = await supabase
         .from('user_progress')
         .insert({
+          user_id: userId,
           user_email: user.email,
           total_xp: 0,
           nivel: 1,
           xp_atual: 0,
+          xp_para_proximo_nivel: 100,
           xp_proximo_nivel: 100,
-          streak_dias: 0
+          streak_dias: 0,
+          weekly_goal: 4,
+          updated_at: new Date().toISOString()
         })
         .select()
         .single();
@@ -57,7 +62,7 @@ Deno.serve(async (req) => {
     const novoTotalXP = currentProgress.total_xp + xp_ganho;
     let novoXPAtual = currentProgress.xp_atual + xp_ganho;
     let novoNivel = currentProgress.nivel;
-    let xpProximoNivel = currentProgress.xp_proximo_nivel;
+    let xpProximoNivel = currentProgress.xp_para_proximo_nivel || currentProgress.xp_proximo_nivel || 100;
 
     // 3. Verificar subida de nível
     const nivelUps = [];
@@ -85,19 +90,23 @@ Deno.serve(async (req) => {
 
     // 5. Atualizar contadores
     const updates = {
+      user_id: userId,
       total_xp: novoTotalXP,
       nivel: novoNivel,
       xp_atual: novoXPAtual,
+      xp_para_proximo_nivel: xpProximoNivel,
       xp_proximo_nivel: xpProximoNivel,
       streak_dias: novoStreak,
       longest_streak: Math.max(novoStreak, currentProgress.longest_streak || 0),
       last_activity_date: hoje,
+      updated_at: new Date().toISOString(),
       updated_date: new Date().toISOString()
     };
 
     if (tipo_acao === 'treino') updates.total_treinos = (currentProgress.total_treinos || 0) + 1;
     if (tipo_acao === 'missao') updates.total_missoes = (currentProgress.total_missoes || 0) + 1;
     if (tipo_acao === 'desafio') updates.total_desafios = (currentProgress.total_desafios || 0) + 1;
+    if (tipo_acao === 'nutricao') updates.total_nutricao = (currentProgress.total_nutricao || 0) + 1;
 
     // 6. Atualizar no banco
     const { data: updated, error: updateError } = await supabase
@@ -110,54 +119,6 @@ Deno.serve(async (req) => {
     if (updateError) {
       console.error('[XP] Erro ao atualizar progresso:', updateError);
       return Response.json({ error: updateError.message }, { status: 400 });
-    }
-
-    // 7. Atualizar ranking
-    try {
-      const { data: rankingEntry } = await supabase
-        .from('ranking')
-        .select('*')
-        .eq('user_email', user.email)
-        .single();
-
-      if (rankingEntry) {
-        await supabase
-          .from('ranking')
-          .update({
-            total_xp: novoTotalXP,
-            nivel: novoNivel,
-            updated_date: new Date().toISOString()
-          })
-          .eq('user_email', user.email);
-      } else {
-        await supabase
-          .from('ranking')
-          .insert({
-            user_email: user.email,
-            user_name: user.full_name || user.email,
-            total_xp: novoTotalXP,
-            nivel: novoNivel
-          });
-      }
-
-      // Recalcular posições
-      const { data: allRankings } = await supabase
-        .from('ranking')
-        .select('user_email, total_xp')
-        .order('total_xp', { ascending: false });
-
-      if (allRankings) {
-        for (let i = 0; i < allRankings.length; i++) {
-          await supabase
-            .from('ranking')
-            .update({ posicao: i + 1 })
-            .eq('user_email', allRankings[i].user_email);
-        }
-      }
-
-      console.log('[XP] Ranking atualizado');
-    } catch (rankError) {
-      console.error('[XP] Erro ao atualizar ranking:', rankError);
     }
 
     return Response.json({

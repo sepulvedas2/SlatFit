@@ -173,41 +173,37 @@ export default function Dashboard() {
     staleTime: 2 * 60 * 1000,
   });
 
-  const { data: userPoints } = useQuery({
-    queryKey: ['userPoints', user?.email],
+  const { data: userProgress } = useQuery({
+    queryKey: ['userProgress', user?.email],
     queryFn: async () => {
-      const list = await db.UserPoints.filter({ user_email: user.email });
+      const list = await db.UserProgress.filter({ user_email: user.email });
       return list[0] || null;
     },
     enabled: !!user?.email,
     staleTime: 2 * 60 * 1000,
   });
 
-  // Auto-reset streak if user hasn't trained in 2+ days
-  useEffect(() => {
-    if (!userPoints || !userPoints.id) return;
-    const today = new Date().toISOString().split("T")[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-    const last = userPoints.last_workout_date;
-    if (last && last !== today && last !== yesterday && (userPoints.daily_streak || 0) > 0) {
-      db.UserPoints.update(userPoints.id, { daily_streak: 0 }).then(() => {
-        queryClient.invalidateQueries(['userPoints']);
-      });
-    }
-  }, [userPoints]);
-
   const saveWeeklyGoalMutation = useMutation({
     mutationFn: async (goal) => {
       console.log('[Dashboard] Salvando meta semanal:', goal);
-      if (userPoints?.id) {
-        return db.UserPoints.update(userPoints.id, { weekly_goal: goal });
+      if (userProgress?.id) {
+        return db.UserProgress.update(userProgress.id, { weekly_goal: goal });
       } else if (user?.email) {
-        return db.UserPoints.create({ user_email: user.email, weekly_goal: goal });
+        return db.UserProgress.create({
+          user_id: user.id || user.email,
+          user_email: user.email,
+          total_xp: 0,
+          nivel: 1,
+          xp_atual: 0,
+          xp_para_proximo_nivel: 100,
+          xp_proximo_nivel: 100,
+          weekly_goal: goal,
+        });
       }
     },
     onSuccess: () => {
       console.log('[Dashboard] Meta semanal salva com sucesso');
-      queryClient.invalidateQueries(['userPoints']);
+      queryClient.invalidateQueries(['userProgress']);
       setShowGoalModal(false);
     },
     onError: (error) => {
@@ -223,6 +219,13 @@ export default function Dashboard() {
     : 0;
 
   const { nextWorkout, allDone } = getNextWorkout(allDailyWorkouts);
+  const currentWeekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+  const dashboardProgress = {
+    daily_streak: userProgress?.streak_dias || 0,
+    longest_streak: userProgress?.longest_streak || 0,
+    weekly_goal: userProgress?.weekly_goal || 4,
+    weekly_completed: allDailyWorkouts.filter(w => w.completed && w.completed_date >= currentWeekStart).length,
+  };
 
   return (
     <div className="min-h-screen pb-24">
@@ -230,7 +233,7 @@ export default function Dashboard() {
 
         {showGoalModal && (
           <WeeklyGoalModal
-            currentGoal={userPoints?.weekly_goal || 4}
+            currentGoal={dashboardProgress.weekly_goal}
             onSave={(goal) => saveWeeklyGoalMutation.mutate(goal)}
             onClose={() => setShowGoalModal(false)}
           />
@@ -245,7 +248,7 @@ export default function Dashboard() {
 
             {/* 3. Streak + Meta Semanal */}
             <StreakWeeklyCard
-              points={userPoints}
+              points={dashboardProgress}
               onEditGoal={() => setShowGoalModal(true)}
             />
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/components/supabaseApi";
 import {
   Flame, Star, ChevronDown, ChevronUp,
   Lightbulb, Check, Plus, Trash2, Edit2, ArrowLeft
@@ -157,51 +156,19 @@ export default function ScannerResultScreen({
     setLoadingSuggestion(false);
   };
 
-  // XP + challenge check after saving
-  const checkFoodChallenges = async (userEmail, savedData) => {
-    const [pointsList, allFoods] = await Promise.all([
-      db.UserPoints.filter({ user_email: userEmail }),
-      db.FoodLog.filter({ user_email: userEmail }),
-    ]);
-    const points = pointsList[0];
-    if (!points) return;
-
-    let xpGain = 5; // base XP per meal logged
-
-    // Challenge: score >= 7 → +10 XP bonus
-    if (score >= 7) xpGain += 10;
-
-    // Challenge: logged 3 meals today → +30 XP (only when exactly hitting 3)
-    const today = new Date().toISOString().split("T")[0];
-    const todayCount = allFoods.filter(f => f.log_date === today).length + 1; // +1 for current save
-    if (todayCount === 3) xpGain += 30;
-
-    // Update XP
-    const newXp = (points.xp_current || 0) + xpGain;
-    const xpNeeded = points.xp_next_level || 100;
-    const newTotal = (points.total_points || 0) + xpGain;
-    if (newXp >= xpNeeded) {
-      await db.UserPoints.update(points.id, {
-        xp_current: newXp - xpNeeded,
-        level: (points.level || 1) + 1,
-        xp_next_level: Math.round(xpNeeded * 1.5),
-        total_points: newTotal,
-      });
-    } else {
-      await db.UserPoints.update(points.id, {
-        xp_current: newXp,
-        total_points: newTotal,
-      });
-    }
-  };
-
   const handleSave = async () => {
     setSaving(true);
     await onSave({ ...data, calories: cal, protein: prot, carbs, fats });
-    // fire-and-forget XP check
-    if (data.user_email || userProfile?.user_email) {
-      checkFoodChallenges(data.user_email || userProfile?.user_email, { cal, prot, carbs, fats }).catch(() => {});
-    }
+
+    let xpGain = 5;
+    if (score >= 7) xpGain += 10;
+    if ((todayFoods.length + 1) === 3) xpGain += 30;
+
+    await base44.functions.invoke('updateXP', {
+      xp_ganho: xpGain,
+      tipo_acao: 'nutricao'
+    });
+
     setSaving(false);
     setSaved(true);
   };

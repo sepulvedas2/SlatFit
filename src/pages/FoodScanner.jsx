@@ -167,6 +167,11 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
       carbs: manualData.carbs || 0,
       fats: manualData.fats || 0,
     });
+    await base44.functions.invoke('updateXP', {
+      xp_ganho: 5,
+      tipo_acao: 'nutricao'
+    });
+    queryClient.invalidateQueries(['userProgress']);
     setManualData({ food_name: "", portion_size: "", calories: "", protein: "", carbs: "", fats: "" });
     setView("home");
     setSaving(false);
