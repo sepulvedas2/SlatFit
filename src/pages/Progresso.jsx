@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/components/supabaseApi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format, startOfWeek, differenceInDays } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -12,9 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import AchievementsGrid from "../components/progress/AchievementsGrid";
 import { WorkoutsModal, CaloriesModal, StreakModal } from "../components/progress/StatsModals";
-
-// ── XP Actions ───────────────────────────────────────────────
-const XP_ACTIONS = { workout: 15, meal: 5, water: 10, login: 3 };
 
 function calculateStreak(logs) {
   if (!logs || logs.length === 0) return 0;
@@ -34,7 +31,6 @@ function calculateStreak(logs) {
 export default function Progresso() {
   const [user, setUser] = useState(null);
   const [modal, setModal] = useState(null);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -52,16 +48,25 @@ export default function Progresso() {
     enabled: !!user?.email,
   });
 
-  const { data: userPoints, refetch: refetchPoints } = useQuery({
-    queryKey: ['userPoints', user?.email],
+  const { data: userProgress } = useQuery({
+    queryKey: ['userProgress', user?.email],
     queryFn: async () => {
-      const pts = await db.UserPoints.filter({ user_email: user.email });
-      return pts[0] || null;
+      const progress = await db.UserProgress.filter({ user_email: user.email });
+      return progress[0] || null;
     },
     enabled: !!user?.email,
   });
 
-  const { data: userChallenges = [], refetch: refetchChallenges } = useQuery({
+  const { data: rankingEntry } = useQuery({
+    queryKey: ['ranking', user?.email],
+    queryFn: async () => {
+      const ranking = await db.Ranking.filter({ user_email: user.email });
+      return ranking[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
+  const { data: userChallenges = [] } = useQuery({
     queryKey: ['userChallenges', user?.email],
     queryFn: () => db.UserChallenge.filter({ user_email: user.email }),
     enabled: !!user?.email,
@@ -93,7 +98,7 @@ export default function Progresso() {
   });
 
   // ── Computed values ──────────────────────────────────────────
-  const totalXP = userPoints?.total_points || 0;
+  const totalXP = userProgress?.total_xp || 0;
   const streak = calculateStreak(allWorkoutLogs);
   const totalCaloriesBurned = allWorkoutLogs.reduce((s, l) => s + (l.calories_burned || 0), 0);
   const isActiveToday = allWorkoutLogs.some(l => l.completed_date === today);
@@ -197,6 +202,16 @@ export default function Progresso() {
                   <Target className="w-5 h-5 text-[#CEF17B]" />
                   <h3 className="text-white font-bold">Meu Objetivo</h3>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-white/5 p-3">
+                    <p className="text-white/50 text-xs">Nível atual</p>
+                    <p className="text-white font-bold text-lg">{userProgress?.nivel || 1}</p>
+                  </div>
+                  <div className="rounded-xl bg-white/5 p-3">
+                    <p className="text-white/50 text-xs">Posição no ranking</p>
+                    <p className="text-white font-bold text-lg">{rankingEntry?.posicao ? `#${rankingEntry.posicao}` : '—'}</p>
+                  </div>
+                </div>
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
                   <div className="text-3xl">
                     {profile?.goal === 'weight_loss' ? '🔥' : profile?.goal === 'muscle_gain' ? '💪' : '⚖️'}
@@ -213,7 +228,7 @@ export default function Progresso() {
 
                 {/* Rank Roadmap */}
                 <div>
-                  <p className="text-white/50 text-xs uppercase tracking-widest font-bold mb-3">Jornada de Ranking</p>
+                  <p className="text-white/50 text-xs uppercase tracking-widest font-bold mb-3">Jornada de Nível</p>
                   {[
                     { label: "Bronze", icon: "🥉", min: 0, max: 800 },
                     { label: "Prata", icon: "🥈", min: 801, max: 2500 },

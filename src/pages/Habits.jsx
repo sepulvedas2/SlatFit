@@ -40,7 +40,6 @@ function computeHabitStreak(logsByDate, habits) {
 
 export default function Habits() {
   const [user, setUser] = useState(null);
-  const [userPoints, setUserPoints] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState("grid"); // grid | stats
   const [xpAnimation, setXpAnimation] = useState(null);
@@ -51,11 +50,7 @@ export default function Habits() {
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
 
   useEffect(() => {
-    base44.auth.me().then(async (u) => {
-      setUser(u);
-      const pts = await db.UserPoints.filter({ user_email: u.email });
-      setUserPoints(pts[0] || null);
-    }).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
   const { data: habits = [] } = useQuery({
@@ -88,6 +83,15 @@ export default function Habits() {
     retry: 1,
   });
 
+  const { data: userProgress } = useQuery({
+    queryKey: ["userProgress", user?.email],
+    queryFn: async () => {
+      const progress = await db.UserProgress.filter({ user_email: user.email });
+      return progress[0] || null;
+    },
+    enabled: !!user?.email,
+  });
+
   // Agrupar logs por data
   const logsByDate = useMemo(() => {
     return allLogs.reduce((acc, log) => {
@@ -104,8 +108,8 @@ export default function Habits() {
   // Streak atual
   const streak = useMemo(() => computeHabitStreak(logsByDate, habits), [logsByDate, habits]);
 
-  // Best streak (simplificado: máximo da contagem atual)
-  const bestStreak = Math.max(streak, userPoints?.longest_streak || 0);
+  // Best streak salvo no sistema atual de progresso
+  const bestStreak = Math.max(streak, userProgress?.longest_streak || 0);
 
   // Consistência semanal
   const weekConsistency = useMemo(() => {

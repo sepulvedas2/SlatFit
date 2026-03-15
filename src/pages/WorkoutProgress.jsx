@@ -30,17 +30,7 @@ export default function WorkoutProgress() {
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
 
-  const { data: weeklyProgress } = useQuery({
-    queryKey: ['weeklyProgress', user?.email],
-    queryFn: () => db.WeeklyProgress.filter({ 
-      user_email: user.email,
-      current_week: true 
-    }),
-    enabled: !!user?.email,
-    initialData: [],
-  });
-
-  const { data: dailyWorkouts } = useQuery({
+  const { data: dailyWorkouts = [] } = useQuery({
     queryKey: ['dailyWorkouts', user?.email],
     queryFn: () => db.DailyWorkout.filter({ user_email: user.email }),
     enabled: !!user?.email,
@@ -55,12 +45,17 @@ export default function WorkoutProgress() {
     initialData: [],
   });
 
-  const currentProgress = weeklyProgress[0] || { progress_percentage: 0, days_completed: [], week_number: 1 };
+  const currentWeekNumber = dailyWorkouts.reduce((max, workout) => Math.max(max, workout.week_number || 1), 1);
+  const currentWeekEntries = dailyWorkouts.filter(w => (w.week_number || 1) === currentWeekNumber);
+  const currentWeekCompleted = currentWeekEntries.filter(w => w.completed);
+  const currentProgress = {
+    week_number: currentWeekNumber,
+    days_completed: currentWeekCompleted.map(w => w.day_of_week),
+    progress_percentage: Math.round((currentWeekCompleted.length / 6) * 100),
+  };
   const weekDays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
   const totalWorkouts = dailyWorkouts.filter(w => w.completed).length;
-  const weekWorkouts = dailyWorkouts.filter(w => 
-    w.week_number === currentProgress.week_number && w.completed
-  ).length;
+  const weekWorkouts = currentWeekCompleted.length;
 
   // Calculate detailed statistics
   const totalMinutes = workoutLogs.reduce((acc, log) => acc + (log.duration_minutes || 45), 0);
