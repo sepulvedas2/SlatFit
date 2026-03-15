@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, defs, linearGradient, stop } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { format, subDays, startOfWeek, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Flame, Trophy, Target, Star } from "lucide-react";
