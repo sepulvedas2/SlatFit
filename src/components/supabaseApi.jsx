@@ -1,9 +1,19 @@
 import { base44 } from "@/api/base44Client";
 
 async function invoke(payload) {
-  const resp = await base44.functions.invoke('supabase', payload);
-  if (resp.data?.error) throw new Error(resp.data.error);
-  return resp.data;
+  try {
+    console.log('[Supabase API] Chamando:', payload.action, 'na tabela:', payload.table);
+    const resp = await base44.functions.invoke('supabase', payload);
+    if (resp.data?.error) {
+      console.error('[Supabase API] Erro retornado:', resp.data.error);
+      throw new Error(resp.data.error);
+    }
+    console.log('[Supabase API] Sucesso:', payload.action, 'na tabela:', payload.table);
+    return resp.data;
+  } catch (error) {
+    console.error('[Supabase API] Erro na requisição:', error);
+    throw error;
+  }
 }
 
 function createEntityAPI(tableName) {

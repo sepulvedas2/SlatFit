@@ -9,9 +9,13 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user) {
+      console.error('[Supabase] Usuário não autenticado');
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { action, table, query, data, bucket, path, fileBase64, mimeType } = await req.json();
+    console.log(`[Supabase] ${action.toUpperCase()} em ${table} por ${user.email}`);
     const now = new Date().toISOString();
 
     // ── DATABASE ──────────────────────────────────────────────────────────────
@@ -38,8 +42,13 @@ Deno.serve(async (req) => {
         created_by: item.created_by || user.email,
       });
       const dataToInsert = Array.isArray(data) ? data.map(addMeta) : addMeta(data);
+      console.log(`[Supabase] Inserindo em ${table}:`, dataToInsert);
       const { data: inserted, error } = await supabase.from(table).insert(dataToInsert).select();
-      if (error) return Response.json({ error: error.message }, { status: 400 });
+      if (error) {
+        console.error(`[Supabase] Erro ao inserir em ${table}:`, error.message);
+        return Response.json({ error: error.message }, { status: 400 });
+      }
+      console.log(`[Supabase] Inserido com sucesso em ${table}:`, inserted);
       return Response.json({ data: inserted });
     }
 
@@ -51,8 +60,13 @@ Deno.serve(async (req) => {
           q = q.eq(col, val);
         }
       }
+      console.log(`[Supabase] Atualizando ${table} com filtro:`, query?.filter, 'dados:', dataToUpdate);
       const { data: updated, error } = await q.select();
-      if (error) return Response.json({ error: error.message }, { status: 400 });
+      if (error) {
+        console.error(`[Supabase] Erro ao atualizar ${table}:`, error.message);
+        return Response.json({ error: error.message }, { status: 400 });
+      }
+      console.log(`[Supabase] Atualizado com sucesso em ${table}:`, updated);
       return Response.json({ data: updated });
     }
 

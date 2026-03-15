@@ -192,6 +192,7 @@ export default function Dashboard() {
 
   const saveWeeklyGoalMutation = useMutation({
     mutationFn: async (goal) => {
+      console.log('[Dashboard] Salvando meta semanal:', goal);
       if (userPoints?.id) {
         return db.UserPoints.update(userPoints.id, { weekly_goal: goal });
       } else if (user?.email) {
@@ -199,8 +200,13 @@ export default function Dashboard() {
       }
     },
     onSuccess: () => {
+      console.log('[Dashboard] Meta semanal salva com sucesso');
       queryClient.invalidateQueries(['userPoints']);
       setShowGoalModal(false);
+    },
+    onError: (error) => {
+      console.error('[Dashboard] Erro ao salvar meta semanal:', error);
+      alert('Erro ao salvar meta. Por favor, tente novamente.');
     },
   });
 

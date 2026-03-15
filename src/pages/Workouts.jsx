@@ -91,11 +91,14 @@ export default function Workouts() {
 
   const completeDayMutation = useMutation({
     mutationFn: async ({ weekNumber, dayOfWeek }) => {
+      console.log('[Workouts] Completando dia:', dayOfWeek, 'semana:', weekNumber);
       // Check if already exists
       const existing = dailyWorkouts.find(w => w.day_of_week === dayOfWeek);
       if (existing) {
+        console.log('[Workouts] Atualizando treino existente:', existing.id);
         return db.DailyWorkout.update(existing.id, { completed: true, completed_date: new Date().toISOString().split('T')[0] });
       }
+      console.log('[Workouts] Criando novo treino concluído');
       return db.DailyWorkout.create({
         user_email: user.email,
         week_number: weekNumber,
@@ -106,8 +109,13 @@ export default function Workouts() {
       });
     },
     onSuccess: () => {
+      console.log('[Workouts] Treino salvo com sucesso');
       queryClient.invalidateQueries(['dailyWorkouts']);
       queryClient.invalidateQueries(['weekWorkouts']);
+    },
+    onError: (error) => {
+      console.error('[Workouts] Erro ao salvar treino:', error);
+      alert('Erro ao salvar treino. Por favor, tente novamente.');
     }
   });
 

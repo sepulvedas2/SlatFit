@@ -105,11 +105,17 @@ export default function Habits() {
   // Create habit
   const createHabitMutation = useMutation({
     mutationFn: async (data) => {
+      console.log('[Habits] Criando novo hábito:', data);
       await db.Habit.create({ ...data, user_email: user.email });
     },
     onSuccess: () => {
+      console.log('[Habits] Hábito criado com sucesso');
       queryClient.invalidateQueries(["habits"]);
       setShowForm(false);
+    },
+    onError: (error) => {
+      console.error('[Habits] Erro ao criar hábito:', error);
+      alert('Erro ao criar hábito. Verifique sua conexão e tente novamente.');
     },
   });
 
@@ -117,17 +123,21 @@ export default function Habits() {
   const toggleHabitMutation = useMutation({
     mutationFn: async ({ habit, dateStr, existingLog }) => {
       const xpEarned = calcXP(habit.xp_per_completion || 10, streak);
+      console.log('[Habits] Toggle hábito:', habit.name, 'data:', dateStr, 'existente:', !!existingLog);
 
       if (existingLog) {
         // Toggle: se já está completo, remove; se não, marca como completo
         if (existingLog.completed) {
+          console.log('[Habits] Removendo conclusão do hábito');
           await db.HabitLog.delete(existingLog.id);
           return { xpDelta: -xpEarned, added: false };
         } else {
+          console.log('[Habits] Marcando hábito como completo');
           await db.HabitLog.update(existingLog.id, { completed: true, xp_earned: xpEarned });
           return { xpDelta: xpEarned, added: true };
         }
       } else {
+        console.log('[Habits] Criando novo log de hábito');
         await db.HabitLog.create({
           user_email: user.email,
           habit_id: habit.id,
@@ -141,6 +151,7 @@ export default function Habits() {
       }
     },
     onSuccess: (result, variables) => {
+    console.log('[Habits] Hábito atualizado com sucesso:', result);
     queryClient.invalidateQueries(["habitLogs"]);
     if (result?.added && result?.xpDelta > 0) {
       setXpAnimation({ value: result.xpDelta });
@@ -152,6 +163,10 @@ export default function Habits() {
         setTimeout(() => setPerfectDayToast(false), 3000);
       }
     }
+    },
+    onError: (error) => {
+      console.error('[Habits] Erro ao atualizar hábito:', error);
+      alert('Erro ao salvar progresso do hábito. Tente novamente.');
     },
   });
 

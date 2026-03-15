@@ -557,17 +557,25 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   const savePRMutation = useMutation({
     mutationFn: async (prData) => {
+      console.log('[WeeklyPlan] Salvando PR:', selectedPRExercise, prData);
       return db.PRRecord.create({
         user_email: user.email,
+        exercise_id: selectedPRExercise,
         exercise_name: selectedPRExercise,
-        weight_kg: parseFloat(prData.weight_kg),
-        reps: parseInt(prData.reps),
-        notes: prData.notes || "",
-        pr_date: prData.pr_date
+        peso_kg: parseFloat(prData.weight_kg),
+        repeticoes: parseInt(prData.reps),
+        observacao: prData.notes || "",
+        data_pr: prData.pr_date
       });
     },
     onSuccess: () => {
+      console.log('[WeeklyPlan] PR salvo com sucesso');
       queryClient.invalidateQueries(['prRecords']);
+      setPRModalOpen(false);
+    },
+    onError: (error) => {
+      console.error('[WeeklyPlan] Erro ao salvar PR:', error);
+      alert('Erro ao salvar recorde pessoal. Tente novamente.');
     },
   });
 
