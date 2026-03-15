@@ -260,8 +260,7 @@ export default function AchievementSystem({
 
   const unlockAchievementMutation = useMutation({
     mutationFn: async (achievement) => {
-      const { db } = await import('@/components/supabaseApi');
-      return db.Achievement.create({
+      return base44.entities.Achievement.create({
         user_email: userEmail,
         achievement_type: achievement.id,
         unlocked_date: new Date().toISOString().split('T')[0],
@@ -277,7 +276,13 @@ export default function AchievementSystem({
 
   const awardPointsMutation = useMutation({
     mutationFn: async (points) => {
-      return base44.functions.invoke('updateXP', { xp_ganho: points, tipo_acao: 'conquista' });
+      const userPoints = await base44.entities.UserPoints.filter({ user_email: userEmail });
+      if (userPoints[0]) {
+        return base44.entities.UserPoints.update(userPoints[0].id, {
+          total_points: userPoints[0].total_points + points,
+          xp_current: userPoints[0].xp_current + points
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['userPoints']);

@@ -71,38 +71,41 @@ function createEntityAPI(tableName) {
   };
 }
 
-// Tabelas ATIVAS no app — apenas o que é realmente usado
 export const db = {
-  // Core
   UserProfile: createEntityAPI('user_profiles'),
-  UserPoints: createEntityAPI('user_points'),      // Sistema unificado de XP/progresso
-  Achievement: createEntityAPI('achievements'),
-
-  // Nutrição
   FoodLog: createEntityAPI('food_logs'),
-  NutritionData: createEntityAPI('nutrition_data'),
-  MealPlan: createEntityAPI('meal_plans'),
-
-  // Treinos
   Workout: createEntityAPI('workouts'),
   WorkoutLog: createEntityAPI('workout_logs'),
-  DailyWorkout: createEntityAPI('daily_workouts'),
-  Exercise: createEntityAPI('exercises', false),   // global, sem filtro de email
-  PRRecord: createEntityAPI('pr_records'),
-  CustomWorkout: createEntityAPI('custom_workouts'),
-  CustomWorkoutExercise: createEntityAPI('custom_workout_exercises'),
-
-  // Hábitos
-  Habit: createEntityAPI('habits'),
-  HabitLog: createEntityAPI('habit_logs'),
-
-  // Desafios
+  MealPlan: createEntityAPI('meal_plans'),
+  Subscription: createEntityAPI('subscriptions'),
+  Achievement: createEntityAPI('achievements'),
+  DailyCheckIn: createEntityAPI('daily_check_ins'),
   Challenge: createEntityAPI('challenges'),
   UserChallenge: createEntityAPI('user_challenges'),
-
-  // Outros
-  DailyCheckIn: createEntityAPI('daily_check_ins'),
+  UserPoints: createEntityAPI('user_points'),
   ProgressPhoto: createEntityAPI('progress_photos'),
   MotivationalJournal: createEntityAPI('motivational_journals'),
+  IAGOConversation: createEntityAPI('iago_conversations'),
+  NutritionData: createEntityAPI('nutrition_data'),
+  AgendaTask: createEntityAPI('agenda_tasks'),
+  Exercise: createEntityAPI('exercises', false),
   WeeklyProgress: createEntityAPI('weekly_progress'),
+  DailyWorkout: createEntityAPI('daily_workouts'),
+  CustomWorkout: createEntityAPI('custom_workouts'),
+  CustomWorkoutExercise: createEntityAPI('custom_workout_exercises'),
+  PRRecord: createEntityAPI('pr_records'),
+  TrainingProfile: createEntityAPI('training_profiles'),
+  AIFeedback: createEntityAPI('ai_feedback'),
+  LearningTip: createEntityAPI('learning_tips'),
+  RunningActivity: createEntityAPI('running_activities'),
+  RunningChallenge: createEntityAPI('running_challenges'),
+  CityLeaderboard: createEntityAPI('city_leaderboards'),
+  CityChallenge: createEntityAPI('city_challenges'),
+  SavedRoute: createEntityAPI('saved_routes'),
+  Habit: createEntityAPI('habits'),
+  HabitLog: createEntityAPI('habit_logs'),
+  UserProgress: createEntityAPI('user_progress'),
+  Ranking: createEntityAPI('ranking'),
+  Mission: createEntityAPI('missions'),
+  MissionProgress: createEntityAPI('missions_progress'),
 };
