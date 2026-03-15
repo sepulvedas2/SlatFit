@@ -58,8 +58,8 @@ export default function Progresso() {
   });
 
   const { data: globalProgress = [] } = useQuery({
-    queryKey: ['globalProgressRanking'],
-    queryFn: () => db.UserProgress.list('-total_xp', 500),
+    queryKey: ['globalUserProgress'],
+    queryFn: () => db.UserProgress.list('-total_xp', 200),
     enabled: !!user?.email,
     initialData: [],
   });
@@ -99,10 +99,12 @@ export default function Progresso() {
   const totalXP = userProgress?.total_xp || 0;
   const streak = calculateStreak(allWorkoutLogs);
   const totalCaloriesBurned = allWorkoutLogs.reduce((s, l) => s + (l.calories_burned || 0), 0);
+  const isActiveToday = allWorkoutLogs.some(l => l.completed_date === today);
   const waterDays = weekNutrition.filter(d => d.water_goal_reached).length;
   const weekWorkouts = allWorkoutLogs.filter(l => l.completed_date >= weekStart);
-  const top10Ranking = globalProgress.slice(0, 10);
-  const currentUserPosition = globalProgress.findIndex(item => item.user_email === user?.email) + 1;
+  const currentUserPosition = globalProgress.findIndex((item) => item.user_email === user?.email) + 1;
+  const topRanking = globalProgress.slice(0, 10);
+  const userGoal = profile?.goal || null;
 
   return (
     <div className="min-h-screen pb-28">
@@ -148,6 +150,38 @@ export default function Progresso() {
           </div>
         </Card>
 
+        {/* Ranking Global */}
+        <Card className="glass-effect border-[#CEF17B]/20 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-bold">Ranking Global</h3>
+            <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0">
+              {currentUserPosition > 0 ? `Sua posição: #${currentUserPosition}` : 'Sem posição'}
+            </Badge>
+          </div>
+          <div className="space-y-2">
+            {topRanking.map((entry, index) => {
+              const isCurrentUser = entry.user_email === user?.email;
+              return (
+                <div
+                  key={entry.id || entry.user_email}
+                  className={`flex items-center justify-between rounded-xl px-3 py-2 ${isCurrentUser ? 'bg-[#CEF17B]/10 border border-[#CEF17B]/20' : 'bg-white/5'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-white/10 text-white">
+                      #{index + 1}
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-semibold">{entry.user_email?.split('@')[0] || 'Usuário'}</p>
+                      <p className="text-white/50 text-xs">Nível {entry.nivel || 1}</p>
+                    </div>
+                  </div>
+                  <p className="text-[#CEF17B] font-bold text-sm">{entry.total_xp || 0} XP</p>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
         {/* Esta Semana */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="glass-effect border-[#CEF17B]/20 p-5">
@@ -173,36 +207,6 @@ export default function Progresso() {
             </div>
           </Card>
         </motion.div>
-
-        <Card className="glass-effect border-[#CEF17B]/20 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-white font-bold">Ranking Global</h3>
-              <p className="text-white/50 text-xs">Baseado em total_xp da tabela user_progress</p>
-            </div>
-            <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0">
-              {currentUserPosition ? `Sua posição: #${currentUserPosition}` : 'Sem posição'}
-            </Badge>
-          </div>
-          <div className="space-y-2">
-            {top10Ranking.map((entry, index) => (
-              <div key={entry.id || entry.user_id || entry.user_email} className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#CEF17B]/15 flex items-center justify-center text-[#CEF17B] font-bold text-sm">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <p className="text-white text-sm font-semibold">{entry.user_email === user?.email ? 'Você' : (entry.user_email || 'Usuário')}</p>
-                    <p className="text-white/40 text-xs">Nível {entry.nivel || 1}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-white font-bold">{entry.total_xp || 0} XP</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
 
         {/* Tabs: Conquistas / Objetivo */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
@@ -237,7 +241,7 @@ export default function Progresso() {
                   </div>
                   <div className="rounded-xl bg-white/5 p-3">
                     <p className="text-white/50 text-xs">Posição no ranking</p>
-                    <p className="text-white font-bold text-lg">{currentUserPosition ? `#${currentUserPosition}` : '—'}</p>
+                    <p className="text-white font-bold text-lg">{currentUserPosition > 0 ? `#${currentUserPosition}` : '—'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
