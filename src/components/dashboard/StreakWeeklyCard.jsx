@@ -2,11 +2,11 @@ import React from "react";
 import { Flame, Trophy, Target } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function StreakWeeklyCard({ points, onEditGoal }) {
-  const streak = points?.daily_streak || 0;
-  const bestStreak = points?.longest_streak || 0;
-  const weeklyGoal = points?.weekly_goal || 4;
-  const weeklyDone = points?.weekly_completed || 0;
+export default function StreakWeeklyCard({ progress, onEditGoal }) {
+  const streak = progress?.streak_dias || 0;
+  const bestStreak = progress?.longest_streak || 0;
+  const weeklyGoal = progress?.weekly_goal || 4;
+  const weeklyDone = progress?.weekly_completed || 0;
   const weeklyPct = Math.min(100, Math.round((weeklyDone / weeklyGoal) * 100));
   const goalReached = weeklyDone >= weeklyGoal;
 

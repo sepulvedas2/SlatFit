@@ -183,22 +183,26 @@ export default function Dashboard() {
     staleTime: 2 * 60 * 1000,
   });
 
+  // Auto-reset streak if user hasn't had activity in 2+ days
+  useEffect(() => {
+    if (!userProgress || !userProgress.id) return;
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+    const last = userProgress.last_activity_date;
+    if (last && last !== today && last !== yesterday && (userProgress.streak_dias || 0) > 0) {
+      db.UserProgress.update(userProgress.id, { streak_dias: 0 }).then(() => {
+        queryClient.invalidateQueries(['userProgress']);
+      });
+    }
+  }, [userProgress]);
+
   const saveWeeklyGoalMutation = useMutation({
     mutationFn: async (goal) => {
       console.log('[Dashboard] Salvando meta semanal:', goal);
       if (userProgress?.id) {
         return db.UserProgress.update(userProgress.id, { weekly_goal: goal });
       } else if (user?.email) {
-        return db.UserProgress.create({
-          user_id: user.id || user.email,
-          user_email: user.email,
-          total_xp: 0,
-          nivel: 1,
-          xp_atual: 0,
-          xp_para_proximo_nivel: 100,
-          xp_proximo_nivel: 100,
-          weekly_goal: goal,
-        });
+        return db.UserProgress.create({ user_id: user.id, user_email: user.email, weekly_goal: goal });
       }
     },
     onSuccess: () => {
@@ -219,13 +223,6 @@ export default function Dashboard() {
     : 0;
 
   const { nextWorkout, allDone } = getNextWorkout(allDailyWorkouts);
-  const currentWeekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
-  const dashboardProgress = {
-    daily_streak: userProgress?.streak_dias || 0,
-    longest_streak: userProgress?.longest_streak || 0,
-    weekly_goal: userProgress?.weekly_goal || 4,
-    weekly_completed: allDailyWorkouts.filter(w => w.completed && w.completed_date >= currentWeekStart).length,
-  };
 
   return (
     <div className="min-h-screen pb-24">
@@ -233,7 +230,7 @@ export default function Dashboard() {
 
         {showGoalModal && (
           <WeeklyGoalModal
-            currentGoal={dashboardProgress.weekly_goal}
+            currentGoal={userProgress?.weekly_goal || 4}
             onSave={(goal) => saveWeeklyGoalMutation.mutate(goal)}
             onClose={() => setShowGoalModal(false)}
           />
@@ -248,7 +245,7 @@ export default function Dashboard() {
 
             {/* 3. Streak + Meta Semanal */}
             <StreakWeeklyCard
-              points={dashboardProgress}
+              progress={userProgress}
               onEditGoal={() => setShowGoalModal(true)}
             />
 
