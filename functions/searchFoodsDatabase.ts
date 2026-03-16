@@ -18,18 +18,36 @@ Deno.serve(async (req) => {
       return Response.json({ foods: [] });
     }
 
-    const { data, error } = await supabase
-      .from('foods_database')
-      .select('id, food_name, portion_size, calories, protein, carbohydrates, fat, fiber')
-      .ilike('food_name', `%${term}%`)
-      .order('food_name', { ascending: true })
-      .limit(20);
+    const safeTerm = term.replace(/'/g, "''");
+    const sql = term
+      ? `
+        SELECT COALESCE(json_agg(t), '[]'::json) AS foods
+        FROM (
+          SELECT id, food_name, portion_size, calories, protein, carbohydrates, fat, fiber
+          FROM foods_database
+          WHERE food_name ILIKE '%${safeTerm}%'
+          ORDER BY food_name ASC
+          LIMIT 20
+        ) t;
+      `
+      : `
+        SELECT COALESCE(json_agg(t), '[]'::json) AS foods
+        FROM (
+          SELECT id, food_name, portion_size, calories, protein, carbohydrates, fat, fiber
+          FROM foods_database
+          ORDER BY food_name ASC
+          LIMIT 30
+        ) t;
+      `;
+
+    const { data, error } = await supabase.rpc('exec_sql', { sql });
 
     if (error) {
       return Response.json({ error: error.message }, { status: 400 });
     }
 
-    return Response.json({ foods: data || [] });
+    const foods = data?.[0]?.foods || data?.foods || [];
+    return Response.json({ foods });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

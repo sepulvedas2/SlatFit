@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/components/supabaseApi";
 import { Input } from "@/components/ui/input";
-import { Search, Database, Plus } from "lucide-react";
+import { Search, Database } from "lucide-react";
 import FoodSelectionModal from "./FoodSelectionModal";
 
 export default function FoodSearchSection({ onAddFood }) {
@@ -14,7 +13,6 @@ export default function FoodSearchSection({ onAddFood }) {
   const { data: searchResults = [] } = useQuery({
     queryKey: ["foodDatabaseSearch", searchTerm],
     queryFn: async () => {
-      if (!searchTerm.trim()) return [];
       const response = await base44.functions.invoke("searchFoodsDatabase", { query: searchTerm });
       return response.data?.foods || [];
     },
@@ -24,7 +22,11 @@ export default function FoodSearchSection({ onAddFood }) {
 
   const { data: browseFoods = [] } = useQuery({
     queryKey: ["foodDatabaseBrowse"],
-    queryFn: () => db.FoodDatabase.list("food_name", 30),
+    queryFn: async () => {
+      const response = await base44.functions.invoke("searchFoodsDatabase", { query: "" });
+      return response.data?.foods || [];
+    },
+    enabled: mode === "browse",
     initialData: [],
   });
 

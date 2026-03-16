@@ -150,23 +150,13 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
   const handleAddFoodFromDatabase = async ({ food, quantity, mealType, nutrition }) => {
     if (!user) return;
 
-    await db.UserFoodLog.create({
-      user_id: user.id,
+    await base44.functions.invoke('addFoodFromDatabase', {
       food_id: food.id,
-      quantity,
-      meal_type: mealType,
-    });
-
-    await db.FoodLog.create({
-      user_email: user.email,
       food_name: food.food_name,
-      meal_type: mealType,
-      calories: nutrition.calories,
-      protein: nutrition.protein,
-      carbs: nutrition.carbohydrates,
-      fats: nutrition.fat,
       portion_size: `${quantity}x ${food.portion_size}`,
-      image_url: null,
+      meal_type: mealType,
+      quantity,
+      nutrition,
       log_date: today,
     });
 
