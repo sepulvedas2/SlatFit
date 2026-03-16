@@ -189,7 +189,7 @@ export default function Habits() {
     console.log('[Habits] Hábito atualizado com sucesso:', result);
     queryClient.invalidateQueries(["habitLogs"]);
     queryClient.invalidateQueries(['userProgress']);
-    queryClient.invalidateQueries(['globalUserProgress']);
+    queryClient.invalidateQueries(['ranking']);
     
     if (result?.added && result?.xpDelta > 0) {
       setXpAnimation({ value: result.xpDelta });

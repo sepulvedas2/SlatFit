@@ -18,30 +18,18 @@ Deno.serve(async (req) => {
             id uuid primary key default gen_random_uuid(),
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
-            updated_at timestamptz default now(),
-            user_id text,
             user_email text not null unique,
             total_xp integer default 0,
             nivel integer default 1,
             xp_atual integer default 0,
-            xp_para_proximo_nivel integer default 100,
             xp_proximo_nivel integer default 100,
-            weekly_goal integer default 4,
             streak_dias integer default 0,
             longest_streak integer default 0,
             last_activity_date date,
             total_treinos integer default 0,
             total_missoes integer default 0,
-            total_desafios integer default 0,
-            total_nutricao integer default 0
+            total_desafios integer default 0
           );
-
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS updated_at timestamptz default now();
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS user_id text;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS xp_para_proximo_nivel integer default 100;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS xp_proximo_nivel integer default 100;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS weekly_goal integer default 4;
-          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS total_nutricao integer default 0;
 
           ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 
@@ -55,7 +43,38 @@ Deno.serve(async (req) => {
       setupResults.push({ table: 'user_progress', status: 'ERROR', error: err.message });
     }
 
-    // 2. HABITS
+    // 2. RANKING
+    try {
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS ranking (
+            id uuid primary key default gen_random_uuid(),
+            created_date timestamptz default now(),
+            updated_date timestamptz default now(),
+            user_email text not null unique,
+            user_name text,
+            total_xp integer default 0,
+            nivel integer default 1,
+            posicao integer,
+            foto_perfil text
+          );
+
+          ALTER TABLE ranking ENABLE ROW LEVEL SECURITY;
+
+          DROP POLICY IF EXISTS "ranking_select" ON ranking;
+          CREATE POLICY "ranking_select" ON ranking FOR SELECT USING (true);
+
+          DROP POLICY IF EXISTS "ranking_insert_update" ON ranking;
+          CREATE POLICY "ranking_insert_update" ON ranking
+          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+        `
+      });
+      setupResults.push({ table: 'ranking', status: 'OK' });
+    } catch (err) {
+      setupResults.push({ table: 'ranking', status: 'ERROR', error: err.message });
+    }
+
+    // 3. HABITS
     try {
       await supabase.rpc('exec_sql', {
         sql: `
@@ -322,80 +341,6 @@ Deno.serve(async (req) => {
     } catch (err) {
       setupResults.push({ table: 'user_challenges', status: 'ERROR', error: err.message });
     }
-
-    // 12. FOODS_DATABASE
-    try {
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS foods_database (
-            id uuid primary key default gen_random_uuid(),
-            food_name text not null,
-            portion_size text,
-            calories numeric default 0,
-            protein numeric default 0,
-            carbohydrates numeric default 0,
-            fat numeric default 0,
-            fiber numeric default 0,
-            created_at timestamptz default now()
-          );
-
-          CREATE INDEX IF NOT EXISTS idx_foods_database_name ON foods_database (food_name);
-          ALTER TABLE foods_database ENABLE ROW LEVEL SECURITY;
-
-          DROP POLICY IF EXISTS "foods_database_select" ON foods_database;
-          CREATE POLICY "foods_database_select" ON foods_database FOR SELECT USING (true);
-
-          INSERT INTO foods_database (food_name, portion_size, calories, protein, carbohydrates, fat, fiber)
-          VALUES
-            ('Arroz branco', '100g', 130, 2.7, 28.0, 0.3, 0.4),
-            ('Arroz integral', '100g', 124, 2.6, 25.8, 1.0, 1.6),
-            ('Frango grelhado', '100g', 165, 31.0, 0.0, 3.6, 0.0),
-            ('Ovo cozido', '1 unidade', 78, 6.3, 0.6, 5.3, 0.0),
-            ('Banana', '1 unidade média', 89, 1.1, 22.8, 0.3, 2.6),
-            ('Maçã', '1 unidade média', 95, 0.5, 25.1, 0.3, 4.4),
-            ('Batata doce', '100g', 86, 1.6, 20.1, 0.1, 3.0),
-            ('Carne bovina', '100g', 250, 26.0, 0.0, 15.0, 0.0),
-            ('Aveia', '100g', 389, 16.9, 66.3, 6.9, 10.6),
-            ('Leite', '200ml', 122, 6.4, 9.6, 6.6, 0.0),
-            ('Pão integral', '2 fatias', 138, 6.0, 24.0, 2.0, 3.8)
-          ON CONFLICT DO NOTHING;
-        `
-      });
-      setupResults.push({ table: 'foods_database', status: 'OK' });
-    } catch (err) {
-      setupResults.push({ table: 'foods_database', status: 'ERROR', error: err.message });
-    }
-
-    // 13. USER_FOOD_LOGS
-    try {
-      await supabase.rpc('exec_sql', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS user_food_logs (
-            id uuid primary key default gen_random_uuid(),
-            user_id uuid,
-            food_id uuid,
-            quantity numeric default 1,
-            meal_type text,
-            created_at timestamptz default now()
-          );
-
-          CREATE INDEX IF NOT EXISTS idx_user_food_logs_user_id ON user_food_logs (user_id);
-          CREATE INDEX IF NOT EXISTS idx_user_food_logs_created_at ON user_food_logs (created_at);
-          ALTER TABLE user_food_logs ENABLE ROW LEVEL SECURITY;
-
-          DROP POLICY IF EXISTS "user_food_logs_all" ON user_food_logs;
-          CREATE POLICY "user_food_logs_all" ON user_food_logs
-          FOR ALL USING ((current_setting('request.jwt.claims', true)::json->>'sub')::uuid = user_id);
-        `
-      });
-      setupResults.push({ table: 'user_food_logs', status: 'OK' });
-    } catch (err) {
-      setupResults.push({ table: 'user_food_logs', status: 'ERROR', error: err.message });
-    }
-
-    await supabase.rpc('exec_sql', {
-      sql: `NOTIFY pgrst, 'reload schema';`
-    });
 
     console.log('[Database Setup] Configuração concluída');
 

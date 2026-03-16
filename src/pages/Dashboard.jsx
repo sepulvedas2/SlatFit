@@ -173,41 +173,41 @@ export default function Dashboard() {
     staleTime: 2 * 60 * 1000,
   });
 
-  const { data: userProgress } = useQuery({
-    queryKey: ['userProgress', user?.email],
+  const { data: userPoints } = useQuery({
+    queryKey: ['userPoints', user?.email],
     queryFn: async () => {
-      const list = await db.UserProgress.filter({ user_email: user.email });
+      const list = await db.UserPoints.filter({ user_email: user.email });
       return list[0] || null;
     },
     enabled: !!user?.email,
     staleTime: 2 * 60 * 1000,
   });
 
-  // Auto-reset streak if user hasn't had activity in 2+ days
+  // Auto-reset streak if user hasn't trained in 2+ days
   useEffect(() => {
-    if (!userProgress || !userProgress.id) return;
+    if (!userPoints || !userPoints.id) return;
     const today = new Date().toISOString().split("T")[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-    const last = userProgress.last_activity_date;
-    if (last && last !== today && last !== yesterday && (userProgress.streak_dias || 0) > 0) {
-      db.UserProgress.update(userProgress.id, { streak_dias: 0 }).then(() => {
-        queryClient.invalidateQueries(['userProgress']);
+    const last = userPoints.last_workout_date;
+    if (last && last !== today && last !== yesterday && (userPoints.daily_streak || 0) > 0) {
+      db.UserPoints.update(userPoints.id, { daily_streak: 0 }).then(() => {
+        queryClient.invalidateQueries(['userPoints']);
       });
     }
-  }, [userProgress]);
+  }, [userPoints]);
 
   const saveWeeklyGoalMutation = useMutation({
     mutationFn: async (goal) => {
       console.log('[Dashboard] Salvando meta semanal:', goal);
-      if (userProgress?.id) {
-        return db.UserProgress.update(userProgress.id, { weekly_goal: goal });
+      if (userPoints?.id) {
+        return db.UserPoints.update(userPoints.id, { weekly_goal: goal });
       } else if (user?.email) {
-        return db.UserProgress.create({ user_id: user.id, user_email: user.email, weekly_goal: goal });
+        return db.UserPoints.create({ user_email: user.email, weekly_goal: goal });
       }
     },
     onSuccess: () => {
       console.log('[Dashboard] Meta semanal salva com sucesso');
-      queryClient.invalidateQueries(['userProgress']);
+      queryClient.invalidateQueries(['userPoints']);
       setShowGoalModal(false);
     },
     onError: (error) => {
@@ -230,7 +230,7 @@ export default function Dashboard() {
 
         {showGoalModal && (
           <WeeklyGoalModal
-            currentGoal={userProgress?.weekly_goal || 4}
+            currentGoal={userPoints?.weekly_goal || 4}
             onSave={(goal) => saveWeeklyGoalMutation.mutate(goal)}
             onClose={() => setShowGoalModal(false)}
           />
@@ -245,7 +245,7 @@ export default function Dashboard() {
 
             {/* 3. Streak + Meta Semanal */}
             <StreakWeeklyCard
-              progress={userProgress}
+              points={userPoints}
               onEditGoal={() => setShowGoalModal(true)}
             />
 

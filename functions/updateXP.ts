@@ -17,13 +17,12 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { xp_ganho, tipo_acao } = await req.json();
-    const userId = user.id || user.email;
-
+    
     console.log(`[XP] ${user.email} ganhou ${xp_ganho} XP por ${tipo_acao}`);
 
-    // 1. Buscar progresso atual centralizado
+    // 1. Buscar progresso atual
     const { data: progress, error: fetchError } = await supabase
-      .from('user_points')
+      .from('user_progress')
       .select('*')
       .eq('user_email', user.email)
       .single();
@@ -33,17 +32,14 @@ Deno.serve(async (req) => {
     if (fetchError || !progress) {
       // Criar registro inicial
       const { data: newProgress, error: createError } = await supabase
-        .from('user_points')
+        .from('user_progress')
         .insert({
           user_email: user.email,
-          total_points: 0,
-          level: 1,
-          xp_current: 0,
-          xp_next_level: 100,
-          daily_streak: 0,
-          longest_streak: 0,
-          weekly_goal: 4,
-          updated_date: new Date().toISOString()
+          total_xp: 0,
+          nivel: 1,
+          xp_atual: 0,
+          xp_proximo_nivel: 100,
+          streak_dias: 0
         })
         .select()
         .single();
@@ -58,10 +54,10 @@ Deno.serve(async (req) => {
     }
 
     // 2. Calcular novo XP
-    const novoTotalXP = (currentProgress.total_points || 0) + xp_ganho;
-    let novoXPAtual = (currentProgress.xp_current || 0) + xp_ganho;
-    let novoNivel = currentProgress.level || 1;
-    let xpProximoNivel = currentProgress.xp_next_level || 100;
+    const novoTotalXP = currentProgress.total_xp + xp_ganho;
+    let novoXPAtual = currentProgress.xp_atual + xp_ganho;
+    let novoNivel = currentProgress.nivel;
+    let xpProximoNivel = currentProgress.xp_proximo_nivel;
 
     // 3. Verificar subida de nível
     const nivelUps = [];
@@ -75,8 +71,8 @@ Deno.serve(async (req) => {
 
     // 4. Atualizar streak
     const hoje = new Date().toISOString().split('T')[0];
-    const lastActivity = currentProgress.last_workout_date;
-    let novoStreak = currentProgress.daily_streak || 0;
+    const lastActivity = currentProgress.last_activity_date;
+    let novoStreak = currentProgress.streak_dias;
 
     if (lastActivity !== hoje) {
       const ontem = new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -89,19 +85,23 @@ Deno.serve(async (req) => {
 
     // 5. Atualizar contadores
     const updates = {
-      total_points: novoTotalXP,
-      level: novoNivel,
-      xp_current: novoXPAtual,
-      xp_next_level: xpProximoNivel,
-      daily_streak: novoStreak,
+      total_xp: novoTotalXP,
+      nivel: novoNivel,
+      xp_atual: novoXPAtual,
+      xp_proximo_nivel: xpProximoNivel,
+      streak_dias: novoStreak,
       longest_streak: Math.max(novoStreak, currentProgress.longest_streak || 0),
-      last_workout_date: hoje,
+      last_activity_date: hoje,
       updated_date: new Date().toISOString()
     };
 
+    if (tipo_acao === 'treino') updates.total_treinos = (currentProgress.total_treinos || 0) + 1;
+    if (tipo_acao === 'missao') updates.total_missoes = (currentProgress.total_missoes || 0) + 1;
+    if (tipo_acao === 'desafio') updates.total_desafios = (currentProgress.total_desafios || 0) + 1;
+
     // 6. Atualizar no banco
     const { data: updated, error: updateError } = await supabase
-      .from('user_points')
+      .from('user_progress')
       .update(updates)
       .eq('user_email', user.email)
       .select()
@@ -112,21 +112,59 @@ Deno.serve(async (req) => {
       return Response.json({ error: updateError.message }, { status: 400 });
     }
 
+    // 7. Atualizar ranking
+    try {
+      const { data: rankingEntry } = await supabase
+        .from('ranking')
+        .select('*')
+        .eq('user_email', user.email)
+        .single();
+
+      if (rankingEntry) {
+        await supabase
+          .from('ranking')
+          .update({
+            total_xp: novoTotalXP,
+            nivel: novoNivel,
+            updated_date: new Date().toISOString()
+          })
+          .eq('user_email', user.email);
+      } else {
+        await supabase
+          .from('ranking')
+          .insert({
+            user_email: user.email,
+            user_name: user.full_name || user.email,
+            total_xp: novoTotalXP,
+            nivel: novoNivel
+          });
+      }
+
+      // Recalcular posições
+      const { data: allRankings } = await supabase
+        .from('ranking')
+        .select('user_email, total_xp')
+        .order('total_xp', { ascending: false });
+
+      if (allRankings) {
+        for (let i = 0; i < allRankings.length; i++) {
+          await supabase
+            .from('ranking')
+            .update({ posicao: i + 1 })
+            .eq('user_email', allRankings[i].user_email);
+        }
+      }
+
+      console.log('[XP] Ranking atualizado');
+    } catch (rankError) {
+      console.error('[XP] Erro ao atualizar ranking:', rankError);
+    }
+
     return Response.json({
       success: true,
       xp_ganho,
       tipo_acao,
-      progress: {
-        ...updated,
-        user_id: userId,
-        total_xp: updated?.total_points || 0,
-        nivel: updated?.level || 1,
-        xp_atual: updated?.xp_current || 0,
-        xp_para_proximo_nivel: updated?.xp_next_level || 100,
-        xp_proximo_nivel: updated?.xp_next_level || 100,
-        streak_dias: updated?.daily_streak || 0,
-        last_activity_date: updated?.last_workout_date || null,
-      },
+      progress: updated,
       level_ups: nivelUps,
       novo_streak: novoStreak
     });

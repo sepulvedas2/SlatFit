@@ -16,7 +16,6 @@ import ScannerResultScreen from "../components/scanner/ScannerResultScreen";
 import DailyTimeline from "../components/scanner/DailyTimeline";
 import MealTypeSelector from "../components/scanner/MealTypeSelector";
 import WeeklyView from "../components/scanner/WeeklyView";
-import FoodSearchSection from "../components/scanner/FoodSearchSection";
 
 function computeStreak(foodsByDate) {
   let streak = 0;
@@ -147,46 +146,6 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
     queryClient.invalidateQueries(["todayFoods"]);
   };
 
-  const handleAddFoodFromDatabase = async ({ food, quantity, mealType, nutrition }) => {
-    if (!user) return;
-
-    try {
-      await base44.functions.invoke('addFoodFromDatabase', {
-        food_id: food.id,
-        food_name: food.food_name,
-        portion_size: `${quantity}x ${food.portion_size}`,
-        meal_type: mealType,
-        quantity,
-        nutrition,
-        log_date: today,
-      });
-    } catch (error) {
-      console.error('[FoodScanner] Registro complementar no banco novo indisponível, salvando no diário principal.', error);
-      await db.FoodLog.create({
-        user_email: user.email,
-        food_name: food.food_name,
-        meal_type: mealType,
-        calories: nutrition.calories,
-        protein: nutrition.protein,
-        carbs: nutrition.carbohydrates,
-        fats: nutrition.fat,
-        portion_size: `${quantity}x ${food.portion_size}`,
-        image_url: null,
-        log_date: today,
-      });
-    }
-
-    await base44.functions.invoke('updateXP', {
-      xp_ganho: 5,
-      tipo_acao: 'nutricao'
-    });
-
-    queryClient.invalidateQueries(["weekFoods"]);
-    queryClient.invalidateQueries(["todayFoods"]);
-    queryClient.invalidateQueries(['userProgress']);
-    queryClient.invalidateQueries(['globalUserProgress']);
-  };
-
   const handleSaveAndReset = async (data) => {
     await saveFood(data);
     setView("home");
@@ -208,12 +167,6 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
       carbs: manualData.carbs || 0,
       fats: manualData.fats || 0,
     });
-    await base44.functions.invoke('updateXP', {
-      xp_ganho: 5,
-      tipo_acao: 'nutricao'
-    });
-    queryClient.invalidateQueries(['userProgress']);
-    queryClient.invalidateQueries(['globalUserProgress']);
     setManualData({ food_name: "", portion_size: "", calories: "", protein: "", carbs: "", fats: "" });
     setView("home");
     setSaving(false);
@@ -337,8 +290,6 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
                   Inserir manualmente
                 </button>
               </div>
-
-              <FoodSearchSection onAddFood={handleAddFoodFromDatabase} />
 
               {/* Tabs dia / semana */}
               <div className="flex gap-2 p-1 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)" }}>

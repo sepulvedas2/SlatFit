@@ -141,7 +141,7 @@ export default function Workouts() {
       queryClient.invalidateQueries(['dailyWorkouts']);
       queryClient.invalidateQueries(['weekWorkouts']);
       queryClient.invalidateQueries(['userProgress']);
-      queryClient.invalidateQueries(['globalUserProgress']);
+      queryClient.invalidateQueries(['ranking']);
     },
     onError: (error) => {
       console.error('[Workouts] Erro ao salvar treino:', error);

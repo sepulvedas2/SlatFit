@@ -71,98 +71,6 @@ function createEntityAPI(tableName) {
   };
 }
 
-const mapUserProgressFromDb = (item) => {
-  if (!item) return null;
-  return {
-    ...item,
-    user_id: item.user_id || item.id,
-    total_xp: item.total_points || 0,
-    nivel: item.level || 1,
-    xp_atual: item.xp_current || 0,
-    xp_para_proximo_nivel: item.xp_next_level || 100,
-    xp_proximo_nivel: item.xp_next_level || 100,
-    streak_dias: item.daily_streak || 0,
-    last_activity_date: item.last_workout_date || null,
-    updated_at: item.updated_date || null,
-  };
-};
-
-const mapUserProgressToDb = (item = {}) => {
-  const mapped = { ...item };
-  if ('total_xp' in mapped) mapped.total_points = mapped.total_xp;
-  if ('nivel' in mapped) mapped.level = mapped.nivel;
-  if ('xp_atual' in mapped) mapped.xp_current = mapped.xp_atual;
-  if ('xp_para_proximo_nivel' in mapped) mapped.xp_next_level = mapped.xp_para_proximo_nivel;
-  if ('xp_proximo_nivel' in mapped) mapped.xp_next_level = mapped.xp_proximo_nivel;
-  if ('streak_dias' in mapped) mapped.daily_streak = mapped.streak_dias;
-  if ('last_activity_date' in mapped) mapped.last_workout_date = mapped.last_activity_date;
-  if ('updated_at' in mapped) mapped.updated_date = mapped.updated_at;
-  delete mapped.total_xp;
-  delete mapped.nivel;
-  delete mapped.xp_atual;
-  delete mapped.xp_para_proximo_nivel;
-  delete mapped.xp_proximo_nivel;
-  delete mapped.streak_dias;
-  delete mapped.last_activity_date;
-  delete mapped.updated_at;
-  delete mapped.user_id;
-  return mapped;
-};
-
-const userProgressApi = {
-  async list(sort = '-created_date', limit = 50) {
-    const mappedSort = sort
-      .replace('total_xp', 'total_points')
-      .replace('nivel', 'level')
-      .replace('xp_atual', 'xp_current')
-      .replace('xp_para_proximo_nivel', 'xp_next_level');
-    const col = mappedSort ? mappedSort.replace(/^-/, '') : 'created_date';
-    const asc = mappedSort ? !mappedSort.startsWith('-') : false;
-    const result = await invoke({
-      action: 'select', table: 'user_points',
-      query: { limit, order: { column: col, ascending: asc } }
-    });
-    return (result?.data || []).map(mapUserProgressFromDb);
-  },
-
-  async filter(filters = {}, sort, limit = 500) {
-    const mappedFilters = mapUserProgressToDb(filters);
-    const mappedSort = (sort || '-created_date')
-      .replace('total_xp', 'total_points')
-      .replace('nivel', 'level')
-      .replace('xp_atual', 'xp_current')
-      .replace('xp_para_proximo_nivel', 'xp_next_level');
-    const col = mappedSort ? mappedSort.replace(/^-/, '') : 'created_date';
-    const asc = mappedSort ? !mappedSort.startsWith('-') : false;
-    const result = await invoke({
-      action: 'select', table: 'user_points',
-      query: { filter: mappedFilters, limit, order: { column: col, ascending: asc } }
-    });
-    return (result?.data || []).map(mapUserProgressFromDb);
-  },
-
-  async create(data) {
-    const result = await invoke({ action: 'insert', table: 'user_points', data: mapUserProgressToDb(data) });
-    return mapUserProgressFromDb(result?.data?.[0] || null);
-  },
-
-  async update(id, data) {
-    const result = await invoke({
-      action: 'update', table: 'user_points', data: mapUserProgressToDb(data),
-      query: { filter: { id } }
-    });
-    return mapUserProgressFromDb(result?.data?.[0] || null);
-  },
-
-  async get(id) {
-    const result = await invoke({
-      action: 'select', table: 'user_points',
-      query: { filter: { id }, limit: 1 }
-    });
-    return mapUserProgressFromDb(result?.data?.[0] || null);
-  }
-};
-
 export const db = {
   UserProfile: createEntityAPI('user_profiles'),
   FoodLog: createEntityAPI('food_logs'),
@@ -196,9 +104,7 @@ export const db = {
   SavedRoute: createEntityAPI('saved_routes'),
   Habit: createEntityAPI('habits'),
   HabitLog: createEntityAPI('habit_logs'),
-  FoodDatabase: createEntityAPI('foods_database'),
-  UserFoodLog: createEntityAPI('user_food_logs'),
-  UserProgress: userProgressApi,
+  UserProgress: createEntityAPI('user_progress'),
   Ranking: createEntityAPI('ranking'),
   Mission: createEntityAPI('missions'),
   MissionProgress: createEntityAPI('missions_progress'),

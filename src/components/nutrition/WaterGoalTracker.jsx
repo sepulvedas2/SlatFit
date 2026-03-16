@@ -83,14 +83,17 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
     },
   });
 
-  const awardXpMutation = useMutation({
+  const awardPointsMutation = useMutation({
     mutationFn: async () => {
-      return base44.functions.invoke('updateXP', { xp_ganho: 20, tipo_acao: 'nutricao' });
+      const points = await db.UserPoints.filter({ user_email: userEmail });
+      if (points[0]) {
+        return db.UserPoints.update(points[0].id, {
+          total_points: points[0].total_points + 20,
+          xp_current: points[0].xp_current + 20,
+        });
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['userProgress']);
-      queryClient.invalidateQueries(['globalUserProgress']);
-    },
+    onSuccess: () => queryClient.invalidateQueries(['userPoints']),
   });
 
   const handleAddWater = async (amount) => {
@@ -99,7 +102,7 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
     await updateWaterMutation.mutateAsync(newIntake);
     if (wasNotReached && newIntake >= goalAmount) {
       setCelebrateGoal(true);
-      await awardXpMutation.mutateAsync();
+      await awardPointsMutation.mutateAsync();
       toast.success("🎉 Meta de água concluída! +20 XP");
       setTimeout(() => setCelebrateGoal(false), 3000);
     } else {
