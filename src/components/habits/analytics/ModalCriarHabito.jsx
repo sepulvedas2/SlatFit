@@ -65,7 +65,7 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto p-5 pb-32">
             <div>
               <Label className="text-white/60">Nome do hábito</Label>
               <Input value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} className="mt-2 border-white/10 bg-white/5 text-white" placeholder="Ex: Ler 10 páginas" />
