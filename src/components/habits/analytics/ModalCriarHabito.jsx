@@ -52,10 +52,10 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 24, stiffness: 240 }}
-          className="flex max-h-[88vh] w-full max-w-lg flex-col rounded-t-[28px] border border-white/10 bg-[#101716]"
+          className="w-full max-w-lg rounded-t-[28px] border border-white/10 bg-[#101716] p-5"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="mb-5 flex items-center justify-between px-5 pt-5">
+          <div className="mb-5 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/35">Novo Hábito</p>
               <h3 className="mt-1 text-xl font-bold text-white">Adicionar hábito</h3>
@@ -65,15 +65,53 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
             </button>
           </div>
 
-          <div className="space-y-4 overflow-y-auto px-5 pb-4">
+          <div className="space-y-4">
             <div>
               <Label className="text-white/60">Nome do hábito</Label>
               <Input value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} className="mt-2 border-white/10 bg-white/5 text-white" placeholder="Ex: Ler 10 páginas" />
             </div>
-...
-          </div>
 
-          <div className="border-t border-white/10 bg-[#101716] px-5 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] pt-4">
+            <div>
+              <Label className="text-white/60">Cor</Label>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {COLORS.map((color) => (
+                  <button
+                    key={color.value}
+                    onClick={() => setForm((prev) => ({ ...prev, color: color.value }))}
+                    className={`flex items-center gap-2 rounded-2xl border px-3 py-3 text-sm ${form.color === color.value ? "border-white/30 bg-white/10 text-white" : "border-white/8 bg-white/5 text-white/55"}`}
+                  >
+                    <span className="h-3 w-3 rounded-full" style={{ backgroundColor: color.hex }} />
+                    {color.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-white/60">Frequência alvo (dias por semana)</Label>
+              <Input type="number" min="1" max="7" value={form.targetFrequency} onChange={(e) => setForm((prev) => ({ ...prev, targetFrequency: Number(e.target.value) }))} className="mt-2 border-white/10 bg-white/5 text-white" />
+            </div>
+
+            <div>
+              <Label className="text-white/60">Melhor horário do dia</Label>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {TIMES.map((time) => (
+                  <button
+                    key={time.value}
+                    onClick={() => setForm((prev) => ({ ...prev, preferredTime: time.value }))}
+                    className={`rounded-2xl border px-3 py-3 text-sm ${form.preferredTime === time.value ? "border-[#CEF17B]/35 bg-[#CEF17B]/12 text-[#CEF17B]" : "border-white/8 bg-white/5 text-white/55"}`}
+                  >
+                    {time.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-white/60">Observações (opcional)</Label>
+              <Textarea value={form.notes} onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))} className="mt-2 min-h-[110px] border-white/10 bg-white/5 text-white" placeholder="Escreva uma observação rápida sobre este hábito..." />
+            </div>
+
             <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-12 w-full rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b]">
               {isLoading ? "Salvando..." : "Criar hábito"}
             </Button>
