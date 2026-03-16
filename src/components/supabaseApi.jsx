@@ -196,6 +196,8 @@ export const db = {
   SavedRoute: createEntityAPI('saved_routes'),
   Habit: createEntityAPI('habits'),
   HabitLog: createEntityAPI('habit_logs'),
+  FoodDatabase: createEntityAPI('foods_database'),
+  UserFoodLog: createEntityAPI('user_food_logs'),
   UserProgress: userProgressApi,
   Ranking: createEntityAPI('ranking'),
   Mission: createEntityAPI('missions'),

@@ -16,6 +16,7 @@ import ScannerResultScreen from "../components/scanner/ScannerResultScreen";
 import DailyTimeline from "../components/scanner/DailyTimeline";
 import MealTypeSelector from "../components/scanner/MealTypeSelector";
 import WeeklyView from "../components/scanner/WeeklyView";
+import FoodSearchSection from "../components/scanner/FoodSearchSection";
 
 function computeStreak(foodsByDate) {
   let streak = 0;
@@ -144,6 +145,40 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
     });
     queryClient.invalidateQueries(["weekFoods"]);
     queryClient.invalidateQueries(["todayFoods"]);
+  };
+
+  const handleAddFoodFromDatabase = async ({ food, quantity, mealType, nutrition }) => {
+    if (!user) return;
+
+    await db.UserFoodLog.create({
+      user_id: user.id,
+      food_id: food.id,
+      quantity,
+      meal_type: mealType,
+    });
+
+    await db.FoodLog.create({
+      user_email: user.email,
+      food_name: food.food_name,
+      meal_type: mealType,
+      calories: nutrition.calories,
+      protein: nutrition.protein,
+      carbs: nutrition.carbohydrates,
+      fats: nutrition.fat,
+      portion_size: `${quantity}x ${food.portion_size}`,
+      image_url: null,
+      log_date: today,
+    });
+
+    await base44.functions.invoke('updateXP', {
+      xp_ganho: 5,
+      tipo_acao: 'nutricao'
+    });
+
+    queryClient.invalidateQueries(["weekFoods"]);
+    queryClient.invalidateQueries(["todayFoods"]);
+    queryClient.invalidateQueries(['userProgress']);
+    queryClient.invalidateQueries(['globalUserProgress']);
   };
 
   const handleSaveAndReset = async (data) => {
@@ -296,6 +331,8 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
                   Inserir manualmente
                 </button>
               </div>
+
+              <FoodSearchSection onAddFood={handleAddFoodFromDatabase} />
 
               {/* Tabs dia / semana */}
               <div className="flex gap-2 p-1 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)" }}>
