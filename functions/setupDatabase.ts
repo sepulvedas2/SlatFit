@@ -342,6 +342,34 @@ Deno.serve(async (req) => {
       setupResults.push({ table: 'user_challenges', status: 'ERROR', error: err.message });
     }
 
+    // 12. DAILY_METRICS
+    try {
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS daily_metrics (
+            id uuid primary key default gen_random_uuid(),
+            created_date timestamptz default now(),
+            updated_date timestamptz default now(),
+            user_email text not null,
+            metric_date date not null,
+            energia integer default 0,
+            foco integer default 0,
+            humor integer default 0,
+            sono integer default 0
+          );
+
+          ALTER TABLE daily_metrics ENABLE ROW LEVEL SECURITY;
+
+          DROP POLICY IF EXISTS "daily_metrics_all" ON daily_metrics;
+          CREATE POLICY "daily_metrics_all" ON daily_metrics
+          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+        `
+      });
+      setupResults.push({ table: 'daily_metrics', status: 'OK' });
+    } catch (err) {
+      setupResults.push({ table: 'daily_metrics', status: 'ERROR', error: err.message });
+    }
+
     console.log('[Database Setup] Configuração concluída');
 
     return Response.json({

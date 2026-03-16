@@ -104,6 +104,7 @@ export const db = {
   SavedRoute: createEntityAPI('saved_routes'),
   Habit: createEntityAPI('habits'),
   HabitLog: createEntityAPI('habit_logs'),
+  DailyMetric: createEntityAPI('daily_metrics'),
   UserProgress: createEntityAPI('user_progress'),
   Ranking: createEntityAPI('ranking'),
   Mission: createEntityAPI('missions'),
