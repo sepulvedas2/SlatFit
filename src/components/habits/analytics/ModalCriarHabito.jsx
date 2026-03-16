@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
+        className="fixed inset-0 z-[100000] flex items-end justify-center bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       >
         <motion.div
@@ -73,15 +73,16 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
 
             <div>
               <Label className="text-white/60">Cor</Label>
-              <div className="mt-2 grid grid-cols-3 gap-2">
+              <div className="mt-2 grid grid-cols-3 gap-3">
                 {COLORS.map((color) => (
                   <button
                     key={color.value}
+                    type="button"
                     onClick={() => setForm((prev) => ({ ...prev, color: color.value }))}
-                    className={`flex items-center gap-2 rounded-2xl border px-3 py-3 text-sm ${form.color === color.value ? "border-white/30 bg-white/10 text-white" : "border-white/8 bg-white/5 text-white/55"}`}
+                    className={`flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border px-2 py-3 text-center text-sm font-medium ${form.color === color.value ? "border-white/30 bg-white/10 text-white" : "border-white/8 bg-white/5 text-white/55"}`}
                   >
-                    <span className="h-3 w-3 rounded-full" style={{ backgroundColor: color.hex }} />
-                    {color.label}
+                    <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color.hex }} />
+                    <span className="truncate">{color.label}</span>
                   </button>
                 ))}
               </div>
@@ -113,12 +114,10 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
             </div>
           </div>
 
-          <div className="sticky bottom-0 mt-auto grid grid-cols-2 gap-3 border-t border-white/10 bg-[#101716] p-5">
-            <Button onClick={onClose} variant="outline" className="h-12 rounded-2xl border-white/15 bg-white/5 text-white hover:bg-white/10">
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-12 rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b]">
-              {isLoading ? "Salvando..." : "Criar hábito"}
+          <div className="sticky bottom-0 mt-auto border-t border-white/10 bg-[#101716] p-5 pt-4">
+            <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-14 w-full rounded-2xl bg-[#CEF17B] text-base font-bold text-[#0B3936] hover:bg-[#bfe56b]">
+              <Plus className="mr-2 h-5 w-5" />
+              {isLoading ? "Salvando..." : "Adicionar hábito"}
             </Button>
           </div>
         </motion.div>
