@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus } from "lucide-react";
+import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100000] flex items-end justify-center bg-black/70 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       >
         <motion.div
@@ -52,7 +52,7 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 24, stiffness: 240 }}
-          className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-[28px] border border-white/10 bg-[#101716]"
+          className="w-full max-w-lg rounded-t-[28px] border border-white/10 bg-[#101716] p-5"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-5 flex items-center justify-between">
@@ -65,7 +65,7 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
             </button>
           </div>
 
-          <div className="space-y-4 overflow-y-auto p-5 pb-32">
+          <div className="space-y-4">
             <div>
               <Label className="text-white/60">Nome do hábito</Label>
               <Input value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} className="mt-2 border-white/10 bg-white/5 text-white" placeholder="Ex: Ler 10 páginas" />
@@ -73,16 +73,15 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
 
             <div>
               <Label className="text-white/60">Cor</Label>
-              <div className="mt-2 grid grid-cols-3 gap-3">
+              <div className="mt-2 grid grid-cols-3 gap-2">
                 {COLORS.map((color) => (
                   <button
                     key={color.value}
-                    type="button"
                     onClick={() => setForm((prev) => ({ ...prev, color: color.value }))}
-                    className={`flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border px-2 py-3 text-center text-sm font-medium ${form.color === color.value ? "border-white/30 bg-white/10 text-white" : "border-white/8 bg-white/5 text-white/55"}`}
+                    className={`flex items-center gap-2 rounded-2xl border px-3 py-3 text-sm ${form.color === color.value ? "border-white/30 bg-white/10 text-white" : "border-white/8 bg-white/5 text-white/55"}`}
                   >
-                    <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color.hex }} />
-                    <span className="truncate">{color.label}</span>
+                    <span className="h-3 w-3 rounded-full" style={{ backgroundColor: color.hex }} />
+                    {color.label}
                   </button>
                 ))}
               </div>
@@ -112,12 +111,9 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
               <Label className="text-white/60">Observações (opcional)</Label>
               <Textarea value={form.notes} onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))} className="mt-2 min-h-[110px] border-white/10 bg-white/5 text-white" placeholder="Escreva uma observação rápida sobre este hábito..." />
             </div>
-          </div>
 
-          <div className="sticky bottom-0 mt-auto border-t border-white/10 bg-[#101716] p-5 pt-4">
-            <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-14 w-full rounded-2xl bg-[#CEF17B] text-base font-bold text-[#0B3936] hover:bg-[#bfe56b]">
-              <Plus className="mr-2 h-5 w-5" />
-              {isLoading ? "Salvando..." : "Adicionar hábito"}
+            <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-12 w-full rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b]">
+              {isLoading ? "Salvando..." : "Criar hábito"}
             </Button>
           </div>
         </motion.div>
