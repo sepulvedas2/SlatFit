@@ -323,6 +323,34 @@ Deno.serve(async (req) => {
       setupResults.push({ table: 'user_challenges', status: 'ERROR', error: err.message });
     }
 
+    // 12. USER_BODY_PROGRESS
+    try {
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS user_body_progress (
+            id uuid primary key default gen_random_uuid(),
+            created_date timestamptz default now(),
+            updated_date timestamptz default now(),
+            created_by text,
+            user_id uuid not null,
+            weight_initial numeric,
+            weight_current numeric,
+            weight_goal numeric,
+            created_at timestamptz default now(),
+            updated_at timestamptz default now()
+          );
+
+          ALTER TABLE user_body_progress ENABLE ROW LEVEL SECURITY;
+
+          DROP POLICY IF EXISTS "user_body_progress_all" ON user_body_progress;
+          CREATE POLICY "user_body_progress_all" ON user_body_progress FOR ALL USING (true);
+        `
+      });
+      setupResults.push({ table: 'user_body_progress', status: 'OK' });
+    } catch (err) {
+      setupResults.push({ table: 'user_body_progress', status: 'ERROR', error: err.message });
+    }
+
     await supabase.rpc('exec_sql', {
       sql: `NOTIFY pgrst, 'reload schema';`
     });

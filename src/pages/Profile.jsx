@@ -20,6 +20,7 @@ import { motion } from "framer-motion";
 import { useTheme } from "@/components/ThemeContext";
 import { clearUser } from "@/components/auth";
 import { LogOut } from "lucide-react";
+import BodyProgressSection from "../components/profile/BodyProgressSection";
 
 const GOAL_META = {
   weight_loss:  { label: "Emagrecimento",   emoji: "🔥", phrase: "Cada treino te aproxima da melhor versão de você!", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
@@ -256,8 +257,13 @@ export default function Profile({ onLogout }) {
           </div>
         </motion.div>
 
-        {/* BLOCO 6 — CONFIGURAÇÕES */}
+        {/* BLOCO 6 — PROGRESSO CORPORAL */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <BodyProgressSection user={user} profileData={formData} />
+        </motion.div>
+
+        {/* BLOCO 7 — CONFIGURAÇÕES */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
           <div className="glass-effect rounded-2xl p-5 space-y-1" style={cardStyle}>
             <h3 className="text-white font-bold mb-4 text-sm">Configurações</h3>
 
