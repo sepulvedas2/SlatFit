@@ -112,9 +112,11 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
               <Textarea value={form.notes} onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))} className="mt-2 min-h-[110px] border-white/10 bg-white/5 text-white" placeholder="Escreva uma observação rápida sobre este hábito..." />
             </div>
 
-            <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-12 w-full rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b]">
-              {isLoading ? "Salvando..." : "Criar hábito"}
-            </Button>
+            <div className="sticky bottom-0 -mx-5 mt-5 border-t border-white/10 bg-[#101716] px-5 pb-2 pt-4">
+              <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-12 w-full rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b]">
+                {isLoading ? "Salvando..." : "Salvar hábito"}
+              </Button>
+            </div>
           </div>
         </motion.div>
       </motion.div>
