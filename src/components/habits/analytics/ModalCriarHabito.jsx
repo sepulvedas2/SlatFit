@@ -52,7 +52,7 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 24, stiffness: 240 }}
-          className="w-full max-w-lg rounded-t-[28px] border border-white/10 bg-[#101716] p-5"
+          className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-[28px] border border-white/10 bg-[#101716]"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-5 flex items-center justify-between">
