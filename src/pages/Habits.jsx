@@ -1,18 +1,36 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, BarChart3, Grid3X3, Settings, PartyPopper } from "lucide-react";
-import { format, startOfWeek, subDays } from "date-fns";
+import { format, startOfWeek, addDays, subDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { motion } from "framer-motion";
+import { Plus, Sparkles, CheckCircle2 } from "lucide-react";
 
-import HabitGrid from "../components/habits/HabitGrid";
-import HabitStats from "../components/habits/HabitStats";
-import HabitFormModal from "../components/habits/HabitFormModal";
-import WeeklyReport from "../components/habits/WeeklyReport";
-import ProgressChart from "../components/habits/ProgressChart";
+import DisciplineScoreCard from "@/components/habits/analytics/DisciplineScoreCard";
+import HabitProgressChart from "@/components/habits/analytics/HabitProgressChart";
+import HabitHeatmapGrid from "@/components/habits/analytics/HabitHeatmapGrid";
+import HabitListPanel from "@/components/habits/analytics/HabitListPanel";
+import WeeklyPerformanceChart from "@/components/habits/analytics/WeeklyPerformanceChart";
+import DailyMetricsChart from "@/components/habits/analytics/DailyMetricsChart";
+import HabitInsightsPanel from "@/components/habits/analytics/HabitInsightsPanel";
+import HabitCreateModal from "@/components/habits/analytics/HabitCreateModal";
 
-// XP com multiplicador de streak
+const moodMap = { great: 5, good: 4, ok: 3, tired: 2, stressed: 1, low: 2 };
+const colorMap = {
+  lime: "#CEF17B",
+  orange: "#FF6A00",
+  blue: "#60A5FA",
+  purple: "#C084FC",
+  rose: "#FB7185",
+  teal: "#2DD4BF",
+  treino: "#FF6A00",
+  saude: "#CEF17B",
+  nutricao: "#60A5FA",
+  mentalidade: "#C084FC",
+  produtividade: "#2DD4BF",
+};
+
 function calcXP(baseXp, streak) {
   let mult = 1;
   if (streak >= 30) mult = 1.4;
@@ -21,33 +39,61 @@ function calcXP(baseXp, streak) {
   return Math.round(baseXp * mult);
 }
 
-// Calcular streak de hábitos
-function computeHabitStreak(logsByDate, habits) {
+function resolveHabitColor(category) {
+  return colorMap[category] || "#94A3B8";
+}
+
+function calculateCurrentStreak(dateSet, today) {
   let streak = 0;
-  const today = format(new Date(), "yyyy-MM-dd");
   for (let i = 0; i < 90; i++) {
-    const dateStr = format(subDays(new Date(), i), "yyyy-MM-dd");
-    const dayLogs = logsByDate[dateStr] || [];
-    const doneCount = dayLogs.filter(l => l.completed).length;
-    if (doneCount > 0) {
-      streak++;
-    } else if (i > 0) {
-      break;
-    }
+    const date = format(subDays(today, i), "yyyy-MM-dd");
+    if (dateSet.has(date)) streak += 1;
+    else break;
   }
   return streak;
 }
 
+function calculateLongestStreak(dateSet, today) {
+  let best = 0;
+  let current = 0;
+  for (let i = 89; i >= 0; i--) {
+    const date = format(subDays(today, i), "yyyy-MM-dd");
+    if (dateSet.has(date)) {
+      current += 1;
+      best = Math.max(best, current);
+    } else {
+      current = 0;
+    }
+  }
+  return best;
+}
+
+function getDisciplineLevel(score) {
+  if (score >= 75) {
+    return {
+      label: "Advanced",
+      description: "Sua consistência está forte e seu sistema de disciplina já mostra padrão de alta performance.",
+    };
+  }
+  if (score >= 45) {
+    return {
+      label: "Intermediate",
+      description: "Você já tem uma boa base, mas ainda há espaço para tornar a execução mais previsível e consistente.",
+    };
+  }
+  return {
+    label: "Beginner",
+    description: "Seu sistema ainda está em construção. O foco agora é reduzir dias quebrados e aumentar constância.",
+  };
+}
+
 export default function Habits() {
   const [user, setUser] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [activeTab, setActiveTab] = useState("grid"); // grid | stats
-  const [xpAnimation, setXpAnimation] = useState(null);
-  const [perfectDayToast, setPerfectDayToast] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const queryClient = useQueryClient();
-
-  const today = format(new Date(), "yyyy-MM-dd");
-  const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
+  const today = new Date();
+  const todayKey = format(today, "yyyy-MM-dd");
+  const weekStart = startOfWeek(today, { weekStartsOn: 1 });
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -55,357 +101,262 @@ export default function Habits() {
 
   const { data: habits = [] } = useQuery({
     queryKey: ["habits", user?.email],
-    queryFn: async () => {
-      try {
-        return await db.Habit.filter({ user_email: user.email, is_active: true });
-      } catch (error) {
-        console.error('[Habits] Erro ao buscar hábitos:', error);
-        return [];
-      }
-    },
+    queryFn: () => db.Habit.filter({ user_email: user.email, is_active: true }),
     enabled: !!user?.email,
     initialData: [],
-    retry: 1,
   });
 
   const { data: allLogs = [] } = useQuery({
     queryKey: ["habitLogs", user?.email],
-    queryFn: async () => {
-      try {
-        return await db.HabitLog.filter({ user_email: user.email });
-      } catch (error) {
-        console.error('[Habits] Erro ao buscar logs:', error);
-        return [];
-      }
-    },
+    queryFn: () => db.HabitLog.filter({ user_email: user.email }),
     enabled: !!user?.email,
     initialData: [],
-    retry: 1,
   });
 
-  const { data: userProgress } = useQuery({
-    queryKey: ["userProgress", user?.email],
-    queryFn: async () => {
-      const progress = await db.UserProgress.filter({ user_email: user.email });
-      return progress[0] || null;
-    },
+  const { data: checkIns = [] } = useQuery({
+    queryKey: ["dailyCheckIns", user?.email],
+    queryFn: () => db.DailyCheckIn.filter({ user_email: user.email }),
     enabled: !!user?.email,
+    initialData: [],
   });
 
-  // Agrupar logs por data
-  const logsByDate = useMemo(() => {
-    return allLogs.reduce((acc, log) => {
-      const d = log.log_date;
-      if (!acc[d]) acc[d] = [];
-      acc[d].push(log);
-      return acc;
-    }, {});
-  }, [allLogs]);
-
-  // Logs desta semana
-  const weekLogs = useMemo(() => allLogs.filter(l => l.log_date >= weekStart), [allLogs, weekStart]);
-
-  // Streak atual
-  const streak = useMemo(() => computeHabitStreak(logsByDate, habits), [logsByDate, habits]);
-
-  // Best streak salvo no sistema atual de progresso
-  const bestStreak = Math.max(streak, userProgress?.longest_streak || 0);
-
-  // Consistência semanal
-  const weekConsistency = useMemo(() => {
-    if (!habits.length) return 0;
-    const possible = habits.length * 7;
-    const done = weekLogs.filter(l => l.completed).length;
-    return Math.round((done / possible) * 100);
-  }, [habits, weekLogs]);
-
-  // Total XP de hábitos
-  const totalHabitXp = useMemo(() => allLogs.reduce((s, l) => s + (l.xp_earned || 0), 0), [allLogs]);
-
-  // Create habit
   const createHabitMutation = useMutation({
-    mutationFn: async (data) => {
-      console.log('[Habits] Criando novo hábito:', data);
-      await db.Habit.create({ ...data, user_email: user.email });
+    mutationFn: async (form) => {
+      await db.Habit.create({
+        user_email: user.email,
+        name: form.name,
+        emoji: "✅",
+        category: form.color,
+        type: "binary",
+        target_value: form.targetFrequency,
+        target_unit: form.notes ? `notes::${form.notes}` : "",
+        ideal_time: form.preferredTime,
+        xp_per_completion: 10,
+        is_native: false,
+        is_active: true,
+      });
     },
     onSuccess: () => {
-      console.log('[Habits] Hábito criado com sucesso');
-      queryClient.invalidateQueries(["habits"]);
-      setShowForm(false);
-    },
-    onError: (error) => {
-      console.error('[Habits] Erro ao criar hábito:', error);
-      alert('Erro ao criar hábito. Verifique sua conexão e tente novamente.');
+      queryClient.invalidateQueries({ queryKey: ["habits"] });
+      setShowCreateModal(false);
     },
   });
 
-  // Toggle habit log
+  const logsByHabit = useMemo(() => {
+    return habits.reduce((acc, habit) => {
+      acc[habit.id] = allLogs.filter((log) => (log.habit_id === habit.id || log.habit_name === habit.name) && log.completed);
+      return acc;
+    }, {});
+  }, [habits, allLogs]);
+
+  const habitStats = useMemo(() => {
+    return habits.map((habit) => {
+      const logs = logsByHabit[habit.id] || [];
+      const dateSet = new Set(logs.map((log) => log.log_date));
+      const completedLast30 = Array.from({ length: 30 }, (_, i) => format(subDays(today, i), "yyyy-MM-dd")).filter((date) => dateSet.has(date)).length;
+      const progress = Math.round((completedLast30 / 30) * 100);
+      const todayLog = logs.find((log) => log.log_date === todayKey) || null;
+
+      return {
+        id: habit.id,
+        name: habit.name,
+        color: resolveHabitColor(habit.category),
+        progress,
+        currentStreak: calculateCurrentStreak(dateSet, today),
+        longestStreak: calculateLongestStreak(dateSet, today),
+        isDoneToday: !!todayLog,
+        todayLog,
+        originalHabit: habit,
+      };
+    });
+  }, [habits, logsByHabit, today, todayKey]);
+
+  const completionMap = useMemo(() => {
+    return habitStats.reduce((acc, habit) => {
+      acc[habit.id] = {};
+      (logsByHabit[habit.id] || []).forEach((log) => {
+        acc[habit.id][log.log_date] = true;
+      });
+      return acc;
+    }, {});
+  }, [habitStats, logsByHabit]);
+
+  const totalPossible30 = habits.length * 30;
+  const completed30 = Object.values(completionMap).reduce((sum, habitDays) => {
+    return sum + Object.keys(habitDays).filter((date) => date >= format(subDays(today, 29), "yyyy-MM-dd")).length;
+  }, 0);
+  const completionRate = totalPossible30 ? Math.round((completed30 / totalPossible30) * 100) : 0;
+
+  const weeklyData = useMemo(() => {
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = addDays(weekStart, index);
+      const key = format(date, "yyyy-MM-dd");
+      const completed = habitStats.filter((habit) => completionMap?.[habit.id]?.[key]).length;
+      const percentage = habits.length ? Math.round((completed / habits.length) * 100) : 0;
+      return {
+        key,
+        label: format(date, "EEE", { locale: ptBR }),
+        completion: percentage,
+      };
+    });
+  }, [weekStart, habits.length, habitStats, completionMap]);
+
+  const weeklyPerformance = weeklyData.length ? Math.round(weeklyData.reduce((sum, day) => sum + day.completion, 0) / weeklyData.length) : 0;
+  const streakConsistency = habitStats.length ? Math.round(habitStats.reduce((sum, habit) => sum + Math.min((habit.currentStreak / 14) * 100, 100), 0) / habitStats.length) : 0;
+  const disciplineScore = Math.min(100, Math.round(completionRate * 0.45 + weeklyPerformance * 0.3 + streakConsistency * 0.25));
+  const disciplineLevel = getDisciplineLevel(disciplineScore);
+
+  const progressChartData = useMemo(() => {
+    return Array.from({ length: 30 }, (_, index) => {
+      const date = subDays(today, 29 - index);
+      const key = format(date, "yyyy-MM-dd");
+      const completed = habitStats.filter((habit) => completionMap?.[habit.id]?.[key]).length;
+      return {
+        label: format(date, "d/MM", { locale: ptBR }),
+        completion: habits.length ? Math.round((completed / habits.length) * 100) : 0,
+      };
+    });
+  }, [today, habitStats, completionMap, habits.length]);
+
+  const heatmapDays = useMemo(() => {
+    return Array.from({ length: 14 }, (_, index) => {
+      const date = subDays(today, 13 - index);
+      return {
+        key: format(date, "yyyy-MM-dd"),
+        label: format(date, "dd/MM", { locale: ptBR }),
+        shortLabel: format(date, "d", { locale: ptBR }),
+      };
+    });
+  }, [today]);
+
+  const metricsChartData = useMemo(() => {
+    return Array.from({ length: 14 }, (_, index) => {
+      const date = subDays(today, 13 - index);
+      const key = format(date, "yyyy-MM-dd");
+      const entry = checkIns.find((item) => item.check_in_date === key);
+      const mood = moodMap[entry?.mood] || 0;
+      const energy = entry?.energy_level || 0;
+      const sleep = entry?.sleep_quality || 0;
+      const focus = entry ? Math.min(5, Math.round(((energy || 0) + (sleep || 0) + mood) / 3)) : 0;
+      return {
+        label: format(date, "d/MM", { locale: ptBR }),
+        energy,
+        focus,
+        mood,
+        sleep,
+      };
+    });
+  }, [checkIns, today]);
+
+  const bestHabit = habitStats.reduce((best, habit) => (!best || habit.progress > best.progress ? habit : best), null);
+  const weakestHabit = habitStats.reduce((worst, habit) => (!worst || habit.progress < worst.progress ? habit : worst), null);
+  const bestDay = weeklyData.reduce((best, day) => (!best || day.completion > best.completion ? day : best), null);
+  const longestStreak = habitStats.reduce((max, habit) => Math.max(max, habit.longestStreak), 0);
+  const totalDoneToday = habitStats.filter((habit) => habit.isDoneToday).length;
+
+  const insights = [
+    {
+      title: "Hábito mais consistente",
+      value: bestHabit ? bestHabit.name : "Sem dados",
+      description: bestHabit ? `${bestHabit.progress}% de execução nos últimos 30 dias.` : "Comece registrando hábitos para gerar insights.",
+    },
+    {
+      title: "Hábito mais fraco",
+      value: weakestHabit ? weakestHabit.name : "Sem dados",
+      description: weakestHabit ? `${weakestHabit.progress}% de consistência. Vale revisar o gatilho desse hábito.` : "Ainda não há histórico suficiente.",
+    },
+    {
+      title: "Melhor dia da semana",
+      value: bestDay ? bestDay.label : "Sem dados",
+      description: bestDay ? `${bestDay.completion}% de conclusão média nesse dia.` : "Sem dados suficientes na semana atual.",
+    },
+    {
+      title: "Recorde de streak",
+      value: `${longestStreak} dias`,
+      description: "Seu maior ciclo de disciplina contínua registrado entre os hábitos ativos.",
+    },
+  ];
+
   const toggleHabitMutation = useMutation({
-    mutationFn: async ({ habit, dateStr, existingLog }) => {
-      const xpEarned = calcXP(habit.xp_per_completion || 10, streak);
-      console.log('[Habits] Toggle hábito:', habit.name, 'data:', dateStr, 'existente:', !!existingLog);
+    mutationFn: async ({ habit, existingLog }) => {
+      const streakBase = habitStats.find((item) => item.id === habit.id)?.currentStreak || 0;
+      const xpEarned = calcXP(habit.xp_per_completion || 10, streakBase);
 
-      let result;
       if (existingLog) {
-        if (existingLog.completed) {
-          console.log('[Habits] Removendo conclusão do hábito');
-          await db.HabitLog.delete(existingLog.id);
-          result = { xpDelta: -xpEarned, added: false };
-        } else {
-          console.log('[Habits] Marcando hábito como completo');
-          await db.HabitLog.update(existingLog.id, { completed: true, xp_earned: xpEarned });
-          result = { xpDelta: xpEarned, added: true };
-        }
-      } else {
-        console.log('[Habits] Criando novo log de hábito');
-        await db.HabitLog.create({
-          user_email: user.email,
-          habit_id: habit.id,
-          habit_name: habit.name,
-          log_date: dateStr,
-          completed: true,
-          xp_earned: xpEarned,
-          completed_at: new Date().toISOString(),
-        });
-        result = { xpDelta: xpEarned, added: true };
+        await db.HabitLog.delete(existingLog.id);
+        return { added: false };
       }
 
-      // Adicionar XP ao sistema de progressão
-      if (result.added && result.xpDelta > 0) {
-        try {
-          await base44.functions.invoke('updateXP', { 
-            xp_ganho: result.xpDelta, 
-            tipo_acao: 'habito' 
-          });
-          console.log('[Habits] XP adicionado ao progresso');
-        } catch (xpError) {
-          console.error('[Habits] Erro ao adicionar XP:', xpError);
-        }
-      }
+      await db.HabitLog.create({
+        user_email: user.email,
+        habit_id: habit.id,
+        habit_name: habit.name,
+        log_date: todayKey,
+        completed: true,
+        xp_earned: xpEarned,
+        completed_at: new Date().toISOString(),
+      });
 
-      return result;
+      await base44.functions.invoke("updateXP", { xp_ganho: xpEarned, tipo_acao: "habito" });
+      return { added: true };
     },
-    onSuccess: (result, variables) => {
-    console.log('[Habits] Hábito atualizado com sucesso:', result);
-    queryClient.invalidateQueries(["habitLogs"]);
-    queryClient.invalidateQueries(['userProgress']);
-    queryClient.invalidateQueries(['ranking']);
-    
-    if (result?.added && result?.xpDelta > 0) {
-      setXpAnimation({ value: result.xpDelta });
-      setTimeout(() => setXpAnimation(null), 1500);
-      const todayLogs = (allLogs.filter(l => l.log_date === today && l.completed)).length + 1;
-      if (todayLogs >= habits.length && habits.length > 0) {
-        setPerfectDayToast(true);
-        setTimeout(() => setPerfectDayToast(false), 3000);
-      }
-    }
-    },
-    onError: (error) => {
-      console.error('[Habits] Erro ao atualizar hábito:', error);
-      alert('Erro ao salvar progresso do hábito. Tente novamente.');
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["habitLogs"] });
+      queryClient.invalidateQueries({ queryKey: ["userProgress"] });
     },
   });
 
-  // Delete habit
-  const deleteHabitMutation = useMutation({
-    mutationFn: (habitId) => db.Habit.update(habitId, { is_active: false }),
-    onSuccess: () => queryClient.invalidateQueries(["habits"]),
-  });
-
-  const handleToggle = useCallback((habit, dateStr, existingLog) => {
-    toggleHabitMutation.mutate({ habit, dateStr, existingLog });
-  }, [toggleHabitMutation]);
+  const handleToggle = (habit, existingLog) => {
+    toggleHabitMutation.mutate({ habit, existingLog });
+  };
 
   return (
-    <div className="min-h-screen pb-28 pt-6">
-      <div className="max-w-lg mx-auto px-4 space-y-4">
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-[#0A0F0F] pb-28 pt-6">
+      <div className="mx-auto max-w-7xl px-4">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-white font-bold text-2xl">Meus Hábitos</h1>
-            <p className="text-white/50 text-sm">Construa sua melhor versão</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">SlatFit Habit Analytics</p>
+            <h1 className="mt-2 text-3xl font-black tracking-tight text-white">Disciplina em dados</h1>
+            <p className="mt-2 max-w-xl text-sm text-white/55">Um painel analítico completo para acompanhar consistência, disciplina e evolução dos seus hábitos.</p>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", boxShadow: "0 4px 16px rgba(255,106,0,0.35)" }}
-          >
-            <Plus className="w-5 h-5 text-white" />
-          </button>
+          <div className="hidden rounded-3xl border border-white/10 bg-white/[0.03] px-4 py-3 text-right sm:block">
+            <p className="text-xs uppercase tracking-[0.18em] text-white/35">Hoje</p>
+            <p className="mt-1 flex items-center justify-end gap-2 text-sm font-semibold text-[#CEF17B]"><CheckCircle2 className="h-4 w-4" />{totalDoneToday}/{habits.length || 0} hábitos</p>
+          </div>
+        </motion.div>
+
+        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <DisciplineScoreCard score={disciplineScore} level={disciplineLevel.label} description={disciplineLevel.description} />
+          <HabitInsightsPanel insights={insights} />
         </div>
 
-        {/* XP Animation */}
-        <AnimatePresence>
-          {xpAnimation && (
-            <motion.div
-              initial={{ opacity: 0, y: 0, scale: 0.8 }}
-              animate={{ opacity: 1, y: -30, scale: 1.2 }}
-              exit={{ opacity: 0, y: -60 }}
-              className="fixed top-24 right-6 z-50 px-3 py-1.5 rounded-full font-bold text-sm text-white"
-              style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", pointerEvents: "none", boxShadow: "0 4px 16px rgba(255,106,0,0.4)" }}
-            >
-              +{xpAnimation.value} XP ⚡
-            </motion.div>
-          )}
-          {perfectDayToast && (
-            <motion.div
-              key="perfect"
-              initial={{ opacity: 0, y: 60, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="fixed bottom-32 left-4 right-4 z-50 mx-auto max-w-sm rounded-2xl p-4 flex items-center gap-3"
-              style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", boxShadow: "0 8px 32px rgba(255,106,0,0.5)" }}
-            >
-              <span className="text-2xl">🎉</span>
-              <div>
-                <p className="text-white font-bold text-sm">Dia 100% concluído!</p>
-                <p className="text-white/80 text-xs">Você está evoluindo. Consistência é poder.</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Tabs */}
-        <div className="flex gap-2 p-1 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)" }}>
-          {[
-            { key: "grid", label: "📋 Grade", icon: Grid3X3 },
-            { key: "stats", label: "📊 Progresso", icon: BarChart3 },
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className="flex-1 py-2 rounded-xl text-sm font-semibold transition-all"
-              style={{
-                background: activeTab === key ? "rgba(206,241,123,0.15)" : "transparent",
-                color: activeTab === key ? "#CEF17B" : "rgba(255,255,255,0.5)",
-                border: activeTab === key ? "1px solid rgba(206,241,123,0.3)" : "1px solid transparent",
-              }}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="mt-4 grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+          <HabitProgressChart data={progressChartData} />
+          <HabitListPanel habitStats={habitStats} onToggle={handleToggle} />
         </div>
 
-        <AnimatePresence mode="wait">
+        <div className="mt-4">
+          <HabitHeatmapGrid habits={habits} days={heatmapDays} completionMap={completionMap} />
+        </div>
 
-          {/* GRADE DE HÁBITOS */}
-          {activeTab === "grid" && (
-            <motion.div key="grid" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
-
-              {/* Streak rápido */}
-              {streak > 0 && (
-                <div
-                  className="flex items-center justify-between p-4 rounded-2xl"
-                  style={{ background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.25)" }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">🔥</span>
-                    <div>
-                      <p className="text-white font-bold text-sm">{streak} dias consecutivos!</p>
-                      <p className="text-orange-300/70 text-xs">
-                        {streak >= 30 ? "Bônus +40% XP ativo" : streak >= 14 ? "Bônus +20% XP ativo" : streak >= 7 ? "Bônus +10% XP ativo" : "Continue para desbloquear bônus"}
-                      </p>
-                    </div>
-                  </div>
-                  {streak >= 7 && (
-                    <span className="text-lg px-2 py-1 rounded-xl" style={{ background: "rgba(249,115,22,0.2)" }}>
-                      {streak >= 30 ? "🏆" : streak >= 14 ? "⭐" : "🔥"}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Grid semanal */}
-              <HabitGrid
-                habits={habits}
-                logsByDate={logsByDate}
-                onToggle={handleToggle}
-                today={today}
-              />
-
-              {/* Gerenciar hábitos */}
-              {habits.length > 0 && (
-                <div
-                  className="rounded-3xl overflow-hidden"
-                  style={{ background: "rgba(8,71,52,0.5)", border: "1px solid rgba(206,241,123,0.1)" }}
-                >
-                  <div className="p-4 flex items-center gap-2 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                    <Settings className="w-4 h-4 text-white/40" />
-                    <span className="text-white/60 text-sm font-semibold">Gerenciar hábitos</span>
-                  </div>
-                  {habits.map((habit, i) => (
-                    <div
-                      key={habit.id}
-                      className="flex items-center justify-between px-4 py-3 border-b"
-                      style={{ borderColor: "rgba(255,255,255,0.04)" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{habit.emoji || "✅"}</span>
-                        <div>
-                          <p className="text-white text-sm font-semibold">{habit.name}</p>
-                          <p className="text-white/40 text-xs capitalize">{habit.category}</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => deleteHabitMutation.mutate(habit.id)}
-                        className="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.2)" }}
-                      >
-                        <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* CTA quando vazio */}
-              {habits.length === 0 && (
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="w-full h-16 rounded-2xl font-bold text-lg text-white"
-                  style={{ background: "linear-gradient(135deg, #FF6A00, #FF8C00)", boxShadow: "0 4px 20px rgba(255,106,0,0.4)" }}
-                >
-                  <div className="flex items-center justify-center gap-3">
-                    <Plus className="w-5 h-5" />
-                    Adicionar meu primeiro hábito
-                  </div>
-                </button>
-              )}
-            </motion.div>
-          )}
-
-          {/* STATS / PROGRESSO */}
-          {activeTab === "stats" && (
-            <motion.div key="stats" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
-              <ProgressChart
-                logsByDate={logsByDate}
-                habits={habits}
-                streak={streak}
-                bestStreak={bestStreak}
-                weekConsistency={weekConsistency}
-                totalXp={totalHabitXp}
-              />
-              <HabitStats
-                totalXp={totalHabitXp}
-                streak={streak}
-                bestStreak={bestStreak}
-                weekConsistency={weekConsistency}
-              />
-              <WeeklyReport habits={habits} logs={weekLogs} />
-            </motion.div>
-          )}
-
-        </AnimatePresence>
+        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+          <WeeklyPerformanceChart data={weeklyData} />
+          <DailyMetricsChart data={metricsChartData} />
+        </div>
       </div>
 
-      {/* Modal adicionar hábito */}
-      <HabitFormModal
-        open={showForm}
-        onClose={() => setShowForm(false)}
-        onSave={createHabitMutation.mutate}
-        existingHabits={habits}
+      <button
+        onClick={() => setShowCreateModal(true)}
+        className="fixed bottom-24 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#CEF17B] text-[#0B3936] shadow-2xl shadow-[#CEF17B]/20 transition-transform active:scale-95"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
+
+      <HabitCreateModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={(form) => createHabitMutation.mutate(form)}
+        isLoading={createHabitMutation.isPending}
       />
     </div>
   );
