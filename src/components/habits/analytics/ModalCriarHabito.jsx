@@ -111,8 +111,13 @@ export default function ModalCriarHabito({ open, onClose, onSubmit, isLoading })
               <Label className="text-white/60">Observações (opcional)</Label>
               <Textarea value={form.notes} onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))} className="mt-2 min-h-[110px] border-white/10 bg-white/5 text-white" placeholder="Escreva uma observação rápida sobre este hábito..." />
             </div>
+          </div>
 
-            <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-12 w-full rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b]">
+          <div className="sticky bottom-0 mt-auto grid grid-cols-2 gap-3 border-t border-white/10 bg-[#101716] p-5">
+            <Button onClick={onClose} variant="outline" className="h-12 rounded-2xl border-white/15 bg-white/5 text-white hover:bg-white/10">
+              Cancelar
+            </Button>
+            <Button onClick={handleSubmit} disabled={isLoading || !form.name.trim()} className="h-12 rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b]">
               {isLoading ? "Salvando..." : "Criar hábito"}
             </Button>
           </div>
