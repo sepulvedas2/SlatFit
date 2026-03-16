@@ -150,15 +150,31 @@ REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tab
   const handleAddFoodFromDatabase = async ({ food, quantity, mealType, nutrition }) => {
     if (!user) return;
 
-    await base44.functions.invoke('addFoodFromDatabase', {
-      food_id: food.id,
-      food_name: food.food_name,
-      portion_size: `${quantity}x ${food.portion_size}`,
-      meal_type: mealType,
-      quantity,
-      nutrition,
-      log_date: today,
-    });
+    try {
+      await base44.functions.invoke('addFoodFromDatabase', {
+        food_id: food.id,
+        food_name: food.food_name,
+        portion_size: `${quantity}x ${food.portion_size}`,
+        meal_type: mealType,
+        quantity,
+        nutrition,
+        log_date: today,
+      });
+    } catch (error) {
+      console.error('[FoodScanner] Registro complementar no banco novo indisponível, salvando no diário principal.', error);
+      await db.FoodLog.create({
+        user_email: user.email,
+        food_name: food.food_name,
+        meal_type: mealType,
+        calories: nutrition.calories,
+        protein: nutrition.protein,
+        carbs: nutrition.carbohydrates,
+        fats: nutrition.fat,
+        portion_size: `${quantity}x ${food.portion_size}`,
+        image_url: null,
+        log_date: today,
+      });
+    }
 
     await base44.functions.invoke('updateXP', {
       xp_ganho: 5,

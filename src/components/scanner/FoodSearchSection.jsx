@@ -1,4 +1,18 @@
 import React, { useMemo, useState } from "react";
+
+const FALLBACK_FOODS = [
+  { id: "fallback-1", food_name: "Arroz branco", portion_size: "100g", calories: 130, protein: 2.7, carbohydrates: 28, fat: 0.3 },
+  { id: "fallback-2", food_name: "Arroz integral", portion_size: "100g", calories: 124, protein: 2.6, carbohydrates: 25.8, fat: 1 },
+  { id: "fallback-3", food_name: "Frango grelhado", portion_size: "100g", calories: 165, protein: 31, carbohydrates: 0, fat: 3.6 },
+  { id: "fallback-4", food_name: "Ovo cozido", portion_size: "1 unidade", calories: 78, protein: 6.3, carbohydrates: 0.6, fat: 5.3 },
+  { id: "fallback-5", food_name: "Banana", portion_size: "1 unidade média", calories: 89, protein: 1.1, carbohydrates: 22.8, fat: 0.3 },
+  { id: "fallback-6", food_name: "Maçã", portion_size: "1 unidade média", calories: 95, protein: 0.5, carbohydrates: 25.1, fat: 0.3 },
+  { id: "fallback-7", food_name: "Batata doce", portion_size: "100g", calories: 86, protein: 1.6, carbohydrates: 20.1, fat: 0.1 },
+  { id: "fallback-8", food_name: "Carne bovina", portion_size: "100g", calories: 250, protein: 26, carbohydrates: 0, fat: 15 },
+  { id: "fallback-9", food_name: "Aveia", portion_size: "100g", calories: 389, protein: 16.9, carbohydrates: 66.3, fat: 6.9 },
+  { id: "fallback-10", food_name: "Leite", portion_size: "200ml", calories: 122, protein: 6.4, carbohydrates: 9.6, fat: 6.6 },
+  { id: "fallback-11", food_name: "Pão integral", portion_size: "2 fatias", calories: 138, protein: 6, carbohydrates: 24, fat: 2 },
+];
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
@@ -13,8 +27,14 @@ export default function FoodSearchSection({ onAddFood }) {
   const { data: searchResults = [] } = useQuery({
     queryKey: ["foodDatabaseSearch", searchTerm],
     queryFn: async () => {
-      const response = await base44.functions.invoke("searchFoodsDatabase", { query: searchTerm });
-      return response.data?.foods || [];
+      try {
+        const response = await base44.functions.invoke("searchFoodsDatabase", { query: searchTerm });
+        const foods = response.data?.foods;
+        if (Array.isArray(foods) && foods.length > 0) return foods;
+      } catch (error) {
+        console.error('[FoodSearchSection] Busca no Supabase indisponível, usando fallback local.', error);
+      }
+      return FALLBACK_FOODS.filter((food) => food.food_name.toLowerCase().includes(searchTerm.toLowerCase()));
     },
     enabled: searchTerm.trim().length >= 2,
     initialData: [],
@@ -23,8 +43,14 @@ export default function FoodSearchSection({ onAddFood }) {
   const { data: browseFoods = [] } = useQuery({
     queryKey: ["foodDatabaseBrowse"],
     queryFn: async () => {
-      const response = await base44.functions.invoke("searchFoodsDatabase", { query: "" });
-      return response.data?.foods || [];
+      try {
+        const response = await base44.functions.invoke("searchFoodsDatabase", { query: "" });
+        const foods = response.data?.foods;
+        if (Array.isArray(foods) && foods.length > 0) return foods;
+      } catch (error) {
+        console.error('[FoodSearchSection] Banco no Supabase indisponível, usando fallback local.', error);
+      }
+      return FALLBACK_FOODS;
     },
     enabled: mode === "browse",
     initialData: [],
