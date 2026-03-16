@@ -84,18 +84,30 @@ Deno.serve(async (req) => {
             updated_date timestamptz default now(),
             created_by text,
             user_email text not null,
+            user_id text,
             name text not null,
             emoji text,
             category text,
+            color text,
             type text default 'binary',
             target_value numeric,
+            frequency integer,
             target_unit text,
+            notes text,
             ideal_time text,
+            preferred_time text,
+            created_at timestamptz default now(),
             xp_per_completion integer default 10,
             is_native boolean default false,
             is_active boolean default true
           );
 
+          ALTER TABLE habits ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE habits ADD COLUMN IF NOT EXISTS color text;
+          ALTER TABLE habits ADD COLUMN IF NOT EXISTS frequency integer;
+          ALTER TABLE habits ADD COLUMN IF NOT EXISTS notes text;
+          ALTER TABLE habits ADD COLUMN IF NOT EXISTS preferred_time text;
+          ALTER TABLE habits ADD COLUMN IF NOT EXISTS created_at timestamptz default now();
           ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "habits_all" ON habits;
@@ -118,14 +130,18 @@ Deno.serve(async (req) => {
             updated_date timestamptz default now(),
             created_by text,
             user_email text not null,
+            user_id text,
             habit_id uuid,
             habit_name text,
+            date date,
             log_date date not null,
             completed boolean default false,
             xp_earned integer default 0,
             completed_at timestamptz
           );
 
+          ALTER TABLE habit_logs ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE habit_logs ADD COLUMN IF NOT EXISTS date date;
           ALTER TABLE habit_logs ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "habit_logs_all" ON habit_logs;
@@ -351,6 +367,7 @@ Deno.serve(async (req) => {
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
             user_email text not null,
+            user_id text,
             metric_date date not null,
             energia integer default 0,
             foco integer default 0,
@@ -358,6 +375,7 @@ Deno.serve(async (req) => {
             sono integer default 0
           );
 
+          ALTER TABLE daily_metrics ADD COLUMN IF NOT EXISTS user_id text;
           ALTER TABLE daily_metrics ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "daily_metrics_all" ON daily_metrics;
