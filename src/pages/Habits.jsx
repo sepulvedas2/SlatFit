@@ -5,6 +5,7 @@ import { db } from "@/components/supabaseApi";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus } from "lucide-react";
+import HabitOverallProgress from "@/components/habits/tracker/HabitOverallProgress";
 import {
   addDays,
   endOfMonth,
@@ -220,6 +221,20 @@ export default function Habits() {
   }, [today, habits, habitLogs]);
 
   const completedToday = habitItems.filter((item) => item.isDoneToday).length;
+  const weeklyExpected = habits.length * 7;
+  const weeklyCompleted = weekDays.reduce((sum, day) => sum + habits.filter((habit) => getLogForDay(habit, day.key)?.completed).length, 0);
+  const weeklyProgress = weeklyExpected ? Math.round((weeklyCompleted / weeklyExpected) * 100) : 0;
+  const disciplinePoints = habitLogs.filter((log) => log.completed).length * 10;
+  const progressTrendData = Array.from({ length: 6 }, (_, index) => {
+    const start = addDays(weekStart, -7 * (5 - index));
+    const days = Array.from({ length: 7 }, (__unused, dayIndex) => format(addDays(start, dayIndex), "yyyy-MM-dd"));
+    const completed = days.reduce((sum, key) => sum + habits.filter((habit) => getLogForDay(habit, key)?.completed).length, 0);
+    const expected = habits.length * 7;
+    return {
+      label: `Sem ${index + 1}`,
+      progress: expected ? Math.round((completed / expected) * 100) : 0,
+    };
+  });
 
   return (
     <div className="min-h-screen pb-28 pt-6">
@@ -239,6 +254,14 @@ export default function Habits() {
         <HabitViewTabs activeView={activeView} onChange={setActiveView} />
 
         <div className="mt-4 space-y-4">
+          <HabitOverallProgress
+            data={progressTrendData}
+            weeklyProgress={weeklyProgress}
+            disciplinePoints={disciplinePoints}
+            completedCount={weeklyCompleted}
+            expectedCount={weeklyExpected}
+          />
+
           {activeView === "plan" && (
             <div className="space-y-4">
               <HabitTodayChecklist
@@ -247,23 +270,14 @@ export default function Habits() {
                 isSaving={toggleHabitMutation.isPending}
               />
 
-              <Card className="rounded-3xl border-white/10 bg-white/[0.04] p-5 shadow-xl shadow-black/10">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Resumo rápido</p>
-                <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="text-xs text-white/40">Hábitos ativos</p>
-                    <p className="mt-2 text-2xl font-black text-white">{habits.length}</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="text-xs text-white/40">Concluídos hoje</p>
-                    <p className="mt-2 text-2xl font-black text-white">{completedToday}</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="text-xs text-white/40">Melhor sequência</p>
-                    <p className="mt-2 text-2xl font-black text-white">{Math.max(...habitItems.map((item) => item.longestStreak), 0)}</p>
-                  </div>
-                </div>
-              </Card>
+              <HabitWeeklyPlanner
+                habits={habitItems}
+                weekDays={weekDays}
+                getLogForDay={getLogForDay}
+                onToggle={(habit, log, streak, dateKey) => toggleHabitMutation.mutate({ habit, existingLog: log, streak, dateKey })}
+                isSaving={toggleHabitMutation.isPending}
+                weeklyProgress={weeklyProgress}
+              />
             </div>
           )}
 
@@ -274,6 +288,7 @@ export default function Habits() {
               getLogForDay={getLogForDay}
               onToggle={(habit, log, streak, dateKey) => toggleHabitMutation.mutate({ habit, existingLog: log, streak, dateKey })}
               isSaving={toggleHabitMutation.isPending}
+              weeklyProgress={weeklyProgress}
             />
           )}
 
