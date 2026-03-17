@@ -294,7 +294,6 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                       setFormData({
                         name: currentExercise?.name || exercise?.name || "",
                         description: currentExercise?.description || exercise?.description || "",
-                        image_url: currentExercise?.image_url || exercise?.image_url || "",
                         reps_suggestion: currentExercise?.reps_suggestion || exercise?.reps || "",
                         duration_seconds: currentExercise?.duration_seconds || exercise?.duration || 30,
                         difficulty: currentExercise?.difficulty || "intermediario",
