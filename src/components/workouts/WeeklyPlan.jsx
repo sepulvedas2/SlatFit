@@ -462,12 +462,12 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🦵",
       restTime: "45-60 segundos",
       exercises: [
-        { name: "Leg press 45", sets: "4x", reps: "10", image_placeholder: "p5_leg_press_45" },
-        { name: "Elevação da coxa em pé", sets: "4x", reps: "10", image_placeholder: "p5_elevacao_coxa_pe" },
-        { name: "Adutor na polia em pé ou abdução na máquina", sets: "4x", reps: "10", image_placeholder: "p5_adutor_polia" },
-        { name: "Cadeira extensora", sets: "4x", reps: "10", image_placeholder: "p5_cadeira_extensora" },
-        { name: "Avanço parado", sets: "4x", reps: "10", image_placeholder: "p5_avanco_parado" },
-        { name: "Subida no banco", sets: "4x", reps: "10", image_placeholder: "p5_subida_banco" }
+        { name: "Leg press 45 (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_leg_press_45" },
+        { name: "Elevação da coxa em pé (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_elevacao_coxa_pe" },
+        { name: "Adutor na polia em pé ou abdução na máquina (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_adutor_polia" },
+        { name: "Cadeira extensora (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_cadeira_extensora" },
+        { name: "Avanço parado (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_avanco_parado" },
+        { name: "Subida no banco (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_subida_banco" }
       ]
     },
     terca: { 
@@ -481,13 +481,13 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🍑",
       restTime: "45-60 segundos",
       exercises: [
-        { name: "Agachamento livre (fem)", sets: "4x", reps: "10", image_placeholder: "p5_agachamento_livre" },
-        { name: "Stiff (fem)", sets: "4x", reps: "10", image_placeholder: "p5_stiff" },
-        { name: "Mesa flexora (fem)", sets: "4x", reps: "10", image_placeholder: "p5_mesa_flexora" },
-        { name: "Elevação pélvica", sets: "4x", reps: "10", image_placeholder: "p5_elevacao_pelvica" },
-        { name: "Cadeira abdutora", sets: "4x", reps: "10", image_placeholder: "p5_cadeira_abdutora" },
-        { name: "Extensão de quadril no solo (quatro apoios)", sets: "4x", reps: "10", image_placeholder: "p5_extensao_quadril_solo" },
-        { name: "Panturrilha em pé (fem)", sets: "4x", reps: "10", image_placeholder: "p5_panturrilha_pe" }
+        { name: "Agachamento livre (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_agachamento_livre" },
+        { name: "Stiff (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_stiff" },
+        { name: "Mesa flexora (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_mesa_flexora" },
+        { name: "Elevação pélvica (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_elevacao_pelvica" },
+        { name: "Cadeira abdutora (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_cadeira_abdutora" },
+        { name: "Extensão de quadril no solo (quatro apoios) (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_extensao_quadril_solo" },
+        { name: "Panturrilha em pé (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_panturrilha_pe" }
       ]
     },
     quinta: { 
@@ -501,13 +501,13 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
       icon: "🦵",
       restTime: "45-60 segundos",
       exercises: [
-        { name: "Leg press 45 (fem)", sets: "4x", reps: "10", image_placeholder: "p5_leg_press_45_c" },
-        { name: "Cadeira extensora (fem)", sets: "4x", reps: "10", image_placeholder: "p5_cadeira_extensora_c" },
-        { name: "Avanço parado (fem)", sets: "4x", reps: "10", image_placeholder: "p5_avanco_parado_c" },
-        { name: "Stiff (fem C)", sets: "4x", reps: "10", image_placeholder: "p5_stiff_c" },
-        { name: "Mesa flexora (fem C)", sets: "4x", reps: "10", image_placeholder: "p5_mesa_flexora_c" },
-        { name: "Extensão de quadril no solo ou na polia", sets: "4x", reps: "10", image_placeholder: "p5_extensao_quadril_polia" },
-        { name: "Panturrilha em pé (fem C)", sets: "4x", reps: "10", image_placeholder: "p5_panturrilha_pe_c" }
+        { name: "Leg press 45 (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_leg_press_45_c" },
+        { name: "Cadeira extensora (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_cadeira_extensora_c" },
+        { name: "Avanço parado (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_avanco_parado_c" },
+        { name: "Stiff (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_stiff_c" },
+        { name: "Mesa flexora (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_mesa_flexora_c" },
+        { name: "Extensão de quadril no solo ou na polia (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_extensao_quadril_polia" },
+        { name: "Panturrilha em pé (Fem)", sets: "4x", reps: "10", image_placeholder: "p5_panturrilha_pe_c" }
       ]
     },
     sabado: { 
