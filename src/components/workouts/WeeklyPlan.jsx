@@ -2,25 +2,33 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Trophy } from "lucide-react";
+import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Image, Upload, Loader2, X, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/components/supabaseApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import PRModal from "./PRModal";
-import { getExerciseImage } from "./exerciseImages";
 
 export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
   const [expandedDay, setExpandedDay] = useState(null);
+  const [uploadingExercise, setUploadingExercise] = useState(null);
+  const [selectedExercise, setSelectedExercise] = useState(null);
   const [prModalOpen, setPRModalOpen] = useState(false);
   const [selectedPRExercise, setSelectedPRExercise] = useState(null);
   const [user, setUser] = useState(null);
+  const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  // Fetch all exercises from database to get saved images
+  const { data: savedExercises = [] } = useQuery({
+    queryKey: ['exercises'],
+    queryFn: () => db.Exercise.list(),
+  });
 
   // Fetch all PR records for current user
   const { data: prRecords = [] } = useQuery({
@@ -30,6 +38,14 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     initialData: [],
   });
 
+  // Create a map of exercise names to their data (including image_url)
+  const exerciseImageMap = savedExercises.reduce((acc, ex) => {
+    if (ex.image_url) {
+      acc[ex.name] = ex.image_url;
+    }
+    return acc;
+  }, {});
+
   // Create a map of exercise names to their latest PR
   const prMap = prRecords.reduce((acc, pr) => {
     if (!acc[pr.exercise_name] || new Date(pr.data_pr) > new Date(acc[pr.exercise_name].data_pr)) {
@@ -37,6 +53,63 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     }
     return acc;
   }, {});
+
+  const handleImageUpload = async (file, exerciseName) => {
+    if (!file) return;
+    
+    setUploadingExercise(exerciseName);
+    try {
+      // Upload the file
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      // Check if exercise already exists in DB
+      const existingExercises = await db.Exercise.filter({ name: exerciseName });
+      
+      if (existingExercises && existingExercises.length > 0) {
+        // Update existing exercise
+        await db.Exercise.update(existingExercises[0].id, { image_url: file_url });
+      } else {
+        // Create new exercise record
+        await db.Exercise.create({
+          name: exerciseName,
+          image_url: file_url,
+          reps_suggestion: "3x10",
+          duration_seconds: 30
+        });
+      }
+      
+      // Refresh exercises list
+      queryClient.invalidateQueries(['exercises']);
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+    }
+    setUploadingExercise(null);
+  };
+
+  const triggerFileInput = (exerciseName) => {
+    setSelectedExercise(exerciseName);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file && selectedExercise) {
+      handleImageUpload(file, selectedExercise);
+    }
+    e.target.value = '';
+  };
+
+  const removeImage = async (exerciseName) => {
+    try {
+      const existingExercises = await db.Exercise.filter({ name: exerciseName });
+      if (existingExercises && existingExercises.length > 0) {
+        await db.Exercise.update(existingExercises[0].id, { image_url: "" });
+        queryClient.invalidateQueries(['exercises']);
+      }
+    } catch (error) {
+      console.error("Erro ao remover imagem:", error);
+    }
+  };
 
   // Definição dos treinos por semana
   const weekPlans = {
@@ -512,6 +585,15 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   return (
     <div className="space-y-4">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* PR Modal */}
       <PRModal
         isOpen={prModalOpen}
@@ -604,6 +686,8 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                     <div className="px-6 pb-6 border-t border-white/10 pt-4">
                       <div className="space-y-3">
                         {dayPlan.exercises.map((exercise, i) => {
+                          const hasImage = exerciseImageMap[exercise.name];
+                          const isUploading = uploadingExercise === exercise.name;
                           const currentPR = prMap[exercise.name];
 
                           return (
@@ -611,12 +695,43 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                               key={i} 
                               className="flex items-center gap-4 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
                             >
-                              <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-white/5">
-                                <img
-                                  src={getExerciseImage(exercise.name)}
-                                  alt={exercise.name}
-                                  className="w-full h-full object-cover"
-                                />
+                              {/* Imagem do exercício */}
+                              <div className="relative group">
+                                {hasImage ? (
+                                  <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img 
+                                      src={hasImage} 
+                                      alt={exercise.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                      <button
+                                        onClick={() => triggerFileInput(exercise.name)}
+                                        className="p-1 bg-white/20 rounded hover:bg-white/30"
+                                      >
+                                        <Upload className="w-3 h-3 text-white" />
+                                      </button>
+                                      <button
+                                        onClick={() => removeImage(exercise.name)}
+                                        className="p-1 bg-red-500/50 rounded hover:bg-red-500/70"
+                                      >
+                                        <X className="w-3 h-3 text-white" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => triggerFileInput(exercise.name)}
+                                    disabled={isUploading}
+                                    className="w-14 h-14 rounded-lg bg-[#CEF17B]/10 flex items-center justify-center flex-shrink-0 border border-dashed border-[#CEF17B]/30 hover:border-[#CEF17B] hover:bg-[#CEF17B]/20 transition-all cursor-pointer"
+                                  >
+                                    {isUploading ? (
+                                      <Loader2 className="w-5 h-5 text-[#CEF17B] animate-spin" />
+                                    ) : (
+                                      <Upload className="w-5 h-5 text-[#CEF17B]/50" />
+                                    )}
+                                  </button>
+                                )}
                               </div>
                               
                               <div className="flex-1">
