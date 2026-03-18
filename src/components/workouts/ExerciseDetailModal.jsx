@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getExerciseImage } from "./exerciseImages";
 
 export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin, isHIIT = false }) {
+  const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -26,6 +27,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
   const [formData, setFormData] = useState({
     name: exercise?.name || "",
     description: exercise?.description || "",
+    image_url: exercise?.image_url || "",
     reps_suggestion: exercise?.reps_suggestion || exercise?.reps || "",
     duration_seconds: exercise?.duration_seconds || exercise?.duration || 30,
     difficulty: exercise?.difficulty || "intermediario",
@@ -47,6 +49,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
             setFormData({
               name: dbExercise.name,
               description: dbExercise.description || "",
+              image_url: dbExercise.image_url || "",
               reps_suggestion: dbExercise.reps_suggestion || exercise.reps || "",
               duration_seconds: dbExercise.duration_seconds || exercise.duration || 30,
               difficulty: dbExercise.difficulty || "intermediario",
@@ -64,6 +67,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
           setFormData({
             name: exercise.name,
             description: exercise.description || "",
+            image_url: exercise.image_url || "",
             reps_suggestion: exercise.reps_suggestion,
             duration_seconds: exercise.duration_seconds,
             difficulty: exercise.difficulty || "intermediario",
@@ -75,6 +79,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
           setFormData({
             name: exercise.name,
             description: exercise.description || "",
+            image_url: exercise.image_url || "",
             reps_suggestion: exercise.reps || "",
             duration_seconds: exercise.duration || 30,
             difficulty: "intermediario",
@@ -101,6 +106,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
       setFormData({
         name: result.name,
         description: result.description || "",
+        image_url: result.image_url || "",
         reps_suggestion: result.reps_suggestion || "",
         duration_seconds: result.duration_seconds || 30,
         difficulty: result.difficulty || "intermediario",
@@ -115,6 +121,38 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
       setTimeout(() => setError(null), 5000);
     }
   });
+
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+
+    setUploading(true);
+    setError(null);
+    
+    try {
+      // Upload the file first
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      // Update form data
+      const updatedData = { 
+        ...formData, 
+        image_url: file_url 
+      };
+      setFormData(updatedData);
+      
+      // Save to database
+      const result = await createOrUpdateExerciseMutation.mutateAsync(updatedData);
+      
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+      
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+      setError("Erro ao fazer upload da imagem. Tente novamente.");
+      setTimeout(() => setError(null), 5000);
+    }
+    
+    setUploading(false);
+  };
 
   const handleSave = async () => {
     setError(null);
@@ -171,7 +209,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
             <div className="space-y-3">
               <div className="relative w-full aspect-[3/4] max-w-[280px] mx-auto rounded-xl overflow-hidden border-2 border-[#CEF17B]/30">
                 <img
-                  src={getExerciseImage(formData.name)}
+                  src={formData.image_url || getExerciseImage(formData.name)}
                   alt={formData.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -294,6 +332,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
                       setFormData({
                         name: currentExercise?.name || exercise?.name || "",
                         description: currentExercise?.description || exercise?.description || "",
+                        image_url: currentExercise?.image_url || exercise?.image_url || "",
                         reps_suggestion: currentExercise?.reps_suggestion || exercise?.reps || "",
                         duration_seconds: currentExercise?.duration_seconds || exercise?.duration || 30,
                         difficulty: currentExercise?.difficulty || "intermediario",
@@ -317,11 +356,13 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
               )}
               </div>
               ) : (
+              isHIIT && (
               <div className="flex gap-3 pt-4 border-t border-white/10">
                 <p className="text-sm text-white/60 text-center w-full py-2">
-                  💡 As imagens dos exercícios são nativas do app e aparecem automaticamente para todos os usuários.
+                  💡 Imagens são fixas no sistema. Não é possível adicionar fotos na aba HIIT.
                 </p>
               </div>
+              )
               )}
 
         </div>
