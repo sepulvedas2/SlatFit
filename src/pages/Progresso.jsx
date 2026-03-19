@@ -8,11 +8,13 @@ import UserResumoCard from "@/components/progress/UserResumoCard";
 import DesafiosAtivosCard from "@/components/progress/DesafiosAtivosCard";
 import ExplorarDesafiosCard from "@/components/progress/ExplorarDesafiosCard";
 import DesafioDoDiaCard from "@/components/progress/DesafioDoDiaCard";
+import RankingModal from "@/components/progress/RankingModal";
 import { challengeCatalog } from "@/components/progress/challengeCatalog";
 
 export default function Progresso() {
   const [user, setUser] = useState(null);
   const [xpFeedback, setXpFeedback] = useState(null);
+  const [rankingOpen, setRankingOpen] = useState(false);
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split("T")[0];
 
@@ -53,6 +55,19 @@ export default function Progresso() {
       }
     },
     enabled: !!user?.email,
+  });
+
+  const { data: leaderboard = [] } = useQuery({
+    queryKey: ["rankingTop10"],
+    queryFn: async () => {
+      try {
+        return await db.Ranking.list('-updated_date', 10);
+      } catch (error) {
+        console.error('[Progresso] erro ao buscar top 10:', error);
+        return [];
+      }
+    },
+    initialData: [],
   });
 
   const { data: userStreak } = useQuery({
@@ -123,6 +138,9 @@ export default function Progresso() {
           progressPercent: Math.min(100, Math.round((progressCurrent / progressTotal) * 100)),
           completedToday,
           streakCount: challenge.streak_count || 0,
+          duration_days: definition?.duration_days || challenge.total_days || 1,
+          xp_per_day: definition?.xp_per_day || 10,
+          difficulty: definition?.difficulty || 'easy',
         };
       })
       .filter((challenge) => challenge.status === "active")
@@ -173,15 +191,49 @@ export default function Progresso() {
       const response = await base44.functions.invoke("completeChallengeCheckIn", { userChallengeId: challenge.id });
       return response.data;
     },
-    onSuccess: (result) => {
-      if (result?.xpGain) {
-        setXpFeedback(result.xpGain);
-        setTimeout(() => setXpFeedback(null), 1800);
-      }
+    onMutate: async (challenge) => {
+      await queryClient.cancelQueries({ queryKey: ["userChallenges", user?.email] });
+      await queryClient.cancelQueries({ queryKey: ["userProgress", user?.email] });
+      await queryClient.cancelQueries({ queryKey: ["ranking", user?.email] });
+      await queryClient.cancelQueries({ queryKey: ["userStreak", user?.id] });
+
+      const prevChallenges = queryClient.getQueryData(["userChallenges", user?.email]);
+      const prevProgress = queryClient.getQueryData(["userProgress", user?.email]);
+      const prevRanking = queryClient.getQueryData(["ranking", user?.email]);
+      const prevStreak = queryClient.getQueryData(["userStreak", user?.id]);
+
+      const optimisticXp = challenge.xp_per_day || 10;
+      setXpFeedback(optimisticXp);
+      setTimeout(() => setXpFeedback(null), 1800);
+
+      queryClient.setQueryData(["userChallenges", user?.email], (old = []) =>
+        old.map((item) => item.id === challenge.id ? {
+          ...item,
+          progress_current: (item.progress_current || 0) + 1,
+          completed_days: [...(item.completed_days || []), today],
+          streak_count: (item.streak_count || 0) + 1,
+          points_earned: (item.points_earned || 0) + optimisticXp,
+        } : item)
+      );
+
+      queryClient.setQueryData(["userProgress", user?.email], (old) => old ? { ...old, total_xp: (old.total_xp || 0) + optimisticXp } : old);
+      queryClient.setQueryData(["ranking", user?.email], (old) => old ? { ...old, total_xp: (old.total_xp || 0) + optimisticXp } : old);
+      queryClient.setQueryData(["userStreak", user?.id], (old) => old ? { ...old, current_streak: (old.current_streak || 0) + 1 } : old);
+
+      return { prevChallenges, prevProgress, prevRanking, prevStreak };
+    },
+    onError: (_error, _vars, context) => {
+      if (context?.prevChallenges) queryClient.setQueryData(["userChallenges", user?.email], context.prevChallenges);
+      if (context?.prevProgress) queryClient.setQueryData(["userProgress", user?.email], context.prevProgress);
+      if (context?.prevRanking) queryClient.setQueryData(["ranking", user?.email], context.prevRanking);
+      if (context?.prevStreak) queryClient.setQueryData(["userStreak", user?.id], context.prevStreak);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["userChallenges"] });
       queryClient.invalidateQueries({ queryKey: ["userProgress"] });
       queryClient.invalidateQueries({ queryKey: ["ranking"] });
       queryClient.invalidateQueries({ queryKey: ["userStreak"] });
+      queryClient.invalidateQueries({ queryKey: ["rankingTop10"] });
     },
   });
 
@@ -204,24 +256,19 @@ export default function Progresso() {
           )}
         </AnimatePresence>
 
-        <UserResumoCard
-          xp={userProgress?.total_xp || 0}
-          level={userProgress?.nivel || 1}
-          ranking={rankingEntry?.posicao || null}
-          streak={streakValue}
-        />
+        <UserResumoCard xp={userProgress?.total_xp || 0} level={userProgress?.nivel || 1} ranking={rankingEntry?.posicao || null} streak={streakValue} onOpenRanking={() => setRankingOpen(true)} />
 
         <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-white/80">
-          <span className="text-lg">{streakValue >= 7 ? '🔥🔥🔥' : streakValue >= 3 ? '🔥🔥' : '🔥'}</span>
+          <span className="text-lg">{streakValue >= 14 ? '🔥🔥🔥' : streakValue >= 7 ? '🔥🔥' : '🔥'}</span>
           <span>Streak ativa: {streakValue} dia(s)</span>
         </div>
 
         <DesafioDoDiaCard challenge={dailyChallenge} onComplete={(challenge) => completeTodayMutation.mutate(challenge)} isSaving={completeTodayMutation.isPending} />
-
         <DesafiosAtivosCard challenges={activeCards} onCompleteToday={(challenge) => completeTodayMutation.mutate(challenge)} isSaving={completeTodayMutation.isPending} />
-
         <ExplorarDesafiosCard categories={availableCategories} activeIds={activeChallengeIds} onActivate={(challenge) => activateChallengeMutation.mutate(challenge)} isSaving={activateChallengeMutation.isPending} />
       </div>
+
+      <RankingModal open={rankingOpen} onClose={() => setRankingOpen(false)} currentXp={userProgress?.total_xp || 0} currentRank={rankingEntry?.posicao || null} leaderboard={leaderboard} />
     </div>
   );
 }
