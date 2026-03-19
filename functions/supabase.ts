@@ -56,8 +56,11 @@ Deno.serve(async (req) => {
           code: error.code
         }, { status: 400 });
       }
-      console.log(`[Supabase] SELECT retornou ${rows?.length || 0} registros de ${table}`);
-      return Response.json({ data: rows });
+      const normalizedRows = table === 'user_profiles'
+        ? (rows || []).map((row) => ({ ...row, user_email: row.user_email || row.email }))
+        : rows;
+      console.log(`[Supabase] SELECT retornou ${normalizedRows?.length || 0} registros de ${table}`);
+      return Response.json({ data: normalizedRows });
     }
 
     if (action === 'insert') {
