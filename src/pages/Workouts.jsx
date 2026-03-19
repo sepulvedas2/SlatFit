@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -73,12 +73,22 @@ export default function Workouts() {
     initialData: [],
   });
 
-  // Fetch all exercises from base44 entities (where images are stored)
+  // Fetch global exercise images once
   const { data: exercises = [] } = useQuery({
     queryKey: ['exercises'],
-    queryFn: () => base44.entities.Exercise.list(),
+    queryFn: () => db.Exercise.list(),
     initialData: [],
+    staleTime: 5 * 60 * 1000,
   });
+
+  const exerciseImageMap = useMemo(() => {
+    return exercises.reduce((acc, exercise) => {
+      if (exercise?.name && exercise?.image_url) {
+        acc[exercise.name] = exercise.image_url;
+      }
+      return acc;
+    }, {});
+  }, [exercises]);
 
   // Fetch daily workouts
   const { data: dailyWorkouts = [] } = useQuery({
@@ -254,6 +264,7 @@ export default function Workouts() {
               weekNumber={selectedWeek}
               dailyWorkouts={dailyWorkouts}
               onCompleteDay={handleCompleteDay}
+              exerciseImageMap={exerciseImageMap}
             />
           </div>
 
