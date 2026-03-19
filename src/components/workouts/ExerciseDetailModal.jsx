@@ -16,6 +16,7 @@ import {
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getExerciseImage } from "./exerciseImages";
 
 export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin, isHIIT = false }) {
   const [uploading, setUploading] = useState(false);
@@ -207,19 +208,14 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
           {!isHIIT && (
             <div className="space-y-3">
               <div className="relative w-full aspect-[3/4] max-w-[280px] mx-auto rounded-xl overflow-hidden border-2 border-[#CEF17B]/30">
-                {formData.image_url ? (
-                  <img
-                    src={formData.image_url}
-                    alt={formData.name}
-                    loading="eager"
-                    decoding="async"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-white/5 text-white/30 text-sm">
-                    Imagem indisponível
-                  </div>
-                )}
+                <img
+                  src={formData.image_url || getExerciseImage(formData.name)}
+                  alt={formData.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = getExerciseImage(formData.name);
+                  }}
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               </div>
             </div>

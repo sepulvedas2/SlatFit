@@ -73,13 +73,11 @@ export default function Workouts() {
     initialData: [],
   });
 
-  // Fetch global exercise images once
-  const { data: exercises = [], isLoading: isExercisesLoading } = useQuery({
+  // Fetch all exercises from base44 entities (where images are stored)
+  const { data: exercises = [] } = useQuery({
     queryKey: ['exercises'],
-    queryFn: () => db.Exercise.list('-created_date', 500),
+    queryFn: () => base44.entities.Exercise.list(),
     initialData: [],
-    staleTime: 30 * 60 * 1000,
-    retry: 2,
   });
 
   // Fetch daily workouts
@@ -255,8 +253,6 @@ export default function Workouts() {
             <WeeklyPlan 
               weekNumber={selectedWeek}
               dailyWorkouts={dailyWorkouts}
-              savedExercises={exercises}
-              isExercisesLoading={isExercisesLoading}
               onCompleteDay={handleCompleteDay}
             />
           </div>
