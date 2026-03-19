@@ -83,26 +83,14 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
     },
   });
 
-  const awardPointsMutation = useMutation({
-    mutationFn: async () => {
-      const points = await db.UserPoints.filter({ user_email: userEmail });
-      if (points[0]) {
-        return db.UserPoints.update(points[0].id, {
-          total_points: points[0].total_points + 20,
-          xp_current: points[0].xp_current + 20,
-        });
-      }
-    },
-    onSuccess: () => queryClient.invalidateQueries(['userPoints']),
-  });
-
   const handleAddWater = async (amount) => {
     const newIntake = currentIntake + amount;
     const wasNotReached = !isGoalReached;
     await updateWaterMutation.mutateAsync(newIntake);
     if (wasNotReached && newIntake >= goalAmount) {
       setCelebrateGoal(true);
-      await awardPointsMutation.mutateAsync();
+      await base44.functions.invoke('updateXP', { xp_ganho: 20, tipo_acao: 'missao' });
+      queryClient.invalidateQueries(['userProgress']);
       toast.success("🎉 Meta de água concluída! +20 XP");
       setTimeout(() => setCelebrateGoal(false), 3000);
     } else {

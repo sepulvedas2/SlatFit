@@ -123,25 +123,14 @@ export default function Workouts() {
         });
       }
 
-      // Adicionar XP ao usuário
-      try {
-        await base44.functions.invoke('updateXP', { 
-          xp_ganho: 50, 
-          tipo_acao: 'treino' 
-        });
-        console.log('[Workouts] XP adicionado com sucesso');
-      } catch (xpError) {
-        console.error('[Workouts] Erro ao adicionar XP:', xpError);
-      }
-
       return result;
     },
     onSuccess: () => {
-      console.log('[Workouts] Treino salvo e XP atualizado');
+      console.log('[Workouts] Treino salvo com sucesso');
       queryClient.invalidateQueries(['dailyWorkouts']);
       queryClient.invalidateQueries(['weekWorkouts']);
-      queryClient.invalidateQueries(['userProgress']);
-      queryClient.invalidateQueries(['ranking']);
+      queryClient.invalidateQueries(['todayWorkouts']);
+      queryClient.invalidateQueries(['allDailyWorkouts']);
     },
     onError: (error) => {
       console.error('[Workouts] Erro ao salvar treino:', error);

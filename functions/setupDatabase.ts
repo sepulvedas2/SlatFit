@@ -26,11 +26,17 @@ Deno.serve(async (req) => {
             streak_dias integer default 0,
             longest_streak integer default 0,
             last_activity_date date,
+            last_workout_date date,
+            weekly_goal integer default 4,
+            weekly_completed integer default 0,
             total_treinos integer default 0,
             total_missoes integer default 0,
             total_desafios integer default 0
           );
 
+          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS last_workout_date date;
+          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS weekly_goal integer default 4;
+          ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS weekly_completed integer default 0;
           ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "user_progress_all" ON user_progress;

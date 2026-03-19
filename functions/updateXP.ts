@@ -39,7 +39,9 @@ Deno.serve(async (req) => {
           nivel: 1,
           xp_atual: 0,
           xp_proximo_nivel: 100,
-          streak_dias: 0
+          streak_dias: 0,
+          weekly_goal: 4,
+          weekly_completed: 0
         })
         .select()
         .single();
