@@ -31,7 +31,7 @@ function createEntityAPI(tableName) {
     },
 
     async filter(filters = {}, sort, limit = 500) {
-      const col = sort ? sort.replace(/^-/, '') : 'created_date';
+      const col = sort ? sort.replace(/^-/, '') : defaultSortColumn;
       const asc = sort ? !sort.startsWith('-') : false;
       const result = await invoke({
         action: 'select', table: tableName,
