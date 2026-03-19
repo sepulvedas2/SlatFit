@@ -18,6 +18,16 @@ async function invoke(payload) {
 
 function createEntityAPI(tableName) {
   const defaultSortColumn = tableName === 'user_profiles' ? 'created_at' : 'created_date';
+  const isUserProgress = tableName === 'user_progress';
+  const mapUserPointsToProgress = (row) => row ? ({
+    ...row,
+    total_xp: row.total_xp ?? row.total_points ?? 0,
+    nivel: row.nivel ?? row.level ?? 1,
+    xp_atual: row.xp_atual ?? row.xp_current ?? 0,
+    xp_proximo_nivel: row.xp_proximo_nivel ?? row.xp_next_level ?? 100,
+    streak_dias: row.streak_dias ?? row.daily_streak ?? 0,
+    longest_streak: row.longest_streak ?? 0,
+  }) : row;
 
   return {
     async list(sort = `-${defaultSortColumn}`, limit = 50) {
