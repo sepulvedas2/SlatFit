@@ -34,8 +34,9 @@ Deno.serve(async (req) => {
       let q = supabase.from(table).select(query?.select || '*');
       if (query?.filter) {
         for (const [col, val] of Object.entries(query.filter)) {
-          if (val === null) q = q.is(col, null);
-          else q = q.eq(col, val);
+          const normalizedCol = normalizeProfileFilterColumn(col);
+          if (val === null) q = q.is(normalizedCol, null);
+          else q = q.eq(normalizedCol, val);
         }
       }
       if (query?.order) q = q.order(query.order.column, { ascending: query.order.ascending ?? false });
