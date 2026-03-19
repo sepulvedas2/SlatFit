@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'insert') {
-      const addMeta = (item) => ({
+      const addMeta = (item) => normalizeProfileData({
         ...item,
         created_date: item.created_date || now,
         updated_date: now,
