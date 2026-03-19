@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
       });
       const dataToInsert = Array.isArray(data) ? data.map(addMeta) : addMeta(data);
       console.log(`[Supabase] Inserindo em ${table}:`, dataToInsert);
-      const { data: inserted, error } = await supabase.from(table).insert(dataToInsert).select();
+      const { data: inserted, error } = await runWithRetry(() => supabase.from(table).insert(dataToInsert).select());
       if (error) {
         console.error(`[Supabase] Erro ao inserir em ${table}:`, error.message);
         return Response.json({ error: error.message }, { status: 400 });
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
         }
       }
       console.log(`[Supabase] Atualizando ${table} com filtro:`, query?.filter, 'dados:', dataToUpdate);
-      const { data: updated, error } = await q.select();
+      const { data: updated, error } = await runWithRetry(() => q.select());
       if (error) {
         console.error(`[Supabase] Erro ao atualizar ${table}:`, error.message);
         return Response.json({ error: error.message }, { status: 400 });
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
           q = q.eq(col, val);
         }
       }
-      const { error } = await q;
+      const { error } = await runWithRetry(() => q);
       if (error) return Response.json({ error: error.message }, { status: 400 });
       return Response.json({ success: true });
     }
