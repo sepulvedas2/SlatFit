@@ -18,6 +18,17 @@ Deno.serve(async (req) => {
     console.log(`[Supabase] ${action.toUpperCase()} em ${table} por ${user.email}`);
     const now = new Date().toISOString();
 
+    const normalizeProfileFilterColumn = (col) => table === 'user_profiles' && col === 'user_email' ? 'email' : col;
+    const normalizeProfileData = (item) => {
+      if (table !== 'user_profiles' || !item) return item;
+      const normalized = { ...item };
+      if ('user_email' in normalized) {
+        normalized.email = normalized.user_email;
+        delete normalized.user_email;
+      }
+      return normalized;
+    };
+
     // ── DATABASE ──────────────────────────────────────────────────────────────
     if (action === 'select') {
       let q = supabase.from(table).select(query?.select || '*');
