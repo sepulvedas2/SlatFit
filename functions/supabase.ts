@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
       }
       if (query?.order) q = q.order(normalizeOrderColumn(query.order.column), { ascending: query.order.ascending ?? false });
       if (query?.limit) q = q.limit(query.limit);
-      const { data: rows, error } = await q;
+      const { data: rows, error } = await runWithRetry(() => q);
       if (error) {
         console.error(`[Supabase] SELECT ERROR em ${table}:`, {
           message: error.message,
