@@ -19,6 +19,7 @@ Deno.serve(async (req) => {
     const now = new Date().toISOString();
 
     const normalizeProfileFilterColumn = (col) => table === 'user_profiles' && col === 'user_email' ? 'email' : col;
+    const normalizeOrderColumn = (col) => table === 'user_profiles' && col === 'created_date' ? 'created_at' : col;
     const normalizeProfileData = (item) => {
       if (table !== 'user_profiles' || !item) return item;
       const normalized = { ...item };
@@ -39,7 +40,7 @@ Deno.serve(async (req) => {
           else q = q.eq(normalizedCol, val);
         }
       }
-      if (query?.order) q = q.order(query.order.column, { ascending: query.order.ascending ?? false });
+      if (query?.order) q = q.order(normalizeOrderColumn(query.order.column), { ascending: query.order.ascending ?? false });
       if (query?.limit) q = q.limit(query.limit);
       const { data: rows, error } = await q;
       if (error) {

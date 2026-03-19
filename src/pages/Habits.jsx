@@ -70,11 +70,7 @@ export default function Habits() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (user?.email) {
-      base44.functions.invoke("setupDatabase", {}).catch(() => {});
-    }
-  }, [user?.email]);
+
 
   const { data: habits = [] } = useQuery({
     queryKey: ["habits", user?.email],
