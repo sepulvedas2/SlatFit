@@ -9,9 +9,8 @@ import { db } from "@/components/supabaseApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import PRModal from "./PRModal";
-import { DEFAULT_EXERCISE_IMAGE } from "./exerciseImages";
 
-export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay, exerciseImageMap = {} }) {
+export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
   const [expandedDay, setExpandedDay] = useState(null);
   const [uploadingExercise, setUploadingExercise] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
@@ -25,6 +24,12 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
+  // Fetch all exercises from database to get saved images
+  const { data: savedExercises = [] } = useQuery({
+    queryKey: ['exercises'],
+    queryFn: () => db.Exercise.list(),
+  });
+
   // Fetch all PR records for current user
   const { data: prRecords = [] } = useQuery({
     queryKey: ['prRecords', user?.email],
@@ -32,6 +37,14 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     enabled: !!user?.email,
     initialData: [],
   });
+
+  // Create a map of exercise names to their data (including image_url)
+  const exerciseImageMap = savedExercises.reduce((acc, ex) => {
+    if (ex.image_url) {
+      acc[ex.name] = ex.image_url;
+    }
+    return acc;
+  }, {});
 
   // Create a map of exercise names to their latest PR
   const prMap = prRecords.reduce((acc, pr) => {
@@ -572,6 +585,15 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   return (
     <div className="space-y-4">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* PR Modal */}
       <PRModal
         isOpen={prModalOpen}
@@ -673,17 +695,43 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                               key={i} 
                               className="flex items-center gap-4 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
                             >
-                              {/* Imagem global do exercício */}
-                              <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
-                                <img 
-                                  src={hasImage || DEFAULT_EXERCISE_IMAGE}
-                                  alt={exercise.name}
-                                  className="w-full h-full object-cover"
-                                  loading="lazy"
-                                  onError={(e) => {
-                                    e.currentTarget.src = DEFAULT_EXERCISE_IMAGE;
-                                  }}
-                                />
+                              {/* Imagem do exercício */}
+                              <div className="relative group">
+                                {hasImage ? (
+                                  <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img 
+                                      src={hasImage} 
+                                      alt={exercise.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                      <button
+                                        onClick={() => triggerFileInput(exercise.name)}
+                                        className="p-1 bg-white/20 rounded hover:bg-white/30"
+                                      >
+                                        <Upload className="w-3 h-3 text-white" />
+                                      </button>
+                                      <button
+                                        onClick={() => removeImage(exercise.name)}
+                                        className="p-1 bg-red-500/50 rounded hover:bg-red-500/70"
+                                      >
+                                        <X className="w-3 h-3 text-white" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => triggerFileInput(exercise.name)}
+                                    disabled={isUploading}
+                                    className="w-14 h-14 rounded-lg bg-[#CEF17B]/10 flex items-center justify-center flex-shrink-0 border border-dashed border-[#CEF17B]/30 hover:border-[#CEF17B] hover:bg-[#CEF17B]/20 transition-all cursor-pointer"
+                                  >
+                                    {isUploading ? (
+                                      <Loader2 className="w-5 h-5 text-[#CEF17B] animate-spin" />
+                                    ) : (
+                                      <Upload className="w-5 h-5 text-[#CEF17B]/50" />
+                                    )}
+                                  </button>
+                                )}
                               </div>
                               
                               <div className="flex-1">

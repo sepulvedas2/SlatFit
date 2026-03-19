@@ -36,19 +36,60 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
   
   const queryClient = useQueryClient();
 
+  // Check if exercise exists in DB when modal opens
   useEffect(() => {
-    if (isOpen && exercise) {
-      setCurrentExercise(exercise.id ? exercise : null);
-      setFormData({
-        name: exercise.name,
-        description: exercise.description || "",
-        image_url: exercise.image_url || "",
-        reps_suggestion: exercise.reps_suggestion || exercise.reps || "",
-        duration_seconds: exercise.duration_seconds || exercise.duration || 30,
-        difficulty: exercise.difficulty || "intermediario",
-        category: exercise.category || "cardio"
-      });
-    }
+    const loadExercise = async () => {
+      if (isOpen && exercise) {
+        // First, check if this exercise already exists in DB by name
+        try {
+          const existingExercises = await base44.entities.Exercise.filter({ name: exercise.name }, '-created_date', 10);
+          if (existingExercises && existingExercises.length > 0) {
+            const dbExercise = existingExercises[0];
+            setCurrentExercise(dbExercise);
+            setFormData({
+              name: dbExercise.name,
+              description: dbExercise.description || "",
+              image_url: dbExercise.image_url || "",
+              reps_suggestion: dbExercise.reps_suggestion || exercise.reps || "",
+              duration_seconds: dbExercise.duration_seconds || exercise.duration || 30,
+              difficulty: dbExercise.difficulty || "intermediario",
+              category: dbExercise.category || "cardio"
+            });
+            return;
+          }
+        } catch (err) {
+          console.error("Error loading exercise:", err);
+        }
+
+        // If exercise has an ID, it's from the database
+        if (exercise.id) {
+          setCurrentExercise(exercise);
+          setFormData({
+            name: exercise.name,
+            description: exercise.description || "",
+            image_url: exercise.image_url || "",
+            reps_suggestion: exercise.reps_suggestion,
+            duration_seconds: exercise.duration_seconds,
+            difficulty: exercise.difficulty || "intermediario",
+            category: exercise.category || "cardio"
+          });
+        } else {
+          // Exercise from hardcoded data
+          setCurrentExercise(null);
+          setFormData({
+            name: exercise.name,
+            description: exercise.description || "",
+            image_url: exercise.image_url || "",
+            reps_suggestion: exercise.reps || "",
+            duration_seconds: exercise.duration || 30,
+            difficulty: "intermediario",
+            category: "cardio"
+          });
+        }
+      }
+    };
+    
+    loadExercise();
   }, [isOpen, exercise]);
 
   const createOrUpdateExerciseMutation = useMutation({
@@ -168,12 +209,11 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
             <div className="space-y-3">
               <div className="relative w-full aspect-[3/4] max-w-[280px] mx-auto rounded-xl overflow-hidden border-2 border-[#CEF17B]/30">
                 <img
-                  src={formData.image_url || getExerciseImage()}
+                  src={formData.image_url || getExerciseImage(formData.name)}
                   alt={formData.name}
                   className="w-full h-full object-cover"
-                  loading="lazy"
                   onError={(e) => {
-                    e.currentTarget.src = getExerciseImage();
+                    e.target.src = getExerciseImage(formData.name);
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
