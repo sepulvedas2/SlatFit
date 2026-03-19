@@ -82,11 +82,11 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'update') {
-      const dataToUpdate = { ...data, updated_date: now };
+      const dataToUpdate = normalizeProfileData({ ...data, updated_date: now });
       let q = supabase.from(table).update(dataToUpdate);
       if (query?.filter) {
         for (const [col, val] of Object.entries(query.filter)) {
-          q = q.eq(col, val);
+          q = q.eq(normalizeProfileFilterColumn(col), val);
         }
       }
       console.log(`[Supabase] Atualizando ${table} com filtro:`, query?.filter, 'dados:', dataToUpdate);
