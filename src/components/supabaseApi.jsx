@@ -52,11 +52,20 @@ function createEntityAPI(tableName) {
     async filter(filters = {}, sort, limit = 500) {
       const col = sort ? sort.replace(/^-/, '') : defaultSortColumn;
       const asc = sort ? !sort.startsWith('-') : false;
-      const result = await invoke({
-        action: 'select', table: tableName,
-        query: { filter: filters, limit, order: { column: col, ascending: asc } }
-      });
-      return result?.data || [];
+      try {
+        const result = await invoke({
+          action: 'select', table: tableName,
+          query: { filter: filters, limit, order: { column: col, ascending: asc } }
+        });
+        return isUserProgress ? (result?.data || []).map(mapUserPointsToProgress) : (result?.data || []);
+      } catch (error) {
+        if (!isUserProgress) throw error;
+        const fallback = await invoke({
+          action: 'select', table: 'user_points',
+          query: { filter: filters, limit, order: { column: 'created_date', ascending: asc } }
+        });
+        return (fallback?.data || []).map(mapUserPointsToProgress);
+      }
     },
 
     async create(data) {
