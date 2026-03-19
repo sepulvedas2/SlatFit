@@ -74,14 +74,28 @@ export default function Habits() {
 
   const { data: habits = [] } = useQuery({
     queryKey: ["habits", user?.email],
-    queryFn: () => db.Habit.filter({ user_email: user.email, is_active: true }),
+    queryFn: async () => {
+      try {
+        return await db.Habit.filter({ user_email: user.email, is_active: true });
+      } catch (error) {
+        console.error('[Habits] Erro ao buscar hábitos:', error);
+        return [];
+      }
+    },
     enabled: !!user?.email,
     initialData: [],
   });
 
   const { data: habitLogs = [] } = useQuery({
     queryKey: ["habitLogs", user?.email],
-    queryFn: () => db.HabitLog.filter({ user_email: user.email }),
+    queryFn: async () => {
+      try {
+        return await db.HabitLog.filter({ user_email: user.email });
+      } catch (error) {
+        console.error('[Habits] Erro ao buscar logs:', error);
+        return [];
+      }
+    },
     enabled: !!user?.email,
     initialData: [],
   });

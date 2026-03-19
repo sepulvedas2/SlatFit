@@ -176,8 +176,24 @@ export default function Dashboard() {
   const { data: userProgress } = useQuery({
     queryKey: ['userProgress', user?.email],
     queryFn: async () => {
-      const list = await db.UserProgress.filter({ user_email: user.email });
-      return list[0] || null;
+      try {
+        const list = await db.UserProgress.filter({ user_email: user.email });
+        if (list[0]) return list[0];
+      } catch (error) {
+        console.error('[Dashboard] user_progress indisponível, usando user_points:', error);
+      }
+
+      const fallback = await db.UserPoints.filter({ user_email: user.email });
+      if (!fallback[0]) return null;
+
+      return {
+        ...fallback[0],
+        total_xp: fallback[0].total_points || 0,
+        nivel: fallback[0].level || 1,
+        xp_atual: fallback[0].xp_current || 0,
+        xp_proximo_nivel: fallback[0].xp_next_level || 100,
+        streak_dias: fallback[0].daily_streak || 0,
+      };
     },
     enabled: !!user?.email,
     staleTime: 2 * 60 * 1000,

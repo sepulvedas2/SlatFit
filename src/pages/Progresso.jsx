@@ -51,8 +51,21 @@ export default function Progresso() {
   const { data: userProgress } = useQuery({
     queryKey: ['userProgress', user?.email],
     queryFn: async () => {
-      const progress = await db.UserProgress.filter({ user_email: user.email });
-      return progress[0] || null;
+      try {
+        const progress = await db.UserProgress.filter({ user_email: user.email });
+        if (progress[0]) return progress[0];
+      } catch (error) {
+        console.error('[Progresso] user_progress indisponível, usando user_points:', error);
+      }
+
+      const points = await db.UserPoints.filter({ user_email: user.email });
+      if (!points[0]) return null;
+
+      return {
+        ...points[0],
+        total_xp: points[0].total_points || 0,
+        nivel: points[0].level || 1,
+      };
     },
     enabled: !!user?.email,
   });
