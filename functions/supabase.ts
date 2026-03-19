@@ -30,6 +30,20 @@ Deno.serve(async (req) => {
       return normalized;
     };
 
+    const runWithRetry = async (operation, attempts = 3) => {
+      let lastResult;
+      for (let i = 0; i < attempts; i++) {
+        lastResult = await operation();
+        const message = String(lastResult?.error?.message || '').toLowerCase();
+        const details = String(lastResult?.error?.details || '').toLowerCase();
+        const shouldRetry = message.includes('connection reset') || details.includes('connection reset');
+        if (!lastResult?.error || !shouldRetry || i === attempts - 1) {
+          return lastResult;
+        }
+      }
+      return lastResult;
+    };
+
     // ── DATABASE ──────────────────────────────────────────────────────────────
     if (action === 'select') {
       let q = supabase.from(table).select(query?.select || '*');
