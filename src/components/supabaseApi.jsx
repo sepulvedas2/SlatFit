@@ -1,19 +1,28 @@
 import { base44 } from "@/api/base44Client";
 
-async function invoke(payload) {
-  try {
-    console.log('[Supabase API] Chamando:', payload.action, 'na tabela:', payload.table);
-    const resp = await base44.functions.invoke('supabase', payload);
-    if (resp.data?.error) {
-      console.error('[Supabase API] Erro retornado:', resp.data.error);
-      throw new Error(resp.data.error);
+async function invoke(payload, attempts = 3) {
+  let lastError;
+
+  for (let i = 0; i < attempts; i++) {
+    try {
+      console.log('[Supabase API] Chamando:', payload.action, 'na tabela:', payload.table);
+      const resp = await base44.functions.invoke('supabase', payload);
+      if (resp.data?.error) {
+        console.error('[Supabase API] Erro retornado:', resp.data.error);
+        throw new Error(resp.data.error);
+      }
+      console.log('[Supabase API] Sucesso:', payload.action, 'na tabela:', payload.table);
+      return resp.data;
+    } catch (error) {
+      lastError = error;
+      const status = error?.response?.status;
+      const shouldRetry = status === 502 || status === 503 || status === 504;
+      console.error('[Supabase API] Erro na requisição:', error);
+      if (!shouldRetry || i === attempts - 1) break;
     }
-    console.log('[Supabase API] Sucesso:', payload.action, 'na tabela:', payload.table);
-    return resp.data;
-  } catch (error) {
-    console.error('[Supabase API] Erro na requisição:', error);
-    throw error;
   }
+
+  throw lastError;
 }
 
 function createEntityAPI(tableName) {
