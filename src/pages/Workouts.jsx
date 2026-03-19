@@ -73,11 +73,12 @@ export default function Workouts() {
     initialData: [],
   });
 
-  useEffect(() => {
-    if (user?.email) {
-      base44.functions.invoke('migrateExerciseImages', {}).catch(() => {});
-    }
-  }, [user?.email]);
+  // Fetch all exercises from base44 entities (where images are stored)
+  const { data: exercises = [] } = useQuery({
+    queryKey: ['exercises'],
+    queryFn: () => base44.entities.Exercise.list(),
+    initialData: [],
+  });
 
   // Fetch daily workouts
   const { data: dailyWorkouts = [] } = useQuery({

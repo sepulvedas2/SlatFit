@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
       const existing = existingExercises?.find(e => e.name === exercise.name);
 
       if (existing) {
-        // Mantém exatamente a imagem atual e só preenche quando estiver vazia
-        if (!existing.image_url) {
+        // Se o exercício existe mas não tem imagem, atualiza
+        if (!existing.image_url || existing.image_url !== exercise.image_url) {
           const { error: updateError } = await supabase
             .from('exercises')
             .update({ image_url: exercise.image_url })
