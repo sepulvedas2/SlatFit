@@ -17,8 +17,9 @@ export default function DesafioDoDiaCard({ challenge, onComplete, isSaving }) {
         <span>•</span>
         <span>{challenge.difficulty}</span>
       </div>
-      <Button onClick={() => onComplete(challenge)} disabled={isSaving} className="mt-4 h-12 w-full rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b]">
-        ✔ Concluir hoje
+      {challenge.completedToday && <div className="mt-4 rounded-2xl bg-[#CEF17B]/15 px-3 py-2 text-center text-xs font-bold text-[#CEF17B]">CONCLUÍDO HOJE</div>}
+      <Button onClick={() => onComplete(challenge)} disabled={isSaving || challenge.completedToday} className="mt-4 h-12 w-full rounded-2xl bg-[#CEF17B] font-bold text-[#0B3936] hover:bg-[#bfe56b] disabled:bg-white/10 disabled:text-white/50">
+        {challenge.completedToday ? '✔ Concluído hoje' : '✔ Concluir hoje'}
       </Button>
     </Card>
   );
