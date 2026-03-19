@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import PRModal from "./PRModal";
 
-export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
+export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], savedExercises = [], isExercisesLoading = false, onStartWorkout, onCompleteDay }) {
   const [expandedDay, setExpandedDay] = useState(null);
   const [uploadingExercise, setUploadingExercise] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
@@ -23,12 +23,6 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
-
-  // Fetch all exercises from database to get saved images
-  const { data: savedExercises = [] } = useQuery({
-    queryKey: ['exercises'],
-    queryFn: () => db.Exercise.list(),
-  });
 
   // Fetch all PR records for current user
   const { data: prRecords = [] } = useQuery({
@@ -698,10 +692,12 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                               {/* Imagem do exercício */}
                               <div className="relative group">
                                 {hasImage ? (
-                                  <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                                  <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
                                     <img 
                                       src={hasImage} 
                                       alt={exercise.name}
+                                      loading="eager"
+                                      decoding="async"
                                       className="w-full h-full object-cover"
                                     />
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
@@ -719,18 +715,14 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
                                       </button>
                                     </div>
                                   </div>
+                                ) : isExercisesLoading ? (
+                                  <div className="w-14 h-14 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10">
+                                    <Loader2 className="w-4 h-4 text-white/40 animate-spin" />
+                                  </div>
                                 ) : (
-                                  <button
-                                    onClick={() => triggerFileInput(exercise.name)}
-                                    disabled={isUploading}
-                                    className="w-14 h-14 rounded-lg bg-[#CEF17B]/10 flex items-center justify-center flex-shrink-0 border border-dashed border-[#CEF17B]/30 hover:border-[#CEF17B] hover:bg-[#CEF17B]/20 transition-all cursor-pointer"
-                                  >
-                                    {isUploading ? (
-                                      <Loader2 className="w-5 h-5 text-[#CEF17B] animate-spin" />
-                                    ) : (
-                                      <Upload className="w-5 h-5 text-[#CEF17B]/50" />
-                                    )}
-                                  </button>
+                                  <div className="w-14 h-14 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10">
+                                    <Image className="w-4 h-4 text-white/25" />
+                                  </div>
                                 )}
                               </div>
                               
