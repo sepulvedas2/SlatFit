@@ -17,9 +17,11 @@ async function invoke(payload) {
 }
 
 function createEntityAPI(tableName) {
+  const defaultSortColumn = tableName === 'user_profiles' ? 'created_at' : 'created_date';
+
   return {
-    async list(sort = '-created_date', limit = 50) {
-      const col = sort ? sort.replace(/^-/, '') : 'created_date';
+    async list(sort = `-${defaultSortColumn}`, limit = 50) {
+      const col = sort ? sort.replace(/^-/, '') : defaultSortColumn;
       const asc = sort ? !sort.startsWith('-') : false;
       const result = await invoke({
         action: 'select', table: tableName,
