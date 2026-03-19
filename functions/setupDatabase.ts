@@ -315,13 +315,31 @@ Deno.serve(async (req) => {
             id uuid primary key default gen_random_uuid(),
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
-            nome_desafio text not null,
+            title text,
+            description text,
+            category text,
+            difficulty text,
+            duration_days integer,
+            xp_per_day integer default 10,
+            xp_completion_bonus integer default 20,
+            is_daily boolean default true,
+            repeatable boolean default true,
+            nome_desafio text,
             descricao text,
             xp_recompensa integer default 100,
             duracao_dias integer,
             is_active boolean default true
           );
 
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS title text;
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS description text;
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS category text;
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS difficulty text;
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS duration_days integer;
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS xp_per_day integer default 10;
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS xp_completion_bonus integer default 20;
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS is_daily boolean default true;
+          ALTER TABLE challenges ADD COLUMN IF NOT EXISTS repeatable boolean default true;
           ALTER TABLE challenges ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "challenges_select" ON challenges;
@@ -342,16 +360,28 @@ Deno.serve(async (req) => {
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
             user_email text not null,
+            user_id text,
             challenge_id uuid,
+            progress_current integer default 0,
+            progress_total integer default 1,
             challenge_title text,
             start_date date,
+            started_at timestamptz,
             current_day integer default 1,
             total_days integer,
             completed_days date[],
             status text default 'active',
-            points_earned integer default 0
+            points_earned integer default 0,
+            streak_count integer default 0,
+            completed_at timestamptz
           );
 
+          ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS progress_current integer default 0;
+          ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS progress_total integer default 1;
+          ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS started_at timestamptz;
+          ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS streak_count integer default 0;
+          ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS completed_at timestamptz;
           ALTER TABLE user_challenges ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "user_challenges_all" ON user_challenges;
@@ -364,7 +394,55 @@ Deno.serve(async (req) => {
       setupResults.push({ table: 'user_challenges', status: 'ERROR', error: err.message });
     }
 
-    // 12. DAILY_METRICS
+    // 12. USER_XP_LOG
+    try {
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS user_xp_log (
+            id uuid primary key default gen_random_uuid(),
+            user_id text not null,
+            xp_gained integer default 0,
+            source text,
+            reference_id text,
+            created_at timestamptz default now()
+          );
+
+          ALTER TABLE user_xp_log ENABLE ROW LEVEL SECURITY;
+
+          DROP POLICY IF EXISTS "user_xp_log_all" ON user_xp_log;
+          CREATE POLICY "user_xp_log_all" ON user_xp_log
+          FOR ALL USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
+        `
+      });
+      setupResults.push({ table: 'user_xp_log', status: 'OK' });
+    } catch (err) {
+      setupResults.push({ table: 'user_xp_log', status: 'ERROR', error: err.message });
+    }
+
+    // 13. USER_STREAK
+    try {
+      await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS user_streak (
+            user_id text primary key,
+            current_streak integer default 0,
+            longest_streak integer default 0,
+            last_checkin_date date
+          );
+
+          ALTER TABLE user_streak ENABLE ROW LEVEL SECURITY;
+
+          DROP POLICY IF EXISTS "user_streak_all" ON user_streak;
+          CREATE POLICY "user_streak_all" ON user_streak
+          FOR ALL USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
+        `
+      });
+      setupResults.push({ table: 'user_streak', status: 'OK' });
+    } catch (err) {
+      setupResults.push({ table: 'user_streak', status: 'ERROR', error: err.message });
+    }
+
+    // 14. DAILY_METRICS
     try {
       await supabase.rpc('exec_sql', {
         sql: `

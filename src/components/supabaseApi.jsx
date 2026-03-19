@@ -136,6 +136,8 @@ export const db = {
   HabitLog: createEntityAPI('habit_logs'),
   DailyMetric: createEntityAPI('daily_metrics'),
   UserProgress: createEntityAPI('user_progress'),
+  UserXpLog: createEntityAPI('user_xp_log'),
+  UserStreak: createEntityAPI('user_streak'),
   Ranking: createEntityAPI('ranking'),
   Mission: createEntityAPI('missions'),
   MissionProgress: createEntityAPI('missions_progress'),
