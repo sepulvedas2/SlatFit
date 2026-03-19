@@ -1,283 +1,187 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/components/supabaseApi";
-import { useQuery } from "@tanstack/react-query";
-import { format, startOfWeek, differenceInDays } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Trophy, Target, Calendar, Dumbbell, Flame } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import AchievementsGrid from "../components/progress/AchievementsGrid";
-import { WorkoutsModal, CaloriesModal, StreakModal } from "../components/progress/StatsModals";
-
-function calculateStreak(logs) {
-  if (!logs || logs.length === 0) return 0;
-  const sorted = [...new Set(logs.map(l => l.completed_date))].sort().reverse();
-  let streak = 0;
-  const today = new Date();
-  for (let i = 0; i < sorted.length; i++) {
-    const d = new Date(sorted[i]);
-    const expected = new Date(today);
-    expected.setDate(today.getDate() - i);
-    if (d.toDateString() === expected.toDateString()) streak++;
-    else break;
-  }
-  return streak;
-}
+import UserResumoCard from "@/components/progress/UserResumoCard";
+import DesafiosAtivosCard from "@/components/progress/DesafiosAtivosCard";
+import ExplorarDesafiosCard from "@/components/progress/ExplorarDesafiosCard";
+import { challengeCatalog, challengeMap } from "@/components/progress/challengeCatalog";
 
 export default function Progresso() {
   const [user, setUser] = useState(null);
-  const [modal, setModal] = useState(null);
+  const [xpFeedback, setXpFeedback] = useState(null);
+  const queryClient = useQueryClient();
+  const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
-
-  const { data: profile } = useQuery({
-    queryKey: ['userProfile', user?.email],
-    queryFn: async () => {
-      const p = await db.UserProfile.filter({ user_email: user.email });
-      return p[0] || null;
-    },
-    enabled: !!user?.email,
-  });
-
   const { data: userProgress } = useQuery({
-    queryKey: ['userProgress', user?.email],
+    queryKey: ["userProgress", user?.email],
     queryFn: async () => {
       try {
         const progress = await db.UserProgress.filter({ user_email: user.email });
         if (progress[0]) return progress[0];
       } catch (error) {
-        console.error('[Progresso] user_progress indisponível, usando user_points:', error);
+        console.error("[Progresso] user_progress indisponível, usando user_points:", error);
       }
-
       const points = await db.UserPoints.filter({ user_email: user.email });
       if (!points[0]) return null;
-
       return {
         ...points[0],
         total_xp: points[0].total_points || 0,
         nivel: points[0].level || 1,
+        streak_dias: points[0].daily_streak || 0,
       };
     },
     enabled: !!user?.email,
   });
 
   const { data: rankingEntry } = useQuery({
-    queryKey: ['ranking', user?.email],
+    queryKey: ["ranking", user?.email],
     queryFn: async () => {
-      const ranking = await db.Ranking.filter({ user_email: user.email });
-      return ranking[0] || null;
+      try {
+        const ranking = await db.Ranking.filter({ user_email: user.email });
+        return ranking[0] || null;
+      } catch (error) {
+        console.error("[Progresso] ranking indisponível:", error);
+        return null;
+      }
     },
     enabled: !!user?.email,
   });
 
-  const { data: userChallenges = [] } = useQuery({
-    queryKey: ['userChallenges', user?.email],
-    queryFn: () => db.UserChallenge.filter({ user_email: user.email }),
-    enabled: !!user?.email,
-    initialData: [],
-  });
-
-  const { data: achievements = [] } = useQuery({
-    queryKey: ['achievements', user?.email],
-    queryFn: () => db.Achievement.filter({ user_email: user.email }),
-    enabled: !!user?.email,
-    initialData: [],
-  });
-
-  const { data: allWorkoutLogs = [] } = useQuery({
-    queryKey: ['allWorkoutLogs', user?.email],
-    queryFn: () => db.WorkoutLog.filter({ user_email: user.email }),
-    enabled: !!user?.email,
-    initialData: [],
-  });
-
-  const { data: weekNutrition = [] } = useQuery({
-    queryKey: ['weekNutrition', user?.email, weekStart],
+  const { data: activeChallenges = [] } = useQuery({
+    queryKey: ["userChallenges", user?.email],
     queryFn: async () => {
-      const data = await db.NutritionData.filter({ user_email: user.email });
-      return data.filter(d => d.log_date >= weekStart);
+      try {
+        return await db.UserChallenge.filter({ user_email: user.email });
+      } catch (error) {
+        console.error("[Progresso] erro ao buscar desafios ativos:", error);
+        return [];
+      }
     },
     enabled: !!user?.email,
     initialData: [],
   });
 
-  // ── Computed values ──────────────────────────────────────────
-  const totalXP = userProgress?.total_xp || 0;
-  const streak = calculateStreak(allWorkoutLogs);
-  const totalCaloriesBurned = allWorkoutLogs.reduce((s, l) => s + (l.calories_burned || 0), 0);
-  const isActiveToday = allWorkoutLogs.some(l => l.completed_date === today);
-  const waterDays = weekNutrition.filter(d => d.water_goal_reached).length;
-  const weekWorkouts = allWorkoutLogs.filter(l => l.completed_date >= weekStart);
-  const userGoal = profile?.goal || null;
+  const activeChallengeIds = useMemo(() => new Set(activeChallenges.map((challenge) => challenge.challenge_id)), [activeChallenges]);
+
+  const activeChallengeCards = useMemo(() => {
+    return activeChallenges
+      .filter((challenge) => challenge.status !== "completed")
+      .map((challenge) => {
+        const definition = challengeMap[challenge.challenge_id];
+        const completedDays = challenge.completed_days || [];
+        const progressCount = completedDays.length;
+        const totalDays = challenge.total_days || definition?.durationDays || 1;
+        return {
+          ...challenge,
+          title: challenge.challenge_title,
+          description: definition?.description || "Desafio ativo em andamento.",
+          progressText: `${progressCount}/${totalDays} dias`,
+          progressPercent: Math.min(100, Math.round((progressCount / totalDays) * 100)),
+          completedToday: completedDays.includes(today),
+        };
+      })
+      .slice(0, 5);
+  }, [activeChallenges, today]);
+
+  const activateChallengeMutation = useMutation({
+    mutationFn: async (challenge) => {
+      await db.UserChallenge.create({
+        user_email: user.email,
+        challenge_id: challenge.id,
+        challenge_title: challenge.title,
+        start_date: today,
+        current_day: 1,
+        total_days: challenge.durationDays,
+        completed_days: [],
+        status: "active",
+        points_earned: 0,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userChallenges"] });
+    },
+  });
+
+  const completeChallengeMutation = useMutation({
+    mutationFn: async (challenge) => {
+      const definition = challengeMap[challenge.challenge_id];
+      const completedDays = [...(challenge.completed_days || [])];
+      if (completedDays.includes(today)) return;
+
+      completedDays.push(today);
+      let xpGain = definition?.dailyXp || 10;
+      if (completedDays.length === 3) xpGain += 20;
+      if (completedDays.length === 7) xpGain += 50;
+      if (completedDays.length === 30) xpGain += 200;
+
+      const isCompleted = completedDays.length >= (challenge.total_days || definition?.durationDays || 1);
+      if (isCompleted) xpGain += definition?.xpReward || 0;
+
+      await db.UserChallenge.update(challenge.id, {
+        completed_days: completedDays,
+        current_day: Math.min(completedDays.length + 1, challenge.total_days || definition?.durationDays || 1),
+        points_earned: (challenge.points_earned || 0) + xpGain,
+        status: isCompleted ? "completed" : "active",
+      });
+
+      await base44.functions.invoke("updateXP", { xp_ganho: xpGain, tipo_acao: "desafio" });
+      return xpGain;
+    },
+    onSuccess: (xpGain) => {
+      if (xpGain) {
+        setXpFeedback(xpGain);
+        setTimeout(() => setXpFeedback(null), 1800);
+      }
+      queryClient.invalidateQueries({ queryKey: ["userChallenges"] });
+      queryClient.invalidateQueries({ queryKey: ["userProgress"] });
+      queryClient.invalidateQueries({ queryKey: ["ranking"] });
+    },
+  });
 
   return (
-    <div className="min-h-screen pb-28">
-      <div className="max-w-lg mx-auto px-4 pt-8 space-y-5">
-
-        {/* Header */}
+    <div className="min-h-screen pb-28 pt-6">
+      <div className="mx-auto max-w-lg px-4 space-y-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Central de Evolução</h1>
-          <p className="text-[#CEEDB2] text-sm mt-1">Desafios reais. Ranking de verdade.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Gamificação</p>
+          <h1 className="mt-2 text-3xl font-black text-white">Progresso</h1>
+          <p className="mt-2 text-sm text-white/55">Desafios rápidos, progresso visível e recompensa diária com XP.</p>
         </div>
 
-        {/* Stats Overview */}
-        <Card className="glass-effect border-[#CEF17B]/20 p-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div onClick={() => setModal("workouts")} className="cursor-pointer">
-              <div className="flex items-center gap-2 mb-1">
-                <Dumbbell className="w-4 h-4 text-[#CEF17B]" />
-                <span className="text-white/60 text-xs">Treinos</span>
-              </div>
-              <p className="text-2xl font-bold text-white">{allWorkoutLogs.length}</p>
-            </div>
-            <div onClick={() => setModal("streak")} className="cursor-pointer">
-              <div className="flex items-center gap-2 mb-1">
-                <Flame className="w-4 h-4 text-orange-400" />
-                <span className="text-white/60 text-xs">Sequência</span>
-              </div>
-              <p className="text-2xl font-bold text-white">{streak} dias</p>
-            </div>
-            <div onClick={() => setModal("calories")} className="cursor-pointer">
-              <div className="flex items-center gap-2 mb-1">
-                <Trophy className="w-4 h-4 text-yellow-400" />
-                <span className="text-white/60 text-xs">Calorias</span>
-              </div>
-              <p className="text-2xl font-bold text-white">{totalCaloriesBurned.toLocaleString()}</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Target className="w-4 h-4 text-blue-400" />
-                <span className="text-white/60 text-xs">XP Total</span>
-              </div>
-              <p className="text-2xl font-bold text-white">{totalXP}</p>
-            </div>
-          </div>
-        </Card>
+        <AnimatePresence>
+          {xpFeedback && (
+            <motion.div initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10 }} className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-2xl border border-[#CEF17B]/30 bg-[#CEF17B]/15 px-4 py-3 text-sm font-bold text-[#CEF17B]">
+              +{xpFeedback} XP conquistado
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Esta Semana */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="glass-effect border-[#CEF17B]/20 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-5 h-5 text-[#CEF17B]" />
-              <h3 className="text-white font-bold">Esta Semana</h3>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-[#CEEDB2]">Treinos</span>
-                  <span className="text-white font-semibold">{weekWorkouts.length}/6</span>
-                </div>
-                <Progress value={(weekWorkouts.length / 6) * 100} className="h-2 bg-white/10 [&>div]:bg-[#CEF17B] [&>div]:transition-all [&>div]:duration-1000" />
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-[#CEEDB2]">Hidratação</span>
-                  <span className="text-white font-semibold">{waterDays}/7 dias</span>
-                </div>
-                <Progress value={(waterDays / 7) * 100} className="h-2 bg-white/10 [&>div]:bg-blue-400 [&>div]:transition-all [&>div]:duration-1000" />
-              </div>
-            </div>
-          </Card>
-        </motion.div>
+        <UserResumoCard
+          xp={userProgress?.total_xp || 0}
+          level={userProgress?.nivel || 1}
+          ranking={rankingEntry?.posicao || null}
+          streak={userProgress?.streak_dias || 0}
+        />
 
-        {/* Tabs: Conquistas / Objetivo */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <Tabs defaultValue="achievements">
-            <TabsList className="w-full bg-white/5 border border-white/10 rounded-2xl p-1 mb-4">
-              <TabsTrigger value="achievements" className="flex-1 rounded-xl text-xs data-[state=active]:bg-[#CEF17B] data-[state=active]:text-black text-white/60 font-semibold">
-                🏆 Conquistas
-              </TabsTrigger>
-              <TabsTrigger value="goal" className="flex-1 rounded-xl text-xs data-[state=active]:bg-[#CEF17B] data-[state=active]:text-black text-white/60 font-semibold">
-                🎖️ Objetivo
-              </TabsTrigger>
-            </TabsList>
+        <DesafiosAtivosCard
+          challenges={activeChallengeCards}
+          onCompleteToday={(challenge) => completeChallengeMutation.mutate(challenge)}
+          isSaving={completeChallengeMutation.isPending}
+        />
 
-            {/* ── CONQUISTAS ───────────────────────────────────────────── */}
-            <TabsContent value="achievements">
-              <Card className="glass-effect border-[#CEF17B]/20 p-5">
-                <AchievementsGrid achievements={achievements} />
-              </Card>
-            </TabsContent>
-
-            {/* ── OBJETIVO ─────────────────────────────────────────────── */}
-            <TabsContent value="goal">
-              <Card className="glass-effect border-[#CEF17B]/20 p-5 space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5 text-[#CEF17B]" />
-                  <h3 className="text-white font-bold">Meu Objetivo</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-white/5 p-3">
-                    <p className="text-white/50 text-xs">Nível atual</p>
-                    <p className="text-white font-bold text-lg">{userProgress?.nivel || 1}</p>
-                  </div>
-                  <div className="rounded-xl bg-white/5 p-3">
-                    <p className="text-white/50 text-xs">Posição no ranking</p>
-                    <p className="text-white font-bold text-lg">{rankingEntry?.posicao ? `#${rankingEntry.posicao}` : '—'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-                  <div className="text-3xl">
-                    {profile?.goal === 'weight_loss' ? '🔥' : profile?.goal === 'muscle_gain' ? '💪' : '⚖️'}
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">
-                      {profile?.goal === 'weight_loss' ? 'Emagrecimento' : profile?.goal === 'muscle_gain' ? 'Ganho de Massa' : 'Manutenção'}
-                    </p>
-                    <p className="text-[#CEEDB2] text-sm">
-                      {profile?.fitness_level || 'Iniciante'} · {profile?.training_frequency || 3}x por semana
-                    </p>
-                  </div>
-                </div>
-
-                {/* Rank Roadmap */}
-                <div>
-                  <p className="text-white/50 text-xs uppercase tracking-widest font-bold mb-3">Jornada de Nível</p>
-                  {[
-                    { label: "Bronze", icon: "🥉", min: 0, max: 800 },
-                    { label: "Prata", icon: "🥈", min: 801, max: 2500 },
-                    { label: "Ouro", icon: "🥇", min: 2501, max: 6000 },
-                    { label: "Platina", icon: "💎", min: 6001, max: 12000 },
-                    { label: "Diamante", icon: "💠", min: 12001, max: 20000 },
-                    { label: "Lendário", icon: "👑", min: 20001, max: 99999 },
-                  ].map(r => {
-                    const reached = totalXP >= r.min;
-                    const active = totalXP >= r.min && totalXP < (r.max + 1);
-                    return (
-                      <div key={r.label} className={`flex items-center gap-3 py-2 px-3 rounded-xl mb-1 ${active ? "bg-white/10" : ""}`}>
-                        <span className={`text-lg ${reached ? "" : "grayscale opacity-30"}`} style={{ filter: reached ? "none" : "grayscale(1)" }}>{r.icon}</span>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-center">
-                            <span className={`text-sm font-semibold ${reached ? "text-white" : "text-white/30"}`}>{r.label}</span>
-                            <span className={`text-xs ${reached ? "text-[#CEF17B]" : "text-white/20"}`}>{r.min.toLocaleString()} XP</span>
-                          </div>
-                        </div>
-                        {reached && !active && <span className="text-green-400 text-xs">✓</span>}
-                        {active && <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0 text-[10px]">Atual</Badge>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-
+        <ExplorarDesafiosCard
+          categories={challengeCatalog}
+          activeIds={activeChallengeIds}
+          onActivate={(challenge) => activateChallengeMutation.mutate(challenge)}
+          isSaving={activateChallengeMutation.isPending}
+        />
       </div>
-
-      {/* Modais */}
-      {modal === "streak" && <StreakModal logs={allWorkoutLogs} onClose={() => setModal(null)} />}
-      {modal === "workouts" && <WorkoutsModal logs={allWorkoutLogs} onClose={() => setModal(null)} />}
-      {modal === "calories" && <CaloriesModal logs={allWorkoutLogs} onClose={() => setModal(null)} />}
     </div>
   );
 }
