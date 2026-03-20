@@ -99,10 +99,8 @@ export default function Profile({ onLogout }) {
       const authUser = await base44.auth.me();
       if (!authUser?.id) {
         console.error('Usuário não autenticado');
-        throw new Error('User not authenticated');
+        throw new Error('Usuário não autenticado');
       }
-
-      await base44.functions.invoke('setupDatabase', {});
 
       const displayName = (data.display_name || '').trim();
       if (displayName.length < 3) throw new Error('O nome público deve ter no mínimo 3 caracteres.');
@@ -126,16 +124,23 @@ export default function Profile({ onLogout }) {
         display_name: displayName || null,
       };
 
-      const payload = {
-        id: authUser.id,
-        ...safeData,
-      };
-
       console.log('USER:', authUser);
-      console.log('DATA:', payload);
+      console.log('DATA:', safeData);
 
       try {
-        const res = await db.UserProfile.upsert(payload);
+        const existingProfiles = await db.UserProfile.filter({ id: authUser.id });
+        const existingProfile = existingProfiles[0] || null;
+
+        let res;
+        if (!existingProfile) {
+          res = await db.UserProfile.create({
+            id: authUser.id,
+            ...safeData,
+          });
+        } else {
+          res = await db.UserProfile.update(existingProfile.id, safeData);
+        }
+
         console.log('RES:', res);
         console.log('ERROR:', null);
         return res;
