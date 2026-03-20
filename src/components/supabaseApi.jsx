@@ -123,10 +123,10 @@ function createEntityAPI(tableName) {
 
     async update(id, data) {
       const result = await invoke({
-        action: 'update', table: tableName, data,
+        action: 'update', table: actualTableName, data: mapOutgoingData(data),
         query: { filter: { id } }
       });
-      return result?.data?.[0] || null;
+      return mapIncomingRows(result?.data)?.[0] || null;
     },
 
     async delete(id) {
