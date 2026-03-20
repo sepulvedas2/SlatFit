@@ -162,7 +162,7 @@ export default function Habits() {
 
   const toggleHabitMutation = useMutation({
     mutationFn: async ({ habit, existingLog, streak, dateKey }) => {
-      const xpEarned = calcXP(habit.xp_per_completion || 10, streak);
+      const xpEarned = calcXP(5, streak);
 
       if (existingLog) {
         const nextCompleted = !existingLog.completed;
@@ -172,7 +172,7 @@ export default function Habits() {
           xp_earned: nextCompleted && !existingLog.completed ? xpEarned : existingLog.xp_earned || 0,
         });
         if (nextCompleted && !existingLog.completed) {
-          await base44.functions.invoke("updateXP", { xp_ganho: xpEarned, tipo_acao: "habito" });
+          await base44.functions.invoke("addXP", { amount: xpEarned, source: 'habit', reference_id: habit.id });
         }
         return;
       }

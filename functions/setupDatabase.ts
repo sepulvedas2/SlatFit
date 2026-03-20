@@ -10,6 +10,18 @@ Deno.serve(async (req) => {
 
     const setupResults = [];
 
+    try {
+      await supabase.rpc('exec_sql', {
+        sql: `
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS display_name text;
+        `
+      });
+      setupResults.push({ table: 'user_profiles', status: 'OK' });
+    } catch (err) {
+      setupResults.push({ table: 'user_profiles', status: 'ERROR', error: err.message });
+    }
+
     // 1. USER_PROGRESS - Sistema de XP e Níveis
     try {
       await supabase.rpc('exec_sql', {

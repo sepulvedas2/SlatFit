@@ -89,8 +89,8 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
     await updateWaterMutation.mutateAsync(newIntake);
     if (wasNotReached && newIntake >= goalAmount) {
       setCelebrateGoal(true);
-      await base44.functions.invoke('updateXP', { xp_ganho: 20, tipo_acao: 'missao' });
-      queryClient.invalidateQueries(['userProgress']);
+      await base44.functions.invoke('addXP', { amount: 20, source: 'challenge', reference_id: 'water-goal' });
+      queryClient.invalidateQueries(['userPoints']);
       toast.success("🎉 Meta de água concluída! +20 XP");
       setTimeout(() => setCelebrateGoal(false), 3000);
     } else {

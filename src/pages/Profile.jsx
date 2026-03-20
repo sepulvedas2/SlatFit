@@ -82,6 +82,8 @@ export default function Profile({ onLogout }) {
     } else if (user) {
       setFormData({
         user_email: user.email,
+        user_id: user.id,
+        display_name: user.full_name || '',
         height: 170, current_weight: 70, target_weight: 70,
         goal: 'maintenance', activity_level: 'moderate',
         gender: 'male', age: 25, body_type: 'mesomorph',
@@ -138,6 +140,8 @@ export default function Profile({ onLogout }) {
     if (window.confirm("Tem certeza que deseja restaurar o perfil para os dados padrão?")) {
       setFormData({
         user_email: user?.email,
+        user_id: user?.id,
+        display_name: user?.full_name || '',
         height: 170, current_weight: 70, target_weight: 70,
         goal: 'maintenance', activity_level: 'moderate',
         gender: 'male', age: 25, body_type: 'mesomorph',
@@ -301,6 +305,11 @@ export default function Profile({ onLogout }) {
             </div>
 
             <div className="space-y-4">
+              <div>
+                <Label className="text-[#A0B5B2] text-xs">Nome público no ranking</Label>
+                <Input value={formData.display_name || ''} onChange={(e) => setFormData({...formData, display_name: e.target.value})} className="bg-white/10 border-white/10 text-white" placeholder="Ex: João Fit" />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-[#A0B5B2] text-xs">Altura (cm)</Label>

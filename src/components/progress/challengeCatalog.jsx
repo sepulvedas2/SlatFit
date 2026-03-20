@@ -1,60 +1,23 @@
-const hydrationTitles = [
-  'Beber 2L de água por 7 dias','Beber 500ml ao acordar por 5 dias','3L por dia durante 3 dias','7 dias sem refrigerante','5 dias bebendo água a cada 2h','10 dias mantendo 2L/dia','3 dias sem bebidas açucaradas','Beber 1 copo antes de cada refeição (7 dias)','14 dias com meta diária de hidratação','5 dias usando garrafa de controle','7 dias bebendo água antes do café','3 dias com 3L/dia','10 dias sem álcool','7 dias com lembrete de água ativo','30 dias com mínimo de 2L','5 dias bebendo água ao invés de suco','7 dias com meta personalizada','14 dias mantendo consistência','3 dias com 4L (nível avançado)','21 dias criando hábito de hidratação'
-];
+const hydrationTitles = ['Beber 2L de água por 7 dias','Beber 500ml ao acordar por 5 dias','3L por dia durante 3 dias','7 dias sem refrigerante','5 dias bebendo água a cada 2h','10 dias mantendo 2L/dia','3 dias sem bebidas açucaradas','Beber água antes de refeições por 7 dias','14 dias de hidratação consistente','5 dias com controle de consumo','7 dias bebendo água ao acordar','3 dias com 3L/dia','10 dias sem álcool','7 dias com lembretes ativos','30 dias com mínimo de 2L','Substituir suco por água por 5 dias','7 dias com meta personalizada','14 dias consistentes','3 dias com 4L','21 dias criando hábito','7 dias sem bebidas industrializadas','5 dias bebendo água antes do treino','10 dias com hidratação perfeita','14 dias sem falhar meta','7 dias monitorando ingestão','3 dias hidratando-se corretamente','21 dias sem esquecer água','5 dias bebendo 2,5L','7 dias mantendo constância','30 dias de hidratação completa'];
+const treinoTitles = ['Treinar 3 dias na semana','7 dias de atividade leve','5 treinos em 7 dias','30 min por dia (5 dias)','10 dias sem faltar treino','3 dias treino intenso','7 dias caminhada','14 dias ativos','20 treinos em 30 dias','Treinar 2x ao dia (3 dias)','5 dias treino funcional','7 dias sem sedentarismo','3 dias cardio','10 dias 10k passos','7 dias alongamento','30 dias treino consistente','5 dias academia','7 dias treino em casa','14 dias disciplina','21 dias hábito','3 dias HIIT','5 dias treino manhã','7 dias treino noite','10 dias sem preguiça','15 dias movimento','7 dias corrida leve','5 dias treino completo','10 dias foco físico','14 dias evolução física','30 dias constância'];
+const mentalTitles = ['Meditar 5 min por 7 dias','3 dias sem redes sociais','7 dias dormindo 8h','5 dias journaling','10 dias sem estresse','7 dias respiração','14 dias mente saudável','3 dias offline','7 dias sem celular ao acordar','5 dias gratidão','10 dias pensamento positivo','7 dias leitura','21 dias autocuidado','3 dias sem ansiedade digital','7 dias foco no presente','5 dias silêncio matinal','14 dias rotina leve','7 dias pausas mentais','10 dias controle emocional','30 dias evolução mental','7 dias sem negatividade','5 dias relaxamento','10 dias foco mental','14 dias equilíbrio emocional','7 dias mindfulness','3 dias detox digital','21 dias mente forte','5 dias autocontrole','10 dias calma diária','30 dias disciplina mental'];
+const disciplinaTitles = ['Acordar cedo 7 dias','5 dias sem procrastinar','10 dias metas cumpridas','7 dias sem faltar compromisso','3 dias foco total','14 dias rotina fixa','5 dias sem distrações','7 dias checklist','10 dias pontualidade','3 dias produtividade extrema','21 dias disciplina','7 dias rotina manhã','5 dias planejamento','10 dias sem desculpas','7 dias execução total','3 dias deep work','14 dias consistência','5 dias foco metas','30 dias disciplina total','7 dias organização','10 dias produtividade','5 dias foco absoluto','14 dias sem falhas','3 dias disciplina extrema','7 dias rotina estruturada','10 dias hábitos fortes','5 dias foco total','14 dias evolução disciplina','21 dias rotina firme','30 dias consistência'];
+const nutricaoTitles = ['Comer saudável 5 dias','7 dias sem fast food','3 dias sem açúcar','10 dias dieta equilibrada','5 dias café saudável','7 dias sem ultraprocessados','14 dias alimentação limpa','3 dias detox','7 dias frutas','5 dias vegetais','10 dias controle alimentar','7 dias alimentação limpa','3 dias sem junk food','21 dias alimentação consciente','5 dias proteína adequada','7 dias refeições balanceadas','10 dias sem açúcar refinado','14 dias foco saúde','30 dias evolução alimentar','7 dias disciplina alimentar','5 dias dieta controlada','10 dias sem exagero','7 dias alimentação natural','3 dias dieta limpa','21 dias hábitos saudáveis','5 dias comida saudável','10 dias foco alimentação','14 dias controle alimentar','7 dias dieta correta','30 dias nutrição ideal'];
+const consistenciaTitles = ['3 dias seguidos sem falhar','5 dias consistentes','7 dias de hábito contínuo','10 dias sem interrupção','14 dias mantendo rotina','21 dias consistência total','30 dias sem falhar','7 dias foco total','5 dias rotina firme','10 dias disciplina contínua','14 dias hábito forte','21 dias execução perfeita','30 dias constância','7 dias sequência ativa','5 dias hábito sólido','10 dias consistência mental','14 dias execução contínua','21 dias disciplina total','30 dias rotina perfeita','7 dias compromisso total','5 dias foco diário','10 dias sem parar','14 dias sem desistir','21 dias evolução constante','30 dias alta performance','7 dias sequência perfeita','5 dias foco contínuo','10 dias sem falhar','14 dias constância máxima','30 dias disciplina extrema'];
 
-const treinoTitles = [
-  'Treinar 3 dias na semana','7 dias seguidos de atividade física leve','5 treinos em 7 dias','30 minutos por dia (5 dias)','10 dias sem faltar treino','3 dias de treino intenso','7 dias com caminhada diária','14 dias ativos','20 treinos em 30 dias','Treinar 2x ao dia (3 dias)','5 dias de treino funcional','7 dias sem sedentarismo','3 dias de cardio','10 dias com 10k passos','7 dias com alongamento diário','30 dias com treino consistente','5 dias de academia','7 dias de treino em casa','14 dias com disciplina','21 dias criando hábito','3 dias de HIIT','5 dias com treino matinal','7 dias com treino noturno','10 dias superando preguiça','15 dias com meta de movimento'
-];
-
-const saudeMentalTitles = [
-  'Meditar 5 minutos por 7 dias','3 dias sem redes sociais','7 dias dormindo 8h','5 dias de journaling','10 dias sem estresse excessivo (autoavaliação)','7 dias com respiração consciente','14 dias cuidando da mente','3 dias offline à noite','7 dias acordando sem celular','5 dias praticando gratidão','10 dias evitando negatividade','7 dias lendo 10 min','21 dias de autocuidado','3 dias sem ansiedade digital','7 dias focando no presente','5 dias de silêncio matinal','14 dias com rotina leve','7 dias com pausa mental','10 dias com mindset positivo','30 dias de evolução mental'
-];
-
-const disciplinaTitles = [
-  'Acordar no mesmo horário por 7 dias','5 dias sem procrastinar','10 dias cumprindo metas','7 dias sem faltar compromisso','3 dias de foco total','14 dias com rotina fixa','5 dias sem distrações','7 dias com checklist diário','10 dias sem atrasos','3 dias de produtividade extrema','21 dias criando disciplina','7 dias com rotina matinal','5 dias com planejamento','10 dias sem desculpas','7 dias de execução total','3 dias deep work','14 dias sem falhar','5 dias focado em metas','30 dias de consistência','7 dias com meta diária cumprida'
-];
-
-const saudeGeralTitles = [
-  'Comer saudável por 5 dias','7 dias sem fast food','3 dias sem açúcar','10 dias equilibrando alimentação','5 dias com café da manhã saudável','7 dias sem ultraprocessados','14 dias com dieta equilibrada','3 dias detox leve','7 dias com frutas diárias','5 dias com vegetais','10 dias sem exageros','7 dias com alimentação limpa','3 dias sem junk food','21 dias de alimentação consciente','5 dias com proteína adequada','7 dias com refeições balanceadas','10 dias sem açúcar refinado','14 dias com foco em saúde','30 dias de evolução alimentar','7 dias com disciplina alimentar'
-];
-
-function slugify(text) {
-  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
-
-function extractDurationDays(title) {
-  const match = title.match(/(\d+)\s*dias?/i);
-  if (match) return Number(match[1]);
-  if (/na semana/i.test(title)) return 7;
-  if (/em 30 dias/i.test(title)) return 30;
-  return 7;
-}
-
-function buildChallenge(category, title) {
-  const durationDays = extractDurationDays(title);
-  const lower = title.toLowerCase();
-  const difficulty = lower.includes('avançado') || durationDays >= 21 ? 'Difícil' : durationDays >= 10 ? 'Médio' : 'Fácil';
-  const xpReward = durationDays >= 30 ? 200 : durationDays >= 21 ? 150 : durationDays >= 14 ? 120 : durationDays >= 10 ? 90 : durationDays >= 7 ? 70 : 50;
-  const dailyXp = difficulty === 'Difícil' ? 20 : difficulty === 'Médio' ? 15 : 10;
-
-  return {
-    id: `${slugify(category)}-${slugify(title)}`,
-    category,
-    title,
-    description: `Desafio de ${category.toLowerCase()} com foco em consistência diária.`,
-    durationDays,
-    xpReward,
-    dailyXp,
-    difficulty,
-  };
-}
+function slugify(text) { return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); }
+function extractDurationDays(title) { const m = title.match(/(\d+)\s*(dias?|min)/i); if (m) return Number(m[1]); if (/na semana/i.test(title)) return 7; if (/em 30 dias/i.test(title)) return 30; return 7; }
+function difficulty(durationDays) { if (durationDays >= 21) return 'hard'; if (durationDays >= 10) return 'medium'; return 'easy'; }
+function difficultyLabel(value) { return value === 'hard' ? 'Difícil' : value === 'medium' ? 'Médio' : 'Fácil'; }
+function buildChallenge(category, title) { const durationDays = extractDurationDays(title); const diff = difficulty(durationDays); const dailyXp = diff === 'hard' ? 40 : diff === 'medium' ? 20 : 10; const xpReward = Math.round(durationDays * dailyXp * 0.5); return { id: `${slugify(category)}-${slugify(title)}`, category, title, description: `Desafio de ${category.toLowerCase()} com foco em constância diária.`, durationDays, duration_days: durationDays, xpReward, xpRewardLabel: `${xpReward} XP`, dailyXp, xp_per_day: dailyXp, difficulty: difficultyLabel(diff), difficulty_key: diff, repeatable: true, is_daily: true }; }
 
 export const challengeCatalog = {
   'Hidratação': hydrationTitles.map((title) => buildChallenge('Hidratação', title)),
   'Treino': treinoTitles.map((title) => buildChallenge('Treino', title)),
-  'Saúde': saudeGeralTitles.map((title) => buildChallenge('Saúde', title)),
-  'Mentalidade': saudeMentalTitles.map((title) => buildChallenge('Mentalidade', title)),
+  'Saúde Mental': mentalTitles.map((title) => buildChallenge('Saúde Mental', title)),
   'Disciplina': disciplinaTitles.map((title) => buildChallenge('Disciplina', title)),
+  'Nutrição': nutricaoTitles.map((title) => buildChallenge('Nutrição', title)),
+  'Consistência': consistenciaTitles.map((title) => buildChallenge('Consistência', title)),
 };
 
 export const challengeList = Object.values(challengeCatalog).flat();

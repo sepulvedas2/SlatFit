@@ -11,20 +11,23 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { data: rows, error } = await supabase
-      .from('user_points')
-      .select('*')
-      .order('total_points', { ascending: false })
-      .limit(100);
+    const [{ data: pointsRows, error: pointsError }, { data: profileRows }] = await Promise.all([
+      supabase.from('user_points').select('*').order('total_points', { ascending: false }).limit(100),
+      supabase.from('user_profiles').select('*').limit(500),
+    ]);
 
-    if (error) return Response.json({ error: error.message }, { status: 400 });
+    if (pointsError) return Response.json({ error: pointsError.message }, { status: 400 });
 
-    const leaderboard = (rows || []).map((row, index) => ({
+    const profileMap = Object.fromEntries(
+      (profileRows || []).map((row) => [row.email || row.user_email || row.user_id || row.id, row.display_name || ''])
+    );
+
+    const leaderboard = (pointsRows || []).map((row, index) => ({
       ...row,
       posicao: index + 1,
       total_xp: row.total_points || 0,
       nivel: row.level || 1,
-      user_name: row.user_email || 'Usuário',
+      display_name: profileMap[row.user_email] || 'Usuário Anônimo',
     }));
 
     const currentUser = leaderboard.find((row) => row.user_email === user.email) || null;
