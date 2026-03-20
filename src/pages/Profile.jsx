@@ -99,13 +99,28 @@ export default function Profile({ onLogout }) {
       const displayName = (data.display_name || '').trim();
       if (displayName.length < 3) throw new Error('O nome público deve ter no mínimo 3 caracteres.');
       if (displayName.length > 20) throw new Error('O nome público deve ter no máximo 20 caracteres.');
-      return db.UserProfile.upsert({
+
+      const payload = {
         id: user.id,
         ...data,
         user_id: user.id,
         user_email: user.email,
         display_name: displayName,
-      });
+      };
+
+      console.log('USER:', user);
+      console.log('DATA:', payload);
+
+      try {
+        const res = await db.UserProfile.upsert(payload);
+        console.log('RES:', res);
+        console.log('ERROR:', null);
+        return res;
+      } catch (error) {
+        console.log('RES:', null);
+        console.log('ERROR:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
