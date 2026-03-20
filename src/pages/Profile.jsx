@@ -394,10 +394,18 @@ export default function Profile({ onLogout }) {
               )}
 
               <div
-                className="fixed left-0 right-0 z-[60] border-t border-white/10 bg-[#162A28]/95 px-4 pt-3 backdrop-blur-xl"
-                style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 92px)" }}
+                className="fixed z-[60] border-t border-white/10 bg-[#162A28]/95 px-4 pt-3 backdrop-blur-xl"
+                style={{
+                  position: 'fixed',
+                  bottom: '70px',
+                  left: '0',
+                  right: '0',
+                  width: '100%',
+                  maxWidth: '500px',
+                  margin: '0 auto',
+                }}
               >
-                <div className="mx-auto flex max-w-lg gap-3 pb-3">
+                <div className="flex gap-3 pb-3">
                   <Button
                     onClick={() => saveProfileMutation.mutate(formData)}
                     disabled={saveProfileMutation.isPending}
