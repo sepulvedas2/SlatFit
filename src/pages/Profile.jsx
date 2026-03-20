@@ -96,16 +96,34 @@ export default function Profile({ onLogout }) {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
+      if (!user?.id) throw new Error('Usuário não autenticado.');
+      await base44.functions.invoke('setupDatabase', {});
+
       const displayName = (data.display_name || '').trim();
       if (displayName.length < 3) throw new Error('O nome público deve ter no mínimo 3 caracteres.');
       if (displayName.length > 20) throw new Error('O nome público deve ter no máximo 20 caracteres.');
 
-      const payload = {
-        id: user.id,
-        ...data,
+      const safeData = {
         user_id: user.id,
         user_email: user.email,
         display_name: displayName,
+        height: data.height ? Number(data.height) : null,
+        current_weight: data.current_weight ? Number(data.current_weight) : null,
+        target_weight: data.target_weight ? Number(data.target_weight) : null,
+        goal: data.goal || null,
+        activity_level: data.activity_level || null,
+        gender: data.gender || null,
+        age: data.age ? Number(data.age) : null,
+        body_type: data.body_type || null,
+        daily_calorie_target: data.daily_calorie_target ? Number(data.daily_calorie_target) : null,
+        protein_target: data.protein_target ? Number(data.protein_target) : null,
+        carbs_target: data.carbs_target ? Number(data.carbs_target) : null,
+        fats_target: data.fats_target ? Number(data.fats_target) : null,
+      };
+
+      const payload = {
+        id: user.id,
+        ...safeData,
       };
 
       console.log('USER:', user);
