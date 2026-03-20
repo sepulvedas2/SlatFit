@@ -22,11 +22,21 @@ Deno.serve(async (req) => {
     const normalizeOrderColumn = (col) => table === 'user_profiles' && col === 'created_date' ? 'created_at' : col;
     const normalizeProfileData = (item) => {
       if (table !== 'user_profiles' || !item) return item;
-      const normalized = { ...item };
-      if ('user_email' in normalized) {
-        normalized.email = normalized.user_email;
-        delete normalized.user_email;
+      const allowedKeys = [
+        'id', 'user_id', 'email', 'display_name', 'height', 'current_weight', 'target_weight',
+        'goal', 'activity_level', 'gender', 'age', 'body_type', 'daily_calorie_target',
+        'protein_target', 'carbs_target', 'fats_target', 'theme_preference', 'fitness_level',
+        'dietary_restrictions', 'training_frequency', 'ai_tone_preference', 'city',
+        'created_date', 'updated_date', 'created_by'
+      ];
+      const normalized = {};
+      for (const key of allowedKeys) {
+        if (item[key] !== undefined) normalized[key] = item[key];
       }
+      if (item.user_email !== undefined) normalized.email = item.user_email;
+      Object.keys(normalized).forEach((key) => {
+        if (normalized[key] === undefined) normalized[key] = null;
+      });
       return normalized;
     };
 
