@@ -130,7 +130,7 @@ function createEntityAPI(tableName) {
     },
 
     async delete(id) {
-      await invoke({ action: 'delete', table: tableName, query: { filter: { id } } });
+      await invoke({ action: 'delete', table: actualTableName, query: { filter: { id } } });
       return true;
     },
 
