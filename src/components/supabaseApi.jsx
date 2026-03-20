@@ -136,10 +136,10 @@ function createEntityAPI(tableName) {
 
     async get(id) {
       const result = await invoke({
-        action: 'select', table: tableName,
+        action: 'select', table: actualTableName,
         query: { filter: { id }, limit: 1 }
       });
-      return result?.data?.[0] || null;
+      return mapIncomingRows(result?.data)?.[0] || null;
     }
   };
 }
