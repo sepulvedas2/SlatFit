@@ -313,7 +313,7 @@ export default function Profile({ onLogout }) {
               <button onClick={() => setEditing(false)} className="text-[#A0B5B2] text-2xl leading-none">×</button>
             </div>
 
-            <div className="space-y-4 pb-24">
+            <div className="space-y-4 pb-40">
               <div>
                 <Label className="text-[#A0B5B2] text-xs">Nome público no ranking</Label>
                 <Input value={formData.display_name || ''} onChange={(e) => setFormData({...formData, display_name: e.target.value})} className="bg-white/10 border-white/10 text-white" placeholder="Ex: João Fit" />
@@ -393,16 +393,19 @@ export default function Profile({ onLogout }) {
                 </Alert>
               )}
 
-              <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#162A28] px-4 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3">
-                <div className="mx-auto flex max-w-lg gap-3">
+              <div
+                className="fixed left-0 right-0 z-[60] border-t border-white/10 bg-[#162A28]/95 px-4 pt-3 backdrop-blur-xl"
+                style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 92px)" }}
+              >
+                <div className="mx-auto flex max-w-lg gap-3 pb-3">
                   <Button
                     onClick={() => saveProfileMutation.mutate(formData)}
                     disabled={saveProfileMutation.isPending}
-                    className="flex-1 bg-[#CEF17B] text-[#084734] hover:bg-[#b8e05a] font-bold h-12"
+                    className="h-14 flex-1 rounded-2xl bg-[#CEF17B] font-bold text-[#084734] shadow-xl shadow-[#CEF17B]/20 hover:bg-[#b8e05a]"
                   >
                     {saveProfileMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5 mr-2" /> Salvar alterações</>}
                   </Button>
-                  <Button onClick={() => { setEditing(false); setSaveError(''); }} variant="outline" className="border-white/20 text-white h-12">
+                  <Button onClick={() => { setEditing(false); setSaveError(''); }} variant="outline" className="h-14 border-white/20 text-white">
                     Cancelar
                   </Button>
                 </div>
