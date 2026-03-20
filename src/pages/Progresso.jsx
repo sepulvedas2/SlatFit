@@ -89,7 +89,7 @@ export default function Progresso() {
 
   const activateChallengeMutation = useMutation({
     mutationFn: async (challenge) => {
-      if (activeCards.length >= 3) throw new Error("Você já possui 3 desafios ativos.");
+      if (activeCards.length >= 2) throw new Error("Você só pode ter 2 desafios ativos. Conclua um para ativar outro.");
       await db.UserChallenge.create({
         user_email: user.email,
         user_id: user.id,
