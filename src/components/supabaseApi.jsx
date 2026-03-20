@@ -17,8 +17,11 @@ async function invoke(payload) {
 }
 
 function createEntityAPI(tableName) {
-  const defaultSortColumn = tableName === 'user_profiles' ? 'created_at' : 'created_date';
+  const actualTableName = (tableName === 'user_progress' || tableName === 'user_streak') ? 'user_points' : tableName;
+  const defaultSortColumn = actualTableName === 'user_profiles' ? 'created_at' : 'created_date';
   const isUserProgress = tableName === 'user_progress';
+  const isUserStreak = tableName === 'user_streak';
+
   const mapUserPointsToProgress = (row) => row ? ({
     ...row,
     total_xp: row.total_xp ?? row.total_points ?? 0,
@@ -27,7 +30,47 @@ function createEntityAPI(tableName) {
     xp_proximo_nivel: row.xp_proximo_nivel ?? row.xp_next_level ?? 100,
     streak_dias: row.streak_dias ?? row.daily_streak ?? 0,
     longest_streak: row.longest_streak ?? 0,
+    weekly_goal: row.weekly_goal ?? 4,
+    weekly_completed: row.weekly_completed ?? 0,
   }) : row;
+
+  const mapUserPointsToStreak = (row) => row ? ({
+    ...row,
+    user_id: row.user_id ?? row.user_email,
+    current_streak: row.current_streak ?? row.daily_streak ?? 0,
+    longest_streak: row.longest_streak ?? 0,
+    last_checkin_date: row.last_checkin_date ?? row.last_workout_date ?? null,
+  }) : row;
+
+  const mapOutgoingData = (data) => {
+    if (isUserProgress) {
+      return {
+        ...data,
+        total_points: data.total_points ?? data.total_xp,
+        level: data.level ?? data.nivel,
+        xp_current: data.xp_current ?? data.xp_atual,
+        xp_next_level: data.xp_next_level ?? data.xp_proximo_nivel,
+        daily_streak: data.daily_streak ?? data.streak_dias,
+      };
+    }
+
+    if (isUserStreak) {
+      return {
+        ...data,
+        daily_streak: data.daily_streak ?? data.current_streak,
+        longest_streak: data.longest_streak,
+        last_workout_date: data.last_workout_date ?? data.last_checkin_date,
+      };
+    }
+
+    return data;
+  };
+
+  const mapIncomingRows = (rows) => {
+    if (isUserProgress) return (rows || []).map(mapUserPointsToProgress);
+    if (isUserStreak) return (rows || []).map(mapUserPointsToStreak);
+    return rows || [];
+  };
 
   return {
     async list(sort = `-${defaultSortColumn}`, limit = 50) {
