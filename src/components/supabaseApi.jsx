@@ -97,17 +97,17 @@ function createEntityAPI(tableName) {
       const asc = sort ? !sort.startsWith('-') : false;
       try {
         const result = await invoke({
-          action: 'select', table: tableName,
+          action: 'select', table: actualTableName,
           query: { filter: filters, limit, order: { column: col, ascending: asc } }
         });
-        return isUserProgress ? (result?.data || []).map(mapUserPointsToProgress) : (result?.data || []);
+        return mapIncomingRows(result?.data);
       } catch (error) {
-        if (!isUserProgress) throw error;
+        if (!isUserProgress && !isUserStreak) throw error;
         const fallback = await invoke({
           action: 'select', table: 'user_points',
           query: { filter: filters, limit, order: { column: 'created_date', ascending: asc } }
         });
-        return (fallback?.data || []).map(mapUserPointsToProgress);
+        return mapIncomingRows(fallback?.data);
       }
     },
 
