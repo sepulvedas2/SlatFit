@@ -52,6 +52,7 @@ export default function Profile({ onLogout }) {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [success, setSuccess] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const { isDark } = useTheme();
   const queryClient = useQueryClient();
 
@@ -95,14 +96,22 @@ export default function Profile({ onLogout }) {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
-      if (profile) return db.UserProfile.update(profile.id, data);
-      return db.UserProfile.create(data);
+      const displayName = (data.display_name || '').trim();
+      if (displayName.length < 3) throw new Error('O nome público deve ter no mínimo 3 caracteres.');
+      if (displayName.length > 20) throw new Error('O nome público deve ter no máximo 20 caracteres.');
+      if (profile) return db.UserProfile.update(profile.id, { ...data, display_name: displayName });
+      return db.UserProfile.create({ ...data, display_name: displayName });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['rankingSnapshot'] });
       setEditing(false);
+      setSaveError('');
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
+    },
+    onError: (error) => {
+      setSaveError(error.message || 'Não foi possível salvar suas alterações.');
     },
   });
 
@@ -304,7 +313,7 @@ export default function Profile({ onLogout }) {
               <button onClick={() => setEditing(false)} className="text-[#A0B5B2] text-2xl leading-none">×</button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 pb-24">
               <div>
                 <Label className="text-[#A0B5B2] text-xs">Nome público no ranking</Label>
                 <Input value={formData.display_name || ''} onChange={(e) => setFormData({...formData, display_name: e.target.value})} className="bg-white/10 border-white/10 text-white" placeholder="Ex: João Fit" />
@@ -378,17 +387,25 @@ export default function Profile({ onLogout }) {
                 </Select>
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <Button
-                  onClick={() => saveProfileMutation.mutate(formData)}
-                  disabled={saveProfileMutation.isPending}
-                  className="flex-1 bg-[#CEF17B] text-[#084734] hover:bg-[#b8e05a] font-bold h-12"
-                >
-                  {saveProfileMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5 mr-2" /> Salvar</>}
-                </Button>
-                <Button onClick={() => setEditing(false)} variant="outline" className="border-white/20 text-white h-12">
-                  Cancelar
-                </Button>
+              {saveError && (
+                <Alert className="bg-red-500/20 border-red-500/30">
+                  <AlertDescription className="text-red-300">{saveError}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#162A28] px-4 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3">
+                <div className="mx-auto flex max-w-lg gap-3">
+                  <Button
+                    onClick={() => saveProfileMutation.mutate(formData)}
+                    disabled={saveProfileMutation.isPending}
+                    className="flex-1 bg-[#CEF17B] text-[#084734] hover:bg-[#b8e05a] font-bold h-12"
+                  >
+                    {saveProfileMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5 mr-2" /> Salvar alterações</>}
+                  </Button>
+                  <Button onClick={() => { setEditing(false); setSaveError(''); }} variant="outline" className="border-white/20 text-white h-12">
+                    Cancelar
+                  </Button>
+                </div>
               </div>
             </div>
           </motion.div>

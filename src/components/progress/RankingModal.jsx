@@ -52,15 +52,15 @@ export default function RankingModal({ open, onClose, currentXp, currentRank, le
             <p className="mb-3 text-xs uppercase tracking-[0.2em] text-white/35">Top 10 Global</p>
             <div className="space-y-2">
               {leaderboard.slice(0, 10).map((entry, index) => (
-                <div key={entry.id || entry.user_email || index} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3">
+                <div key={entry.id || index} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-white/80">{index + 1}</div>
                     <div>
-                      <p className="text-sm font-semibold text-white">{entry.user_name || entry.user_email || 'Usuário'}</p>
-                      <p className="text-xs text-white/45">Nível {entry.nivel || entry.level || 1}</p>
+                      <p className="text-sm font-semibold text-white">{entry.display_name || 'Usuário'}</p>
+                      <p className="text-xs text-white/45">Nível {entry.nivel || 1}</p>
                     </div>
                   </div>
-                  <p className="text-sm font-bold text-[#CEF17B]">{entry.total_xp || entry.total_points || 0} XP</p>
+                  <p className="text-sm font-bold text-[#CEF17B]">{entry.total_xp || 0} XP</p>
                 </div>
               ))}
             </div>
