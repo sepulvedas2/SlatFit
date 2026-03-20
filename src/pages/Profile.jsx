@@ -99,8 +99,13 @@ export default function Profile({ onLogout }) {
       const displayName = (data.display_name || '').trim();
       if (displayName.length < 3) throw new Error('O nome público deve ter no mínimo 3 caracteres.');
       if (displayName.length > 20) throw new Error('O nome público deve ter no máximo 20 caracteres.');
-      if (profile) return db.UserProfile.update(profile.id, { ...data, display_name: displayName });
-      return db.UserProfile.create({ ...data, display_name: displayName });
+      return db.UserProfile.upsert({
+        id: user.id,
+        ...data,
+        user_id: user.id,
+        user_email: user.email,
+        display_name: displayName,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });

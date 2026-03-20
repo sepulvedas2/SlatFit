@@ -114,6 +114,19 @@ Deno.serve(async (req) => {
       return Response.json({ data: updated });
     }
 
+    if (action === 'upsert') {
+      const dataToUpsert = normalizeProfileData({ ...data, updated_date: now, created_by: data?.created_by || user.email });
+      const conflictColumn = table === 'user_profiles' ? 'id' : (query?.onConflict || 'id');
+      console.log(`[Supabase] Upsert em ${table}:`, dataToUpsert, 'onConflict:', conflictColumn);
+      const { data: upserted, error } = await runWithRetry(() => supabase.from(table).upsert(dataToUpsert, { onConflict: conflictColumn }).select());
+      if (error) {
+        console.error(`[Supabase] Erro ao fazer upsert em ${table}:`, error.message);
+        return Response.json({ error: error.message }, { status: 400 });
+      }
+      console.log(`[Supabase] Upsert concluído em ${table}:`, upserted);
+      return Response.json({ data: upserted });
+    }
+
     if (action === 'delete') {
       let q = supabase.from(table).delete();
       if (query?.filter) {

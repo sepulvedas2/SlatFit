@@ -86,6 +86,14 @@ function createEntityAPI(tableName) {
       return result?.data?.[0] || null;
     },
 
+    async upsert(data, onConflict = 'id') {
+      const result = await invoke({
+        action: 'upsert', table: tableName, data,
+        query: { onConflict }
+      });
+      return result?.data?.[0] || null;
+    },
+
     async delete(id) {
       await invoke({ action: 'delete', table: tableName, query: { filter: { id } } });
       return true;
