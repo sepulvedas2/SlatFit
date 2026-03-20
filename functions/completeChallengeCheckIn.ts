@@ -76,44 +76,38 @@ Deno.serve(async (req) => {
       })
       .eq('id', userChallengeId);
 
-    const { data: pointsRows } = await supabase
+    await supabase
+      .from('user_points')
+      .upsert({
+        user_email: user.email,
+        daily_streak: nextStreak,
+        longest_streak: nextStreak,
+      }, { onConflict: 'user_email' });
+
+    await base44.functions.invoke('addXP', {
+      amount: xpGain,
+      source: completed ? 'bonus' : 'challenge',
+      reference_id: userChallenge.challenge_id,
+    });
+
+    const { data: refreshedPoints } = await supabase
       .from('user_points')
       .select('*')
       .eq('user_email', user.email)
       .limit(1);
 
-    const currentPoints = pointsRows?.[0];
-    if (currentPoints) {
-      const nextLevelXp = currentPoints.xp_next_level || 100;
-      const rawXp = (currentPoints.xp_current || 0) + xpGain;
-      const leveledUp = rawXp >= nextLevelXp;
-      await supabase
-        .from('user_points')
-        .update({
-          total_points: (currentPoints.total_points || 0) + xpGain,
-          xp_current: leveledUp ? rawXp - nextLevelXp : rawXp,
-          level: leveledUp ? (currentPoints.level || 1) + 1 : (currentPoints.level || 1),
-          xp_next_level: leveledUp ? Math.round(nextLevelXp * 1.5) : nextLevelXp,
-          daily_streak: nextStreak,
-          longest_streak: Math.max(currentPoints.longest_streak || 0, nextStreak),
-          updated_date: new Date().toISOString(),
-        })
-        .eq('id', currentPoints.id);
-    } else {
-      await supabase
-        .from('user_points')
-        .insert({
-          user_email: user.email,
-          total_points: xpGain,
-          level: 1,
-          xp_current: xpGain,
-          xp_next_level: 100,
-          daily_streak: nextStreak,
-          longest_streak: nextStreak,
-        });
-    }
+    const finalPoints = refreshedPoints?.[0] || null;
 
-    return Response.json({ success: true, xpGain, progressCurrent, progressTotal, completed, streakCount: nextStreak });
+    return Response.json({
+      success: true,
+      xpGain,
+      progressCurrent,
+      progressTotal,
+      completed,
+      streakCount: nextStreak,
+      totalXp: finalPoints?.total_points || null,
+      level: finalPoints?.level || null,
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

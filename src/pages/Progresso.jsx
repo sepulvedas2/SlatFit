@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/components/supabaseApi";
 
@@ -109,6 +110,10 @@ export default function Progresso() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userChallenges"] });
+      toast.success("Desafio ativado com sucesso.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Não foi possível ativar o desafio.");
     },
   });
 
