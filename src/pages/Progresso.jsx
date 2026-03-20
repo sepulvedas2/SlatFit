@@ -35,23 +35,8 @@ export default function Progresso() {
   const { data: rankingSnapshot } = useQuery({
     queryKey: ["rankingSnapshot", user?.email],
     queryFn: async () => {
-      const rows = await db.UserPoints.list('-created_date', 100);
-      const leaderboard = rows
-        .sort((a, b) => (b.total_points || 0) - (a.total_points || 0))
-        .map((row, index) => ({
-          ...row,
-          posicao: index + 1,
-          total_xp: row.total_points || 0,
-          nivel: row.level || 1,
-          user_name: row.user_email || 'Usuário',
-        }));
-      const currentUser = leaderboard.find((row) => row.user_email === user.email) || null;
-      return {
-        currentRank: currentUser?.posicao || null,
-        currentXp: currentUser?.total_xp || 0,
-        currentLevel: currentUser?.nivel || 1,
-        leaderboard: leaderboard.slice(0, 10),
-      };
+      const response = await base44.functions.invoke("getRankingSnapshot", {});
+      return response.data;
     },
     enabled: !!user?.email,
   });
@@ -129,47 +114,11 @@ export default function Progresso() {
 
   const completeTodayMutation = useMutation({
     mutationFn: async (challenge) => {
-      const todayDone = Array.isArray(challenge.completed_days) ? challenge.completed_days : [];
-      if (todayDone.includes(today)) throw new Error('Desafio já concluído hoje');
-
-      const nextProgress = (challenge.progress_current || 0) + 1;
-      const nextStreak = (challenge.streak_count || 0) + 1;
-      const progressTotal = challenge.progress_total || challenge.total_days || challenge.challengeMeta?.durationDays || 1;
-      const completed = nextProgress >= progressTotal;
-      let xpGain = challenge.xp_per_day || 10;
-      if (nextStreak >= 14) xpGain = Math.round(xpGain * 1.5);
-      else if (nextStreak >= 7) xpGain = Math.round(xpGain * 1.2);
-      else if (nextStreak >= 3) xpGain = Math.round(xpGain * 1.1);
-      if (nextStreak === 3) xpGain += 20;
-      if (nextStreak === 7) xpGain += 50;
-      if (nextStreak === 14) xpGain += 120;
-      if (nextStreak === 30) xpGain += 300;
-      if (completed) xpGain += challenge.challengeMeta?.xpReward || 0;
-
-      await db.UserChallenge.update(challenge.id, {
-        progress_current: nextProgress,
-        completed_days: [...todayDone, today],
-        streak_count: nextStreak,
-        points_earned: (challenge.points_earned || 0) + xpGain,
-        status: completed ? 'completed' : 'active',
-        completed_at: completed ? new Date().toISOString() : null,
+      const response = await base44.functions.invoke("completeChallengeCheckIn", {
+        userChallengeId: challenge.id,
+        challengeMeta: challenge.challengeMeta,
       });
-
-      if (userPoints?.id) {
-        const nextLevelXp = userPoints.xp_next_level || 100;
-        const rawXp = (userPoints.xp_current || 0) + xpGain;
-        const leveledUp = rawXp >= nextLevelXp;
-        await db.UserPoints.update(userPoints.id, {
-          total_points: (userPoints.total_points || 0) + xpGain,
-          xp_current: leveledUp ? rawXp - nextLevelXp : rawXp,
-          level: leveledUp ? (userPoints.level || 1) + 1 : (userPoints.level || 1),
-          xp_next_level: leveledUp ? Math.round(nextLevelXp * 1.5) : nextLevelXp,
-          daily_streak: nextStreak,
-          longest_streak: Math.max(userPoints.longest_streak || 0, nextStreak),
-        });
-      }
-
-      return { xpGain, completed };
+      return response.data;
     },
     onMutate: async (challenge) => {
       await queryClient.cancelQueries({ queryKey: ["userChallenges", user?.email] });

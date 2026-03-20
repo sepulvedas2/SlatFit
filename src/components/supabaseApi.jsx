@@ -17,11 +17,8 @@ async function invoke(payload) {
 }
 
 function createEntityAPI(tableName) {
-  const actualTableName = (tableName === 'user_progress' || tableName === 'user_streak') ? 'user_points' : tableName;
-  const defaultSortColumn = actualTableName === 'user_profiles' ? 'created_at' : 'created_date';
+  const defaultSortColumn = tableName === 'user_profiles' ? 'created_at' : 'created_date';
   const isUserProgress = tableName === 'user_progress';
-  const isUserStreak = tableName === 'user_streak';
-
   const mapUserPointsToProgress = (row) => row ? ({
     ...row,
     total_xp: row.total_xp ?? row.total_points ?? 0,
@@ -30,47 +27,7 @@ function createEntityAPI(tableName) {
     xp_proximo_nivel: row.xp_proximo_nivel ?? row.xp_next_level ?? 100,
     streak_dias: row.streak_dias ?? row.daily_streak ?? 0,
     longest_streak: row.longest_streak ?? 0,
-    weekly_goal: row.weekly_goal ?? 4,
-    weekly_completed: row.weekly_completed ?? 0,
   }) : row;
-
-  const mapUserPointsToStreak = (row) => row ? ({
-    ...row,
-    user_id: row.user_id ?? row.user_email,
-    current_streak: row.current_streak ?? row.daily_streak ?? 0,
-    longest_streak: row.longest_streak ?? 0,
-    last_checkin_date: row.last_checkin_date ?? row.last_workout_date ?? null,
-  }) : row;
-
-  const mapOutgoingData = (data) => {
-    if (isUserProgress) {
-      return {
-        ...data,
-        total_points: data.total_points ?? data.total_xp,
-        level: data.level ?? data.nivel,
-        xp_current: data.xp_current ?? data.xp_atual,
-        xp_next_level: data.xp_next_level ?? data.xp_proximo_nivel,
-        daily_streak: data.daily_streak ?? data.streak_dias,
-      };
-    }
-
-    if (isUserStreak) {
-      return {
-        ...data,
-        daily_streak: data.daily_streak ?? data.current_streak,
-        longest_streak: data.longest_streak,
-        last_workout_date: data.last_workout_date ?? data.last_checkin_date,
-      };
-    }
-
-    return data;
-  };
-
-  const mapIncomingRows = (rows) => {
-    if (isUserProgress) return (rows || []).map(mapUserPointsToProgress);
-    if (isUserStreak) return (rows || []).map(mapUserPointsToStreak);
-    return rows || [];
-  };
 
   return {
     async list(sort = `-${defaultSortColumn}`, limit = 50) {
@@ -78,17 +35,17 @@ function createEntityAPI(tableName) {
       const asc = sort ? !sort.startsWith('-') : false;
       try {
         const result = await invoke({
-          action: 'select', table: actualTableName,
+          action: 'select', table: tableName,
           query: { limit, order: { column: col, ascending: asc } }
         });
-        return mapIncomingRows(result?.data);
+        return isUserProgress ? (result?.data || []).map(mapUserPointsToProgress) : (result?.data || []);
       } catch (error) {
-        if (!isUserProgress && !isUserStreak) throw error;
+        if (!isUserProgress) throw error;
         const fallback = await invoke({
           action: 'select', table: 'user_points',
           query: { limit, order: { column: 'created_date', ascending: asc } }
         });
-        return mapIncomingRows(fallback?.data);
+        return (fallback?.data || []).map(mapUserPointsToProgress);
       }
     },
 
@@ -97,49 +54,49 @@ function createEntityAPI(tableName) {
       const asc = sort ? !sort.startsWith('-') : false;
       try {
         const result = await invoke({
-          action: 'select', table: actualTableName,
+          action: 'select', table: tableName,
           query: { filter: filters, limit, order: { column: col, ascending: asc } }
         });
-        return mapIncomingRows(result?.data);
+        return isUserProgress ? (result?.data || []).map(mapUserPointsToProgress) : (result?.data || []);
       } catch (error) {
-        if (!isUserProgress && !isUserStreak) throw error;
+        if (!isUserProgress) throw error;
         const fallback = await invoke({
           action: 'select', table: 'user_points',
           query: { filter: filters, limit, order: { column: 'created_date', ascending: asc } }
         });
-        return mapIncomingRows(fallback?.data);
+        return (fallback?.data || []).map(mapUserPointsToProgress);
       }
     },
 
     async create(data) {
-      const result = await invoke({ action: 'insert', table: actualTableName, data: mapOutgoingData(data) });
-      return mapIncomingRows(result?.data)?.[0] || null;
+      const result = await invoke({ action: 'insert', table: tableName, data });
+      return result?.data?.[0] || null;
     },
 
     async bulkCreate(items) {
-      const result = await invoke({ action: 'insert', table: actualTableName, data: items.map(mapOutgoingData) });
-      return mapIncomingRows(result?.data);
+      const result = await invoke({ action: 'insert', table: tableName, data: items });
+      return result?.data || [];
     },
 
     async update(id, data) {
       const result = await invoke({
-        action: 'update', table: actualTableName, data: mapOutgoingData(data),
+        action: 'update', table: tableName, data,
         query: { filter: { id } }
       });
-      return mapIncomingRows(result?.data)?.[0] || null;
+      return result?.data?.[0] || null;
     },
 
     async delete(id) {
-      await invoke({ action: 'delete', table: actualTableName, query: { filter: { id } } });
+      await invoke({ action: 'delete', table: tableName, query: { filter: { id } } });
       return true;
     },
 
     async get(id) {
       const result = await invoke({
-        action: 'select', table: actualTableName,
+        action: 'select', table: tableName,
         query: { filter: { id }, limit: 1 }
       });
-      return mapIncomingRows(result?.data)?.[0] || null;
+      return result?.data?.[0] || null;
     }
   };
 }
