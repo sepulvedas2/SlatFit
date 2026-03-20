@@ -112,8 +112,8 @@ function createEntityAPI(tableName) {
     },
 
     async create(data) {
-      const result = await invoke({ action: 'insert', table: tableName, data });
-      return result?.data?.[0] || null;
+      const result = await invoke({ action: 'insert', table: actualTableName, data: mapOutgoingData(data) });
+      return mapIncomingRows(result?.data)?.[0] || null;
     },
 
     async bulkCreate(items) {
