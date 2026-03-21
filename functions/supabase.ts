@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
       if (table !== 'user_profiles' || !item) return item;
       const rawData = {
         id: item.id,
-        name: item.name ?? item.display_name,
         height: item.height,
         age: item.age,
         weight: item.weight ?? item.current_weight,
@@ -36,7 +35,6 @@ Deno.serve(async (req) => {
       };
       const allowedFields = [
         'id',
-        'name',
         'height',
         'age',
         'weight',
@@ -101,8 +99,6 @@ Deno.serve(async (req) => {
         ? (rows || []).map((row) => ({
             ...row,
             user_email: row.email || row.user_email,
-            name: row.name ?? row.display_name ?? null,
-            display_name: row.name ?? row.display_name ?? null,
             current_weight: row.weight ?? null,
             target_weight: row.goal_weight ?? null,
             goal: row.objective ?? null,
