@@ -23,8 +23,8 @@ Deno.serve(async (req) => {
     const normalizeProfileData = (item) => {
       if (table !== 'user_profiles' || !item) return item;
       const allowedKeys = [
-        'id', 'user_id', 'email', 'display_name', 'height', 'current_weight', 'target_weight',
-        'goal', 'activity_level', 'gender', 'age', 'body_type', 'daily_calorie_target',
+        'id', 'user_id', 'email', 'display_name', 'height', 'weight', 'goal_weight',
+        'objective', 'activity_level', 'gender', 'age', 'biotype', 'daily_calorie_target',
         'protein_target', 'carbs_target', 'fats_target', 'theme_preference', 'fitness_level',
         'dietary_restrictions', 'training_frequency', 'ai_tone_preference', 'city',
         'created_date', 'updated_date', 'created_by'
@@ -82,7 +82,14 @@ Deno.serve(async (req) => {
         }, { status: 400 });
       }
       const normalizedRows = table === 'user_profiles'
-        ? (rows || []).map((row) => ({ ...row, user_email: row.user_email || row.email }))
+        ? (rows || []).map((row) => ({
+            ...row,
+            user_email: row.user_email || row.email,
+            current_weight: row.current_weight ?? row.weight,
+            target_weight: row.target_weight ?? row.goal_weight,
+            goal: row.goal ?? row.objective,
+            body_type: row.body_type ?? row.biotype,
+          }))
         : rows;
       console.log(`[Supabase] SELECT retornou ${normalizedRows?.length || 0} registros de ${table}`);
       return Response.json({ data: normalizedRows });

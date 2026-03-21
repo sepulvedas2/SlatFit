@@ -64,7 +64,15 @@ export default function Profile({ onLogout }) {
     queryKey: ['userProfile', user?.email],
     queryFn: async () => {
       const profiles = await db.UserProfile.filter({ user_email: user.email });
-      return profiles[0] || null;
+      const profile = profiles[0] || null;
+      if (!profile) return null;
+      return {
+        ...profile,
+        current_weight: profile.current_weight ?? profile.weight,
+        target_weight: profile.target_weight ?? profile.goal_weight,
+        goal: profile.goal ?? profile.objective,
+        body_type: profile.body_type ?? profile.biotype,
+      };
     },
     enabled: !!user?.email,
   });
@@ -108,21 +116,17 @@ export default function Profile({ onLogout }) {
       if (displayName.length > 20) throw new Error('O nome público deve ter no máximo 20 caracteres.');
 
       const safeData = {
+        display_name: displayName || null,
         height: data.height ? Number(data.height) : null,
         age: data.age ? Number(data.age) : null,
-        current_weight: data.current_weight ? Number(data.current_weight) : null,
-        target_weight: data.target_weight ? Number(data.target_weight) : null,
+        weight: data.current_weight ? Number(data.current_weight) : null,
+        goal_weight: data.target_weight ? Number(data.target_weight) : null,
         gender: data.gender || null,
-        goal: data.goal || null,
-        body_type: data.body_type || null,
+        objective: data.goal || null,
+        biotype: data.body_type || null,
         activity_level: data.activity_level || null,
-        daily_calorie_target: data.daily_calorie_target ? Number(data.daily_calorie_target) : null,
-        protein_target: data.protein_target ? Number(data.protein_target) : null,
-        carbs_target: data.carbs_target ? Number(data.carbs_target) : null,
-        fats_target: data.fats_target ? Number(data.fats_target) : null,
         user_id: authUser.id,
         user_email: authUser.email,
-        display_name: displayName || null,
       };
 
       const payload = {
