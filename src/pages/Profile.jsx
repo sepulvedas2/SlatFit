@@ -84,6 +84,7 @@ export default function Profile({ onLogout }) {
       setFormData({
         user_email: user.email,
         user_id: user.id,
+        name: user.full_name || '',
         display_name: user.full_name || '',
         height: 170, current_weight: 70, target_weight: 70,
         goal: 'maintenance', activity_level: 'moderate',
@@ -104,6 +105,7 @@ export default function Profile({ onLogout }) {
 
       const allowedFields = [
         'id',
+        'name',
         'height',
         'age',
         'weight',
@@ -116,6 +118,7 @@ export default function Profile({ onLogout }) {
 
       const rawData = {
         id: authUser.id,
+        name: data.name || data.display_name,
         height: data.height,
         age: data.age,
         weight: data.current_weight,
@@ -130,6 +133,7 @@ export default function Profile({ onLogout }) {
         Object.entries(rawData).filter(([key, value]) => allowedFields.includes(key) && value !== undefined)
       );
 
+      cleanData.name = (cleanData.name || '').trim() || 'Usuário';
       cleanData.height = cleanData.height ? Number(cleanData.height) : null;
       cleanData.age = cleanData.age ? Number(cleanData.age) : null;
       cleanData.weight = cleanData.weight ? Number(cleanData.weight) : null;
@@ -214,6 +218,7 @@ export default function Profile({ onLogout }) {
       setFormData({
         user_email: user?.email,
         user_id: user?.id,
+        name: user?.full_name || '',
         display_name: user?.full_name || '',
         height: 170, current_weight: 70, target_weight: 70,
         goal: 'maintenance', activity_level: 'moderate',
@@ -379,8 +384,8 @@ export default function Profile({ onLogout }) {
 
             <div className="space-y-4 pb-40">
               <div>
-                <Label className="text-[#A0B5B2] text-xs">Nome público no ranking</Label>
-                <Input value={formData.display_name || ''} onChange={(e) => setFormData({...formData, display_name: e.target.value})} className="bg-white/10 border-white/10 text-white" placeholder="Ex: João Fit" />
+                <Label className="text-[#A0B5B2] text-xs">Como quer ser chamado</Label>
+                <Input value={formData.name || formData.display_name || ''} onChange={(e) => setFormData({...formData, name: e.target.value, display_name: e.target.value})} className="bg-white/10 border-white/10 text-white" placeholder="Ex: João Fit" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">

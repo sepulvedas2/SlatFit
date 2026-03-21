@@ -13,12 +13,12 @@ Deno.serve(async (req) => {
 
     const [{ data: pointsRows, error: pointsError }, { data: profileRows }] = await Promise.all([
       supabase.from('user_points').select('id,user_email,total_points,level').order('total_points', { ascending: false }).limit(100),
-      supabase.from('user_profiles').select('user_id,email,display_name').limit(500),
+      supabase.from('user_profiles').select('user_id,email,name,display_name').limit(500),
     ]);
 
     if (pointsError) return Response.json({ error: pointsError.message }, { status: 400 });
 
-    const profileMapByEmail = Object.fromEntries((profileRows || []).map((row) => [row.email, row.display_name || '']));
+    const profileMapByEmail = Object.fromEntries((profileRows || []).map((row) => [row.email, row.name || row.display_name || '']));
 
     const leaderboard = (pointsRows || []).map((row, index) => ({
       id: row.id,
