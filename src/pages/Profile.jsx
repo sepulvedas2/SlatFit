@@ -96,72 +96,54 @@ export default function Profile({ onLogout }) {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
-      try {
-        const authUser = await base44.auth.me();
+      const authUser = await base44.auth.me();
 
-        if (!authUser?.id) {
-          console.error('Erro de autenticação:', authUser);
-          throw new Error('User not authenticated');
-        }
-
-        const payload = {
-          id: authUser.id,
-          user_id: authUser.id,
-          display_name: (data.display_name || '').trim() || null,
-          height: data.height ? Number(data.height) : null,
-          age: data.age ? Number(data.age) : null,
-          weight: data.current_weight ? Number(data.current_weight) : null,
-          goal_weight: data.target_weight ? Number(data.target_weight) : null,
-          gender: data.gender || null,
-          objective: data.goal || null,
-          biotype: data.body_type || null,
-          activity_level: data.activity_level || null,
-        };
-
-        console.log('USER:', authUser);
-        console.log('PAYLOAD:', payload);
-
-        const saveResponse = await db.UserProfile.upsert(payload, 'id');
-        console.log('SAVE RESPONSE:', saveResponse);
-
-        const profileData = await db.UserProfile.filter({ id: authUser.id });
-        if (profileData && profileData.length > 0) {
-          const p = profileData[0];
-          return {
-            ...p,
-            current_weight: p.current_weight ?? p.weight ?? null,
-            target_weight: p.target_weight ?? p.goal_weight ?? null,
-            goal: p.goal ?? p.objective ?? null,
-            body_type: p.body_type ?? p.biotype ?? null,
-          };
-        }
-
-        throw new Error('Perfil não retornou após salvamento');
-      } catch (err) {
-        console.error('Erro inesperado no save:', err);
-        throw err;
+      if (!authUser?.id) {
+        alert('Usuário não autenticado');
+        throw new Error('Usuário não autenticado');
       }
+
+      const payload = {
+        id: authUser.id,
+        name: data.display_name || null,
+        height: data.height ? Number(data.height) : null,
+        age: data.age ? Number(data.age) : null,
+        weight: data.current_weight ? Number(data.current_weight) : null,
+        goal_weight: data.target_weight ? Number(data.target_weight) : null,
+        gender: data.gender || null,
+        objective: data.goal || null,
+        biotype: data.body_type || null,
+        activity_level: data.activity_level || null,
+      };
+
+      console.log('SALVANDO:', payload);
+
+      const res = await db.UserProfile.upsert(payload, 'id');
+      return {
+        ...res,
+        display_name: res?.name ?? payload.name,
+        current_weight: res?.weight ?? payload.weight,
+        target_weight: res?.goal_weight ?? payload.goal_weight,
+        goal: res?.objective ?? payload.objective,
+        body_type: res?.biotype ?? payload.biotype,
+      };
     },
     onSuccess: (refreshedData) => {
       setFormData((prev) => ({
         ...prev,
         ...refreshedData,
-        display_name: refreshedData.display_name ?? prev.display_name,
-        current_weight: refreshedData.current_weight ?? prev.current_weight,
-        target_weight: refreshedData.target_weight ?? prev.target_weight,
-        goal: refreshedData.goal ?? prev.goal,
-        body_type: refreshedData.body_type ?? prev.body_type,
       }));
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-      queryClient.invalidateQueries({ queryKey: ['rankingSnapshot'] });
       setEditing(false);
       setSaveError('');
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
+      alert('Salvo com sucesso');
     },
     onError: (error) => {
-      console.error('Erro Supabase:', error);
-      setSaveError(error.message || 'Erro ao salvar no banco');
+      console.error('ERRO AO SALVAR:', error);
+      setSaveError(error.message || 'Erro ao salvar');
+      alert('Erro ao salvar');
     },
   });
 
