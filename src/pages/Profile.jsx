@@ -47,12 +47,6 @@ function imcLabel(imc) {
   return "Obesidade";
 }
 
-const safeNumber = (value) => {
-  if (value === "" || value === null || value === undefined) return null;
-  const num = Number(String(value).replace(',', '.'));
-  return Number.isNaN(num) ? null : num;
-};
-
 export default function Profile({ onLogout }) {
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -103,59 +97,73 @@ export default function Profile({ onLogout }) {
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
       const authUser = await base44.auth.me();
-
       if (!authUser?.id) {
-        alert('Usuário não autenticado');
+        console.error('Usuário não autenticado');
         throw new Error('Usuário não autenticado');
       }
 
-      const payload = {
-        id: authUser.id,
-        name: data.display_name || null,
-        height: safeNumber(data.height),
-        age: safeNumber(data.age),
-        weight: safeNumber(data.current_weight),
-        goal_weight: safeNumber(data.target_weight),
+      const displayName = (data.display_name || '').trim();
+      if (displayName.length < 3) throw new Error('O nome público deve ter no mínimo 3 caracteres.');
+      if (displayName.length > 20) throw new Error('O nome público deve ter no máximo 20 caracteres.');
+
+      const safeData = {
+        height: data.height ? Number(data.height) : null,
+        age: data.age ? Number(data.age) : null,
+        current_weight: data.current_weight ? Number(data.current_weight) : null,
+        target_weight: data.target_weight ? Number(data.target_weight) : null,
         gender: data.gender || null,
-        objective: data.goal || null,
-        biotype: data.body_type || null,
+        goal: data.goal || null,
+        body_type: data.body_type || null,
         activity_level: data.activity_level || null,
+        daily_calorie_target: data.daily_calorie_target ? Number(data.daily_calorie_target) : null,
+        protein_target: data.protein_target ? Number(data.protein_target) : null,
+        carbs_target: data.carbs_target ? Number(data.carbs_target) : null,
+        fats_target: data.fats_target ? Number(data.fats_target) : null,
+        user_id: authUser.id,
+        user_email: authUser.email,
+        display_name: displayName || null,
       };
 
-      Object.keys(payload).forEach((key) => {
-        if (payload[key] === undefined) {
-          delete payload[key];
+      console.log('USER:', authUser);
+      console.log('DATA:', safeData);
+
+      try {
+        const existingProfiles = await db.UserProfile.filter({ id: authUser.id });
+        const existingProfile = existingProfiles[0] || null;
+
+        let res;
+        if (!existingProfile) {
+          res = await db.UserProfile.create({
+            id: authUser.id,
+            ...safeData,
+          });
+        } else {
+          res = await db.UserProfile.update(existingProfile.id, safeData);
         }
-      });
 
-      console.log('SALVANDO:', payload);
-
-      const res = await db.UserProfile.upsert(payload, 'id');
-      return {
-        ...res,
-        display_name: res?.name ?? payload.name,
-        current_weight: res?.weight ?? payload.weight,
-        target_weight: res?.goal_weight ?? payload.goal_weight,
-        goal: res?.objective ?? payload.objective,
-        body_type: res?.biotype ?? payload.biotype,
-      };
+        console.log('RES:', res);
+        console.log('ERROR:', null);
+        return res;
+      } catch (error) {
+        console.error('Erro completo:', error);
+        console.error('Mensagem:', error?.message);
+        console.error('Detalhes:', error?.details);
+        console.error('Hint:', error?.hint);
+        console.log('RES:', null);
+        console.log('ERROR:', error);
+        throw error;
+      }
     },
-    onSuccess: (refreshedData) => {
-      setFormData((prev) => ({
-        ...prev,
-        ...refreshedData,
-      }));
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['rankingSnapshot'] });
       setEditing(false);
       setSaveError('');
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-      alert('Salvo com sucesso');
     },
     onError: (error) => {
-      console.error('ERRO AO SALVAR:', error);
-      setSaveError(error.message || 'Erro ao salvar');
-      alert('Erro ao salvar');
+      setSaveError(error.message || 'Não foi possível salvar suas alterações.');
     },
   });
 
