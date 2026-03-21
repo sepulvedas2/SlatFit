@@ -97,67 +97,47 @@ export default function Profile({ onLogout }) {
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
       const authUser = await base44.auth.me();
-      if (!authUser) throw new Error('Sem usuário');
+      if (!authUser?.id) {
+        console.error('Usuário não autenticado');
+        throw new Error('User not authenticated');
+      }
 
-      const rawData = {
+      const payload = {
         id: authUser.id,
         user_id: authUser.id,
         display_name: (data.display_name || '').trim() || null,
-        height: data.height,
-        age: data.age,
-        weight: data.current_weight,
-        goal_weight: data.target_weight,
-        gender: data.gender,
-        objective: data.goal,
-        biotype: data.body_type,
-        activity_level: data.activity_level,
+        height: data.height ? Number(data.height) : null,
+        age: data.age ? Number(data.age) : null,
+        weight: data.current_weight ? Number(data.current_weight) : null,
+        goal_weight: data.target_weight ? Number(data.target_weight) : null,
+        gender: data.gender || null,
+        objective: data.goal || null,
+        biotype: data.body_type || null,
+        activity_level: data.activity_level || null,
       };
 
-      const allowedFields = [
-        'id',
-        'user_id',
-        'display_name',
-        'height',
-        'age',
-        'weight',
-        'goal_weight',
-        'gender',
-        'objective',
-        'biotype',
-        'activity_level'
-      ];
-
-      const cleanData = Object.fromEntries(
-        Object.entries(rawData)
-          .filter(([key]) => allowedFields.includes(key))
-          .filter(([, value]) => value !== undefined)
-      );
-
-      cleanData.height = cleanData.height ? Number(cleanData.height) : null;
-      cleanData.age = cleanData.age ? Number(cleanData.age) : null;
-      cleanData.weight = cleanData.weight ? Number(cleanData.weight) : null;
-      cleanData.goal_weight = cleanData.goal_weight ? Number(cleanData.goal_weight) : null;
-      cleanData.gender = cleanData.gender || null;
-      cleanData.objective = cleanData.objective || null;
-      cleanData.biotype = cleanData.biotype || null;
-      cleanData.activity_level = cleanData.activity_level || null;
-
       console.log('USER:', authUser);
-      console.log('DATA:', cleanData);
+      console.log('DATA:', payload);
 
-      try {
-        const res = await db.UserProfile.upsert(cleanData);
-        console.log('RES:', res);
-        console.log('ERROR:', null);
-        return res;
-      } catch (error) {
-        console.error(error);
-        console.log('RES:', null);
-        console.log('ERROR:', error);
-        throw error;
+      const res = await db.UserProfile.upsert(payload, 'id');
+      console.log('SALVO NO BANCO:', res);
+
+      const refreshedData = await db.UserProfile.get(authUser.id);
+      if (!refreshedData) {
+        throw new Error('Perfil não retornou após salvamento');
       }
+
+      return refreshedData;
     },
-    onSuccess: () => {
+    onSuccess: (refreshedData) => {
+      setFormData((prev) => ({
+        ...prev,
+        ...refreshedData,
+        current_weight: refreshedData.current_weight ?? prev.current_weight,
+        target_weight: refreshedData.target_weight ?? prev.target_weight,
+        goal: refreshedData.goal ?? prev.goal,
+        body_type: refreshedData.body_type ?? prev.body_type,
+      }));
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       queryClient.invalidateQueries({ queryKey: ['rankingSnapshot'] });
       setEditing(false);
@@ -166,6 +146,7 @@ export default function Profile({ onLogout }) {
       setTimeout(() => setSuccess(false), 3000);
     },
     onError: (error) => {
+      console.error('Erro ao salvar:', error);
       setSaveError(error.message || 'Não foi possível salvar suas alterações.');
     },
   });
