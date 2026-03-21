@@ -61,12 +61,12 @@ export default function Profile({ onLogout }) {
   }, []);
 
   const { data: profile } = useQuery({
-    queryKey: ['userProfile', user?.email],
+    queryKey: ['userProfile', user?.id],
     queryFn: async () => {
-      const profiles = await db.UserProfile.filter({ user_email: user.email });
+      const profiles = await db.UserProfile.filter({ id: user.id });
       return profiles[0] || null;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
 
@@ -79,7 +79,14 @@ export default function Profile({ onLogout }) {
 
   useEffect(() => {
     if (profile) {
-      setFormData(profile);
+      setFormData({
+        ...profile,
+        current_weight: profile.current_weight ?? profile.weight ?? null,
+        target_weight: profile.target_weight ?? profile.goal_weight ?? null,
+        goal: profile.goal ?? profile.objective ?? 'maintenance',
+        body_type: profile.body_type ?? profile.biotype ?? 'mesomorph',
+        display_name: profile.display_name ?? profile.name ?? user?.full_name ?? '',
+      });
     } else if (user) {
       setFormData({
         user_email: user.email,
@@ -104,6 +111,8 @@ export default function Profile({ onLogout }) {
 
       const allowedFields = [
         'id',
+        'name',
+        'display_name',
         'height',
         'age',
         'weight',
@@ -116,6 +125,8 @@ export default function Profile({ onLogout }) {
 
       const rawData = {
         id: authUser.id,
+        name: data.display_name,
+        display_name: data.display_name,
         height: data.height,
         age: data.age,
         weight: data.current_weight,

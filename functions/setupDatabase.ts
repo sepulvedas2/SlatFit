@@ -15,13 +15,18 @@ Deno.serve(async (req) => {
         sql: `
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS user_id text;
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS display_name text;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS name text;
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS height numeric;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS age integer;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS weight numeric;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS goal_weight numeric;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS gender text;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS objective text;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS biotype text;
+          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS activity_level text;
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS current_weight numeric;
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS target_weight numeric;
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS goal text;
-          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS activity_level text;
-          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS gender text;
-          ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS age integer;
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS body_type text;
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS daily_calorie_target numeric;
           ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS protein_target numeric;
