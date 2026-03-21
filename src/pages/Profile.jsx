@@ -47,10 +47,10 @@ function imcLabel(imc) {
   return "Obesidade";
 }
 
-const parseNumber = (value) => {
-  if (!value) return null;
-  const parsed = Number(String(value).replace(',', '.'));
-  return Number.isNaN(parsed) ? null : parsed;
+const safeNumber = (value) => {
+  if (value === "" || value === null || value === undefined) return null;
+  const num = Number(String(value).replace(',', '.'));
+  return Number.isNaN(num) ? null : num;
 };
 
 export default function Profile({ onLogout }) {
@@ -112,15 +112,21 @@ export default function Profile({ onLogout }) {
       const payload = {
         id: authUser.id,
         name: data.display_name || null,
-        height: parseNumber(data.height),
-        age: parseNumber(data.age),
-        weight: parseNumber(data.current_weight),
-        goal_weight: parseNumber(data.target_weight),
+        height: safeNumber(data.height),
+        age: safeNumber(data.age),
+        weight: safeNumber(data.current_weight),
+        goal_weight: safeNumber(data.target_weight),
         gender: data.gender || null,
         objective: data.goal || null,
         biotype: data.body_type || null,
         activity_level: data.activity_level || null,
       };
+
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] === undefined) {
+          delete payload[key];
+        }
+      });
 
       console.log('SALVANDO:', payload);
 
