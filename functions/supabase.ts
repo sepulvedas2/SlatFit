@@ -24,8 +24,6 @@ Deno.serve(async (req) => {
       if (table !== 'user_profiles' || !item) return item;
       const rawData = {
         id: item.id,
-        name: item.name ?? item.display_name,
-        display_name: item.display_name ?? item.name,
         height: item.height,
         age: item.age,
         weight: item.weight ?? item.current_weight,
@@ -37,8 +35,6 @@ Deno.serve(async (req) => {
       };
       const allowedFields = [
         'id',
-        'name',
-        'display_name',
         'height',
         'age',
         'weight',
@@ -103,12 +99,10 @@ Deno.serve(async (req) => {
         ? (rows || []).map((row) => ({
             ...row,
             user_email: row.email || row.user_email,
-            current_weight: row.weight ?? row.current_weight ?? null,
-            target_weight: row.goal_weight ?? row.target_weight ?? null,
-            goal: row.objective ?? row.goal ?? null,
-            body_type: row.biotype ?? row.body_type ?? null,
-            display_name: row.display_name ?? row.name ?? null,
-            name: row.name ?? row.display_name ?? null,
+            current_weight: row.weight ?? null,
+            target_weight: row.goal_weight ?? null,
+            goal: row.objective ?? null,
+            body_type: row.biotype ?? null,
           }))
         : rows;
       console.log(`[Supabase] SELECT retornou ${normalizedRows?.length || 0} registros de ${table}`);
