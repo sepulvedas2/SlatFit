@@ -96,10 +96,11 @@ export default function Profile({ onLogout }) {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
-      const authUser = await base44.auth.me();
-      if (!authUser?.id) {
-        console.error('Usuário não autenticado');
-        throw new Error('Usuário não autenticado');
+      const authUser = await base44.auth.me().catch(() => null);
+      if (!authUser || !authUser.id) {
+        console.error('Usuário não autenticado:', authUser);
+        alert('Erro: usuário não identificado');
+        return null;
       }
 
       const displayName = (data.display_name || '').trim();
@@ -124,33 +125,28 @@ export default function Profile({ onLogout }) {
         display_name: displayName || null,
       };
 
+      const payload = {
+        id: authUser.id,
+        ...safeData,
+      };
+
       console.log('USER:', authUser);
-      console.log('DATA:', safeData);
+      console.log('PAYLOAD:', payload);
 
       try {
         const existingProfiles = await db.UserProfile.filter({ id: authUser.id });
         const existingProfile = existingProfiles[0] || null;
+        console.log('EXISTING_PROFILE:', existingProfile);
 
-        let res;
-        if (!existingProfile) {
-          res = await db.UserProfile.create({
-            id: authUser.id,
-            ...safeData,
-          });
-        } else {
-          res = await db.UserProfile.update(existingProfile.id, safeData);
-        }
-
-        console.log('RES:', res);
-        console.log('ERROR:', null);
+        const res = await db.UserProfile.upsert(payload, 'id');
+        console.log('SUPABASE RESPONSE:', res);
+        console.log('SUPABASE ERROR:', null);
         return res;
       } catch (error) {
-        console.error('Erro completo:', error);
-        console.error('Mensagem:', error?.message);
-        console.error('Detalhes:', error?.details);
-        console.error('Hint:', error?.hint);
-        console.log('RES:', null);
-        console.log('ERROR:', error);
+        console.error('Erro Supabase:', error);
+        console.log('SUPABASE RESPONSE:', null);
+        console.log('SUPABASE ERROR:', error);
+        alert(error?.message || 'Erro ao salvar perfil');
         throw error;
       }
     },
