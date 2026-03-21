@@ -102,30 +102,45 @@ export default function Profile({ onLogout }) {
         throw new Error('Usuário não autenticado');
       }
 
-      const displayName = (data.display_name || '').trim();
-      if (displayName.length < 3) throw new Error('O nome público deve ter no mínimo 3 caracteres.');
-      if (displayName.length > 20) throw new Error('O nome público deve ter no máximo 20 caracteres.');
+      const allowedFields = [
+        'id',
+        'height',
+        'age',
+        'weight',
+        'goal_weight',
+        'gender',
+        'objective',
+        'biotype',
+        'activity_level'
+      ];
 
-      const safeData = {
-        height: data.height ? Number(data.height) : null,
-        age: data.age ? Number(data.age) : null,
-        current_weight: data.current_weight ? Number(data.current_weight) : null,
-        target_weight: data.target_weight ? Number(data.target_weight) : null,
-        gender: data.gender || null,
-        goal: data.goal || null,
-        body_type: data.body_type || null,
-        activity_level: data.activity_level || null,
-        daily_calorie_target: data.daily_calorie_target ? Number(data.daily_calorie_target) : null,
-        protein_target: data.protein_target ? Number(data.protein_target) : null,
-        carbs_target: data.carbs_target ? Number(data.carbs_target) : null,
-        fats_target: data.fats_target ? Number(data.fats_target) : null,
-        user_id: authUser.id,
-        user_email: authUser.email,
-        display_name: displayName || null,
+      const rawData = {
+        id: authUser.id,
+        height: data.height,
+        age: data.age,
+        weight: data.current_weight,
+        goal_weight: data.target_weight,
+        gender: data.gender,
+        objective: data.goal,
+        biotype: data.body_type,
+        activity_level: data.activity_level,
       };
 
+      const cleanData = Object.fromEntries(
+        Object.entries(rawData).filter(([key, value]) => allowedFields.includes(key) && value !== undefined)
+      );
+
+      cleanData.height = cleanData.height ? Number(cleanData.height) : null;
+      cleanData.age = cleanData.age ? Number(cleanData.age) : null;
+      cleanData.weight = cleanData.weight ? Number(cleanData.weight) : null;
+      cleanData.goal_weight = cleanData.goal_weight ? Number(cleanData.goal_weight) : null;
+      cleanData.gender = cleanData.gender || null;
+      cleanData.objective = cleanData.objective || null;
+      cleanData.biotype = cleanData.biotype || null;
+      cleanData.activity_level = cleanData.activity_level || null;
+
       console.log('USER:', authUser);
-      console.log('DATA:', safeData);
+      console.log('DATA:', cleanData);
 
       try {
         const existingProfiles = await db.UserProfile.filter({ id: authUser.id });
@@ -133,12 +148,9 @@ export default function Profile({ onLogout }) {
 
         let res;
         if (!existingProfile) {
-          res = await db.UserProfile.create({
-            id: authUser.id,
-            ...safeData,
-          });
+          res = await db.UserProfile.create(cleanData);
         } else {
-          res = await db.UserProfile.update(existingProfile.id, safeData);
+          res = await db.UserProfile.update(existingProfile.id, cleanData);
         }
 
         console.log('RES:', res);

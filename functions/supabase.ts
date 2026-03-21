@@ -22,21 +22,35 @@ Deno.serve(async (req) => {
     const normalizeOrderColumn = (col) => table === 'user_profiles' && col === 'created_date' ? 'created_at' : col;
     const normalizeProfileData = (item) => {
       if (table !== 'user_profiles' || !item) return item;
-      const allowedKeys = [
-        'id', 'user_id', 'email', 'display_name', 'height', 'current_weight', 'target_weight',
-        'goal', 'activity_level', 'gender', 'age', 'body_type', 'daily_calorie_target',
-        'protein_target', 'carbs_target', 'fats_target', 'theme_preference', 'fitness_level',
-        'dietary_restrictions', 'training_frequency', 'ai_tone_preference', 'city',
-        'created_date', 'updated_date', 'created_by'
+      const rawData = {
+        id: item.id,
+        height: item.height,
+        age: item.age,
+        weight: item.weight ?? item.current_weight,
+        goal_weight: item.goal_weight ?? item.target_weight,
+        gender: item.gender,
+        objective: item.objective ?? item.goal,
+        biotype: item.biotype ?? item.body_type,
+        activity_level: item.activity_level,
+      };
+      const allowedFields = [
+        'id',
+        'height',
+        'age',
+        'weight',
+        'goal_weight',
+        'gender',
+        'objective',
+        'biotype',
+        'activity_level'
       ];
-      const normalized = {};
-      for (const key of allowedKeys) {
-        if (item[key] !== undefined) normalized[key] = item[key];
-      }
-      if (item.user_email !== undefined) normalized.email = item.user_email;
-      Object.keys(normalized).forEach((key) => {
-        if (normalized[key] === undefined) normalized[key] = null;
-      });
+      const normalized = Object.fromEntries(
+        Object.entries(rawData).filter(([key, value]) => allowedFields.includes(key) && value !== undefined)
+      );
+      if ('height' in normalized) normalized.height = normalized.height ? Number(normalized.height) : null;
+      if ('age' in normalized) normalized.age = normalized.age ? Number(normalized.age) : null;
+      if ('weight' in normalized) normalized.weight = normalized.weight ? Number(normalized.weight) : null;
+      if ('goal_weight' in normalized) normalized.goal_weight = normalized.goal_weight ? Number(normalized.goal_weight) : null;
       return normalized;
     };
 
@@ -82,7 +96,14 @@ Deno.serve(async (req) => {
         }, { status: 400 });
       }
       const normalizedRows = table === 'user_profiles'
-        ? (rows || []).map((row) => ({ ...row, user_email: row.user_email || row.email }))
+        ? (rows || []).map((row) => ({
+            ...row,
+            user_email: row.email || row.user_email,
+            current_weight: row.weight ?? null,
+            target_weight: row.goal_weight ?? null,
+            goal: row.objective ?? null,
+            body_type: row.biotype ?? null,
+          }))
         : rows;
       console.log(`[Supabase] SELECT retornou ${normalizedRows?.length || 0} registros de ${table}`);
       return Response.json({ data: normalizedRows });
