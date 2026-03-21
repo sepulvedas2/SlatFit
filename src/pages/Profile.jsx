@@ -47,6 +47,12 @@ function imcLabel(imc) {
   return "Obesidade";
 }
 
+const parseNumber = (value) => {
+  if (!value) return null;
+  const parsed = Number(String(value).replace(',', '.'));
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
 export default function Profile({ onLogout }) {
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
