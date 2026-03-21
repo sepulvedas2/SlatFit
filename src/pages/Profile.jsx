@@ -97,25 +97,12 @@ export default function Profile({ onLogout }) {
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
       const authUser = await base44.auth.me();
-      if (!authUser?.id) {
-        console.error('Usuário não autenticado');
-        throw new Error('Usuário não autenticado');
-      }
-
-      const allowedFields = [
-        'id',
-        'height',
-        'age',
-        'weight',
-        'goal_weight',
-        'gender',
-        'objective',
-        'biotype',
-        'activity_level'
-      ];
+      if (!authUser) throw new Error('Sem usuário');
 
       const rawData = {
         id: authUser.id,
+        user_id: authUser.id,
+        display_name: (data.display_name || '').trim() || null,
         height: data.height,
         age: data.age,
         weight: data.current_weight,
@@ -126,8 +113,24 @@ export default function Profile({ onLogout }) {
         activity_level: data.activity_level,
       };
 
+      const allowedFields = [
+        'id',
+        'user_id',
+        'display_name',
+        'height',
+        'age',
+        'weight',
+        'goal_weight',
+        'gender',
+        'objective',
+        'biotype',
+        'activity_level'
+      ];
+
       const cleanData = Object.fromEntries(
-        Object.entries(rawData).filter(([key, value]) => allowedFields.includes(key) && value !== undefined)
+        Object.entries(rawData)
+          .filter(([key]) => allowedFields.includes(key))
+          .filter(([, value]) => value !== undefined)
       );
 
       cleanData.height = cleanData.height ? Number(cleanData.height) : null;
@@ -143,24 +146,12 @@ export default function Profile({ onLogout }) {
       console.log('DATA:', cleanData);
 
       try {
-        const existingProfiles = await db.UserProfile.filter({ id: authUser.id });
-        const existingProfile = existingProfiles[0] || null;
-
-        let res;
-        if (!existingProfile) {
-          res = await db.UserProfile.create(cleanData);
-        } else {
-          res = await db.UserProfile.update(existingProfile.id, cleanData);
-        }
-
+        const res = await db.UserProfile.upsert(cleanData);
         console.log('RES:', res);
         console.log('ERROR:', null);
         return res;
       } catch (error) {
-        console.error('Erro completo:', error);
-        console.error('Mensagem:', error?.message);
-        console.error('Detalhes:', error?.details);
-        console.error('Hint:', error?.hint);
+        console.error(error);
         console.log('RES:', null);
         console.log('ERROR:', error);
         throw error;

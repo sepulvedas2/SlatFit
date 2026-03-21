@@ -35,6 +35,8 @@ Deno.serve(async (req) => {
       };
       const allowedFields = [
         'id',
+        'user_id',
+        'display_name',
         'height',
         'age',
         'weight',
