@@ -1,48 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Dumbbell, UtensilsCrossed, User, ScanLine, CheckSquare } from "lucide-react";
 import { ThemeProvider, useTheme } from "@/components/ThemeContext";
-import "@/components/auth"; // inicializa override base44.auth.me
-import { getStoredUser, clearUser } from "@/components/auth";
-import LoginScreen from "@/components/auth/LoginScreen";
+import { useAuth } from "@/lib/AuthContext";
 
 function AppLayout({ children, currentPageName }) {
   const location = useLocation();
   const { isDark } = useTheme();
-  const [authUser, setAuthUser] = useState(undefined); // undefined = loading
-
-  useEffect(() => {
-    const user = getStoredUser();
-    setAuthUser(user || null);
-  }, []);
-
-  const handleLogin = (user) => {
-    setAuthUser(user);
-  };
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    clearUser();
-    setAuthUser(null);
+    logout();
   };
-
-  // Loading
-  if (authUser === undefined) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0B3936" }}>
-        <div className="w-10 h-10 border-2 border-[#CEF17B] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  // Não autenticado
-  if (authUser === null) {
-    return (
-      <div style={{ backgroundColor: '#0F1C1B', minHeight: '100vh' }}>
-        <LoginScreen onLogin={handleLogin} />
-      </div>
-    );
-  }
 
   const navItems = [
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },

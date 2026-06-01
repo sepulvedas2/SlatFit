@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
-import { saveUser } from "@/components/auth";
+import { useAuth } from "@/lib/AuthContext";
 import { Loader2, Eye, EyeOff, Dumbbell } from "lucide-react";
 
 export default function LoginScreen({ onLogin }) {
+  const { login, register } = useAuth();
   const [tab, setTab] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,17 +16,13 @@ export default function LoginScreen({ onLogin }) {
     setLoading(true);
     setError('');
     try {
-      const payload = tab === 'login'
-        ? { action: 'login', email, password }
-        : { action: 'register', email, password, full_name: email.split('@')[0] };
+      const user = tab === 'login'
+        ? await login(email, password)
+        : await register(email, password, email.split('@')[0]);
 
-      const resp = await base44.functions.invoke('supabaseAuth', payload);
-      if (resp.data?.error) throw new Error(resp.data.error);
-
-      saveUser(resp.data.user, resp.data.token);
-      onLogin(resp.data.user);
+      if (onLogin) onLogin(user);
     } catch (err) {
-      const errorMsg = err.response?.data?.error || err.message || 'Erro ao autenticar. Verifique suas credenciais.';
+      const errorMsg = err.data?.error || err.message || 'Erro ao autenticar. Verifique suas credenciais.';
       setError(errorMsg);
     } finally {
       setLoading(false);

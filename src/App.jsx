@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import LoginScreen from '@/components/auth/LoginScreen';
 import Layout from './Layout';
 
 // Import pages
@@ -27,26 +27,24 @@ import AdminSetup from './pages/AdminSetup';
 setupIframeMessaging();
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  // Show loading spinner while validating the stored session
+  if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: '#0B3936' }}>
+        <div className="w-10 h-10 border-2 border-[#CEF17B] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
+  // Single source of truth: no valid session -> show the login screen
+  if (!isAuthenticated) {
+    return (
+      <div style={{ backgroundColor: '#0F1C1B', minHeight: '100vh' }}>
+        <LoginScreen />
+      </div>
+    );
   }
 
   // Render the main app
