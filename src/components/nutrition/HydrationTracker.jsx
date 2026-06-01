@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export default function HydrationTracker({ userEmail, today }) {
+export default function HydrationTracker({ userId, today }) {
   const queryClient = useQueryClient();
   const [customAmount, setCustomAmount] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -23,29 +23,29 @@ export default function HydrationTracker({ userEmail, today }) {
   const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
 
   const { data: nutritionData } = useQuery({
-    queryKey: ['nutritionData', userEmail, today],
+    queryKey: ['nutritionData', userId, today],
     queryFn: async () => {
-      if (!userEmail) return null;
+      if (!userId) return null;
       const data = await db.NutritionData.filter({
-        user_email: userEmail,
+        user_id: userId,
         log_date: today
       });
       return data[0] || null;
     },
-    enabled: !!userEmail && !!today,
+    enabled: !!userId && !!today,
   });
 
   const { data: yesterdayData } = useQuery({
-    queryKey: ['nutritionData', userEmail, yesterday],
+    queryKey: ['nutritionData', userId, yesterday],
     queryFn: async () => {
-      if (!userEmail) return null;
+      if (!userId) return null;
       const data = await db.NutritionData.filter({
-        user_email: userEmail,
+        user_id: userId,
         log_date: yesterday
       });
       return data[0] || null;
     },
-    enabled: !!userEmail,
+    enabled: !!userId,
   });
 
   const waterGoal = nutritionData?.water_goal_ml || 2000;
@@ -63,7 +63,7 @@ export default function HydrationTracker({ userEmail, today }) {
 
   const updateHydrationMutation = useMutation({
     mutationFn: async (amount) => {
-      if (!userEmail) throw new Error("User email is required");
+      if (!userId) throw new Error("User id is required");
       
       const currentIntake = nutritionData?.water_intake_ml || 0;
       const newIntake = currentIntake + amount;
@@ -76,7 +76,7 @@ export default function HydrationTracker({ userEmail, today }) {
         });
       } else {
         return db.NutritionData.create({
-          user_email: userEmail,
+          user_id: userId,
           log_date: today,
           water_intake_ml: newIntake,
           water_goal_ml: waterGoal,
@@ -93,7 +93,7 @@ export default function HydrationTracker({ userEmail, today }) {
 
   const updateGoalMutation = useMutation({
     mutationFn: async (newGoal) => {
-      if (!userEmail) throw new Error("User email is required");
+      if (!userId) throw new Error("User id is required");
       
       if (nutritionData) {
         return db.NutritionData.update(nutritionData.id, {
@@ -101,7 +101,7 @@ export default function HydrationTracker({ userEmail, today }) {
         });
       } else {
         return db.NutritionData.create({
-          user_email: userEmail,
+          user_id: userId,
           log_date: today,
           water_goal_ml: newGoal,
           water_intake_ml: 0
@@ -129,7 +129,7 @@ export default function HydrationTracker({ userEmail, today }) {
     }
   };
 
-  if (!userEmail) {
+  if (!userId) {
     return (
       <Card className="glass-effect p-6 border-[#CEF17B]/20">
         <p className="text-white/60 text-center">Carregando...</p>

@@ -7,41 +7,41 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Check } from "lucide-react";
 import { format, subDays } from "date-fns";
 
-export default function RoutineConsistency({ userEmail }) {
+export default function RoutineConsistency({ userId }) {
   const queryClient = useQueryClient();
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data: nutritionData } = useQuery({
-    queryKey: ['nutritionData', userEmail, today],
+    queryKey: ['nutritionData', userId, today],
     queryFn: async () => {
-      if (!userEmail) return null;
+      if (!userId) return null;
       const data = await base44.entities.NutritionData.filter({
-        user_email: userEmail,
+        user_id: userId,
         log_date: today
       });
       return data[0] || null;
     },
-    enabled: !!userEmail,
+    enabled: !!userId,
   });
 
   // Get last 7 days data
   const { data: weekData } = useQuery({
-    queryKey: ['weekNutritionData', userEmail],
+    queryKey: ['weekNutritionData', userId],
     queryFn: async () => {
-      if (!userEmail) return [];
+      if (!userId) return [];
       const sevenDaysAgo = format(subDays(new Date(), 7), 'yyyy-MM-dd');
       const data = await base44.entities.NutritionData.filter({
-        user_email: userEmail
+        user_id: userId
       });
       return data.filter(d => d.log_date >= sevenDaysAgo);
     },
-    enabled: !!userEmail,
+    enabled: !!userId,
     initialData: [],
   });
 
   const updateRoutineMutation = useMutation({
     mutationFn: async (updates) => {
-      if (!userEmail) throw new Error("User email is required");
+      if (!userId) throw new Error("User id is required");
       
       if (nutritionData) {
         const score = calculateScore({...nutritionData, ...updates});
@@ -52,7 +52,7 @@ export default function RoutineConsistency({ userEmail }) {
       } else {
         const score = calculateScore(updates);
         return base44.entities.NutritionData.create({
-          user_email: userEmail,
+          user_id: userId,
           log_date: today,
           ...updates,
           consistency_score: score
@@ -75,7 +75,7 @@ export default function RoutineConsistency({ userEmail }) {
     return score;
   };
 
-  if (!userEmail) {
+  if (!userId) {
     return (
       <Card className="glass-effect p-6 border-[#CEF17B]/20">
         <p className="text-white/60 text-center">Carregando...</p>

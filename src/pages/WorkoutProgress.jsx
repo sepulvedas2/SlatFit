@@ -31,17 +31,17 @@ export default function WorkoutProgress() {
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
 
   const { data: dailyWorkouts = [] } = useQuery({
-    queryKey: ['dailyWorkouts', user?.email],
-    queryFn: () => db.DailyWorkout.filter({ user_email: user.email }),
-    enabled: !!user?.email,
+    queryKey: ['dailyWorkouts', user?.id],
+    queryFn: () => db.DailyWorkout.filter({ user_id: user.id }),
+    enabled: !!user?.id,
     initialData: [],
   });
 
   // Fetch workout logs for detailed stats
   const { data: workoutLogs = [] } = useQuery({
-    queryKey: ['workoutLogs', user?.email],
-    queryFn: () => db.WorkoutLog.filter({ user_email: user.email }),
-    enabled: !!user?.email,
+    queryKey: ['workoutLogs', user?.id],
+    queryFn: () => db.WorkoutLog.filter({ user_id: user.id }),
+    enabled: !!user?.id,
     initialData: [],
   });
 

@@ -4,31 +4,31 @@ import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Zap, Smile, Meh, Frown, Coffee } from "lucide-react";
 
-export default function EnergyMoodLog({ userEmail, today }) {
+export default function EnergyMoodLog({ userId, today }) {
   const queryClient = useQueryClient();
 
   const { data: nutritionData } = useQuery({
-    queryKey: ['nutritionData', userEmail, today],
+    queryKey: ['nutritionData', userId, today],
     queryFn: async () => {
-      if (!userEmail) return null;
+      if (!userId) return null;
       const data = await base44.entities.NutritionData.filter({
-        user_email: userEmail,
+        user_id: userId,
         log_date: today
       });
       return data[0] || null;
     },
-    enabled: !!userEmail && !!today,
+    enabled: !!userId && !!today,
   });
 
   const updateMutation = useMutation({
     mutationFn: async (updates) => {
-      if (!userEmail) throw new Error("User email is required");
+      if (!userId) throw new Error("User id is required");
       
       if (nutritionData) {
         return base44.entities.NutritionData.update(nutritionData.id, updates);
       } else {
         return base44.entities.NutritionData.create({
-          user_email: userEmail,
+          user_id: userId,
           log_date: today,
           ...updates
         });
@@ -39,7 +39,7 @@ export default function EnergyMoodLog({ userEmail, today }) {
     },
   });
 
-  if (!userEmail) {
+  if (!userId) {
     return (
       <Card className="glass-effect p-6 border-[#CEF17B]/20">
         <p className="text-white/60 text-center">Carregando...</p>

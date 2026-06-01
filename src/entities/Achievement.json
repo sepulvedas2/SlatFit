@@ -2,9 +2,9 @@
   "name": "Achievement",
   "type": "object",
   "properties": {
-    "user_email": {
+    "user_id": {
       "type": "string",
-      "description": "Email do usu\u00e1rio"
+      "description": "ID do usuário autenticado"
     },
     "achievement_type": {
       "type": "string",
@@ -29,15 +29,15 @@
     },
     "title": {
       "type": "string",
-      "description": "T\u00edtulo da conquista"
+      "description": "Título da conquista"
     },
     "description": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o"
+      "description": "Descrição"
     }
   },
   "required": [
-    "user_email",
+    "user_id",
     "achievement_type"
   ]
 }

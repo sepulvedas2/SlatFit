@@ -121,17 +121,17 @@ export default function Dashboard() {
   }, []);
 
   const { data: profile } = useQuery({
-    queryKey: ['userProfile', user?.email],
+    queryKey: ['userProfile', user?.id],
     queryFn: async () => {
       try {
-        const profiles = await db.UserProfile.filter({ user_email: user.email });
+        const profiles = await db.UserProfile.filter({ id: user.id });
         return profiles[0] || null;
       } catch (error) {
         console.error('[Dashboard] Erro ao buscar perfil:', error);
         return null;
       }
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });
@@ -139,51 +139,51 @@ export default function Dashboard() {
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data: todayFoods = [] } = useQuery({
-    queryKey: ['todayFoods', user?.email, today],
-    queryFn: () => db.FoodLog.filter({ user_email: user.email, log_date: today }),
-    enabled: !!user?.email && !!profile,
+    queryKey: ['todayFoods', user?.id, today],
+    queryFn: () => db.FoodLog.filter({ user_id: user.id, log_date: today }),
+    enabled: !!user?.id && !!profile,
     initialData: [],
     staleTime: 2 * 60 * 1000,
   });
 
   const { data: todayWorkouts = [] } = useQuery({
-    queryKey: ['todayWorkouts', user?.email, today],
-    queryFn: () => db.WorkoutLog.filter({ user_email: user.email, completed_date: today }),
-    enabled: !!user?.email && !!profile,
+    queryKey: ['todayWorkouts', user?.id, today],
+    queryFn: () => db.WorkoutLog.filter({ user_id: user.id, completed_date: today }),
+    enabled: !!user?.id && !!profile,
     initialData: [],
     staleTime: 2 * 60 * 1000,
   });
 
   const { data: nutritionData } = useQuery({
-    queryKey: ['nutritionData', user?.email, today],
+    queryKey: ['nutritionData', user?.id, today],
     queryFn: async () => {
-      const data = await db.NutritionData.filter({ user_email: user.email, log_date: today });
+      const data = await db.NutritionData.filter({ user_id: user.id, log_date: today });
       return data[0] || null;
     },
-    enabled: !!user?.email && !!profile,
+    enabled: !!user?.id && !!profile,
     staleTime: 2 * 60 * 1000,
   });
 
   // Fetch all daily workouts to determine next workout
   const { data: allDailyWorkouts = [] } = useQuery({
-    queryKey: ['allDailyWorkouts', user?.email],
-    queryFn: () => db.DailyWorkout.filter({ user_email: user.email }),
-    enabled: !!user?.email && !!profile,
+    queryKey: ['allDailyWorkouts', user?.id],
+    queryFn: () => db.DailyWorkout.filter({ user_id: user.id }),
+    enabled: !!user?.id && !!profile,
     initialData: [],
     staleTime: 2 * 60 * 1000,
   });
 
   const { data: userProgress } = useQuery({
-    queryKey: ['userProgress', user?.email],
+    queryKey: ['userProgress', user?.id],
     queryFn: async () => {
       try {
-        const list = await db.UserProgress.filter({ user_email: user.email });
+        const list = await db.UserProgress.filter({ user_id: user.id });
         if (list[0]) return list[0];
       } catch (error) {
         console.error('[Dashboard] user_progress indisponível, usando user_points:', error);
       }
 
-      const fallback = await db.UserPoints.filter({ user_email: user.email });
+      const fallback = await db.UserPoints.filter({ user_id: user.id });
       if (!fallback[0]) return null;
 
       return {
@@ -195,7 +195,7 @@ export default function Dashboard() {
         streak_dias: fallback[0].daily_streak || 0,
       };
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     staleTime: 2 * 60 * 1000,
   });
 
@@ -204,9 +204,9 @@ export default function Dashboard() {
       console.log('[Dashboard] Salvando meta semanal:', goal);
       if (userProgress?.id) {
         return db.UserProgress.update(userProgress.id, { weekly_goal: goal });
-      } else if (user?.email) {
+      } else if (user?.id) {
         return db.UserProgress.create({
-          user_email: user.email,
+          user_id: user.id,
           total_xp: 0,
           nivel: 1,
           xp_atual: 0,

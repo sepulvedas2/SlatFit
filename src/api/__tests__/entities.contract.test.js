@@ -34,12 +34,12 @@ describe('entities / db contract over the supabase function', () => {
   it('filter() applies filter, default descending sort and limit 500', async () => {
     global.fetch = vi.fn(async () => jsonResponse({ data: [] }));
 
-    await entities.FoodLog.filter({ user_email: 'a@b.c' });
+    await entities.FoodLog.filter({ user_id: 'user-123' });
 
     expect(lastSupabaseBody()).toEqual({
       action: 'select',
       table: 'food_logs',
-      query: { filter: { user_email: 'a@b.c' }, limit: 500, order: { column: 'created_date', ascending: false } },
+      query: { filter: { user_id: 'user-123' }, limit: 500, order: { column: 'created_date', ascending: false } },
     });
   });
 
@@ -90,13 +90,13 @@ describe('entities / db contract over the supabase function', () => {
   it('upsert() passes onConflict and returns the first row', async () => {
     global.fetch = vi.fn(async () => jsonResponse({ data: [{ id: '7' }] }));
 
-    await entities.Workout.upsert({ user_email: 'a@b.c' }, 'user_email');
+    await entities.Workout.upsert({ user_id: 'user-123' }, 'user_id');
 
     expect(lastSupabaseBody()).toEqual({
       action: 'upsert',
       table: 'workouts',
-      data: { user_email: 'a@b.c' },
-      query: { onConflict: 'user_email' },
+      data: { user_id: 'user-123' },
+      query: { onConflict: 'user_id' },
     });
   });
 

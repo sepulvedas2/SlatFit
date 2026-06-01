@@ -45,7 +45,7 @@ export default function IAGOCoach({
     
     // Detectar inatividade
     const lastWorkouts = await base44.entities.WorkoutLog.filter({ 
-      user_email: user.email 
+      user_id: user.id 
     });
     const lastWorkout = lastWorkouts[0];
     const daysSinceLastWorkout = lastWorkout 
@@ -54,7 +54,7 @@ export default function IAGOCoach({
 
     // Detectar padrão de check-ins
     const recentCheckIns = await base44.entities.DailyCheckIn.filter({
-      user_email: user.email
+      user_id: user.id
     });
     const last7DaysCheckIns = recentCheckIns.slice(0, 7);
 

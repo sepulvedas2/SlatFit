@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
       .from('user_challenges')
       .select('*')
       .eq('id', userChallengeId)
-      .eq('user_email', user.email)
+      .eq('user_id', user.id)
       .single();
 
     if (userChallengeError || !userChallenge) {
@@ -79,10 +79,10 @@ Deno.serve(async (req) => {
     await supabase
       .from('user_points')
       .upsert({
-        user_email: user.email,
+        user_id: user.id,
         daily_streak: nextStreak,
         longest_streak: nextStreak,
-      }, { onConflict: 'user_email' });
+      }, { onConflict: 'user_id' });
 
     await base44.functions.invoke('addXP', {
       amount: xpGain,
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     const { data: refreshedPoints } = await supabase
       .from('user_points')
       .select('*')
-      .eq('user_email', user.email)
+      .eq('user_id', user.id)
       .limit(1);
 
     const finalPoints = refreshedPoints?.[0] || null;

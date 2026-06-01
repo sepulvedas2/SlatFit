@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     const { error: foodLogError } = await supabase
       .from('food_logs')
       .insert({
-        user_email: user.email,
+        user_id: user.id,
         food_name,
         meal_type,
         calories: nutrition?.calories || 0,

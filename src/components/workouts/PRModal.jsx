@@ -13,7 +13,7 @@ function calc1RM(weight, reps) {
   return Math.round(weight * (1 + reps / 30));
 }
 
-export default function PRModal({ isOpen, onClose, exercise, userEmail }) {
+export default function PRModal({ isOpen, onClose, exercise, userId }) {
   const [formData, setFormData] = useState({
     peso_kg: "",
     repeticoes: "",
@@ -34,16 +34,16 @@ export default function PRModal({ isOpen, onClose, exercise, userEmail }) {
   }, [isOpen]);
 
   const { data: prHistory = [] } = useQuery({
-    queryKey: ['prRecords', exercise?.id, userEmail],
-    queryFn: () => db.PRRecord.filter({ user_email: userEmail, exercise_id: exercise.id }, '-data_pr', 5),
-    enabled: !!exercise?.id && !!userEmail && isOpen,
+    queryKey: ['prRecords', exercise?.id, userId],
+    queryFn: () => db.PRRecord.filter({ user_id: userId, exercise_id: exercise.id }, '-data_pr', 5),
+    enabled: !!exercise?.id && !!userId && isOpen,
   });
 
   const lastPR = prHistory[0] || null;
 
   const savePRMutation = useMutation({
     mutationFn: async (data) => db.PRRecord.create({
-      user_email: userEmail,
+      user_id: userId,
       exercise_id: exercise.id,
       exercise_name: exercise.name,
       ...data,

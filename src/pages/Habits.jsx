@@ -73,37 +73,36 @@ export default function Habits() {
 
 
   const { data: habits = [] } = useQuery({
-    queryKey: ["habits", user?.email],
+    queryKey: ["habits", user?.id],
     queryFn: async () => {
       try {
-        return await db.Habit.filter({ user_email: user.email, is_active: true });
+        return await db.Habit.filter({ user_id: user.id, is_active: true });
       } catch (error) {
         console.error('[Habits] Erro ao buscar hábitos:', error);
         return [];
       }
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     initialData: [],
   });
 
   const { data: habitLogs = [] } = useQuery({
-    queryKey: ["habitLogs", user?.email],
+    queryKey: ["habitLogs", user?.id],
     queryFn: async () => {
       try {
-        return await db.HabitLog.filter({ user_email: user.email });
+        return await db.HabitLog.filter({ user_id: user.id });
       } catch (error) {
         console.error('[Habits] Erro ao buscar logs:', error);
         return [];
       }
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     initialData: [],
   });
 
   const createHabitMutation = useMutation({
     mutationFn: async (form) => {
       await db.Habit.create({
-        user_email: user.email,
         user_id: user.id,
         name: form.name,
         color: form.color,
@@ -178,7 +177,6 @@ export default function Habits() {
       }
 
       await db.HabitLog.create({
-        user_email: user.email,
         user_id: user.id,
         habit_id: habit.id,
         habit_name: habit.name,

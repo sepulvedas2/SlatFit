@@ -23,7 +23,7 @@ const inputStyle = {
   outline: "none",
 };
 
-export default function CustomWorkoutModal({ isOpen, onClose, userEmail, editingWorkout = null, existingExercises = [] }) {
+export default function CustomWorkoutModal({ isOpen, onClose, userId, editingWorkout = null, existingExercises = [] }) {
   const [workoutData, setWorkoutData] = useState({ nome_treino: "", dia_semana: "segunda", observacoes: "" });
   const [exercises, setExercises] = useState([{ exercise_name: "", series: "3", repeticoes: "10", observacoes: "" }]);
   const [activeInput, setActiveInput] = useState(null);
@@ -47,7 +47,7 @@ export default function CustomWorkoutModal({ isOpen, onClose, userEmail, editing
         workout = await db.CustomWorkout.update(editingWorkout.id, data.workout);
         await Promise.all(existingExercises.map(ex => db.CustomWorkoutExercise.delete(ex.id)));
       } else {
-        workout = await db.CustomWorkout.create({ user_email: userEmail, ...data.workout });
+        workout = await db.CustomWorkout.create({ user_id: userId, ...data.workout });
       }
       await Promise.all(data.exercises.map((ex, idx) =>
         db.CustomWorkoutExercise.create({

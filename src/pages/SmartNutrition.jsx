@@ -23,21 +23,21 @@ export default function SmartNutrition() {
   }, []);
 
   const { data: nutritionData } = useQuery({
-    queryKey: ['nutritionData', user?.email, today],
+    queryKey: ['nutritionData', user?.id, today],
     queryFn: async () => {
-      const data = await db.NutritionData.filter({ user_email: user.email, log_date: today });
+      const data = await db.NutritionData.filter({ user_id: user.id, log_date: today });
       return data[0] || null;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
   const { data: userProfile } = useQuery({
-    queryKey: ['userProfile', user?.email],
+    queryKey: ['userProfile', user?.id],
     queryFn: async () => {
-      const profiles = await db.UserProfile.filter({ user_email: user.email });
+      const profiles = await db.UserProfile.filter({ id: user.id });
       return profiles[0] || null;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
   if (loading) {
@@ -96,7 +96,7 @@ export default function SmartNutrition() {
 
         {/* ── 3. HIDRATAÇÃO ── */}
         <WaterGoalTracker
-          userEmail={user.email}
+          userId={user.id}
           nutritionData={nutritionData}
           userProfile={userProfile}
         />

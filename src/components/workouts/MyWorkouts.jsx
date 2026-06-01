@@ -16,7 +16,7 @@ const dayLabels = {
 };
 const days = ["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"];
 
-export default function MyWorkouts({ userEmail }) {
+export default function MyWorkouts({ userId }) {
   const [activeTab, setActiveTab] = useState("ai");
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [aiWizardOpen, setAiWizardOpen] = useState(false);
@@ -29,28 +29,28 @@ export default function MyWorkouts({ userEmail }) {
   const queryClient = useQueryClient();
 
   const { data: customWorkouts = [] } = useQuery({
-    queryKey: ['customWorkouts', userEmail],
-    queryFn: () => db.CustomWorkout.filter({ user_email: userEmail }),
-    enabled: !!userEmail,
+    queryKey: ['customWorkouts', userId],
+    queryFn: () => db.CustomWorkout.filter({ user_id: userId }),
+    enabled: !!userId,
     initialData: [],
   });
 
   const { data: workoutExercises = [] } = useQuery({
-    queryKey: ['customWorkoutExercises', userEmail],
+    queryKey: ['customWorkoutExercises', userId],
     queryFn: async () => {
-      const workouts = await db.CustomWorkout.filter({ user_email: userEmail });
+      const workouts = await db.CustomWorkout.filter({ user_id: userId });
       if (workouts.length === 0) return [];
       const allExercises = await db.CustomWorkoutExercise.list();
       return allExercises.filter(ex => workouts.map(w => w.id).includes(ex.custom_workout_id));
     },
-    enabled: !!userEmail,
+    enabled: !!userId,
     initialData: [],
   });
 
   const { data: prRecords = [] } = useQuery({
-    queryKey: ['prRecords', userEmail],
-    queryFn: () => db.PRRecord.filter({ user_email: userEmail }),
-    enabled: !!userEmail,
+    queryKey: ['prRecords', userId],
+    queryFn: () => db.PRRecord.filter({ user_id: userId }),
+    enabled: !!userId,
     initialData: [],
   });
 
@@ -281,7 +281,7 @@ export default function MyWorkouts({ userEmail }) {
                                   })}
                                 </div>
                                 <div className="pt-1">
-                                  <CompleteWorkoutButton workout={workout} exercises={exercises} userEmail={userEmail} onCompleted={() => setExpandedWorkout(null)} />
+                                  <CompleteWorkoutButton workout={workout} exercises={exercises} userId={userId} onCompleted={() => setExpandedWorkout(null)} />
                                 </div>
                               </div>
                             </motion.div>
@@ -322,13 +322,13 @@ export default function MyWorkouts({ userEmail }) {
       <CustomWorkoutModal
         isOpen={createModalOpen}
         onClose={handleCloseModal}
-        userEmail={userEmail}
+        userId={userId}
         editingWorkout={editingWorkout}
         existingExercises={editingExercises}
       />
       {aiWizardOpen && (
         <AIWorkoutWizard
-          userEmail={userEmail}
+          userId={userId}
           onClose={() => setAiWizardOpen(false)}
           onWorkoutsGenerated={() => setAiWizardOpen(false)}
         />
@@ -338,7 +338,7 @@ export default function MyWorkouts({ userEmail }) {
           isOpen={prModalOpen}
           onClose={() => { setPrModalOpen(false); setSelectedExercise(null); }}
           exercise={selectedExercise}
-          userEmail={userEmail}
+          userId={userId}
         />
       )}
     </div>

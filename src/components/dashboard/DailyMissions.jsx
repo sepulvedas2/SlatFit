@@ -6,39 +6,39 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 
-export default function DailyMissions({ userEmail }) {
+export default function DailyMissions({ userId }) {
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data: todayFoods } = useQuery({
-    queryKey: ['todayFoods', userEmail, today],
+    queryKey: ['todayFoods', userId, today],
     queryFn: () => base44.entities.FoodLog.filter({ 
-      user_email: userEmail, 
+      user_id: userId, 
       log_date: today 
     }),
-    enabled: !!userEmail,
+    enabled: !!userId,
     initialData: [],
   });
 
   const { data: todayWorkouts } = useQuery({
-    queryKey: ['todayWorkouts', userEmail, today],
+    queryKey: ['todayWorkouts', userId, today],
     queryFn: () => base44.entities.WorkoutLog.filter({ 
-      user_email: userEmail, 
+      user_id: userId, 
       completed_date: today 
     }),
-    enabled: !!userEmail,
+    enabled: !!userId,
     initialData: [],
   });
 
   const { data: todayCheckIn } = useQuery({
-    queryKey: ['checkIn', userEmail, today],
+    queryKey: ['checkIn', userId, today],
     queryFn: async () => {
       const checkIns = await base44.entities.DailyCheckIn.filter({
-        user_email: userEmail,
+        user_id: userId,
         check_in_date: today
       });
       return checkIns[0] || null;
     },
-    enabled: !!userEmail
+    enabled: !!userId
   });
 
   const missions = [

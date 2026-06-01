@@ -2,9 +2,9 @@
   "name": "FoodLog",
   "type": "object",
   "properties": {
-    "user_email": {
+    "user_id": {
       "type": "string",
-      "description": "Email do usu\u00e1rio"
+      "description": "ID do usuário autenticado"
     },
     "food_name": {
       "type": "string",
@@ -18,7 +18,7 @@
         "dinner",
         "snack"
       ],
-      "description": "Tipo de refei\u00e7\u00e3o"
+      "description": "Tipo de refeição"
     },
     "calories": {
       "type": "number",
@@ -26,7 +26,7 @@
     },
     "protein": {
       "type": "number",
-      "description": "Prote\u00edna em gramas"
+      "description": "Proteína em gramas"
     },
     "carbs": {
       "type": "number",
@@ -38,7 +38,7 @@
     },
     "portion_size": {
       "type": "string",
-      "description": "Tamanho da por\u00e7\u00e3o estimado"
+      "description": "Tamanho da porção estimado"
     },
     "image_url": {
       "type": "string",
@@ -51,7 +51,7 @@
     }
   },
   "required": [
-    "user_email",
+    "user_id",
     "food_name",
     "calories"
   ]

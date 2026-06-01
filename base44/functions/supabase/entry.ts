@@ -5,6 +5,38 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_KEY");
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+const PRIVATE_USER_TABLES = new Set([
+  'food_logs',
+  'workout_logs',
+  'meal_plans',
+  'subscriptions',
+  'achievements',
+  'daily_check_ins',
+  'user_challenges',
+  'user_points',
+  'progress_photos',
+  'motivational_journals',
+  'iago_conversations',
+  'nutrition_data',
+  'agenda_tasks',
+  'weekly_progress',
+  'daily_workouts',
+  'custom_workouts',
+  'pr_records',
+  'training_profiles',
+  'ai_feedback',
+  'running_activities',
+  'saved_routes',
+  'habits',
+  'habit_logs',
+  'daily_metrics',
+  'user_progress',
+  'user_xp_log',
+  'user_streak',
+  'missions_progress',
+  'ranking',
+]);
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -18,7 +50,12 @@ Deno.serve(async (req) => {
     console.log(`[Supabase] ${action.toUpperCase()} em ${table} por ${user.email}`);
     const now = new Date().toISOString();
 
-    const normalizeProfileFilterColumn = (col) => table === 'user_profiles' && col === 'user_email' ? 'email' : col;
+    const isPrivateUserTable = PRIVATE_USER_TABLES.has(table);
+    const normalizeFilter = (col, val) => {
+      if (table === 'user_profiles' && col === 'user_email') return ['email', val];
+      if (isPrivateUserTable && (col === 'user_email' || col === 'user_id')) return ['user_id', user.id];
+      return [col, val];
+    };
     const normalizeOrderColumn = (col) => table === 'user_profiles' && col === 'created_date' ? 'created_at' : col;
     const normalizeProfileData = (item) => {
       if (table !== 'user_profiles' || !item) return item;
@@ -34,10 +71,32 @@ Deno.serve(async (req) => {
         if (item[key] !== undefined) normalized[key] = item[key];
       }
       if (item.user_email !== undefined) normalized.email = item.user_email;
+      normalized.id = normalized.id || user.id;
+      normalized.user_id = user.id;
+      normalized.email = normalized.email || user.email;
       Object.keys(normalized).forEach((key) => {
         if (normalized[key] === undefined) normalized[key] = null;
       });
       return normalized;
+    };
+    const normalizeOwnerData = (item) => {
+      const normalized = normalizeProfileData(item);
+      if (!isPrivateUserTable || !normalized) return normalized;
+      const { user_email: _ignoredUserEmail, ...safeData } = normalized;
+      return {
+        ...safeData,
+        user_id: user.id,
+      };
+    };
+    const normalizeConflictColumn = (col) => {
+      if (table === 'user_profiles') return 'id';
+      if (isPrivateUserTable && col === 'user_email') return 'user_id';
+      return col || 'id';
+    };
+    const filterHasOwner = (filter = {}) => Object.prototype.hasOwnProperty.call(filter, 'user_id') || Object.prototype.hasOwnProperty.call(filter, 'user_email');
+    const applyOwnerScope = (q, filter = {}) => {
+      if (!isPrivateUserTable || filterHasOwner(filter)) return q;
+      return q.eq('user_id', user.id);
     };
 
     const runWithRetry = async (operation, attempts = 3) => {
@@ -59,11 +118,12 @@ Deno.serve(async (req) => {
       let q = supabase.from(table).select(query?.select || '*');
       if (query?.filter) {
         for (const [col, val] of Object.entries(query.filter)) {
-          const normalizedCol = normalizeProfileFilterColumn(col);
-          if (val === null) q = q.is(normalizedCol, null);
-          else q = q.eq(normalizedCol, val);
+          const [normalizedCol, normalizedVal] = normalizeFilter(col, val);
+          if (normalizedVal === null) q = q.is(normalizedCol, null);
+          else q = q.eq(normalizedCol, normalizedVal);
         }
       }
+      q = applyOwnerScope(q, query?.filter);
       if (query?.order) q = q.order(normalizeOrderColumn(query.order.column), { ascending: query.order.ascending ?? false });
       if (query?.limit) q = q.limit(query.limit);
       const { data: rows, error } = await runWithRetry(() => q);
@@ -96,7 +156,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'insert') {
-      const addMeta = (item) => normalizeProfileData({
+      const addMeta = (item) => normalizeOwnerData({
         ...item,
         created_date: item.created_date || now,
         updated_date: now,
@@ -114,13 +174,15 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'update') {
-      const dataToUpdate = normalizeProfileData({ ...data, updated_date: now });
+      const dataToUpdate = normalizeOwnerData({ ...data, updated_date: now });
       let q = supabase.from(table).update(dataToUpdate);
       if (query?.filter) {
         for (const [col, val] of Object.entries(query.filter)) {
-          q = q.eq(normalizeProfileFilterColumn(col), val);
+          const [normalizedCol, normalizedVal] = normalizeFilter(col, val);
+          q = q.eq(normalizedCol, normalizedVal);
         }
       }
+      q = applyOwnerScope(q, query?.filter);
       console.log(`[Supabase] Atualizando ${table} com filtro:`, query?.filter, 'dados:', dataToUpdate);
       const { data: updated, error } = await runWithRetry(() => q.select());
       if (error) {
@@ -132,8 +194,8 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'upsert') {
-      const dataToUpsert = normalizeProfileData({ ...data, updated_date: now, created_by: data?.created_by || user.email });
-      const conflictColumn = table === 'user_profiles' ? 'id' : (query?.onConflict || 'id');
+      const dataToUpsert = normalizeOwnerData({ ...data, updated_date: now, created_by: data?.created_by || user.email });
+      const conflictColumn = normalizeConflictColumn(query?.onConflict);
       console.log(`[Supabase] Upsert em ${table}:`, dataToUpsert, 'onConflict:', conflictColumn);
       const { data: upserted, error } = await runWithRetry(() => supabase.from(table).upsert(dataToUpsert, { onConflict: conflictColumn }).select());
       if (error) {
@@ -148,9 +210,11 @@ Deno.serve(async (req) => {
       let q = supabase.from(table).delete();
       if (query?.filter) {
         for (const [col, val] of Object.entries(query.filter)) {
-          q = q.eq(col, val);
+          const [normalizedCol, normalizedVal] = normalizeFilter(col, val);
+          q = q.eq(normalizedCol, normalizedVal);
         }
       }
+      q = applyOwnerScope(q, query?.filter);
       const { error } = await runWithRetry(() => q);
       if (error) return Response.json({ error: error.message }, { status: 400 });
       return Response.json({ success: true });

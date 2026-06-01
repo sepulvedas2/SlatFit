@@ -14,7 +14,7 @@ const calculateWaterGoalByBodyType = (bodyType, weight = 70) => {
   return Math.round(baseWater * (multipliers[bodyType] || 1.0));
 };
 
-export default function WaterGoalTracker({ userEmail, nutritionData, userProfile }) {
+export default function WaterGoalTracker({ userId, nutritionData, userProfile }) {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [celebrateGoal, setCelebrateGoal] = useState(false);
   const queryClient = useQueryClient();
@@ -55,7 +55,7 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
         });
       }
       return db.NutritionData.create({
-        user_email: userEmail,
+        user_id: userId,
         log_date: today,
         water_intake_ml: newIntake,
         water_goal_ml: goalAmount,
@@ -71,7 +71,7 @@ export default function WaterGoalTracker({ userEmail, nutritionData, userProfile
         return db.NutritionData.update(nutritionData.id, { water_goal_ml: newGoal });
       }
       return db.NutritionData.create({
-        user_email: userEmail,
+        user_id: userId,
         log_date: today,
         water_goal_ml: newGoal,
         water_intake_ml: 0,

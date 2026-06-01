@@ -19,14 +19,14 @@ function extractIntensity(observacoes = "") {
   return "leve";
 }
 
-export default function CompleteWorkoutButton({ workout, exercises, userEmail, onCompleted }) {
+export default function CompleteWorkoutButton({ workout, exercises, userId, onCompleted }) {
   const [loading, setLoading] = useState(false);
   const [showXP, setShowXP] = useState(false);
   const [xpEarned, setXpEarned] = useState(0);
   const queryClient = useQueryClient();
 
   const handleComplete = async () => {
-    if (!userEmail) return;
+    if (!userId) return;
     setLoading(true);
 
     const intensity = extractIntensity(workout.observacoes);
@@ -43,7 +43,7 @@ export default function CompleteWorkoutButton({ workout, exercises, userEmail, o
 
     // Save workout log
     await db.WorkoutLog.create({
-      user_email: userEmail,
+      user_id: userId,
       workout_id: workout.id,
       workout_name: workout.nome_treino,
       completed_date: today,
@@ -52,7 +52,7 @@ export default function CompleteWorkoutButton({ workout, exercises, userEmail, o
     });
 
     // Update XP + rank + streak + weekly
-    const pointsList = await db.UserPoints.filter({ user_email: userEmail });
+    const pointsList = await db.UserPoints.filter({ user_id: userId });
     const RANKS = [
       { key: "bronze", minXP: 0 },
       { key: "silver", minXP: 500 },
@@ -96,7 +96,7 @@ export default function CompleteWorkoutButton({ workout, exercises, userEmail, o
       });
     } else {
       await db.UserPoints.create({
-        user_email: userEmail,
+        user_id: userId,
         total_points: xp,
         xp_current: xp,
         rank: "bronze",

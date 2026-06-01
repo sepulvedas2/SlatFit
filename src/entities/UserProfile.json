@@ -2,9 +2,13 @@
   "name": "UserProfile",
   "type": "object",
   "properties": {
-    "user_email": {
+    "email": {
       "type": "string",
-      "description": "Email do usu\u00e1rio vinculado"
+      "description": "Email do usuário vinculado"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID do usuário autenticado"
     },
     "height": {
       "type": "number",
@@ -36,7 +40,7 @@
         "active",
         "very_active"
       ],
-      "description": "N\u00edvel de atividade f\u00edsica"
+      "description": "Nível de atividade física"
     },
     "gender": {
       "type": "string",
@@ -44,7 +48,7 @@
         "male",
         "female"
       ],
-      "description": "G\u00eanero"
+      "description": "Gênero"
     },
     "age": {
       "type": "number",
@@ -52,23 +56,23 @@
     },
     "daily_calorie_target": {
       "type": "number",
-      "description": "Meta di\u00e1ria de calorias calculada"
+      "description": "Meta diária de calorias calculada"
     },
     "protein_target": {
       "type": "number",
-      "description": "Meta di\u00e1ria de prote\u00edna em gramas"
+      "description": "Meta diária de proteína em gramas"
     },
     "carbs_target": {
       "type": "number",
-      "description": "Meta di\u00e1ria de carboidratos em gramas"
+      "description": "Meta diária de carboidratos em gramas"
     },
     "fats_target": {
       "type": "number",
-      "description": "Meta di\u00e1ria de gorduras em gramas"
+      "description": "Meta diária de gorduras em gramas"
     }
   },
   "required": [
-    "user_email",
+    "email",
     "goal"
   ]
 }

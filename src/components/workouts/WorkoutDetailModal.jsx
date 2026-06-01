@@ -12,14 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Flame, Check, Loader2, Play } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
-export default function WorkoutDetailModal({ workout, onClose, userEmail }) {
+export default function WorkoutDetailModal({ workout, onClose, userId }) {
   const [completing, setCompleting] = useState(false);
   const queryClient = useQueryClient();
 
   const completeWorkoutMutation = useMutation({
     mutationFn: async () => {
       return base44.entities.WorkoutLog.create({
-        user_email: userEmail,
+        user_id: userId,
         workout_id: workout.id,
         workout_name: workout.name,
         completed_date: new Date().toISOString().split('T')[0],
@@ -112,7 +112,7 @@ export default function WorkoutDetailModal({ workout, onClose, userEmail }) {
           <div className="flex gap-3 pt-4">
             <Button
               onClick={handleComplete}
-              disabled={completing || !userEmail}
+              disabled={completing || !userId}
               className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
             >
               {completing ? (

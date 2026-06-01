@@ -25,34 +25,34 @@ export default function Progresso() {
   }, []);
 
   const { data: userPoints } = useQuery({
-    queryKey: ["userPoints", user?.email],
+    queryKey: ["userPoints", user?.id],
     queryFn: async () => {
-      const rows = await db.UserPoints.filter({ user_email: user.email });
+      const rows = await db.UserPoints.filter({ user_id: user.id });
       return rows[0] || null;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
   const { data: rankingSnapshot } = useQuery({
-    queryKey: ["rankingSnapshot", user?.email],
+    queryKey: ["rankingSnapshot", user?.id],
     queryFn: async () => {
       const response = await base44.functions.invoke("getRankingSnapshot", {});
       return response.data;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
   const { data: activeChallenges = [] } = useQuery({
-    queryKey: ["userChallenges", user?.email],
+    queryKey: ["userChallenges", user?.id],
     queryFn: async () => {
       try {
-        return await db.UserChallenge.filter({ user_email: user.email });
+        return await db.UserChallenge.filter({ user_id: user.id });
       } catch (error) {
         console.error("[Progresso] erro ao buscar desafios ativos:", error);
         return [];
       }
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     initialData: [],
   });
 
@@ -92,7 +92,6 @@ export default function Progresso() {
     mutationFn: async (challenge) => {
       if (activeCards.length >= 2) throw new Error("Você só pode ter 2 desafios ativos. Conclua um para ativar outro.");
       await db.UserChallenge.create({
-        user_email: user.email,
         user_id: user.id,
         challenge_id: challenge.id,
         progress_current: 0,
@@ -126,19 +125,19 @@ export default function Progresso() {
       return response.data;
     },
     onMutate: async (challenge) => {
-      await queryClient.cancelQueries({ queryKey: ["userChallenges", user?.email] });
-      await queryClient.cancelQueries({ queryKey: ["userPoints", user?.email] });
-      await queryClient.cancelQueries({ queryKey: ["rankingSnapshot", user?.email] });
+      await queryClient.cancelQueries({ queryKey: ["userChallenges", user?.id] });
+      await queryClient.cancelQueries({ queryKey: ["userPoints", user?.id] });
+      await queryClient.cancelQueries({ queryKey: ["rankingSnapshot", user?.id] });
 
-      const previousChallenges = queryClient.getQueryData(["userChallenges", user?.email]);
-      const previousPoints = queryClient.getQueryData(["userPoints", user?.email]);
-      const previousRanking = queryClient.getQueryData(["rankingSnapshot", user?.email]);
+      const previousChallenges = queryClient.getQueryData(["userChallenges", user?.id]);
+      const previousPoints = queryClient.getQueryData(["userPoints", user?.id]);
+      const previousRanking = queryClient.getQueryData(["rankingSnapshot", user?.id]);
       const optimisticXp = challenge.xp_per_day || 10;
 
       setXpFeedback(optimisticXp);
       setTimeout(() => setXpFeedback(null), 1400);
 
-      queryClient.setQueryData(["userChallenges", user?.email], (old = []) =>
+      queryClient.setQueryData(["userChallenges", user?.id], (old = []) =>
         old.map((item) => item.id === challenge.id ? {
           ...item,
           progress_current: (item.progress_current || 0) + 1,
@@ -148,24 +147,24 @@ export default function Progresso() {
         } : item)
       );
 
-      queryClient.setQueryData(["userPoints", user?.email], (old) => old ? {
+      queryClient.setQueryData(["userPoints", user?.id], (old) => old ? {
         ...old,
         total_points: (old.total_points || 0) + optimisticXp,
         xp_current: (old.xp_current || 0) + optimisticXp,
       } : old);
 
-      queryClient.setQueryData(["rankingSnapshot", user?.email], (old) => old ? {
+      queryClient.setQueryData(["rankingSnapshot", user?.id], (old) => old ? {
         ...old,
         currentXp: (old.currentXp || 0) + optimisticXp,
-        leaderboard: (old.leaderboard || []).map((entry) => entry.user_email === user?.email ? { ...entry, total_xp: (entry.total_xp || 0) + optimisticXp, total_points: (entry.total_points || 0) + optimisticXp } : entry),
+        leaderboard: (old.leaderboard || []).map((entry) => entry.user_id === user?.id ? { ...entry, total_xp: (entry.total_xp || 0) + optimisticXp, total_points: (entry.total_points || 0) + optimisticXp } : entry),
       } : old);
 
       return { previousChallenges, previousPoints, previousRanking };
     },
     onError: (_error, _challenge, context) => {
-      if (context?.previousChallenges) queryClient.setQueryData(["userChallenges", user?.email], context.previousChallenges);
-      if (context?.previousPoints) queryClient.setQueryData(["userPoints", user?.email], context.previousPoints);
-      if (context?.previousRanking) queryClient.setQueryData(["rankingSnapshot", user?.email], context.previousRanking);
+      if (context?.previousChallenges) queryClient.setQueryData(["userChallenges", user?.id], context.previousChallenges);
+      if (context?.previousPoints) queryClient.setQueryData(["userPoints", user?.id], context.previousPoints);
+      if (context?.previousRanking) queryClient.setQueryData(["rankingSnapshot", user?.id], context.previousRanking);
     },
     onSuccess: (result) => {
       if (result?.completed) {

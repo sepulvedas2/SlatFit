@@ -61,9 +61,9 @@ export default function Profile({ onLogout }) {
   }, []);
 
   const { data: profile } = useQuery({
-    queryKey: ['userProfile', user?.email],
+    queryKey: ['userProfile', user?.id],
     queryFn: async () => {
-      const profiles = await db.UserProfile.filter({ user_email: user.email });
+      const profiles = await db.UserProfile.filter({ id: user.id });
       const profile = profiles[0] || null;
       if (!profile) return null;
       return {
@@ -74,14 +74,14 @@ export default function Profile({ onLogout }) {
         body_type: profile.body_type ?? profile.biotype,
       };
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
 
   const { data: progressPhotos = [] } = useQuery({
-    queryKey: ['progressPhotos', user?.email],
-    queryFn: () => db.ProgressPhoto.filter({ user_email: user.email }),
-    enabled: !!user?.email,
+    queryKey: ['progressPhotos', user?.id],
+    queryFn: () => db.ProgressPhoto.filter({ user_id: user.id }),
+    enabled: !!user?.id,
     initialData: [],
   });
 
@@ -90,8 +90,8 @@ export default function Profile({ onLogout }) {
       setFormData(profile);
     } else if (user) {
       setFormData({
-        user_email: user.email,
         user_id: user.id,
+        email: user.email,
         display_name: user.full_name || '',
         height: 170, current_weight: 70, target_weight: 70,
         goal: 'maintenance', activity_level: 'moderate',
@@ -126,7 +126,7 @@ export default function Profile({ onLogout }) {
         biotype: data.body_type || null,
         activity_level: data.activity_level || null,
         user_id: authUser.id,
-        user_email: authUser.email,
+        email: authUser.email,
       };
 
       const payload = {
@@ -200,8 +200,8 @@ export default function Profile({ onLogout }) {
   const handleReset = () => {
     if (window.confirm("Tem certeza que deseja restaurar o perfil para os dados padrão?")) {
       setFormData({
-        user_email: user?.email,
         user_id: user?.id,
+        email: user?.email,
         display_name: user?.full_name || '',
         height: 170, current_weight: 70, target_weight: 70,
         goal: 'maintenance', activity_level: 'moderate',

@@ -32,9 +32,9 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
 
   // Fetch all PR records for current user
   const { data: prRecords = [] } = useQuery({
-    queryKey: ['prRecords', user?.email],
-    queryFn: () => db.PRRecord.filter({ user_email: user.email }),
-    enabled: !!user?.email,
+    queryKey: ['prRecords', user?.id],
+    queryFn: () => db.PRRecord.filter({ user_id: user.id }),
+    enabled: !!user?.id,
     initialData: [],
   });
 
@@ -559,7 +559,7 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     mutationFn: async (prData) => {
       console.log('[WeeklyPlan] Salvando PR:', selectedPRExercise, prData);
       return db.PRRecord.create({
-        user_email: user.email,
+        user_id: user.id,
         exercise_id: selectedPRExercise,
         exercise_name: selectedPRExercise,
         peso_kg: parseFloat(prData.weight_kg),

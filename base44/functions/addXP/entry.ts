@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     const { data: rows, error } = await supabase
       .from('user_points')
       .select('*')
-      .eq('user_email', user.email)
+      .eq('user_id', user.id)
       .limit(1);
 
     if (error) return Response.json({ error: error.message }, { status: 400 });
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
         .eq('id', current.id);
     } else {
       await supabase.from('user_points').insert({
-        user_email: user.email,
+        user_id: user.id,
         total_points: xpAmount,
         level: 1,
         xp_current: xpAmount,

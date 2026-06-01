@@ -29,47 +29,47 @@ export default function Workouts() {
   }, []);
 
   const { data: profile } = useQuery({
-    queryKey: ['userProfile', user?.email],
+    queryKey: ['userProfile', user?.id],
     queryFn: async () => {
-      if (!user?.email) return null;
+      if (!user?.id) return null;
       try {
-        const profiles = await db.UserProfile.filter({ user_email: user.email });
+        const profiles = await db.UserProfile.filter({ id: user.id });
         return profiles[0] || null;
       } catch (error) {
         console.error('[Workouts] Erro ao buscar perfil:', error);
         return null;
       }
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     retry: 1,
   });
 
   const { data: todayWorkouts = [] } = useQuery({
-    queryKey: ['todayWorkouts', user?.email],
+    queryKey: ['todayWorkouts', user?.id],
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
       const logs = await db.WorkoutLog.filter({ 
-        user_email: user.email,
+        user_id: user.id,
         completed_date: today
       });
       return logs;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     initialData: [],
   });
 
   const { data: weekWorkouts } = useQuery({
-    queryKey: ['weekWorkouts', user?.email],
+    queryKey: ['weekWorkouts', user?.id],
     queryFn: async () => {
       const today = new Date();
       const weekStart = new Date(today);
       weekStart.setDate(today.getDate() - today.getDay() + 1);
       const weekStartStr = weekStart.toISOString().split('T')[0];
       
-      const logs = await db.WorkoutLog.filter({ user_email: user.email });
+      const logs = await db.WorkoutLog.filter({ user_id: user.id });
       return logs.filter(log => log.completed_date >= weekStartStr);
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     initialData: [],
   });
 
@@ -82,12 +82,12 @@ export default function Workouts() {
 
   // Fetch daily workouts
   const { data: dailyWorkouts = [] } = useQuery({
-    queryKey: ['dailyWorkouts', user?.email, selectedWeek],
+    queryKey: ['dailyWorkouts', user?.id, selectedWeek],
     queryFn: () => db.DailyWorkout.filter({ 
-      user_email: user.email,
+      user_id: user.id,
       week_number: selectedWeek 
     }),
-    enabled: !!user?.email,
+    enabled: !!user?.id,
     initialData: [],
   });
 
@@ -113,7 +113,7 @@ export default function Workouts() {
       } else {
         console.log('[Workouts] Criando novo treino concluído');
         result = await db.DailyWorkout.create({
-          user_email: user.email,
+          user_id: user.id,
           week_number: weekNumber,
           day_of_week: dayOfWeek,
           muscle_group: "treino",
@@ -207,7 +207,7 @@ export default function Workouts() {
           </div>
 
           {activeTab === "my-workouts" && (
-            <MyWorkouts userEmail={user?.email} />
+            <MyWorkouts userId={user?.id} />
           )}
 
           {activeTab === "app-workouts" && <div className="space-y-7">

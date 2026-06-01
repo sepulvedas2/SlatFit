@@ -22,9 +22,9 @@ export default function ExerciseBlock({ block, exercises = [] }) {
   }, []);
 
   const { data: prRecords = [] } = useQuery({
-    queryKey: ['prRecords', user?.email],
-    queryFn: () => db.PRRecord.filter({ user_email: user.email }),
-    enabled: !!user?.email,
+    queryKey: ['prRecords', user?.id],
+    queryFn: () => db.PRRecord.filter({ user_id: user.id }),
+    enabled: !!user?.id,
     initialData: [],
   });
 
@@ -132,7 +132,7 @@ export default function ExerciseBlock({ block, exercises = [] }) {
             setSelectedExerciseForPR(null);
           }}
           exercise={selectedExerciseForPR}
-          userEmail={user?.email}
+          userId={user?.id}
         />
       )}
     </>

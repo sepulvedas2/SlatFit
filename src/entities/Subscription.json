@@ -2,9 +2,9 @@
   "name": "Subscription",
   "type": "object",
   "properties": {
-    "user_email": {
+    "user_id": {
       "type": "string",
-      "description": "Email do usu\u00e1rio"
+      "description": "ID do usuário autenticado"
     },
     "plan": {
       "type": "string",
@@ -19,12 +19,12 @@
     "start_date": {
       "type": "string",
       "format": "date",
-      "description": "Data de in\u00edcio"
+      "description": "Data de início"
     },
     "end_date": {
       "type": "string",
       "format": "date",
-      "description": "Data de t\u00e9rmino"
+      "description": "Data de término"
     },
     "is_active": {
       "type": "boolean",
@@ -33,15 +33,15 @@
     },
     "payment_method": {
       "type": "string",
-      "description": "M\u00e9todo de pagamento"
+      "description": "Método de pagamento"
     },
     "auto_renew": {
       "type": "boolean",
       "default": true,
-      "description": "Renova\u00e7\u00e3o autom\u00e1tica"
+      "description": "Renovação automática"
     }
   },
   "required": [
-    "user_email"
+    "user_id"
   ]
 }

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle, Coffee, Utensils, Moon, Apple } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function QuickCheckIns({ userEmail, today }) {
+export default function QuickCheckIns({ userId, today }) {
   const checkIns = [
     { id: "sleep", icon: Moon, label: "Dormiu bem?", color: "purple" },
     { id: "breakfast", icon: Coffee, label: "Café da manhã", color: "orange" },

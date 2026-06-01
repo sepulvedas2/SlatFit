@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     const { data: progress, error: fetchError } = await supabase
       .from('user_progress')
       .select('*')
-      .eq('user_email', user.email)
+      .eq('user_id', user.id)
       .single();
 
     let currentProgress;
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
       const { data: newProgress, error: createError } = await supabase
         .from('user_progress')
         .insert({
-          user_email: user.email,
+          user_id: user.id,
           total_xp: 0,
           nivel: 1,
           xp_atual: 0,
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     const { data: updated, error: updateError } = await supabase
       .from('user_progress')
       .update(updates)
-      .eq('user_email', user.email)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
       const { data: rankingEntry } = await supabase
         .from('ranking')
         .select('*')
-        .eq('user_email', user.email)
+        .eq('user_id', user.id)
         .single();
 
       if (rankingEntry) {
@@ -130,12 +130,12 @@ Deno.serve(async (req) => {
             nivel: novoNivel,
             updated_date: new Date().toISOString()
           })
-          .eq('user_email', user.email);
+          .eq('user_id', user.id);
       } else {
         await supabase
           .from('ranking')
           .insert({
-            user_email: user.email,
+            user_id: user.id,
             user_name: user.full_name || user.email,
             total_xp: novoTotalXP,
             nivel: novoNivel
@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
       // Recalcular posições
       const { data: allRankings } = await supabase
         .from('ranking')
-        .select('user_email, total_xp')
+        .select('user_id, total_xp')
         .order('total_xp', { ascending: false });
 
       if (allRankings) {
@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
           await supabase
             .from('ranking')
             .update({ posicao: i + 1 })
-            .eq('user_email', allRankings[i].user_email);
+            .eq('user_id', allRankings[i].user_id);
         }
       }
 

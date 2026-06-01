@@ -158,10 +158,10 @@ export default function ScannerResultScreen({
   };
 
   // XP + challenge check after saving
-  const checkFoodChallenges = async (userEmail, savedData) => {
+  const checkFoodChallenges = async (userId, savedData) => {
     const [pointsList, allFoods] = await Promise.all([
-      db.UserPoints.filter({ user_email: userEmail }),
-      db.FoodLog.filter({ user_email: userEmail }),
+      db.UserPoints.filter({ user_id: userId }),
+      db.FoodLog.filter({ user_id: userId }),
     ]);
     const points = pointsList[0];
     if (!points) return;
@@ -199,8 +199,8 @@ export default function ScannerResultScreen({
     setSaving(true);
     await onSave({ ...data, calories: cal, protein: prot, carbs, fats });
     // fire-and-forget XP check
-    if (data.user_email || userProfile?.user_email) {
-      checkFoodChallenges(data.user_email || userProfile?.user_email, { cal, prot, carbs, fats }).catch(() => {});
+    if (data.user_id || userProfile?.user_id || userProfile?.id) {
+      checkFoodChallenges(data.user_id || userProfile?.user_id || userProfile?.id, { cal, prot, carbs, fats }).catch(() => {});
     }
     setSaving(false);
     setSaved(true);

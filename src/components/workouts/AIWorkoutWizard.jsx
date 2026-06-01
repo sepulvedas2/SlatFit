@@ -56,7 +56,7 @@ const OPTIONS = {
   ],
 };
 
-export default function AIWorkoutWizard({ userEmail, onClose, onWorkoutsGenerated }) {
+export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
@@ -178,7 +178,7 @@ Responda SOMENTE com JSON válido neste formato exato:
   };
 
   const savePlan = async () => {
-    if (!generatedPlan || !userEmail) return;
+    if (!generatedPlan || !userId) return;
     setIsSaving(true);
 
     const dayOrder = ["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"];
@@ -189,7 +189,7 @@ Responda SOMENTE com JSON válido neste formato exato:
       const dayOfWeek = days[i];
 
       const savedWorkout = await db.CustomWorkout.create({
-        user_email: userEmail,
+        user_id: userId,
         nome_treino: workout.name,
         dia_semana: dayOfWeek,
         observacoes: `${workout.muscle_group} • ${workout.intensity} • ${workout.duration_minutes}min | Gerado por IA`,

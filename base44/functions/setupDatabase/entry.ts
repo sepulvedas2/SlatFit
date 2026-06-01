@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
             id uuid primary key default gen_random_uuid(),
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
-            user_email text not null unique,
+            user_id uuid not null unique,
             total_xp integer default 0,
             nivel integer default 1,
             xp_atual integer default 0,
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "user_progress_all" ON user_progress;
           CREATE POLICY "user_progress_all" ON user_progress
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'user_progress', status: 'OK' });
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
             id uuid primary key default gen_random_uuid(),
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
-            user_email text not null unique,
+            user_id uuid not null unique,
             user_name text,
             total_xp integer default 0,
             nivel integer default 1,
@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "ranking_insert_update" ON ranking;
           CREATE POLICY "ranking_insert_update" ON ranking
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'ranking', status: 'OK' });
@@ -113,8 +113,7 @@ Deno.serve(async (req) => {
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
             created_by text,
-            user_email text not null,
-            user_id text,
+            user_id uuid not null,
             name text not null,
             emoji text,
             category text,
@@ -132,7 +131,7 @@ Deno.serve(async (req) => {
             is_active boolean default true
           );
 
-          ALTER TABLE habits ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE habits ADD COLUMN IF NOT EXISTS user_id uuid;
           ALTER TABLE habits ADD COLUMN IF NOT EXISTS color text;
           ALTER TABLE habits ADD COLUMN IF NOT EXISTS frequency integer;
           ALTER TABLE habits ADD COLUMN IF NOT EXISTS notes text;
@@ -142,7 +141,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "habits_all" ON habits;
           CREATE POLICY "habits_all" ON habits
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'habits', status: 'OK' });
@@ -159,8 +158,7 @@ Deno.serve(async (req) => {
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
             created_by text,
-            user_email text not null,
-            user_id text,
+            user_id uuid not null,
             habit_id uuid,
             habit_name text,
             date date,
@@ -170,13 +168,13 @@ Deno.serve(async (req) => {
             completed_at timestamptz
           );
 
-          ALTER TABLE habit_logs ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE habit_logs ADD COLUMN IF NOT EXISTS user_id uuid;
           ALTER TABLE habit_logs ADD COLUMN IF NOT EXISTS date date;
           ALTER TABLE habit_logs ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "habit_logs_all" ON habit_logs;
           CREATE POLICY "habit_logs_all" ON habit_logs
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'habit_logs', status: 'OK' });
@@ -224,7 +222,7 @@ Deno.serve(async (req) => {
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
             created_by text,
-            user_email text not null,
+            user_id uuid not null,
             workout_id text,
             workout_name text,
             completed_date date,
@@ -239,7 +237,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "workout_logs_all" ON workout_logs;
           CREATE POLICY "workout_logs_all" ON workout_logs
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'workout_logs', status: 'OK' });
@@ -256,7 +254,7 @@ Deno.serve(async (req) => {
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
             created_by text,
-            user_email text not null,
+            user_id uuid not null,
             week_number integer,
             day_of_week text,
             muscle_group text,
@@ -270,7 +268,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "daily_workouts_all" ON daily_workouts;
           CREATE POLICY "daily_workouts_all" ON daily_workouts
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'daily_workouts', status: 'OK' });
@@ -312,7 +310,7 @@ Deno.serve(async (req) => {
             id uuid primary key default gen_random_uuid(),
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
-            user_email text not null,
+            user_id uuid not null,
             mission_id uuid,
             concluido boolean default false,
             data_conclusao date,
@@ -323,7 +321,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "missions_progress_all" ON missions_progress;
           CREATE POLICY "missions_progress_all" ON missions_progress
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'missions_progress', status: 'OK' });
@@ -383,8 +381,7 @@ Deno.serve(async (req) => {
             id uuid primary key default gen_random_uuid(),
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
-            user_email text not null,
-            user_id text,
+            user_id uuid not null,
             challenge_id uuid,
             progress_current integer default 0,
             progress_total integer default 1,
@@ -400,7 +397,7 @@ Deno.serve(async (req) => {
             completed_at timestamptz
           );
 
-          ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS user_id uuid;
           ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS progress_current integer default 0;
           ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS progress_total integer default 1;
           ALTER TABLE user_challenges ADD COLUMN IF NOT EXISTS started_at timestamptz;
@@ -410,7 +407,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "user_challenges_all" ON user_challenges;
           CREATE POLICY "user_challenges_all" ON user_challenges
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'user_challenges', status: 'OK' });
@@ -424,7 +421,7 @@ Deno.serve(async (req) => {
         sql: `
           CREATE TABLE IF NOT EXISTS user_xp_log (
             id uuid primary key default gen_random_uuid(),
-            user_id text not null,
+            user_id uuid not null,
             xp_gained integer default 0,
             source text,
             reference_id text,
@@ -435,7 +432,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "user_xp_log_all" ON user_xp_log;
           CREATE POLICY "user_xp_log_all" ON user_xp_log
-          FOR ALL USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'user_xp_log', status: 'OK' });
@@ -448,7 +445,7 @@ Deno.serve(async (req) => {
       await supabase.rpc('exec_sql', {
         sql: `
           CREATE TABLE IF NOT EXISTS user_streak (
-            user_id text primary key,
+            user_id uuid primary key,
             current_streak integer default 0,
             longest_streak integer default 0,
             last_checkin_date date
@@ -458,7 +455,7 @@ Deno.serve(async (req) => {
 
           DROP POLICY IF EXISTS "user_streak_all" ON user_streak;
           CREATE POLICY "user_streak_all" ON user_streak
-          FOR ALL USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'user_streak', status: 'OK' });
@@ -474,8 +471,7 @@ Deno.serve(async (req) => {
             id uuid primary key default gen_random_uuid(),
             created_date timestamptz default now(),
             updated_date timestamptz default now(),
-            user_email text not null,
-            user_id text,
+            user_id uuid not null,
             metric_date date not null,
             energia integer default 0,
             foco integer default 0,
@@ -483,17 +479,122 @@ Deno.serve(async (req) => {
             sono integer default 0
           );
 
-          ALTER TABLE daily_metrics ADD COLUMN IF NOT EXISTS user_id text;
+          ALTER TABLE daily_metrics ADD COLUMN IF NOT EXISTS user_id uuid;
           ALTER TABLE daily_metrics ENABLE ROW LEVEL SECURITY;
 
           DROP POLICY IF EXISTS "daily_metrics_all" ON daily_metrics;
           CREATE POLICY "daily_metrics_all" ON daily_metrics
-          FOR ALL USING (user_email = current_setting('request.jwt.claims', true)::json->>'sub');
+          FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
         `
       });
       setupResults.push({ table: 'daily_metrics', status: 'OK' });
     } catch (err) {
       setupResults.push({ table: 'daily_metrics', status: 'ERROR', error: err.message });
+    }
+
+    try {
+      await supabase.rpc('exec_sql', {
+        sql: `
+          DO $$
+          DECLARE
+            tbl text;
+            owned_tables text[] := ARRAY[
+              'user_progress',
+              'user_points',
+              'ranking',
+              'habits',
+              'habit_logs',
+              'workout_logs',
+              'daily_workouts',
+              'missions_progress',
+              'user_challenges',
+              'daily_metrics'
+            ];
+            policy_name text;
+          BEGIN
+            FOREACH tbl IN ARRAY owned_tables LOOP
+              IF to_regclass(format('public.%I', tbl)) IS NULL THEN
+                CONTINUE;
+              END IF;
+
+              IF NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = tbl
+                  AND column_name = 'user_id'
+              ) THEN
+                EXECUTE format('ALTER TABLE public.%I ADD COLUMN user_id uuid', tbl);
+              ELSIF EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = tbl
+                  AND column_name = 'user_id'
+                  AND udt_name <> 'uuid'
+              ) THEN
+                EXECUTE format(
+                  'ALTER TABLE public.%I ALTER COLUMN user_id TYPE uuid USING CASE WHEN user_id ~* %L THEN user_id::uuid ELSE NULL END',
+                  tbl,
+                  '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+                );
+              END IF;
+
+              IF EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = tbl
+                  AND column_name = 'user_email'
+              ) THEN
+                EXECUTE format(
+                  'UPDATE public.%1$I t SET user_id = u.id
+                   FROM auth.users u
+                   WHERE t.user_id IS NULL
+                     AND t.user_email IS NOT NULL
+                     AND u.email IS NOT NULL
+                     AND lower(t.user_email) = lower(u.email)',
+                  tbl
+                );
+                EXECUTE format('ALTER TABLE public.%I ALTER COLUMN user_email DROP NOT NULL', tbl);
+              END IF;
+
+              EXECUTE format('CREATE INDEX IF NOT EXISTS %I ON public.%I (user_id)', tbl || '_user_id_idx', tbl);
+              EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', tbl);
+
+              FOR policy_name IN
+                SELECT policyname FROM pg_policies WHERE schemaname = 'public' AND tablename = tbl
+              LOOP
+                EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', policy_name, tbl);
+              END LOOP;
+
+              IF tbl = 'ranking' THEN
+                EXECUTE 'CREATE POLICY "ranking_select" ON public.ranking FOR SELECT USING (true)';
+                EXECUTE 'CREATE POLICY "ranking_owner_all" ON public.ranking FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid())';
+              ELSE
+                EXECUTE format(
+                  'CREATE POLICY %I ON public.%I FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid())',
+                  tbl || '_owner_all',
+                  tbl
+                );
+              END IF;
+            END LOOP;
+
+            IF to_regclass('public.user_progress') IS NOT NULL THEN
+              CREATE UNIQUE INDEX IF NOT EXISTS user_progress_user_id_key ON public.user_progress (user_id);
+            END IF;
+            IF to_regclass('public.user_points') IS NOT NULL THEN
+              CREATE UNIQUE INDEX IF NOT EXISTS user_points_user_id_key ON public.user_points (user_id);
+            END IF;
+            IF to_regclass('public.ranking') IS NOT NULL THEN
+              CREATE UNIQUE INDEX IF NOT EXISTS ranking_user_id_key ON public.ranking (user_id);
+            END IF;
+          END $$;
+        `
+      });
+      setupResults.push({ table: 'owner_id_migration', status: 'OK' });
+    } catch (err) {
+      setupResults.push({ table: 'owner_id_migration', status: 'ERROR', error: err.message });
     }
 
     console.log('[Database Setup] Configuração concluída');

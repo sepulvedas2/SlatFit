@@ -18,13 +18,13 @@ export default function MealPlans() {
   }, []);
 
   const { data: profile } = useQuery({
-    queryKey: ['userProfile', user?.email],
+    queryKey: ['userProfile', user?.id],
     queryFn: async () => {
-      if (!user?.email) return null;
-      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      if (!user?.id) return null;
+      const profiles = await base44.entities.UserProfile.filter({ id: user.id });
       return profiles[0] || null;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
   const { data: meals, isLoading } = useQuery({

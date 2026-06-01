@@ -16,13 +16,13 @@ export default function PremiumFeatureLock({ featureName, children }) {
   }, []);
 
   const { data: subscription } = useQuery({
-    queryKey: ['subscription', user?.email],
+    queryKey: ['subscription', user?.id],
     queryFn: async () => {
-      if (!user?.email) return null;
-      const subs = await base44.entities.Subscription.filter({ user_email: user.email });
+      if (!user?.id) return null;
+      const subs = await base44.entities.Subscription.filter({ user_id: user.id });
       return subs[0] || null;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
   const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
