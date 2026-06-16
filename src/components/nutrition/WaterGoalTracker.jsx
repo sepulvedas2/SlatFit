@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Droplets, Settings, Sparkles } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -89,7 +89,7 @@ export default function WaterGoalTracker({ userId, nutritionData, userProfile })
     await updateWaterMutation.mutateAsync(newIntake);
     if (wasNotReached && newIntake >= goalAmount) {
       setCelebrateGoal(true);
-      await base44.functions.invoke('addXP', { amount: 20, source: 'challenge', reference_id: 'water-goal' });
+      await api.functions.invoke('addXP', { amount: 20, source: 'challenge', reference_id: 'water-goal' });
       queryClient.invalidateQueries(['userPoints']);
       toast.success("🎉 Meta de água concluída! +20 XP");
       setTimeout(() => setCelebrateGoal(false), 3000);

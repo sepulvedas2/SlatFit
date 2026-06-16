@@ -1,4 +1,4 @@
-# Base44 Preview Template for MicroVM sandbox
+# SlatFit
 
 This template is used by the server to preview user-apps.
 

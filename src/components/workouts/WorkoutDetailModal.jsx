@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
@@ -18,7 +18,7 @@ export default function WorkoutDetailModal({ workout, onClose, userId }) {
 
   const completeWorkoutMutation = useMutation({
     mutationFn: async () => {
-      return base44.entities.WorkoutLog.create({
+      return api.entities.WorkoutLog.create({
         user_id: userId,
         workout_id: workout.id,
         workout_name: workout.name,

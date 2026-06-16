@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ export default function RoutineConsistency({ userId }) {
     queryKey: ['nutritionData', userId, today],
     queryFn: async () => {
       if (!userId) return null;
-      const data = await base44.entities.NutritionData.filter({
+      const data = await api.entities.NutritionData.filter({
         user_id: userId,
         log_date: today
       });
@@ -30,7 +30,7 @@ export default function RoutineConsistency({ userId }) {
     queryFn: async () => {
       if (!userId) return [];
       const sevenDaysAgo = format(subDays(new Date(), 7), 'yyyy-MM-dd');
-      const data = await base44.entities.NutritionData.filter({
+      const data = await api.entities.NutritionData.filter({
         user_id: userId
       });
       return data.filter(d => d.log_date >= sevenDaysAgo);
@@ -45,13 +45,13 @@ export default function RoutineConsistency({ userId }) {
       
       if (nutritionData) {
         const score = calculateScore({...nutritionData, ...updates});
-        return base44.entities.NutritionData.update(nutritionData.id, {
+        return api.entities.NutritionData.update(nutritionData.id, {
           ...updates,
           consistency_score: score
         });
       } else {
         const score = calculateScore(updates);
-        return base44.entities.NutritionData.create({
+        return api.entities.NutritionData.create({
           user_id: userId,
           log_date: today,
           ...updates,

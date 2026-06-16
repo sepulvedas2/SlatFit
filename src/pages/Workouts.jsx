@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -25,7 +25,7 @@ export default function Workouts() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    api.auth.me().then(setUser).catch(() => {});
   }, []);
 
   const { data: profile } = useQuery({
@@ -73,10 +73,10 @@ export default function Workouts() {
     initialData: [],
   });
 
-  // Fetch all exercises from base44 entities (where images are stored)
+  // Fetch all exercises from the entity API (where images are stored)
   const { data: exercises = [] } = useQuery({
     queryKey: ['exercises'],
-    queryFn: () => base44.entities.Exercise.list(),
+    queryFn: () => api.entities.Exercise.list(),
     initialData: [],
   });
 

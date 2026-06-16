@@ -2,9 +2,6 @@ import { invokeFunction, request } from './transport';
 import { entities } from './createEntityAPI';
 import { saveUser, clearUser, getStoredToken } from '@/components/auth';
 
-// `base44` is now a thin adapter over SlatFit BE. There is no Base44 SDK
-// dependency anymore: auth/data/functions go through ./transport, AI lives in
-// ./ai, and integrations.Core has been removed.
 async function me() {
   const json = await request('/auth/me');
   const user = json?.user;
@@ -37,7 +34,7 @@ function logout() {
   clearUser();
 }
 
-export const base44 = {
+export const api = {
   functions: { invoke: invokeFunction },
   auth: { me, login, register, logout },
   entities,

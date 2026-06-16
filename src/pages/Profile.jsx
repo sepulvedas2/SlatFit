@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -57,7 +57,7 @@ export default function Profile({ onLogout }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    api.auth.me().then(setUser).catch(() => {});
   }, []);
 
   const { data: profile } = useQuery({
@@ -104,7 +104,7 @@ export default function Profile({ onLogout }) {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
-      const authUser = await base44.auth.me().catch(() => null);
+      const authUser = await api.auth.me().catch(() => null);
       if (!authUser || !authUser.id) {
         console.error('Usuário não autenticado:', authUser);
         alert('Erro: usuário não identificado');

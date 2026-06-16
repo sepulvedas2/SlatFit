@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -67,7 +67,7 @@ export default function Habits() {
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    api.auth.me().then(setUser).catch(() => {});
   }, []);
 
 
@@ -171,7 +171,7 @@ export default function Habits() {
           xp_earned: nextCompleted && !existingLog.completed ? xpEarned : existingLog.xp_earned || 0,
         });
         if (nextCompleted && !existingLog.completed) {
-          await base44.functions.invoke("addXP", { amount: xpEarned, source: 'habit', reference_id: habit.id });
+          await api.functions.invoke("addXP", { amount: xpEarned, source: 'habit', reference_id: habit.id });
         }
         return;
       }
@@ -186,7 +186,7 @@ export default function Habits() {
         xp_earned: xpEarned,
         completed_at: new Date().toISOString(),
       });
-      await base44.functions.invoke("updateXP", { xp_ganho: xpEarned, tipo_acao: "habito" });
+      await api.functions.invoke("updateXP", { xp_ganho: xpEarned, tipo_acao: "habito" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habitLogs"] });

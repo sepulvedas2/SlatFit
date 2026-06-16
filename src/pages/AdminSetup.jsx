@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Check, AlertCircle, Database } from "lucide-react";
@@ -15,7 +15,7 @@ export default function AdminSetup() {
     setError(null);
 
     try {
-      const response = await base44.functions.invoke('seedExercises', {});
+      const response = await api.functions.invoke('seedExercises', {});
       
       if (response.data?.success) {
         setResult(response.data);

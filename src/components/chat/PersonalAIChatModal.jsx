@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import * as ai from "@/api/ai";
 import { useMutation } from "@tanstack/react-query";
 import AIChatInput from "./AIChatInput";
@@ -23,7 +23,7 @@ export default function PersonalAIChatModal({ user, onClose }) {
   const feedbackMutation = useMutation({
     mutationFn: async ({ messageIndex, feedbackType, message }) => {
       const userQuestion = messages[messageIndex - 1]?.content || "";
-      return base44.entities.AIFeedback.create({
+      return api.entities.AIFeedback.create({
         user_id: user.id,
         message_content: message.content,
         user_question: userQuestion,
@@ -59,10 +59,10 @@ export default function PersonalAIChatModal({ user, onClose }) {
     try {
       // Buscar contexto do usuário
       const [profile, trainingProfile, todayNutrition, recentWorkouts] = await Promise.all([
-        base44.entities.UserProfile.filter({ id: user.id }).then(p => p[0]),
-        base44.entities.TrainingProfile.filter({ user_id: user.id }).then(t => t[0]).catch(() => null),
-        base44.entities.NutritionData.filter({ user_id: user.id, log_date: new Date().toISOString().split('T')[0] }).then(n => n[0]).catch(() => null),
-        base44.entities.WorkoutLog.filter({ user_id: user.id }).then(w => w.slice(0, 3)).catch(() => [])
+        api.entities.UserProfile.filter({ id: user.id }).then(p => p[0]),
+        api.entities.TrainingProfile.filter({ user_id: user.id }).then(t => t[0]).catch(() => null),
+        api.entities.NutritionData.filter({ user_id: user.id, log_date: new Date().toISOString().split('T')[0] }).then(n => n[0]).catch(() => null),
+        api.entities.WorkoutLog.filter({ user_id: user.id }).then(w => w.slice(0, 3)).catch(() => [])
       ]);
 
       const userContext = {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Heart, Zap, Brain, Target } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import * as ai from "@/api/ai";
 import { differenceInDays, format } from "date-fns";
 import AIAssistantCard from "./AIAssistantCard";
@@ -45,7 +45,7 @@ export default function IAGOCoach({
     const today = format(new Date(), 'yyyy-MM-dd');
     
     // Detectar inatividade
-    const lastWorkouts = await base44.entities.WorkoutLog.filter({ 
+    const lastWorkouts = await api.entities.WorkoutLog.filter({ 
       user_id: user.id 
     });
     const lastWorkout = lastWorkouts[0];
@@ -54,7 +54,7 @@ export default function IAGOCoach({
       : 999;
 
     // Detectar padrão de check-ins
-    const recentCheckIns = await base44.entities.DailyCheckIn.filter({
+    const recentCheckIns = await api.entities.DailyCheckIn.filter({
       user_id: user.id
     });
     const last7DaysCheckIns = recentCheckIns.slice(0, 7);

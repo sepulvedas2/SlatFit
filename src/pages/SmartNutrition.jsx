@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, BookOpen, ChevronRight, Utensils } from "lucide-react";
@@ -16,7 +16,7 @@ export default function SmartNutrition() {
   const today = format(new Date(), 'yyyy-MM-dd');
 
   useEffect(() => {
-    base44.auth.me()
+    api.auth.me()
       .then(setUser)
       .catch(() => {})
       .finally(() => setLoading(false));

@@ -14,7 +14,7 @@ const FALLBACK_FOODS = [
   { id: "fallback-11", food_name: "Pão integral", portion_size: "2 fatias", calories: 138, protein: 6, carbohydrates: 24, fat: 2 },
 ];
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Input } from "@/components/ui/input";
 import { Search, Database } from "lucide-react";
 import FoodSelectionModal from "./FoodSelectionModal";
@@ -28,7 +28,7 @@ export default function FoodSearchSection({ onAddFood }) {
     queryKey: ["foodDatabaseSearch", searchTerm],
     queryFn: async () => {
       try {
-        const response = await base44.functions.invoke("searchFoodsDatabase", { query: searchTerm });
+        const response = await api.functions.invoke("searchFoodsDatabase", { query: searchTerm });
         const foods = response.data?.foods;
         if (Array.isArray(foods) && foods.length > 0) return foods;
       } catch (error) {
@@ -44,7 +44,7 @@ export default function FoodSearchSection({ onAddFood }) {
     queryKey: ["foodDatabaseBrowse"],
     queryFn: async () => {
       try {
-        const response = await base44.functions.invoke("searchFoodsDatabase", { query: "" });
+        const response = await api.functions.invoke("searchFoodsDatabase", { query: "" });
         const foods = response.data?.foods;
         if (Array.isArray(foods) && foods.length > 0) return foods;
       } catch (error) {

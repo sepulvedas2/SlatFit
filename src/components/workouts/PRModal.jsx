@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trophy, Loader2, X, Dumbbell, RotateCcw, Calendar, FileText, TrendingUp, Sparkles, ChevronDown } from "lucide-react";

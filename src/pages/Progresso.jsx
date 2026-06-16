@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 
 import UserResumoCard from "@/components/progress/UserResumoCard";
@@ -21,7 +21,7 @@ export default function Progresso() {
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    api.auth.me().then(setUser).catch(() => {});
   }, []);
 
   const { data: userPoints } = useQuery({
@@ -36,7 +36,7 @@ export default function Progresso() {
   const { data: rankingSnapshot } = useQuery({
     queryKey: ["rankingSnapshot", user?.id],
     queryFn: async () => {
-      const response = await base44.functions.invoke("getRankingSnapshot", {});
+      const response = await api.functions.invoke("getRankingSnapshot", {});
       return response.data;
     },
     enabled: !!user?.id,
@@ -118,7 +118,7 @@ export default function Progresso() {
 
   const completeTodayMutation = useMutation({
     mutationFn: async (challenge) => {
-      const response = await base44.functions.invoke("completeChallengeCheckIn", {
+      const response = await api.functions.invoke("completeChallengeCheckIn", {
         userChallengeId: challenge.id,
         challengeMeta: challenge.challengeMeta,
       });

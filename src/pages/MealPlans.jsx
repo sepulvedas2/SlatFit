@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,14 +14,14 @@ export default function MealPlans() {
   const [selectedMeal, setSelectedMeal] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    api.auth.me().then(setUser).catch(() => {});
   }, []);
 
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const profiles = await base44.entities.UserProfile.filter({ id: user.id });
+      const profiles = await api.entities.UserProfile.filter({ id: user.id });
       return profiles[0] || null;
     },
     enabled: !!user?.id,
@@ -29,7 +29,7 @@ export default function MealPlans() {
 
   const { data: meals, isLoading } = useQuery({
     queryKey: ['mealPlans'],
-    queryFn: () => base44.entities.MealPlan.list(),
+    queryFn: () => api.entities.MealPlan.list(),
     initialData: [],
   });
 

@@ -13,7 +13,7 @@ import {
 import { 
   X, Info, Zap, Target, Check, Loader2
 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import * as ai from "@/api/ai";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -43,7 +43,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
       if (isOpen && exercise) {
         // First, check if this exercise already exists in DB by name
         try {
-          const existingExercises = await base44.entities.Exercise.filter({ name: exercise.name }, '-created_date', 10);
+          const existingExercises = await api.entities.Exercise.filter({ name: exercise.name }, '-created_date', 10);
           if (existingExercises && existingExercises.length > 0) {
             const dbExercise = existingExercises[0];
             setCurrentExercise(dbExercise);
@@ -96,9 +96,9 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
   const createOrUpdateExerciseMutation = useMutation({
     mutationFn: async (data) => {
       if (currentExercise?.id) {
-        return base44.entities.Exercise.update(currentExercise.id, data);
+        return api.entities.Exercise.update(currentExercise.id, data);
       } else {
-        return base44.entities.Exercise.create(data);
+        return api.entities.Exercise.create(data);
       }
     },
     onSuccess: (result) => {

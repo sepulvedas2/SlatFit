@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Flame, Dumbbell, Apple, Target } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { format } from "date-fns";
 
 export default function DailyMissions({ userId }) {
@@ -11,7 +11,7 @@ export default function DailyMissions({ userId }) {
 
   const { data: todayFoods } = useQuery({
     queryKey: ['todayFoods', userId, today],
-    queryFn: () => base44.entities.FoodLog.filter({ 
+    queryFn: () => api.entities.FoodLog.filter({ 
       user_id: userId, 
       log_date: today 
     }),
@@ -21,7 +21,7 @@ export default function DailyMissions({ userId }) {
 
   const { data: todayWorkouts } = useQuery({
     queryKey: ['todayWorkouts', userId, today],
-    queryFn: () => base44.entities.WorkoutLog.filter({ 
+    queryFn: () => api.entities.WorkoutLog.filter({ 
       user_id: userId, 
       completed_date: today 
     }),
@@ -32,7 +32,7 @@ export default function DailyMissions({ userId }) {
   const { data: todayCheckIn } = useQuery({
     queryKey: ['checkIn', userId, today],
     queryFn: async () => {
-      const checkIns = await base44.entities.DailyCheckIn.filter({
+      const checkIns = await api.entities.DailyCheckIn.filter({
         user_id: userId,
         check_in_date: today
       });

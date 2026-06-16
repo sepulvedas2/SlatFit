@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export default function FoodScanner() {
   const today = format(new Date(), "yyyy-MM-dd");
 
   useEffect(() => {
-    base44.auth.me().then(async (u) => {
+    api.auth.me().then(async (u) => {
       setUser(u);
       const profiles = await db.UserProfile.filter({ id: u.id });
       setUserProfile(profiles[0] || null);

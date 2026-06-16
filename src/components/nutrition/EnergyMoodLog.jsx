@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Card } from "@/components/ui/card";
 import { Zap, Smile, Meh, Frown, Coffee } from "lucide-react";
 
@@ -11,7 +11,7 @@ export default function EnergyMoodLog({ userId, today }) {
     queryKey: ['nutritionData', userId, today],
     queryFn: async () => {
       if (!userId) return null;
-      const data = await base44.entities.NutritionData.filter({
+      const data = await api.entities.NutritionData.filter({
         user_id: userId,
         log_date: today
       });
@@ -25,9 +25,9 @@ export default function EnergyMoodLog({ userId, today }) {
       if (!userId) throw new Error("User id is required");
       
       if (nutritionData) {
-        return base44.entities.NutritionData.update(nutritionData.id, updates);
+        return api.entities.NutritionData.update(nutritionData.id, updates);
       } else {
-        return base44.entities.NutritionData.create({
+        return api.entities.NutritionData.create({
           user_id: userId,
           log_date: today,
           ...updates

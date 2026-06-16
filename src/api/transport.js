@@ -35,8 +35,7 @@ export async function request(path, { method = 'GET', body, auth = true, headers
   return json;
 }
 
-// Mirrors the Base44 SDK `functions.invoke(name, payload)` contract:
-// resolves to an axios-like response where `data` is the function's JSON body.
+// Resolves to an axios-like response where `data` is the function's JSON body.
 export async function invokeFunction(name, payload) {
   const data = await request(`/functions/${name}`, { method: 'POST', body: payload ?? {} });
   return { data };

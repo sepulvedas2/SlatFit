@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { getStoredToken, getStoredUser, clearUser } from '@/components/auth';
 
 const AuthContext = createContext();
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     if (stored) setUser(stored);
 
     try {
-      const currentUser = await base44.auth.me();
+      const currentUser = await api.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
     } catch (error) {
@@ -42,21 +42,21 @@ export const AuthProvider = ({ children }) => {
   }, [validateSession]);
 
   const login = useCallback(async (email, password) => {
-    const loggedUser = await base44.auth.login(email, password);
+    const loggedUser = await api.auth.login(email, password);
     setUser(loggedUser);
     setIsAuthenticated(true);
     return loggedUser;
   }, []);
 
   const register = useCallback(async (email, password, fullName) => {
-    const newUser = await base44.auth.register(email, password, fullName);
+    const newUser = await api.auth.register(email, password, fullName);
     setUser(newUser);
     setIsAuthenticated(true);
     return newUser;
   }, []);
 
   const logout = useCallback(() => {
-    base44.auth.logout();
+    api.auth.logout();
     setUser(null);
     setIsAuthenticated(false);
   }, []);
