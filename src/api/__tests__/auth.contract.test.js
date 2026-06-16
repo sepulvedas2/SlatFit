@@ -7,16 +7,6 @@ vi.mock('@/components/auth', () => ({
   getStoredUser: vi.fn(),
 }));
 
-// Avoid initializing the real Base44 SDK during the module load.
-vi.mock('@base44/sdk', () => ({
-  createClient: () => ({ integrations: { Core: {} } }),
-}));
-
-// app-params touches `window` at import time; stub it for the Node test env.
-vi.mock('@/lib/app-params', () => ({
-  appParams: { appId: 'app', serverUrl: 'http://localhost', token: null, functionsVersion: null },
-}));
-
 import { base44 } from '../base44Client';
 import { API_BASE } from '../transport';
 import * as authStore from '@/components/auth';

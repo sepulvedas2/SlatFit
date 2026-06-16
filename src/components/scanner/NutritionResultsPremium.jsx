@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sliders, Lightbulb, ArrowRight, Check, Plus, Trash2, Edit3, X } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -233,25 +233,10 @@ export default function NutritionResultsPremium({ data, userProfile, mealType, o
   const fetchSuggestions = async () => {
     setLoadingSuggestions(true);
     setShowSuggestions(true);
-    const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Você é nutricionista. Para a refeição "${foodItems.join(", ")}" com ${cal}kcal, sugira 2 substituições simples e práticas para o objetivo: ${goal || "manutenção"}. Seja específico com economia calórica.`,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          suggestions: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                original: { type: "string" },
-                substitute: { type: "string" },
-                savings: { type: "string" },
-                reason: { type: "string" }
-              }
-            }
-          }
-        }
-      }
+    const res = await ai.mealSubstitutions({
+      food_items: foodItems,
+      calories: cal,
+      goal,
     });
     setSuggestions(res?.suggestions || []);
     setLoadingSuggestions(false);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 import { X, ChevronDown, Minus, Sparkles, Send, Dumbbell, Utensils, Zap, Brain, Home } from "lucide-react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import AIChatInput from "./AIChatInput";
@@ -91,28 +91,18 @@ export default function SlatFitAssistant({ user, userProfile, context = "geral" 
     setMessages(newMessages);
     setLoading(true);
 
-    const history = newMessages
-      .slice(-8)
-      .map(m => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
-      .join("\n");
-
-    const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Você é o Assistente SlatFit, um personal trainer digital especialista em fitness, nutrição e bem-estar.
-Responda sempre em português brasileiro, de forma clara, motivadora e personalizada.
-Seja breve e direto (máximo 4-5 linhas). Use o nome do usuário quando souber.
-
-Dados do usuário:
-- Nome: ${memory.name || userName}
-- Objetivo principal: ${memory.goal || goal}
-- Peso atual: ${userProfile?.current_weight ? userProfile.current_weight + "kg" : memory.weight || "não informado"}
-- Altura: ${userProfile?.height ? userProfile.height + "cm" : memory.height || "não informada"}
-- Contexto atual: ${context === "nutrition" ? "Aba de Nutrição" : context === "workout" ? "Aba de Treinos" : "Geral"}
-${buildMemoryContext(memory)}
-
-Histórico recente:
-${history}
-
-Assistente:`,
+    const res = await ai.chat({
+      persona: "assistant",
+      message: msg,
+      history: messages,
+      context: {
+        name: memory.name || userName,
+        goal: memory.goal || goal,
+        weight: userProfile?.current_weight,
+        height: userProfile?.height,
+        appContext: context,
+        memory,
+      },
     });
 
     setMessages(prev => [...prev, { role: "assistant", content: res }]);

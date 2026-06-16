@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
-import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 import AIChatInput from "./AIChatInput";
 
 export default function AssistantChatModal({ user, onClose }) {
@@ -34,23 +34,10 @@ export default function AssistantChatModal({ user, onClose }) {
     setLoading(true);
 
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é o assistente pessoal do FitLens. Você é amigável, motivador e especialista em fitness, nutrição e bem-estar.
-
-Contexto do usuário: ${user?.full_name || 'Usuário'} está usando o FitLens para melhorar sua saúde e fitness.
-
-Pergunta do usuário: ${userMessage}
-
-Instruções:
-- Seja breve, direto e motivador
-- Use emojis quando apropriado
-- Se a pergunta for sobre treino, nutrição ou saúde, responda com base científica
-- Se não souber, seja honesto mas sempre tente ajudar
-- Mantenha tom amigável e encorajador
-- Máximo 3-4 linhas de resposta
-
-Responda de forma natural e útil:`,
-        add_context_from_internet: false
+      const response = await ai.chat({
+        persona: "iago",
+        message: userMessage,
+        context: { userName: user?.full_name },
       });
 
       setMessages(prev => [...prev, { 

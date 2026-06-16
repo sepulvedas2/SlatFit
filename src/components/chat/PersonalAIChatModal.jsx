@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 import { useMutation } from "@tanstack/react-query";
 import AIChatInput from "./AIChatInput";
 
@@ -80,53 +81,24 @@ export default function PersonalAIChatModal({ user, onClose }) {
         ultimosTreinos: recentWorkouts.map(w => w.workout_name)
       };
 
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é o **Assistente Personal do aplicativo FitnessLynx**, especializado em **academia, treino, nutrição esportiva, saúde e bem-estar**.
-
-Seu papel é **educar, orientar e motivar** usuários de forma **ética, profissional, segura e humanizada**.
-
-📌 CONTEXTO DO USUÁRIO:
-- Nome: ${userContext.nome || 'Atleta'}
-- Idade: ${userContext.idade || 'não informada'}
-- Objetivo: ${userContext.objetivo}
-- Nível: ${userContext.nivel}
-- Peso atual: ${userContext.peso ? userContext.peso + 'kg' : 'não informado'}
-- Altura: ${userContext.altura ? userContext.altura + 'cm' : 'não informada'}
-- Frequência de treino: ${userContext.frequenciaTreino || 'não definida'} vezes por semana
-- Divisão: ${userContext.divisaoTreino || 'não definida'}
-- Restrições alimentares: ${userContext.restricoes.length > 0 ? userContext.restricoes.join(', ') : 'nenhuma'}
-- Lesões/limitações: ${userContext.lesoes.length > 0 ? userContext.lesoes.join(', ') : 'nenhuma'}
-- Meta de proteína: ${userContext.metaProteina ? userContext.metaProteina + 'g/dia' : 'não definida'}
-- Água hoje: ${userContext.aguaHoje ? userContext.aguaHoje + 'ml' : 'não registrada'}
-- Últimos treinos: ${userContext.ultimosTreinos.join(', ') || 'nenhum registrado'}
-
-📌 REGRAS DE COMPORTAMENTO:
-1. NUNCA prescreva medicamentos ou diagnósticos
-2. NUNCA substitua médicos ou nutricionistas
-3. Se a pergunta envolver risco à saúde, oriente procurar um profissional
-4. Use linguagem clara, amigável e motivadora
-5. Seja direto, sem respostas longas demais (máximo 4-5 linhas)
-6. SEMPRE incentive constância e hábitos saudáveis
-7. Personalize com base no contexto do usuário
-
-📌 TIPOS DE PERGUNTAS QUE VOCÊ DEVE RESPONDER:
-- Dúvidas sobre exercícios e execução correta
-- Frequência de treino e descanso muscular
-- Alimentação geral para treino
-- Hidratação e rotina saudável
-- Motivação e disciplina
-- Explicação de conceitos fitness
-
-📌 ESTRUTURA DAS RESPOSTAS:
-1. Resposta direta
-2. Explicação simples
-3. Dica prática aplicável hoje
-4. Mensagem motivacional curta (com emoji)
-
-Pergunta do usuário: ${userMessage}
-
-Responda de forma personalizada, natural e útil:`,
-        add_context_from_internet: false
+      const response = await ai.chat({
+        persona: "personal",
+        message: userMessage,
+        context: {
+          name: userContext.nome,
+          age: userContext.idade,
+          goal: profile?.goal,
+          level: userContext.nivel,
+          weight: userContext.peso,
+          height: userContext.altura,
+          restrictions: userContext.restricoes,
+          frequency: userContext.frequenciaTreino,
+          division: userContext.divisaoTreino,
+          injuries: userContext.lesoes,
+          proteinTarget: userContext.metaProteina,
+          waterToday: userContext.aguaHoje,
+          recentWorkouts: userContext.ultimosTreinos,
+        },
       });
 
       const assistantMessage = { 

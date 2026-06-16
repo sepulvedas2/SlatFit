@@ -41,3 +41,36 @@ export async function invokeFunction(name, payload) {
   const data = await request(`/functions/${name}`, { method: 'POST', body: payload ?? {} });
   return { data };
 }
+
+// Multipart upload to SlatFit BE. Do NOT set Content-Type so the browser adds
+// the multipart boundary itself. Returns the backend JSON body, e.g. { file_url }.
+export async function uploadFile(file) {
+  const form = new FormData();
+  form.append('file', file);
+
+  const finalHeaders = {};
+  const token = getStoredToken();
+  if (token) finalHeaders.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/uploads`, {
+    method: 'POST',
+    headers: finalHeaders,
+    body: form,
+  });
+
+  let json = null;
+  try {
+    json = await res.json();
+  } catch {
+    json = null;
+  }
+
+  if (!res.ok) {
+    const error = new Error(json?.message || json?.error || res.statusText || 'Upload failed');
+    error.status = res.status;
+    error.data = json;
+    throw error;
+  }
+
+  return json;
+}

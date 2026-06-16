@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
-import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
 import {
   Flame, Star, ChevronDown, ChevronUp,
@@ -146,12 +146,13 @@ export default function ScannerResultScreen({
   const fetchSuggestion = async () => {
     setLoadingSuggestion(true);
     setShowSuggestion(true);
-    const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Você é nutricionista. Para a refeição "${data.food_name}" (${cal}kcal, ${prot}g prot, ${carbs}g carbs, ${fats}g gordura), dê UMA sugestão prática e curta para melhorar o equilíbrio nutricional, considerando objetivo: ${goal || "manutenção"}. Máximo 2 frases.`,
-      response_json_schema: {
-        type: "object",
-        properties: { suggestion: { type: "string" } }
-      }
+    const res = await ai.mealSuggestion({
+      food_name: data.food_name,
+      calories: cal,
+      protein: prot,
+      carbs,
+      fats,
+      goal,
     });
     setSuggestion(res?.suggestion || null);
     setLoadingSuggestion(false);

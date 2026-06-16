@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 import { MessageCircle, X } from "lucide-react";
 import AIChatInput from "../chat/AIChatInput";
 
@@ -26,22 +26,11 @@ export default function NutritionChatButton({ userProfile }) {
     setInput("");
     setLoading(true);
 
-    const goal = userProfile?.goal === "weight_loss" ? "Emagrecimento" : userProfile?.goal === "muscle_gain" ? "Hipertrofia" : "Manutenção";
-
-    const history = [...messages, userMsg]
-      .map(m => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
-      .join("\n");
-
-    const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Você é um assistente de nutrição e treino brasileiro, profissional, didático e direto.
-Objetivo do usuário: ${goal}.
-Responda em português brasileiro, de forma clara e concisa (máximo 4 linhas).
-Não use linguagem técnica excessiva.
-
-Histórico da conversa:
-${history}
-
-Assistente:`,
+    const res = await ai.chat({
+      persona: "nutrition",
+      message: userMsg.content,
+      history: messages,
+      context: { goal: userProfile?.goal },
     });
 
     setMessages(prev => [...prev, { role: "assistant", content: res }]);

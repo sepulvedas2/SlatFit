@@ -14,6 +14,7 @@ import {
   X, Info, Zap, Target, Check, Loader2
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getExerciseImage } from "./exerciseImages";
@@ -130,7 +131,7 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose, isAdmin
     
     try {
       // Upload the file first
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await ai.uploadFile(file);
       
       // Update form data
       const updatedData = { 

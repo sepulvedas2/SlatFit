@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -92,85 +92,13 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
     setIsGenerating(true);
     const { objetivo, frequencia, nivel, local, tempo, lesao } = answersOverride || answers;
 
-    const prompt = `Você é um personal trainer de elite. Crie um plano de treino semanal personalizado e profissional.
-
-PERFIL DO USUÁRIO:
-- Objetivo: ${objetivo === "weight_loss" ? "Emagrecimento" : objetivo === "muscle_gain" ? "Ganho de massa muscular" : "Manutenção"}
-- Frequência: ${frequencia}x por semana
-- Nível: ${nivel}
-- Local: ${local}
-- Tempo disponível: ${tempo} minutos por sessão
-- Lesões/Restrições: ${lesao}
-
-REGRAS OBRIGATÓRIAS:
-1. Crie exatamente ${frequencia} treinos (um para cada dia que o usuário vai treinar)
-2. Dê nomes fortes e profissionais para cada treino (ex: "Treino A – Peito e Tríceps", "Treino B – Costas e Bíceps")
-3. Cada treino deve ter entre 5 e 8 exercícios
-4. Exercícios devem ser adequados ao nível e local
-5. Inclua séries, repetições e intervalo de descanso em cada exercício
-6. Inclua observação técnica breve para cada exercício
-7. Classifique cada treino como "leve", "moderado" ou "intenso" para o cálculo de XP
-8. Atribua um grupo muscular principal a cada treino
-
-Responda SOMENTE com JSON válido neste formato exato:
-{
-  "plan_name": "Nome do Plano",
-  "plan_description": "Descrição breve e motivante",
-  "workouts": [
-    {
-      "name": "Treino A – Peito e Tríceps",
-      "muscle_group": "Peito e Tríceps",
-      "day_of_week": "segunda",
-      "intensity": "moderado",
-      "duration_minutes": 55,
-      "exercises": [
-        {
-          "name": "Nome do exercício",
-          "sets": "4",
-          "reps": "10-12",
-          "rest_seconds": "60",
-          "notes": "Observação técnica"
-        }
-      ]
-    }
-  ]
-}`;
-
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          plan_name: { type: "string" },
-          plan_description: { type: "string" },
-          workouts: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                muscle_group: { type: "string" },
-                day_of_week: { type: "string" },
-                intensity: { type: "string" },
-                duration_minutes: { type: "number" },
-                exercises: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      name: { type: "string" },
-                      sets: { type: "string" },
-                      reps: { type: "string" },
-                      rest_seconds: { type: "string" },
-                      notes: { type: "string" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    const result = await ai.workoutPlan({
+      objective: objetivo,
+      frequency: frequencia,
+      level: nivel,
+      place: local,
+      time: tempo,
+      injuries: lesao,
     });
 
     setGeneratedPlan(result);

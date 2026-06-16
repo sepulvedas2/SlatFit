@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
+import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,33 +94,8 @@ export default function FoodScanner() {
   const analyzeFood = async (file) => {
     setError(null);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é um nutricionista expert. Analise esta imagem de alimento com MÁXIMA PRECISÃO e retorne informações nutricionais REAIS baseadas em bases de dados científicas (USDA, TACO Brasil).
-
-Identifique:
-1. Nome EXATO do alimento (em português, completo)
-2. Tamanho REAL estimado da porção
-3. Valores nutricionais PRECISOS para ESTA porção:
-   - Calorias (kcal)
-   - Proteínas (g)
-   - Carboidratos (g)
-   - Gorduras (g)
-
-REGRAS: Se houver múltiplos alimentos, some os valores totais. Use dados de tabelas nutricionais oficiais (USDA, TACO). NUNCA invente valores.`,
-        file_urls: [file_url],
-        response_json_schema: {
-          type: "object",
-          properties: {
-            food_name: { type: "string" },
-            portion_size: { type: "string" },
-            calories: { type: "number" },
-            protein: { type: "number" },
-            carbs: { type: "number" },
-            fats: { type: "number" }
-          }
-        }
-      });
+      const { file_url } = await ai.uploadFile(file);
+      const result = await ai.analyzeFoodImage(file_url);
       setNutritionData({ ...result, image_url: file_url });
       setView("result");
     } catch {
