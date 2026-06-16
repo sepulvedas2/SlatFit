@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { api } from "@/api/client";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -48,17 +48,13 @@ function imcLabel(imc) {
 }
 
 export default function Profile({ onLogout }) {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [success, setSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
   const { isDark } = useTheme();
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.id],
@@ -104,9 +100,8 @@ export default function Profile({ onLogout }) {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {
-      const authUser = await api.auth.me().catch(() => null);
-      if (!authUser || !authUser.id) {
-        console.error('Usuário não autenticado:', authUser);
+      if (!user || !user.id) {
+        console.error('Usuário não autenticado:', user);
         alert('Erro: usuário não identificado');
         return null;
       }
@@ -125,20 +120,20 @@ export default function Profile({ onLogout }) {
         objective: data.goal || null,
         biotype: data.body_type || null,
         activity_level: data.activity_level || null,
-        user_id: authUser.id,
-        email: authUser.email,
+        user_id: user.id,
+        email: user.email,
       };
 
       const payload = {
-        id: authUser.id,
+        id: user.id,
         ...safeData,
       };
 
-      console.log('USER:', authUser);
+      console.log('USER:', user);
       console.log('PAYLOAD:', payload);
 
       try {
-        const existingProfiles = await db.UserProfile.filter({ id: authUser.id });
+        const existingProfiles = await db.UserProfile.filter({ id: user.id });
         const existingProfile = existingProfiles[0] || null;
         console.log('EXISTING_PROFILE:', existingProfile);
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { api } from "@/api/client";
+import React, { useState } from "react";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -112,13 +112,9 @@ function getNextWorkout(dailyWorkouts) {
 }
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [showGoalModal, setShowGoalModal] = useState(false);
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.id],

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { api } from "@/api/client";
+import React, { useState } from "react";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -18,15 +18,11 @@ import WorkoutAICoach from "../components/workouts/WorkoutAICoach";
 import SlatFitAssistant from "../components/chat/SlatFitAssistant";
 
 export default function Workouts() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("app-workouts");
   const [selectedWeek, setSelectedWeek] = useState(1);
 
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.id],

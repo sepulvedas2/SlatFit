@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Circle, Dumbbell, Play, Clock, ChevronDown, ChevronUp, Image, Upload, Loader2, X, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { api } from "@/api/client";
+import { useAuth } from "@/lib/AuthContext";
 import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,13 +17,9 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [prModalOpen, setPRModalOpen] = useState(false);
   const [selectedPRExercise, setSelectedPRExercise] = useState(null);
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   // Fetch all exercises from database to get saved images
   const { data: savedExercises = [] } = useQuery({

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { api } from "@/api/client";
+import React, { useState } from "react";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -11,15 +11,11 @@ import { getExerciseImage } from "./exerciseImages";
 import PRModal from "./PRModal";
 
 export default function ExerciseBlock({ block, exercises = [] }) {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [prModalOpen, setPrModalOpen] = useState(false);
   const [selectedExerciseForPR, setSelectedExerciseForPR] = useState(null);
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   const { data: prRecords = [] } = useQuery({
     queryKey: ['prRecords', user?.id],

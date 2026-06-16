@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { api } from "@/api/client";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 
 import UserResumoCard from "@/components/progress/UserResumoCard";
@@ -13,16 +14,12 @@ import RankingModal from "@/components/progress/RankingModal";
 import { challengeCatalog, challengeList, challengeMap } from "@/components/progress/challengeCatalog";
 
 export default function Progresso() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [xpFeedback, setXpFeedback] = useState(null);
   const [rankingOpen, setRankingOpen] = useState(false);
   const [completionToast, setCompletionToast] = useState(null);
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split("T")[0];
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   const { data: userPoints } = useQuery({
     queryKey: ["userPoints", user?.id],

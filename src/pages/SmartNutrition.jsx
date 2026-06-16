@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { api } from "@/api/client";
+import React from "react";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, BookOpen, ChevronRight, Utensils } from "lucide-react";
+import { BookOpen, ChevronRight, Utensils } from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -11,16 +11,8 @@ import MealGenerator from "../components/nutrition/MealGenerator";
 import SlatFitAssistant from "../components/chat/SlatFitAssistant";
 
 export default function SmartNutrition() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const today = format(new Date(), 'yyyy-MM-dd');
-
-  useEffect(() => {
-    api.auth.me()
-      .then(setUser)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
 
   const { data: nutritionData } = useQuery({
     queryKey: ['nutritionData', user?.id, today],
@@ -39,14 +31,6 @@ export default function SmartNutrition() {
     },
     enabled: !!user?.id,
   });
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#CEF17B]" />
-      </div>
-    );
-  }
 
   if (!user) {
     return (

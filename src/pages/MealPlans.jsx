@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { api } from "@/api/client";
+import { useAuth } from "@/lib/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +10,9 @@ import MealFilters from "../components/meals/MealFilters";
 import MealDetailModal from "../components/meals/MealDetailModal";
 
 export default function MealPlans() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [selectedMealType, setSelectedMealType] = useState("all");
   const [selectedMeal, setSelectedMeal] = useState(null);
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
 
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.id],

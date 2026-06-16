@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -57,7 +58,7 @@ function longestStreak(dateSet, today) {
 }
 
 export default function Habits() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [activeView, setActiveView] = useState("plan");
   const [showCreateScreen, setShowCreateScreen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -65,12 +66,6 @@ export default function Habits() {
   const today = new Date();
   const todayKey = format(today, "yyyy-MM-dd");
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
-
-
 
   const { data: habits = [] } = useQuery({
     queryKey: ["habits", user?.id],

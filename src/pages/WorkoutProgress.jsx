@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { api } from "@/api/client";
+import React from "react";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -21,11 +21,7 @@ import WeeklyBarChart from "../components/progress/WeeklyBarChart";
 import StatCard from "../components/progress/StatCard";
 
 export default function WorkoutProgress() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
+  const { user } = useAuth();
 
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { api } from "@/api/client";
+import { useAuth } from "@/lib/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,11 +10,7 @@ import { createPageUrl } from "@/utils";
 import { differenceInDays } from "date-fns";
 
 export default function PremiumFeatureLock({ featureName, children }) {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    api.auth.me().then(setUser).catch(() => {});
-  }, []);
+  const { user } = useAuth();
 
   const { data: subscription } = useQuery({
     queryKey: ['subscription', user?.id],

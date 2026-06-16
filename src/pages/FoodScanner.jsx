@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { api } from "@/api/client";
+import { useAuth } from "@/lib/AuthContext";
 import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ function computeStreak(foodsByDate) {
 }
 
 export default function FoodScanner() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [userProfile, setUserProfile] = useState(null);
   const [view, setView] = useState("home"); // home | camera | analyzing | result | manual
   const [activeTab, setActiveTab] = useState("day"); // day | week
@@ -50,12 +50,11 @@ export default function FoodScanner() {
   const today = format(new Date(), "yyyy-MM-dd");
 
   useEffect(() => {
-    api.auth.me().then(async (u) => {
-      setUser(u);
-      const profiles = await db.UserProfile.filter({ id: u.id });
-      setUserProfile(profiles[0] || null);
-    }).catch(() => {});
-  }, []);
+    if (!user?.id) return;
+    db.UserProfile.filter({ id: user.id })
+      .then((p) => setUserProfile(p[0] || null))
+      .catch(() => {});
+  }, [user]);
 
   // Buscar registros da semana inteira
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
