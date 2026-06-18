@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/AuthContext";
 import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PRModal from "./PRModal";
 
 export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWorkout, onCompleteDay }) {
@@ -552,34 +552,6 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
     setPRModalOpen(true);
   };
 
-  const savePRMutation = useMutation({
-    mutationFn: async (prData) => {
-      console.log('[WeeklyPlan] Salvando PR:', selectedPRExercise, prData);
-      return db.PRRecord.create({
-        user_id: user.id,
-        exercise_id: selectedPRExercise,
-        exercise_name: selectedPRExercise,
-        peso_kg: parseFloat(prData.weight_kg),
-        repeticoes: parseInt(prData.reps),
-        observacao: prData.notes || "",
-        data_pr: prData.pr_date
-      });
-    },
-    onSuccess: () => {
-      console.log('[WeeklyPlan] PR salvo com sucesso');
-      queryClient.invalidateQueries(['prRecords']);
-      setPRModalOpen(false);
-    },
-    onError: (error) => {
-      console.error('[WeeklyPlan] Erro ao salvar PR:', error);
-      alert('Erro ao salvar recorde pessoal. Tente novamente.');
-    },
-  });
-
-  const handleSavePR = async (prData) => {
-    await savePRMutation.mutateAsync(prData);
-  };
-
   return (
     <div className="space-y-4">
       {/* Hidden file input */}
@@ -591,14 +563,17 @@ export default function WeeklyPlan({ weekNumber, dailyWorkouts = [], onStartWork
         className="hidden"
       />
 
-      {/* PR Modal */}
-      <PRModal
-        isOpen={prModalOpen}
-        onClose={() => setPRModalOpen(false)}
-        exerciseName={selectedPRExercise}
-        onSave={handleSavePR}
-        currentPR={selectedPRExercise ? prMap[selectedPRExercise] : null}
-      />
+      {prModalOpen && selectedPRExercise && (
+        <PRModal
+          isOpen={prModalOpen}
+          onClose={() => {
+            setPRModalOpen(false);
+            setSelectedPRExercise(null);
+          }}
+          exercise={{ id: selectedPRExercise, name: selectedPRExercise }}
+          userId={user?.id}
+        />
+      )}
 
       <div className="flex items-center justify-between mb-6">
         <div>

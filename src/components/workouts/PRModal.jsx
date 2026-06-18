@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { api } from "@/api/client";
+import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Trophy, Loader2, X, Dumbbell, RotateCcw, Calendar, FileText, TrendingUp, Sparkles, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -14,6 +15,8 @@ function calc1RM(weight, reps) {
 }
 
 export default function PRModal({ isOpen, onClose, exercise, userId }) {
+  const { user } = useAuth();
+  const effectiveUserId = userId ?? user?.id;
   const [formData, setFormData] = useState({
     peso_kg: "",
     repeticoes: "",
@@ -34,30 +37,56 @@ export default function PRModal({ isOpen, onClose, exercise, userId }) {
   }, [isOpen]);
 
   const { data: prHistory = [] } = useQuery({
-    queryKey: ['prRecords', exercise?.id, userId],
-    queryFn: () => db.PRRecord.filter({ user_id: userId, exercise_id: exercise.id }, '-data_pr', 5),
-    enabled: !!exercise?.id && !!userId && isOpen,
+    queryKey: ['prRecords', exercise?.id, effectiveUserId],
+    queryFn: () => db.PRRecord.filter({ user_id: effectiveUserId, exercise_id: exercise.id }, '-data_pr', 5),
+    enabled: !!exercise?.id && !!effectiveUserId && isOpen,
   });
 
   const lastPR = prHistory[0] || null;
 
   const savePRMutation = useMutation({
-    mutationFn: async (data) => db.PRRecord.create({
-      user_id: userId,
-      exercise_id: exercise.id,
-      exercise_name: exercise.name,
-      ...data,
-    }),
+    mutationFn: async (data) => {
+      if (!effectiveUserId) {
+        throw new Error("Usuário não identificado. Faça login novamente.");
+      }
+      if (!exercise?.id) {
+        throw new Error("Exercício inválido.");
+      }
+
+      const created = await db.PRRecord.create({
+        user_id: effectiveUserId,
+        exercise_id: exercise.id,
+        exercise_name: exercise.name,
+        ...data,
+      });
+
+      if (!created) {
+        throw new Error("Não foi possível salvar o recorde. Tente novamente.");
+      }
+
+      return created;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['prRecords']);
       setSaved(true);
       setTimeout(() => { onClose(); setSaved(false); }, 2000);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao salvar recorde pessoal. Tente novamente.");
     },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.peso_kg || !formData.repeticoes) return;
+    if (!effectiveUserId) {
+      toast.error("Usuário não identificado. Faça login novamente.");
+      return;
+    }
+    if (!exercise?.id) {
+      toast.error("Exercício inválido.");
+      return;
+    }
     savePRMutation.mutate({
       peso_kg: parseFloat(formData.peso_kg),
       repeticoes: parseInt(formData.repeticoes),
@@ -281,7 +310,7 @@ export default function PRModal({ isOpen, onClose, exercise, userId }) {
                 <button
                   type="submit"
                   form="pr-form"
-                  disabled={savePRMutation.isPending || !formData.peso_kg || !formData.repeticoes || saved}
+                  disabled={savePRMutation.isPending || !formData.peso_kg || !formData.repeticoes || saved || !effectiveUserId || !exercise?.id}
                   onClick={handleSubmit}
                   className="w-full h-13 rounded-2xl font-black text-base flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] disabled:opacity-60"
                   style={{
