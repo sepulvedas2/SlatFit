@@ -1,0 +1,27 @@
+# Fly.io config for SlatFit frontend (static nginx).
+#
+# Deploy after SlatFit BE is live:
+#   cd SlatFit
+#   fly deploy --build-arg VITE_API_BASE_URL=https://slatfit-be.fly.dev
+#
+# Replace the URL with your actual backend Fly app hostname.
+
+app = 'slatfit'
+primary_region = 'gru'
+
+[build]
+  [build.args]
+    VITE_API_BASE_URL = 'https://slatfit-be.fly.dev'
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1

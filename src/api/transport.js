@@ -1,8 +1,12 @@
 import { getStoredToken } from '@/components/auth';
 
-export const API_BASE =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) ||
-  'http://192.168.2.110:3000';
+// Empty string = same origin (Vite dev proxy → localhost:3000). Set VITE_API_BASE_URL
+// only for production builds or when the API runs on a different host.
+const envBase =
+  typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL;
+export const API_BASE = envBase != null && String(envBase).trim() !== '' ? envBase : '';
+
+const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV;
 
 export async function request(path, { method = 'GET', body, auth = true, headers = {} } = {}) {
   const url = `${API_BASE}${path}`;
@@ -13,7 +17,9 @@ export async function request(path, { method = 'GET', body, auth = true, headers
     if (token) finalHeaders.Authorization = `Bearer ${token}`;
   }
 
-  console.log('[transport] →', method, url, { auth: !!finalHeaders.Authorization, body: body ?? null });
+  if (isDev) {
+    console.log('[transport] →', method, url, { auth: !!finalHeaders.Authorization, body: body ?? null });
+  }
 
   let res;
   try {
@@ -23,16 +29,18 @@ export async function request(path, { method = 'GET', body, auth = true, headers
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch (err) {
-    // "Failed to fetch" / TypeError lands here: the request never reached the
-    // server (wrong/stale API_BASE, server down, CORS preflight blocked, etc.).
-    console.error(
-      `[transport] ✗ network error for ${method} ${url} — API_BASE=${API_BASE} unreachable? (CORS/down/wrong IP)`,
-      err,
-    );
+    if (isDev) {
+      console.error(
+        `[transport] ✗ network error for ${method} ${url} — API_BASE=${API_BASE || '(same origin/proxy)'} unreachable? (CORS/down/wrong IP)`,
+        err,
+      );
+    }
     throw err;
   }
 
-  console.log('[transport] ←', res.status, method, url);
+  if (isDev) {
+    console.log('[transport] ←', res.status, method, url);
+  }
 
   let json = null;
   try {
@@ -45,7 +53,9 @@ export async function request(path, { method = 'GET', body, auth = true, headers
     const error = new Error(json?.message || json?.error || res.statusText || 'Request failed');
     error.status = res.status;
     error.data = json;
-    console.error('[transport] ✗', res.status, method, url, json);
+    if (isDev) {
+      console.error('[transport] ✗', res.status, method, url, json);
+    }
     throw error;
   }
 
