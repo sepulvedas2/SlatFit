@@ -60,6 +60,7 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState(null);
   const [generatedPlan, setGeneratedPlan] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -90,19 +91,26 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
 
   const generateWorkoutPlan = async (answersOverride) => {
     setIsGenerating(true);
+    setGenerateError(null);
     const { objetivo, frequencia, nivel, local, tempo, lesao } = answersOverride || answers;
 
-    const result = await ai.workoutPlan({
-      objective: objetivo,
-      frequency: frequencia,
-      level: nivel,
-      place: local,
-      time: tempo,
-      injuries: lesao,
-    });
+    try {
+      const result = await ai.workoutPlan({
+        objective: objetivo,
+        frequency: frequencia,
+        level: nivel,
+        place: local,
+        time: tempo,
+        injuries: lesao,
+      });
 
-    setGeneratedPlan(result);
-    setIsGenerating(false);
+      setGeneratedPlan(result);
+    } catch (err) {
+      setGenerateError(err?.message || "Não foi possível gerar o plano. Tente novamente.");
+      setCurrentStep(STEPS.length - 1);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const savePlan = async () => {
@@ -314,6 +322,12 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
               ))}
             </div>
           </div>
+
+          {generateError && (
+            <div className="mb-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {generateError}
+            </div>
+          )}
 
           {/* Step Content */}
           <AnimatePresence mode="wait">
