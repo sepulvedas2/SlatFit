@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -49,6 +50,7 @@ function imcLabel(imc) {
 
 export default function Profile({ onLogout }) {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [success, setSuccess] = useState(false);
@@ -97,6 +99,14 @@ export default function Profile({ onLogout }) {
       });
     }
   }, [profile, user]);
+
+  useEffect(() => {
+    if (searchParams.get("edit") !== "1") return;
+    setEditing(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete("edit");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data) => {

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Brain, Zap, Target, TrendingUp, Flame, Dumbbell, Activity, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPageUrl } from "@/utils";
 
 export default function WorkoutAICoach({ profile, weekWorkouts, onStartWorkout }) {
   const [recommendation, setRecommendation] = useState(null);
@@ -221,12 +223,20 @@ export default function WorkoutAICoach({ profile, weekWorkouts, onStartWorkout }
   if (recommendation.type === "incomplete_profile") {
     return (
       <Card className="bg-gradient-to-br from-[#084734] to-[#063528] border-[#CEF17B]/20 p-6 mb-6">
-        <div className="flex items-center gap-3">
-          <Brain className="w-8 h-8 text-[#CEF17B]" />
-          <div>
-            <h3 className="text-white font-bold text-lg">Configure seu Perfil</h3>
-            <p className="text-white/70 text-sm">{recommendation.message}</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <Brain className="w-8 h-8 text-[#CEF17B] flex-shrink-0" />
+            <div>
+              <h3 className="text-white font-bold text-lg">Configure seu Perfil</h3>
+              <p className="text-white/70 text-sm">{recommendation.message}</p>
+            </div>
           </div>
+          <Button
+            asChild
+            className="bg-[#CEF17B] text-[#084734] hover:bg-[#CEEDB2] font-semibold flex-shrink-0"
+          >
+            <Link to={`${createPageUrl("Profile")}?edit=1`}>Ir para o Perfil</Link>
+          </Button>
         </div>
       </Card>
     );
