@@ -186,6 +186,7 @@ export default function Habits() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habitLogs"] });
       queryClient.invalidateQueries({ queryKey: ["userProgress"] });
+      queryClient.invalidateQueries({ queryKey: ["userPoints"] });
     },
   });
 

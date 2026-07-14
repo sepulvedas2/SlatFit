@@ -42,6 +42,7 @@ describe('functions.invoke transport contract', () => {
     ['searchFoodsDatabase', { query: 'arroz' }],
     ['getRankingSnapshot', {}],
     ['completeChallengeCheckIn', { userChallengeId: '1', challengeMeta: {} }],
+    ['completePlanDay', { weekNumber: 1, dayOfWeek: 'segunda', muscleGroup: 'treino' }],
     ['seedExercises', {}],
   ])('preserves the frozen payload for %s', async (name, payload) => {
     global.fetch = vi.fn(async () => jsonResponse({ ok: true }));

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -69,13 +70,6 @@ export default function Workouts() {
     initialData: [],
   });
 
-  // Fetch all exercises from the entity API (where images are stored)
-  const { data: exercises = [] } = useQuery({
-    queryKey: ['exercises'],
-    queryFn: () => api.entities.Exercise.list(),
-    initialData: [],
-  });
-
   // Fetch daily workouts
   const { data: dailyWorkouts = [] } = useQuery({
     queryKey: ['dailyWorkouts', user?.id, selectedWeek],
@@ -87,50 +81,31 @@ export default function Workouts() {
     initialData: [],
   });
 
-
-
-
-
   const completeDayMutation = useMutation({
     mutationFn: async ({ weekNumber, dayOfWeek }) => {
       console.log('[Workouts] Completando dia:', dayOfWeek, 'semana:', weekNumber);
-      
-      // Verificar se já existe
-      const existing = dailyWorkouts.find(w => w.day_of_week === dayOfWeek);
-      let result;
-      
-      if (existing) {
-        console.log('[Workouts] Atualizando treino existente:', existing.id);
-        result = await db.DailyWorkout.update(existing.id, { 
-          completed: true, 
-          completed_date: new Date().toISOString().split('T')[0],
-          xp_earned: 50
-        });
-      } else {
-        console.log('[Workouts] Criando novo treino concluído');
-        result = await db.DailyWorkout.create({
-          user_id: user.id,
-          week_number: weekNumber,
-          day_of_week: dayOfWeek,
-          muscle_group: "treino",
-          completed: true,
-          completed_date: new Date().toISOString().split('T')[0],
-          xp_earned: 50
-        });
+      const { data } = await api.functions.invoke('completePlanDay', {
+        weekNumber,
+        dayOfWeek,
+        muscleGroup: 'treino',
+      });
+      if (data?.error) {
+        throw new Error(data.error);
       }
-
-      return result;
+      return data;
     },
     onSuccess: () => {
       console.log('[Workouts] Treino salvo com sucesso');
-      queryClient.invalidateQueries(['dailyWorkouts']);
-      queryClient.invalidateQueries(['weekWorkouts']);
-      queryClient.invalidateQueries(['todayWorkouts']);
-      queryClient.invalidateQueries(['allDailyWorkouts']);
+      queryClient.invalidateQueries({ queryKey: ['dailyWorkouts'] });
+      queryClient.invalidateQueries({ queryKey: ['weekWorkouts'] });
+      queryClient.invalidateQueries({ queryKey: ['todayWorkouts'] });
+      queryClient.invalidateQueries({ queryKey: ['allDailyWorkouts'] });
+      queryClient.invalidateQueries({ queryKey: ['userPoints'] });
+      queryClient.invalidateQueries({ queryKey: ['userProgress'] });
     },
     onError: (error) => {
       console.error('[Workouts] Erro ao salvar treino:', error);
-      alert('Erro ao salvar treino. Por favor, tente novamente.');
+      alert(error?.message || 'Erro ao salvar treino. Por favor, tente novamente.');
     }
   });
 

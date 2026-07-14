@@ -29,99 +29,47 @@ export default function CompleteWorkoutButton({ workout, exercises, userId, onCo
     if (!userId) return;
     setLoading(true);
 
-    const intensity = extractIntensity(workout.observacoes);
-    const xp = XP_BY_INTENSITY[intensity];
+    try {
+      const intensity = extractIntensity(workout.observacoes);
+      const xp = XP_BY_INTENSITY[intensity];
+      const today = new Date().toISOString().split("T")[0];
 
-    const today = new Date().toISOString().split("T")[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-
-    // Calcular semana atual (ISO week key YYYY-WW)
-    const d = new Date();
-    const startOfYear = new Date(d.getFullYear(), 0, 1);
-    const weekNum = Math.ceil(((d - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
-    const currentWeekKey = `${d.getFullYear()}-${String(weekNum).padStart(2, "0")}`;
-
-    // Save workout log
-    await db.WorkoutLog.create({
-      user_id: userId,
-      workout_id: workout.id,
-      workout_name: workout.nome_treino,
-      completed_date: today,
-      duration_minutes: 55,
-      calories_burned: intensity === "intenso" ? 400 : intensity === "moderado" ? 280 : 180,
-    });
-
-    // Update XP + rank + streak + weekly
-    const pointsList = await db.UserPoints.filter({ user_id: userId });
-    const RANKS = [
-      { key: "bronze", minXP: 0 },
-      { key: "silver", minXP: 500 },
-      { key: "gold", minXP: 1500 },
-      { key: "platinum", minXP: 3500 },
-      { key: "diamond", minXP: 7000 },
-    ];
-
-    if (pointsList[0]) {
-      const p = pointsList[0];
-      const newTotal = (p.total_points || 0) + xp;
-      const newXP = (p.xp_current || 0) + xp;
-      const newRank = [...RANKS].reverse().find(r => newTotal >= r.minXP)?.key || "bronze";
-
-      // Streak logic
-      let newStreak = p.daily_streak || 0;
-      const lastDate = p.last_workout_date;
-      if (lastDate === today) {
-        // Same day - don't change streak
-        newStreak = p.daily_streak || 1;
-      } else if (lastDate === yesterday) {
-        newStreak = (p.daily_streak || 0) + 1;
-      } else {
-        newStreak = 1;
-      }
-      const newBest = Math.max(newStreak, p.longest_streak || 0);
-
-      // Weekly goal logic
-      const isNewWeek = p.last_reset_week !== currentWeekKey;
-      const weeklyCompleted = isNewWeek ? 1 : (lastDate === today ? (p.weekly_completed || 0) : (p.weekly_completed || 0) + 1);
-
-      await db.UserPoints.update(p.id, {
-        total_points: newTotal,
-        xp_current: newXP,
-        rank: newRank,
-        daily_streak: newStreak,
-        longest_streak: newBest,
-        last_workout_date: today,
-        weekly_completed: weeklyCompleted,
-        last_reset_week: currentWeekKey,
-      });
-    } else {
-      await db.UserPoints.create({
+      await db.WorkoutLog.create({
         user_id: userId,
-        total_points: xp,
-        xp_current: xp,
-        rank: "bronze",
-        level: 1,
-        daily_streak: 1,
-        longest_streak: 1,
-        last_workout_date: today,
-        weekly_goal: 4,
-        weekly_completed: 1,
-        last_reset_week: currentWeekKey,
+        workout_id: workout.id,
+        workout_name: workout.nome_treino,
+        completed_date: today,
+        duration_minutes: 55,
+        calories_burned: intensity === "intenso" ? 400 : intensity === "moderado" ? 280 : 180,
       });
+
+      const { data } = await api.functions.invoke("addXP", {
+        amount: xp,
+        source: "workout",
+        reference_id: workout.id,
+      });
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["customWorkouts"] });
+      queryClient.invalidateQueries({ queryKey: ["weekWorkouts"] });
+      queryClient.invalidateQueries({ queryKey: ["userPoints"] });
+      queryClient.invalidateQueries({ queryKey: ["userProgress"] });
+
+      setXpEarned(xp);
+      setShowXP(true);
+
+      setTimeout(() => {
+        setShowXP(false);
+        onCompleted?.();
+      }, 2500);
+    } catch (error) {
+      console.error("[CompleteWorkoutButton] Erro:", error);
+      alert(error?.message || "Erro ao concluir treino.");
+    } finally {
+      setLoading(false);
     }
-
-    queryClient.invalidateQueries(["customWorkouts"]);
-    queryClient.invalidateQueries(["weekWorkouts"]);
-    queryClient.invalidateQueries(["userPoints"]);
-
-    setXpEarned(xp);
-    setLoading(false);
-    setShowXP(true);
-
-    setTimeout(() => {
-      setShowXP(false);
-      onCompleted?.();
-    }, 2500);
   };
 
   return (

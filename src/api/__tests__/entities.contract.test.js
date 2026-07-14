@@ -126,19 +126,15 @@ describe('entities / db contract over the supabase function', () => {
     expect(row).toEqual({ id: '3' });
   });
 
-  it('UserProgress falls back to user_points and maps the legacy fields', async () => {
+  it('UserProgress always reads user_points and maps the legacy fields', async () => {
     global.fetch = vi
       .fn()
-      // first call: user_progress select fails with an in-body error
-      .mockImplementationOnce(async () => jsonResponse({ error: 'relation "user_progress" does not exist' }))
-      // fallback call: user_points returns legacy column names
       .mockImplementationOnce(async () => jsonResponse({ data: [{ total_points: 50, level: 2, daily_streak: 4 }] }));
 
     const rows = await entities.UserProgress.list();
 
-    expect(global.fetch).toHaveBeenCalledTimes(2);
-    expect(JSON.parse(global.fetch.mock.calls[0][1].body).table).toBe('user_progress');
-    expect(JSON.parse(global.fetch.mock.calls[1][1].body).table).toBe('user_points');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(global.fetch.mock.calls[0][1].body).table).toBe('user_points');
     expect(rows[0]).toMatchObject({ total_xp: 50, nivel: 2, streak_dias: 4 });
   });
 });

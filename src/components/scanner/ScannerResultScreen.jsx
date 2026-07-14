@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import * as ai from "@/api/ai";
+import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
 import {
   Flame, Star, ChevronDown, ChevronUp,
@@ -160,12 +161,7 @@ export default function ScannerResultScreen({
 
   // XP + challenge check after saving
   const checkFoodChallenges = async (userId, savedData) => {
-    const [pointsList, allFoods] = await Promise.all([
-      db.UserPoints.filter({ user_id: userId }),
-      db.FoodLog.filter({ user_id: userId }),
-    ]);
-    const points = pointsList[0];
-    if (!points) return;
+    const allFoods = await db.FoodLog.filter({ user_id: userId });
 
     let xpGain = 5; // base XP per meal logged
 
@@ -177,23 +173,11 @@ export default function ScannerResultScreen({
     const todayCount = allFoods.filter(f => f.log_date === today).length + 1; // +1 for current save
     if (todayCount === 3) xpGain += 30;
 
-    // Update XP
-    const newXp = (points.xp_current || 0) + xpGain;
-    const xpNeeded = points.xp_next_level || 100;
-    const newTotal = (points.total_points || 0) + xpGain;
-    if (newXp >= xpNeeded) {
-      await db.UserPoints.update(points.id, {
-        xp_current: newXp - xpNeeded,
-        level: (points.level || 1) + 1,
-        xp_next_level: Math.round(xpNeeded * 1.5),
-        total_points: newTotal,
-      });
-    } else {
-      await db.UserPoints.update(points.id, {
-        xp_current: newXp,
-        total_points: newTotal,
-      });
-    }
+    await api.functions.invoke("addXP", {
+      amount: xpGain,
+      source: "food",
+      reference_id: userId,
+    });
   };
 
   const handleSave = async () => {

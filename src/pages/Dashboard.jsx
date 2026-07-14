@@ -172,24 +172,8 @@ export default function Dashboard() {
   const { data: userProgress } = useQuery({
     queryKey: ['userProgress', user?.id],
     queryFn: async () => {
-      try {
-        const list = await db.UserProgress.filter({ user_id: user.id });
-        if (list[0]) return list[0];
-      } catch (error) {
-        console.error('[Dashboard] user_progress indisponível, usando user_points:', error);
-      }
-
-      const fallback = await db.UserPoints.filter({ user_id: user.id });
-      if (!fallback[0]) return null;
-
-      return {
-        ...fallback[0],
-        total_xp: fallback[0].total_points || 0,
-        nivel: fallback[0].level || 1,
-        xp_atual: fallback[0].xp_current || 0,
-        xp_proximo_nivel: fallback[0].xp_next_level || 100,
-        streak_dias: fallback[0].daily_streak || 0,
-      };
+      const list = await db.UserProgress.filter({ user_id: user.id });
+      return list[0] ?? null;
     },
     enabled: !!user?.id,
     staleTime: 2 * 60 * 1000,
@@ -203,20 +187,14 @@ export default function Dashboard() {
       } else if (user?.id) {
         return db.UserProgress.create({
           user_id: user.id,
-          total_xp: 0,
-          nivel: 1,
-          xp_atual: 0,
-          xp_proximo_nivel: 100,
-          streak_dias: 0,
-          longest_streak: 0,
           weekly_goal: goal,
-          weekly_completed: 0,
         });
       }
     },
     onSuccess: () => {
       console.log('[Dashboard] Meta semanal salva com sucesso');
-      queryClient.invalidateQueries(['userProgress']);
+      queryClient.invalidateQueries({ queryKey: ['userProgress'] });
+      queryClient.invalidateQueries({ queryKey: ['userPoints'] });
       setShowGoalModal(false);
     },
     onError: (error) => {
