@@ -24,6 +24,20 @@ import HabitWeeklyPlanner from "@/components/habits/tracker/HabitWeeklyPlanner";
 import HabitMonthlyPlanner from "@/components/habits/tracker/HabitMonthlyPlanner";
 import HabitCreateScreen from "@/components/habits/tracker/HabitCreateScreen";
 
+const HABIT_COLOR_HEX = {
+  lime: "#CEF17B",
+  orange: "#FF6A00",
+  blue: "#60A5FA",
+  purple: "#C084FC",
+  rose: "#FB7185",
+  teal: "#2DD4BF",
+};
+
+function habitColor(habit) {
+  const key = habit?.category || habit?.color;
+  return HABIT_COLOR_HEX[key] || (typeof key === "string" && key.startsWith("#") ? key : "#CEF17B");
+}
+
 function calcXP(baseXp, streak) {
   let mult = 1;
   if (streak >= 30) mult = 1.4;
@@ -97,23 +111,17 @@ export default function Habits() {
 
   const createHabitMutation = useMutation({
     mutationFn: async (form) => {
+      // Live habits columns: name, category, emoji, is_active, target_days,
+      // xp_per_completion, user_id, created_date (no color/frequency/notes/…).
       await db.Habit.create({
         user_id: user.id,
-        name: form.name,
-        color: form.color,
-        category: form.color,
-        frequency: form.frequency,
-        target_value: form.frequency,
-        preferred_time: form.preferredTime,
-        ideal_time: form.preferredTime,
-        notes: form.notes,
-        target_unit: form.notes,
+        name: form.name.trim(),
+        category: form.color || "lime",
         emoji: "✅",
-        type: "binary",
+        target_days: Number(form.frequency) || 7,
         xp_per_completion: 10,
-        is_native: false,
         is_active: true,
-        created_at: new Date().toISOString(),
+        created_date: new Date().toISOString(),
       });
     },
     onSuccess: () => {
@@ -143,6 +151,7 @@ export default function Habits() {
       return {
         id: habit.id,
         name: habit.name,
+        color: habitColor(habit),
         progress: Math.round((completed30 / 30) * 100),
         currentStreak: currentStreak(completedSet, today),
         longestStreak: longestStreak(completedSet, today),
@@ -175,7 +184,6 @@ export default function Habits() {
         user_id: user.id,
         habit_id: habit.id,
         habit_name: habit.name,
-        date: dateKey,
         log_date: dateKey,
         completed: true,
         xp_earned: xpEarned,
