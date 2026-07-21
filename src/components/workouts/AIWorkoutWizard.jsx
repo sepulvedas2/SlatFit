@@ -310,24 +310,17 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
               ))}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-stretch">
               <Button
                 onClick={savePlan}
                 disabled={isSaving}
-                className="flex-1 bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold py-6"
+                className="flex-1 h-12 bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold"
               >
                 {isSaving ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Aplicando...</>
                 ) : (
                   <><CheckCircle className="w-4 h-4 mr-2" /> Aplicar ao meu plano</>
                 )}
-              </Button>
-              <Button
-                onClick={() => setGeneratedPlan(null)}
-                variant="outline"
-                className="border-[#CEF17B]/20 text-white hover:bg-white/10"
-              >
-                Refazer
               </Button>
             </div>
           </div>
@@ -461,7 +454,7 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
               <Button
                 onClick={handleBack}
                 variant="outline"
-                className="border-[#CEF17B]/20 text-white hover:bg-white/10 px-6"
+                className="h-12 border-[#CEF17B]/40 bg-transparent text-[#CEF17B] hover:bg-[#CEF17B]/15 hover:text-[#CEF17B] px-6 font-bold"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
