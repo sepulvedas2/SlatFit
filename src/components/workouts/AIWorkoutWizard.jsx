@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
 import { useQueryClient } from "@tanstack/react-query";
@@ -45,6 +46,51 @@ function resolveDayOfWeek(rawDay, fallbackIndex) {
     if (DAY_ALIASES[key]) return DAY_ALIASES[key];
   }
   return DAY_ORDER[fallbackIndex] || DAY_ORDER[0];
+}
+
+/** Portal overlay above bottom nav (z-index 99999) — top-aligned, not a bottom sheet. */
+function WizardOverlay({ children, align = "start" }) {
+  return createPortal(
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 100000,
+        display: "flex",
+        alignItems: align === "center" ? "center" : "flex-start",
+        justifyContent: "center",
+        padding: align === "center" ? "16px" : "24px 16px 24px",
+        backgroundColor: "rgba(0,0,0,0.7)",
+        overflowY: "auto",
+      }}
+    >
+      {children}
+    </motion.div>,
+    document.body,
+  );
+}
+
+function WizardPanel({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", damping: 28 }}
+      style={{
+        width: "100%",
+        maxWidth: "42rem",
+        maxHeight: "calc(100vh - 32px)",
+        overflowY: "auto",
+        borderRadius: "1.5rem",
+        border: "1px solid rgba(206,241,123,0.2)",
+        background: "linear-gradient(to bottom right, #0a3d2e, #062A1F)",
+      }}
+    >
+      {children}
+    </motion.div>
+  );
 }
 const STEPS = [
   { id: "objetivo", title: "Objetivo", icon: Target },
@@ -212,17 +258,8 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
   // GENERATED PLAN VIEW
   if (generatedPlan) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 px-4 pt-4 pb-4 overflow-y-auto"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", damping: 28 }}
-          className="w-full max-w-2xl my-0 bg-gradient-to-br from-[#0a3d2e] to-[#062A1F] rounded-3xl border border-[#CEF17B]/20 max-h-[calc(100vh-2rem)] overflow-y-auto"
-        >
+      <WizardOverlay>
+        <WizardPanel>
           <div className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Badge className="bg-[#CEF17B]/20 text-[#CEF17B] border-0">
@@ -294,19 +331,15 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
               </Button>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </WizardPanel>
+      </WizardOverlay>
     );
   }
 
   // GENERATING VIEW
   if (isGenerating) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
-      >
+      <WizardOverlay align="center">
         <div className="text-center space-y-4">
           <div className="w-20 h-20 rounded-full bg-[#CEF17B]/20 flex items-center justify-center mx-auto">
             <Brain className="w-10 h-10 text-[#CEF17B] animate-pulse" />
@@ -324,23 +357,14 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
             ))}
           </div>
         </div>
-      </motion.div>
+      </WizardOverlay>
     );
   }
 
   // WIZARD STEPS VIEW
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 px-4 pt-4 pb-4 overflow-y-auto"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", damping: 28 }}
-        className="w-full max-w-2xl my-0 bg-gradient-to-br from-[#0a3d2e] to-[#062A1F] rounded-3xl border border-[#CEF17B]/20 max-h-[calc(100vh-2rem)] overflow-y-auto"
-      >
+    <WizardOverlay>
+      <WizardPanel>
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -445,7 +469,7 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
             )}
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </WizardPanel>
+    </WizardOverlay>
   );
 }
