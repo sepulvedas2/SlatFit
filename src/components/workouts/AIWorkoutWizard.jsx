@@ -1,16 +1,51 @@
 import React, { useState } from "react";
 import * as ai from "@/api/ai";
 import { db } from "@/components/supabaseApi";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
   Brain, Zap, Target, Dumbbell, Clock, MapPin, AlertTriangle,
   ArrowRight, ArrowLeft, CheckCircle, Loader2, Sparkles, X
 } from "lucide-react";
 
+const DAY_ORDER = ["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"];
+
+const DAY_ALIASES = {
+  segunda: "segunda",
+  "segunda-feira": "segunda",
+  monday: "segunda",
+  terca: "terca",
+  terça: "terca",
+  "terca-feira": "terca",
+  "terça-feira": "terca",
+  tuesday: "terca",
+  quarta: "quarta",
+  "quarta-feira": "quarta",
+  wednesday: "quarta",
+  quinta: "quinta",
+  "quinta-feira": "quinta",
+  thursday: "quinta",
+  sexta: "sexta",
+  "sexta-feira": "sexta",
+  friday: "sexta",
+  sabado: "sabado",
+  sábado: "sabado",
+  saturday: "sabado",
+  domingo: "domingo",
+  sunday: "domingo",
+};
+
+function resolveDayOfWeek(rawDay, fallbackIndex) {
+  if (typeof rawDay === "string") {
+    const key = rawDay.trim().toLowerCase();
+    if (DAY_ALIASES[key]) return DAY_ALIASES[key];
+  }
+  return DAY_ORDER[fallbackIndex] || DAY_ORDER[0];
+}
 const STEPS = [
   { id: "objetivo", title: "Objetivo", icon: Target },
   { id: "frequencia", title: "Frequência", icon: Clock },
@@ -114,42 +149,62 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
   };
 
   const savePlan = async () => {
-    if (!generatedPlan || !userId) return;
+    if (!generatedPlan || !userId) {
+      toast.error("Não foi possível aplicar o plano. Faça login novamente.");
+      return;
+    }
     setIsSaving(true);
 
-    const dayOrder = ["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"];
-    const days = dayOrder.filter((_, i) => i < generatedPlan.workouts.length);
+    try {
+      const usedDays = new Set();
 
-    for (let i = 0; i < generatedPlan.workouts.length; i++) {
-      const workout = generatedPlan.workouts[i];
-      const dayOfWeek = days[i];
+      for (let i = 0; i < generatedPlan.workouts.length; i++) {
+        const workout = generatedPlan.workouts[i];
+        let dayOfWeek = resolveDayOfWeek(workout.day_of_week, i);
+        if (usedDays.has(dayOfWeek)) {
+          dayOfWeek = DAY_ORDER.find((day) => !usedDays.has(day)) || dayOfWeek;
+        }
+        usedDays.add(dayOfWeek);
 
-      const savedWorkout = await db.CustomWorkout.create({
-        user_id: userId,
-        nome_treino: workout.name,
-        dia_semana: dayOfWeek,
-        observacoes: `${workout.muscle_group} • ${workout.intensity} • ${workout.duration_minutes}min | Gerado por IA`,
-        source: "ai"
-      });
-
-      for (let j = 0; j < workout.exercises.length; j++) {
-        const ex = workout.exercises[j];
-        await db.CustomWorkoutExercise.create({
-          custom_workout_id: savedWorkout.id,
-          exercise_name: ex.name,
-          series: ex.sets,
-          repeticoes: ex.reps,
-          observacoes: `Descanso: ${ex.rest_seconds}s | ${ex.notes}`,
-          ordem: j
+        const savedWorkout = await db.CustomWorkout.create({
+          user_id: userId,
+          nome_treino: workout.name,
+          dia_semana: dayOfWeek,
+          observacoes: `${generatedPlan.plan_name} • ${workout.muscle_group} • ${workout.intensity} • ${workout.duration_minutes}min | Gerado por IA`,
+          source: "ai",
         });
-      }
-    }
 
-    queryClient.invalidateQueries(['customWorkouts']);
-    queryClient.invalidateQueries(['customWorkoutExercises']);
-    setIsSaving(false);
-    onWorkoutsGenerated?.();
-    onClose();
+        if (!savedWorkout?.id) {
+          throw new Error("Falha ao salvar treino no banco de dados");
+        }
+
+        for (let j = 0; j < (workout.exercises || []).length; j++) {
+          const ex = workout.exercises[j];
+          await db.CustomWorkoutExercise.create({
+            custom_workout_id: savedWorkout.id,
+            exercise_name: ex.name,
+            series: String(ex.sets ?? ""),
+            repeticoes: String(ex.reps ?? ""),
+            observacoes: `Descanso: ${ex.rest_seconds}s | ${ex.notes || ""}`,
+            ordem: j,
+          });
+        }
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["customWorkouts"] });
+      await queryClient.invalidateQueries({ queryKey: ["customWorkoutExercises"] });
+      toast.success("Plano aplicado aos seus treinos");
+      onWorkoutsGenerated?.({
+        planName: generatedPlan.plan_name,
+        workoutCount: generatedPlan.workouts.length,
+      });
+      onClose();
+    } catch (err) {
+      console.error("[AIWorkoutWizard] apply plan failed", err);
+      toast.error(err?.message || "Não foi possível aplicar o plano. Tente novamente.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const intensityXP = { leve: 30, moderado: 60, intenso: 100 };
@@ -160,13 +215,13 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0"
+        className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 px-4 pt-4 pb-4 overflow-y-auto"
       >
         <motion.div
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          transition={{ type: "spring", damping: 30 }}
-          className="w-full max-w-2xl bg-gradient-to-br from-[#0a3d2e] to-[#062A1F] rounded-t-3xl border border-[#CEF17B]/20 max-h-[90vh] overflow-y-auto"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", damping: 28 }}
+          className="w-full max-w-2xl my-0 bg-gradient-to-br from-[#0a3d2e] to-[#062A1F] rounded-3xl border border-[#CEF17B]/20 max-h-[calc(100vh-2rem)] overflow-y-auto"
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-2">
@@ -225,9 +280,9 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
                 className="flex-1 bg-[#CEF17B] hover:bg-[#CEF17B]/90 text-[#084734] font-bold py-6"
               >
                 {isSaving ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Aplicando...</>
                 ) : (
-                  <><CheckCircle className="w-4 h-4 mr-2" /> Salvar Plano</>
+                  <><CheckCircle className="w-4 h-4 mr-2" /> Aplicar ao meu plano</>
                 )}
               </Button>
               <Button
@@ -278,13 +333,13 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 px-4 pt-4 pb-4 overflow-y-auto"
     >
       <motion.div
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", damping: 30 }}
-        className="w-full max-w-2xl bg-gradient-to-br from-[#0a3d2e] to-[#062A1F] rounded-t-3xl border border-[#CEF17B]/20 max-h-[90vh] overflow-y-auto"
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", damping: 28 }}
+        className="w-full max-w-2xl my-0 bg-gradient-to-br from-[#0a3d2e] to-[#062A1F] rounded-3xl border border-[#CEF17B]/20 max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
         <div className="p-6">
           {/* Header */}

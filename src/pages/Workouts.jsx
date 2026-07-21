@@ -178,7 +178,10 @@ export default function Workouts() {
           </div>
 
           {activeTab === "my-workouts" && (
-            <MyWorkouts userId={user?.id} />
+            <MyWorkouts
+              userId={user?.id}
+              onPlanApplied={() => setActiveTab("my-workouts")}
+            />
           )}
 
           {activeTab === "app-workouts" && <div className="space-y-7">

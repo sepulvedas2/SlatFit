@@ -16,7 +16,7 @@ const dayLabels = {
 };
 const days = ["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"];
 
-export default function MyWorkouts({ userId }) {
+export default function MyWorkouts({ userId, onPlanApplied }) {
   const [activeTab, setActiveTab] = useState("ai");
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [aiWizardOpen, setAiWizardOpen] = useState(false);
@@ -330,7 +330,11 @@ export default function MyWorkouts({ userId }) {
         <AIWorkoutWizard
           userId={userId}
           onClose={() => setAiWizardOpen(false)}
-          onWorkoutsGenerated={() => setAiWizardOpen(false)}
+          onWorkoutsGenerated={() => {
+            setActiveTab("ai");
+            setAiWizardOpen(false);
+            onPlanApplied?.();
+          }}
         />
       )}
       {prModalOpen && selectedExercise && (
