@@ -1,10 +1,26 @@
 import { getStoredToken } from '@/components/auth';
 
-// Empty string = same origin (Vite dev proxy → localhost:3000). Set VITE_API_BASE_URL
-// only for production builds or when the API runs on a different host.
-const envBase =
-  typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL;
-export const API_BASE = envBase != null && String(envBase).trim() !== '' ? envBase : '';
+const RENDER_BE = 'https://slatfit-be.onrender.com';
+
+function resolveApiBase() {
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const host = window.location.hostname.toLowerCase();
+    if (host.includes('beautiful') || host.includes('illustrious')) {
+      return RENDER_BE;
+    }
+  }
+
+  const envBase =
+    typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL;
+  if (envBase != null && String(envBase).trim() !== '') {
+    return String(envBase).trim().replace(/\/+$/, '');
+  }
+
+  // Empty = same origin (Vite dev proxy → localhost:3000)
+  return '';
+}
+
+export const API_BASE = resolveApiBase();
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV;
 
