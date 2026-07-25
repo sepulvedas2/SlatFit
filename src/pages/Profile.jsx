@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/components/supabaseApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,15 +12,13 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   User, Target, Activity, Save, Loader2,
-  Droplets, Flame, Dumbbell, Pencil, Scale, ArrowRight, TrendingUp
+  Droplets, Flame, Dumbbell, Pencil, Scale, ArrowRight, TrendingUp, LogOut
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { motion } from "framer-motion";
 import { useTheme } from "@/components/ThemeContext";
-import { clearUser } from "@/components/auth";
-import { LogOut } from "lucide-react";
 
 const GOAL_META = {
   weight_loss:  { label: "Emagrecimento",   emoji: "🔥", phrase: "Cada treino te aproxima da melhor versão de você!", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
@@ -48,8 +46,9 @@ function imcLabel(imc) {
   return "Obesidade";
 }
 
-export default function Profile({ onLogout }) {
-  const { user } = useAuth();
+export default function Profile() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
@@ -343,9 +342,8 @@ export default function Profile({ onLogout }) {
 
             <button
               onClick={() => {
-                clearUser();
-                if (onLogout) onLogout();
-                else window.location.reload();
+                logout();
+                navigate("/", { replace: true });
               }}
               className="w-full flex items-center gap-3 py-3 text-left"
             >

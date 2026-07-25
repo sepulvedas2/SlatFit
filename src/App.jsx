@@ -49,7 +49,7 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Layout currentPageName="Dashboard">
+    <Layout>
       <Routes>
         <Route path="/" element={<Navigate to="/Dashboard" replace />} />
         <Route path="/Dashboard" element={<Dashboard />} />

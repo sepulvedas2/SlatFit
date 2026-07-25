@@ -3,16 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Home, Dumbbell, UtensilsCrossed, User, ScanLine, CheckSquare } from "lucide-react";
 import { ThemeProvider, useTheme } from "@/components/ThemeContext";
-import { useAuth } from "@/lib/AuthContext";
 
-function AppLayout({ children, currentPageName }) {
+function AppLayout({ children }) {
   const location = useLocation();
   const { isDark } = useTheme();
-  const { logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-  };
 
   const navItems = [
     { name: "Início", icon: Home, path: createPageUrl("Dashboard") },
@@ -60,7 +54,7 @@ function AppLayout({ children, currentPageName }) {
       `}</style>
 
       <main className="pb-28 min-h-screen">
-        {React.cloneElement(children, { onLogout: handleLogout })}
+        {children}
       </main>
 
       <nav
@@ -103,10 +97,10 @@ function AppLayout({ children, currentPageName }) {
   );
 }
 
-export default function Layout({ children, currentPageName }) {
+export default function Layout({ children }) {
   return (
     <ThemeProvider>
-      <AppLayout currentPageName={currentPageName}>{children}</AppLayout>
+      <AppLayout>{children}</AppLayout>
     </ThemeProvider>
   );
 }
