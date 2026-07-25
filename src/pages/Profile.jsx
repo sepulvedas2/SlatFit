@@ -468,9 +468,6 @@ export default function Profile() {
                   >
                     {saveProfileMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5 mr-2" /> Salvar alterações</>}
                   </Button>
-                  <Button onClick={() => { setEditing(false); setSaveError(''); }} variant="outline" className="h-14 border-white/20 text-white">
-                    Cancelar
-                  </Button>
                 </div>
               </div>
             </div>
