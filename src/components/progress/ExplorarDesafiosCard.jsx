@@ -29,7 +29,7 @@ export default function ExplorarDesafiosCard({ categories, activeIds, onActivate
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-white">{item.title}</p>
-                <p className="mt-1 text-xs text-white/50">{item.durationDays} dias • {item.xpReward} XP • {item.difficulty}</p>
+                <p className="mt-1 text-xs text-white/50">{item.durationDays} dias • +{item.dailyXp} XP/dia • {item.difficulty}</p>
               </div>
               <Button onClick={() => onActivate(item)} disabled={isSaving || activeIds.has(item.id)} className="h-10 rounded-2xl bg-white/10 px-4 text-xs font-bold text-white hover:bg-white/15">
                 {activeIds.has(item.id) ? 'Ativo' : 'Ativar'}

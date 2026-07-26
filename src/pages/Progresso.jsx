@@ -11,7 +11,7 @@ import DesafiosAtivosCard from "@/components/progress/DesafiosAtivosCard";
 import ExplorarDesafiosCard from "@/components/progress/ExplorarDesafiosCard";
 import DesafioDoDiaCard from "@/components/progress/DesafioDoDiaCard";
 import RankingModal from "@/components/progress/RankingModal";
-import { challengeCatalog, challengeList, challengeMap } from "@/components/progress/challengeCatalog";
+import { challengeList, challengeMap } from "@/components/progress/challengeCatalog";
 
 export default function Progresso() {
   const { user } = useAuth();
@@ -41,16 +41,8 @@ export default function Progresso() {
 
   const { data: activeChallenges = [] } = useQuery({
     queryKey: ["userChallenges", user?.id],
-    queryFn: async () => {
-      try {
-        return await db.UserChallenge.filter({ user_id: user.id });
-      } catch (error) {
-        console.error("[Progresso] erro ao buscar desafios ativos:", error);
-        return [];
-      }
-    },
+    queryFn: async () => db.UserChallenge.filter({ user_id: user.id }),
     enabled: !!user?.id,
-    initialData: [],
   });
 
   const activeChallengeIds = useMemo(() => new Set(activeChallenges.filter((challenge) => challenge.status === "active").map((challenge) => challenge.challenge_id)), [activeChallenges]);
@@ -59,13 +51,17 @@ export default function Progresso() {
     return activeChallenges
       .map((challenge) => {
         const definition = challengeMap[challenge.challenge_id];
-        const progressCurrent = challenge.progress_current || (challenge.completed_days || []).length || 0;
-        const progressTotal = challenge.progress_total || challenge.total_days || definition?.durationDays || 1;
-        const completedToday = Array.isArray(challenge.completed_days) ? challenge.completed_days.includes(today) : false;
+        const completedDays = Array.isArray(challenge.completed_days) ? challenge.completed_days : [];
+        // Schema uses completed_days/total_days; progress_* columns may not exist yet
+        const progressCurrent = completedDays.length || challenge.progress_current || 0;
+        const progressTotal = challenge.total_days || challenge.progress_total || definition?.durationDays || 1;
+        const completedToday = completedDays.includes(today);
         return {
           ...challenge,
           title: challenge.challenge_title || definition?.title,
           description: definition?.description || "Desafio diário em andamento.",
+          progress_current: progressCurrent,
+          progress_total: progressTotal,
           progressText: `${progressCurrent}/${progressTotal} dias`,
           progressPercent: Math.min(100, Math.round((progressCurrent / progressTotal) * 100)),
           completedToday,
@@ -77,7 +73,7 @@ export default function Progresso() {
         };
       })
       .filter((challenge) => challenge.status === "active")
-      .slice(0, 3);
+      .slice(0, 2);
   }, [activeChallenges, today]);
 
   const dailyChallenge = useMemo(() => {
@@ -88,28 +84,60 @@ export default function Progresso() {
   const activateChallengeMutation = useMutation({
     mutationFn: async (challenge) => {
       if (activeCards.length >= 2) throw new Error("Você só pode ter 2 desafios ativos. Conclua um para ativar outro.");
-      await db.UserChallenge.create({
+      // Only columns that exist on public.user_challenges
+      const created = await db.UserChallenge.create({
         user_id: user.id,
+        user_email: user.email || null,
         challenge_id: challenge.id,
-        progress_current: 0,
-        progress_total: challenge.durationDays,
         challenge_title: challenge.title,
         start_date: today,
-        started_at: new Date().toISOString(),
         current_day: 1,
         total_days: challenge.durationDays,
         completed_days: [],
         status: "active",
         points_earned: 0,
-        streak_count: 0,
       });
+      if (!created?.id) {
+        throw new Error("Não foi possível salvar o desafio em user_challenges.");
+      }
+      return created;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userChallenges"] });
-      toast.success("Desafio ativado com sucesso.");
+    onMutate: async (challenge) => {
+      await queryClient.cancelQueries({ queryKey: ["userChallenges", user?.id] });
+      const previousChallenges = queryClient.getQueryData(["userChallenges", user?.id]);
+      const optimisticRow = {
+        id: `temp-${challenge.id}-${Date.now()}`,
+        user_id: user.id,
+        user_email: user.email || null,
+        challenge_id: challenge.id,
+        challenge_title: challenge.title,
+        start_date: today,
+        current_day: 1,
+        total_days: challenge.durationDays,
+        completed_days: [],
+        status: "active",
+        points_earned: 0,
+      };
+      queryClient.setQueryData(["userChallenges", user?.id], (old = []) => [...old, optimisticRow]);
+      return { previousChallenges };
     },
-    onError: (error) => {
+    onSuccess: (created, challenge) => {
+      queryClient.setQueryData(["userChallenges", user?.id], (old = []) => {
+        const withoutTemp = old.filter((row) => !String(row.id).startsWith("temp-"));
+        if (withoutTemp.some((row) => row.id === created.id)) return withoutTemp;
+        return [...withoutTemp, created];
+      });
+      const dailyXp = challenge.dailyXp || challenge.xp_per_day || 10;
+      toast.success(`Desafio ativado • +${dailyXp} XP por dia`);
+    },
+    onError: (error, _challenge, context) => {
+      if (context?.previousChallenges) {
+        queryClient.setQueryData(["userChallenges", user?.id], context.previousChallenges);
+      }
       toast.error(error.message || "Não foi possível ativar o desafio.");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["userChallenges"] });
     },
   });
 
@@ -162,11 +190,18 @@ export default function Progresso() {
       if (context?.previousChallenges) queryClient.setQueryData(["userChallenges", user?.id], context.previousChallenges);
       if (context?.previousPoints) queryClient.setQueryData(["userPoints", user?.id], context.previousPoints);
       if (context?.previousRanking) queryClient.setQueryData(["rankingSnapshot", user?.id], context.previousRanking);
+      toast.error(_error?.message || "Não foi possível registrar o progresso de hoje.");
     },
     onSuccess: (result) => {
+      if (result?.xpGain) {
+        setXpFeedback(result.xpGain);
+        setTimeout(() => setXpFeedback(null), 1400);
+      }
       if (result?.completed) {
         setCompletionToast(`🎉 Desafio concluído • +${result.xpGain} XP`);
         setTimeout(() => setCompletionToast(null), 2400);
+      } else if (result?.xpGain) {
+        toast.success(`Meta do dia concluída • +${result.xpGain} XP`);
       }
     },
     onSettled: () => {
