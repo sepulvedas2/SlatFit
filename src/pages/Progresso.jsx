@@ -39,6 +39,30 @@ export default function Progresso() {
     enabled: !!user?.id,
   });
 
+  const { data: userProfile } = useQuery({
+    queryKey: ["userProfile", user?.id],
+    queryFn: async () => {
+      const rows = await db.UserProfile.filter({ id: user.id });
+      return rows[0] || null;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const rankingLeaderboard = useMemo(() => {
+    const board = rankingSnapshot?.leaderboard || [];
+    // Prefer profile row (works even if production BE hasn't shipped avatar_url yet)
+    const myAvatar = userProfile?.avatar_url || null;
+
+    if (!myAvatar || !user?.id) return board;
+
+    return board.map((entry) => {
+      const isMe = entry.is_current_user || entry.user_id === user.id;
+      if (!isMe || entry.avatar_url) return entry;
+      return { ...entry, avatar_url: myAvatar };
+    });
+  }, [rankingSnapshot?.leaderboard, userProfile, user?.id]);
+
   const { data: activeChallenges = [] } = useQuery({
     queryKey: ["userChallenges", user?.id],
     queryFn: async () => db.UserChallenge.filter({ user_id: user.id }),
@@ -261,7 +285,7 @@ export default function Progresso() {
         <ExplorarDesafiosCard categories={groupedCategories} activeIds={activeChallengeIds} onActivate={(challenge) => activateChallengeMutation.mutate(challenge)} isSaving={activateChallengeMutation.isPending} />
       </div>
 
-      <RankingModal open={rankingOpen} onClose={() => setRankingOpen(false)} currentXp={rankingSnapshot?.currentXp || userPoints?.total_points || 0} currentRank={rankingSnapshot?.currentRank || null} leaderboard={rankingSnapshot?.leaderboard || []} />
+      <RankingModal open={rankingOpen} onClose={() => setRankingOpen(false)} currentXp={rankingSnapshot?.currentXp || userPoints?.total_points || 0} currentRank={rankingSnapshot?.currentRank || null} leaderboard={rankingLeaderboard} />
     </div>
   );
 }

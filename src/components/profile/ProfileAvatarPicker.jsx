@@ -81,13 +81,12 @@ export default function ProfileAvatarPicker({
     try {
       const { file_url } = await uploadFile(file);
       if (!file_url) throw new Error("Upload não retornou URL.");
-      const consentAt = hasConsent
-        ? undefined
-        : new Date().toISOString();
+      // Always stamp consent on upload once the user has accepted the disclaimer
+      const consentAt = new Date().toISOString();
       setPreviewUrl(file_url);
       await onChange?.({
         avatar_url: file_url,
-        ...(consentAt ? { avatar_public_consent_at: consentAt } : {}),
+        avatar_public_consent_at: consentAt,
       });
       toast.success("Foto de perfil atualizada.");
     } catch (error) {

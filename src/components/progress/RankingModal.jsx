@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { initialsFromName } from "@/components/profile/ProfileAvatarPicker";
 
 const tiers = [
@@ -14,6 +13,29 @@ const tiers = [
 
 function getTier(xp) {
   return tiers.find((tier) => xp >= tier.min && xp < tier.max) || tiers[tiers.length - 1];
+}
+
+function RankAvatar({ url, name }) {
+  const [failed, setFailed] = useState(false);
+  const initials = initialsFromName(name || "U");
+
+  if (!url || failed) {
+    return (
+      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white/80 ring-1 ring-white/15">
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt={name || "Avatar"}
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(true)}
+      className="h-9 w-9 rounded-full object-cover ring-1 ring-white/15"
+    />
+  );
 }
 
 export default function RankingModal({ open, onClose, currentXp, currentRank, leaderboard = [] }) {
@@ -56,14 +78,7 @@ export default function RankingModal({ open, onClose, currentXp, currentRank, le
               {leaderboard.slice(0, 10).map((entry, index) => (
                 <div key={entry.id || index} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9 ring-1 ring-white/15">
-                      {entry.avatar_url ? (
-                        <AvatarImage src={entry.avatar_url} alt={entry.display_name || "Usuário"} className="object-cover" />
-                      ) : null}
-                      <AvatarFallback className="bg-white/10 text-xs font-bold text-white/80">
-                        {initialsFromName(entry.display_name || "U")}
-                      </AvatarFallback>
-                    </Avatar>
+                    <RankAvatar url={entry.avatar_url} name={entry.display_name} />
                     <div>
                       <p className="text-sm font-semibold text-white">
                         <span className="mr-1.5 text-white/35">#{index + 1}</span>
