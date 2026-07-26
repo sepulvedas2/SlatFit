@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  User, Target, Activity, Save, Loader2,
+  Target, Activity, Save, Loader2,
   Droplets, Flame, Dumbbell, Pencil, Scale, ArrowRight, TrendingUp, LogOut
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -19,6 +19,8 @@ import { format } from "date-fns";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { motion } from "framer-motion";
 import { useTheme } from "@/components/ThemeContext";
+import ProfileAvatarPicker from "@/components/profile/ProfileAvatarPicker";
+import OnboardingModal from "@/components/onboarding/OnboardingModal";
 
 const GOAL_META = {
   weight_loss:  { label: "Emagrecimento",   emoji: "🔥", phrase: "Cada treino te aproxima da melhor versão de você!", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
@@ -57,7 +59,7 @@ export default function Profile() {
   const { isDark } = useTheme();
   const queryClient = useQueryClient();
 
-  const { data: profile } = useQuery({
+  const { data: profile, isFetched: profileFetched } = useQuery({
     queryKey: ['userProfile', user?.id],
     queryFn: async () => {
       const profiles = await db.UserProfile.filter({ id: user.id });
@@ -72,6 +74,27 @@ export default function Profile() {
       };
     },
     enabled: !!user?.id,
+  });
+
+  const showOnboarding = !!user?.id && profileFetched && !profile;
+
+  const saveAvatarMutation = useMutation({
+    mutationFn: async (patch) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+      const existingProfiles = await db.UserProfile.filter({ id: user.id });
+      const existing = existingProfiles[0];
+      if (!existing) throw new Error("Complete seu perfil antes de adicionar a foto.");
+      return db.UserProfile.update(existing.id, {
+        avatar_url: patch.avatar_url ?? null,
+        ...(patch.avatar_public_consent_at
+          ? { avatar_public_consent_at: patch.avatar_public_consent_at }
+          : {}),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['rankingSnapshot'] });
+    },
   });
 
 
@@ -219,15 +242,31 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen pb-28" style={{ backgroundColor: isDark ? "#0F1C1B" : undefined, transition: "background-color 0.2s ease" }}>
+      {showOnboarding && (
+        <OnboardingModal
+          user={user}
+          isOpen
+          onComplete={() => {
+            queryClient.invalidateQueries({ queryKey: ['userProfile', user?.id] });
+          }}
+        />
+      )}
+
       <div className="max-w-lg mx-auto px-4 pt-8 space-y-5">
 
         {/* BLOCO 1 — HEADER PREMIUM */}
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="text-center py-4">
-          <div className="relative inline-block mb-4">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#CEF17B]/40 to-[#084734] flex items-center justify-center ring-4 ring-[#CEF17B]/30 mx-auto">
-              <User className="w-12 h-12 text-[#CEF17B]" />
-            </div>
-  
+          <div className="mb-4 flex flex-col items-center">
+            <ProfileAvatarPicker
+              avatarUrl={formData.avatar_url || profile?.avatar_url}
+              name={formData.display_name || user?.full_name}
+              hasConsent={!!(formData.avatar_public_consent_at || profile?.avatar_public_consent_at)}
+              editable={!!profile}
+              onChange={async (patch) => {
+                setFormData((prev) => ({ ...prev, ...patch }));
+                await saveAvatarMutation.mutateAsync(patch);
+              }}
+            />
           </div>
           <h1 className="text-2xl font-bold text-white">{user?.full_name || "Meu Perfil"}</h1>
 

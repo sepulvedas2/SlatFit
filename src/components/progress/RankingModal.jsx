@@ -1,6 +1,8 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { initialsFromName } from "@/components/profile/ProfileAvatarPicker";
 
 const tiers = [
   { label: "Bronze", min: 0, max: 500, color: "#CD7F32", icon: "🥉" },
@@ -44,7 +46,7 @@ export default function RankingModal({ open, onClose, currentXp, currentRank, le
                 <span>{nextTier ? `${currentXp}/${nextTier.min} XP` : `${currentXp} XP`}</span>
               </div>
               <Progress value={tierProgress} className="h-2 bg-white/10 [&>div]:bg-[#CEF17B]" />
-              {nextTier && <p className="text-xs text-white/45">Faltam {Math.max(0, nextTier.min - currentXp)} XP para {nextTier.label}</p>}
+              {nextTier && <p className="mt-1 text-xs text-white/45">Faltam {Math.max(0, nextTier.min - currentXp)} XP para {nextTier.label}</p>}
             </div>
           </div>
 
@@ -54,9 +56,19 @@ export default function RankingModal({ open, onClose, currentXp, currentRank, le
               {leaderboard.slice(0, 10).map((entry, index) => (
                 <div key={entry.id || index} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-white/80">{index + 1}</div>
+                    <Avatar className="h-9 w-9 ring-1 ring-white/15">
+                      {entry.avatar_url ? (
+                        <AvatarImage src={entry.avatar_url} alt={entry.display_name || "Usuário"} className="object-cover" />
+                      ) : null}
+                      <AvatarFallback className="bg-white/10 text-xs font-bold text-white/80">
+                        {initialsFromName(entry.display_name || "U")}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
-                      <p className="text-sm font-semibold text-white">{entry.display_name || 'Usuário'}</p>
+                      <p className="text-sm font-semibold text-white">
+                        <span className="mr-1.5 text-white/35">#{index + 1}</span>
+                        {entry.display_name || 'Usuário'}
+                      </p>
                       <p className="text-xs text-white/45">Nível {entry.nivel || 1}</p>
                     </div>
                   </div>
@@ -64,6 +76,9 @@ export default function RankingModal({ open, onClose, currentXp, currentRank, le
                 </div>
               ))}
             </div>
+            <p className="mt-3 text-[11px] leading-relaxed text-white/40">
+              Fotos exibidas são fotos de perfil públicas, com autorização do usuário.
+            </p>
           </div>
         </div>
       </DialogContent>

@@ -12,6 +12,7 @@ import HeroAction from "../components/dashboard/HeroAction";
 import TodayGoals from "../components/dashboard/TodayGoals";
 import StreakWeeklyCard from "../components/dashboard/StreakWeeklyCard";
 import WeeklyGoalModal from "../components/dashboard/WeeklyGoalModal";
+import OnboardingModal from "../components/onboarding/OnboardingModal";
 
 // Minimal plan map to determine next workout (mirrors WeeklyPlan data)
 const WEEK_PLANS = {
@@ -116,7 +117,7 @@ export default function Dashboard() {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: profile } = useQuery({
+  const { data: profile, isFetched: profileFetched } = useQuery({
     queryKey: ['userProfile', user?.id],
     queryFn: async () => {
       try {
@@ -131,6 +132,8 @@ export default function Dashboard() {
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });
+
+  const showOnboarding = !!user?.id && profileFetched && !profile;
 
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -239,10 +242,21 @@ export default function Dashboard() {
             onClose={() => setShowGoalModal(false)}
           />
         )}
+
+        {showOnboarding && (
+          <OnboardingModal
+            user={user}
+            isOpen
+            onComplete={() => {
+              queryClient.invalidateQueries({ queryKey: ['userProfile', user?.id] });
+            }}
+          />
+        )}
+
         {user && (
           <>
             {/* 1. Saudação */}
-            <HeroHeader user={user} />
+            <HeroHeader user={user} avatarUrl={profile?.avatar_url} />
 
             {/* 2. Próximo treino inteligente + CTA */}
             <HeroAction nextWorkout={nextWorkout} allDone={allDone} />
