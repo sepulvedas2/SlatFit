@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">Exercicio sem demonstracao</title>
+  <desc id="desc">Imagem placeholder para exercicio sem GIF disponivel.</desc>
+  <rect width="160" height="160" rx="18" fill="#082f25"/>
+  <rect x="8" y="8" width="144" height="144" rx="14" fill="#0f4a38" stroke="#CEF17B" stroke-opacity=".28" stroke-width="2"/>
+  <path d="M43 82h74" stroke="#CEF17B" stroke-width="8" stroke-linecap="round"/>
+  <path d="M35 69v26M125 69v26M51 72v20M109 72v20" stroke="#CEF17B" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="80" cy="50" r="13" fill="#CEF17B"/>
+  <path d="M61 124c3-19 10-34 19-34s16 15 19 34" fill="none" stroke="#CEEDB2" stroke-width="8" stroke-linecap="round"/>
+</svg>
