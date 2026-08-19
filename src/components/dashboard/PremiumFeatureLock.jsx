@@ -7,26 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Crown, Lock, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { differenceInDays } from "date-fns";
 
 export default function PremiumFeatureLock({ featureName, children }) {
   const { user } = useAuth();
 
   const { data: subscription } = useQuery({
-    queryKey: ['subscription', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const subs = await api.entities.Subscription.filter({ user_id: user.id });
-      return subs[0] || null;
-    },
+    queryKey: ['billing', 'subscription'],
+    queryFn: api.billing.getSubscription,
     enabled: !!user?.id,
   });
 
-  const isPremium = subscription?.plan === "premium" || subscription?.plan === "free_trial";
-  const isActive = subscription?.is_active && 
-    differenceInDays(new Date(subscription.end_date), new Date()) > 0;
-
-  if (isPremium && isActive) {
+  if (subscription?.hasAccess) {
     return children;
   }
 
@@ -55,7 +46,7 @@ export default function PremiumFeatureLock({ featureName, children }) {
           </Link>
           
           <p className="text-sm text-[#CEEDB2]">
-            R$ 19,90/mês • 30 dias grátis • Cancele quando quiser
+            Planos mensal, semestral ou anual • Reembolso em ate 7 dias
           </p>
         </div>
 

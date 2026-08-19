@@ -34,8 +34,39 @@ function logout() {
   clearUser();
 }
 
+async function getBillingPlans() {
+  return request('/billing/plans');
+}
+
+async function getSubscription() {
+  const json = await request('/billing/subscription');
+  return json?.subscription ?? null;
+}
+
+async function createSubscription(plan) {
+  return request('/billing/create-subscription', {
+    method: 'POST',
+    body: { plan },
+  });
+}
+
+async function createPortalSession() {
+  return request('/billing/portal-session', { method: 'POST' });
+}
+
+async function requestRefund() {
+  return request('/billing/refund', { method: 'POST' });
+}
+
 export const api = {
   functions: { invoke: invokeFunction },
   auth: { me, login, register, logout },
+  billing: {
+    getPlans: getBillingPlans,
+    getSubscription,
+    createSubscription,
+    createPortalSession,
+    requestRefund,
+  },
   entities,
 };
