@@ -1,0 +1,664 @@
+{
+  "generatedAt": "2026-09-02T22:14:04.261Z",
+  "total": 94,
+  "report": [
+    {
+      "exerciseName": "Supino reto",
+      "query": "barbell bench press",
+      "status": "downloaded",
+      "workoutXId": "0025",
+      "workoutXName": "Barbell Bench Press"
+    },
+    {
+      "exerciseName": "Supino inclinado",
+      "query": "incline bench press",
+      "status": "downloaded",
+      "workoutXId": "0047",
+      "workoutXName": "Barbell Incline Bench Press"
+    },
+    {
+      "exerciseName": "Supino no banco declinado",
+      "query": "decline bench press",
+      "status": "downloaded",
+      "workoutXId": "0033",
+      "workoutXName": "Barbell Decline Bench Press"
+    },
+    {
+      "exerciseName": "Tríceps pulley",
+      "query": "triceps pushdown",
+      "status": "downloaded",
+      "workoutXId": "0241",
+      "workoutXName": "Cable Triceps Pushdown (v-bar)"
+    },
+    {
+      "exerciseName": "Tríceps barra reta",
+      "query": "triceps pushdown",
+      "status": "downloaded",
+      "workoutXId": "0241",
+      "workoutXName": "Cable Triceps Pushdown (v-bar)"
+    },
+    {
+      "exerciseName": "Tríceps corda",
+      "query": "rope triceps pushdown",
+      "status": "manual_override",
+      "workoutXId": "0200",
+      "workoutXName": "Cable Pushdown (with Rope Attachment)"
+    },
+    {
+      "exerciseName": "Remada baixa aberta",
+      "query": "seated cable row",
+      "status": "manual_override",
+      "workoutXId": "0218",
+      "workoutXName": "Cable Seated Wide-grip Row"
+    },
+    {
+      "exerciseName": "Remada alta",
+      "query": "seated cable row",
+      "status": "manual_override",
+      "workoutXId": "0120",
+      "workoutXName": "Barbell Upright Row"
+    },
+    {
+      "exerciseName": "Puxada Alta à Frente",
+      "query": "lat pulldown",
+      "status": "downloaded",
+      "workoutXId": "0673",
+      "workoutXName": "Reverse Grip Machine Lat Pulldown"
+    },
+    {
+      "exerciseName": "Bíceps barra reta",
+      "query": "biceps curl",
+      "status": "downloaded",
+      "workoutXId": "0023",
+      "workoutXName": "Barbell Alternate Biceps Curl"
+    },
+    {
+      "exerciseName": "Bíceps alternado",
+      "query": "biceps curl",
+      "status": "downloaded",
+      "workoutXId": "0023",
+      "workoutXName": "Barbell Alternate Biceps Curl"
+    },
+    {
+      "exerciseName": "Mergulho no Banco",
+      "query": "bench dip",
+      "status": "downloaded",
+      "workoutXId": "0129",
+      "workoutXName": "Bench Dip (knees Bent)"
+    },
+    {
+      "exerciseName": "Agachamento Livre",
+      "query": "squat",
+      "status": "downloaded",
+      "workoutXId": "0024",
+      "workoutXName": "Barbell Bench Front Squat"
+    },
+    {
+      "exerciseName": "Leg press 45",
+      "query": "leg press",
+      "status": "downloaded",
+      "workoutXId": "0739",
+      "workoutXName": "Sled 45° Leg Press"
+    },
+    {
+      "exerciseName": "Cadeira extensora",
+      "query": "leg extension",
+      "status": "downloaded",
+      "workoutXId": "0585",
+      "workoutXName": "Lever Leg Extension"
+    },
+    {
+      "exerciseName": "Cadeira flexora",
+      "query": "leg curl",
+      "status": "manual_override",
+      "workoutXId": "0599",
+      "workoutXName": "Lever Seated Leg Curl"
+    },
+    {
+      "exerciseName": "Agachamento sumô",
+      "query": "sumo squat",
+      "status": "downloaded",
+      "workoutXId": "3142",
+      "workoutXName": "Smith Sumo Squat"
+    },
+    {
+      "exerciseName": "Panturrilha no Leg Press Horizontal",
+      "query": "leg press",
+      "status": "manual_override",
+      "workoutXId": "2335",
+      "workoutXName": "Lever Seated Calf Press"
+    },
+    {
+      "exerciseName": "Bíceps martelo",
+      "query": "hammer curl",
+      "status": "downloaded",
+      "workoutXId": "0165",
+      "workoutXName": "Cable Hammer Curl (with Rope)"
+    },
+    {
+      "exerciseName": "Elevação Lateral Sentado",
+      "query": "lateral raise",
+      "status": "manual_override",
+      "workoutXId": "0396",
+      "workoutXName": "Dumbbell Seated Lateral Raise"
+    },
+    {
+      "exerciseName": "Elevação Frontal com Anilha",
+      "query": "front raise",
+      "status": "manual_override",
+      "workoutXId": "0834",
+      "workoutXName": "Weighted Front Raise"
+    },
+    {
+      "exerciseName": "Desenvolvimento com Rotação de Ombro",
+      "query": "arnold press",
+      "status": "downloaded",
+      "workoutXId": "0287",
+      "workoutXName": "Dumbbell Arnold Press V. 2"
+    },
+    {
+      "exerciseName": "Prancha",
+      "query": "front plank",
+      "status": "downloaded",
+      "workoutXId": "5202",
+      "workoutXName": "Front Plank"
+    },
+    {
+      "exerciseName": "Abdominal infra",
+      "query": "lying leg raise",
+      "status": "downloaded",
+      "workoutXId": "0620",
+      "workoutXName": "Lying Leg Raise Flat Bench"
+    },
+    {
+      "exerciseName": "Abdominal reto",
+      "query": "crunch",
+      "status": "downloaded",
+      "workoutXId": "0267",
+      "workoutXName": "Crunch (hands Overhead)"
+    },
+    {
+      "exerciseName": "Supino Inclinado",
+      "query": "incline bench press",
+      "status": "downloaded",
+      "workoutXId": "0047",
+      "workoutXName": "Barbell Incline Bench Press"
+    },
+    {
+      "exerciseName": "Supino Reto",
+      "query": "barbell bench press",
+      "status": "downloaded",
+      "workoutXId": "0025",
+      "workoutXName": "Barbell Bench Press"
+    },
+    {
+      "exerciseName": "Flexão de Braço",
+      "query": "push up",
+      "status": "manual_override",
+      "workoutXId": "0662",
+      "workoutXName": "Push-up"
+    },
+    {
+      "exerciseName": "Desenvolvimento com Halteres",
+      "query": "shoulder press",
+      "status": "manual_override",
+      "workoutXId": "0405",
+      "workoutXName": "Dumbbell Seated Shoulder Press"
+    },
+    {
+      "exerciseName": "Elevação Lateral",
+      "query": "lateral raise",
+      "status": "manual_override",
+      "workoutXId": "0334",
+      "workoutXName": "Dumbbell Lateral Raise"
+    },
+    {
+      "exerciseName": "Elevação Frontal",
+      "query": "front raise",
+      "status": "manual_override",
+      "workoutXId": "0310",
+      "workoutXName": "Dumbbell Front Raise"
+    },
+    {
+      "exerciseName": "Remada Baixa com Triângulo",
+      "query": "seated cable row",
+      "status": "manual_override",
+      "workoutXId": "0213",
+      "workoutXName": "Cable Seated High Row (v-bar)"
+    },
+    {
+      "exerciseName": "Remada Curvada na Barra em Pé",
+      "query": "barbell bent over row",
+      "status": "downloaded",
+      "workoutXId": "0027",
+      "workoutXName": "Barbell Bent Over Row"
+    },
+    {
+      "exerciseName": "Tríceps Pulley Barra",
+      "query": "triceps pushdown",
+      "status": "downloaded",
+      "workoutXId": "0241",
+      "workoutXName": "Cable Triceps Pushdown (v-bar)"
+    },
+    {
+      "exerciseName": "Tríceps Testa no Banco",
+      "query": "triceps pushdown",
+      "status": "manual_override",
+      "workoutXId": "0060",
+      "workoutXName": "Barbell Lying Triceps Extension Skull Crusher"
+    },
+    {
+      "exerciseName": "Tríceps na Máquina",
+      "query": "triceps pushdown",
+      "status": "manual_override",
+      "workoutXId": "0607",
+      "workoutXName": "Lever Triceps Extension"
+    },
+    {
+      "exerciseName": "Agachamento a Fundo",
+      "query": "squat",
+      "status": "manual_override",
+      "workoutXId": "2368",
+      "workoutXName": "Split Squats"
+    },
+    {
+      "exerciseName": "Leg Press Horizontal",
+      "query": "leg press",
+      "status": "downloaded",
+      "workoutXId": "0739",
+      "workoutXName": "Sled 45° Leg Press"
+    },
+    {
+      "exerciseName": "Cadeira Extensora",
+      "query": "leg extension",
+      "status": "downloaded",
+      "workoutXId": "0585",
+      "workoutXName": "Lever Leg Extension"
+    },
+    {
+      "exerciseName": "Cadeira Flexora",
+      "query": "leg curl",
+      "status": "manual_override",
+      "workoutXId": "0599",
+      "workoutXName": "Lever Seated Leg Curl"
+    },
+    {
+      "exerciseName": "Agachamento Sumô",
+      "query": "sumo squat",
+      "status": "downloaded",
+      "workoutXId": "3142",
+      "workoutXName": "Smith Sumo Squat"
+    },
+    {
+      "exerciseName": "Puxada Alta Aberta",
+      "query": "lat pulldown",
+      "status": "downloaded",
+      "workoutXId": "0673",
+      "workoutXName": "Reverse Grip Machine Lat Pulldown"
+    },
+    {
+      "exerciseName": "Mesa Flexora",
+      "query": "leg curl",
+      "status": "manual_override",
+      "workoutXId": "0586",
+      "workoutXName": "Lever Lying Leg Curl"
+    },
+    {
+      "exerciseName": "Stiff",
+      "query": "romanian deadlift",
+      "status": "downloaded",
+      "workoutXId": "0085",
+      "workoutXName": "Barbell Romanian Deadlift"
+    },
+    {
+      "exerciseName": "Tríceps Corda",
+      "query": "rope triceps pushdown",
+      "status": "manual_override",
+      "workoutXId": "0200",
+      "workoutXName": "Cable Pushdown (with Rope Attachment)"
+    },
+    {
+      "exerciseName": "Tríceps Máquina",
+      "query": "triceps pushdown",
+      "status": "manual_override",
+      "workoutXId": "0607",
+      "workoutXName": "Lever Triceps Extension"
+    },
+    {
+      "exerciseName": "Supino reto com halteres",
+      "query": "dumbbell bench press",
+      "status": "downloaded",
+      "workoutXId": "0289",
+      "workoutXName": "Dumbbell Bench Press"
+    },
+    {
+      "exerciseName": "Supino com Barra",
+      "query": "barbell bench press",
+      "status": "downloaded",
+      "workoutXId": "0025",
+      "workoutXName": "Barbell Bench Press"
+    },
+    {
+      "exerciseName": "Crucifixo com Halteres",
+      "query": "dumbbell fly",
+      "status": "downloaded",
+      "workoutXId": "0308",
+      "workoutXName": "Dumbbell Fly"
+    },
+    {
+      "exerciseName": "Tríceps Mergulho",
+      "query": "bench dip",
+      "status": "downloaded",
+      "workoutXId": "0129",
+      "workoutXName": "Bench Dip (knees Bent)"
+    },
+    {
+      "exerciseName": "Tríceps Testa na Polia",
+      "query": "triceps pushdown",
+      "status": "downloaded",
+      "workoutXId": "0241",
+      "workoutXName": "Cable Triceps Pushdown (v-bar)"
+    },
+    {
+      "exerciseName": "Tríceps francês no banco",
+      "query": "triceps pushdown",
+      "status": "downloaded",
+      "workoutXId": "0241",
+      "workoutXName": "Cable Triceps Pushdown (v-bar)"
+    },
+    {
+      "exerciseName": "Remada Livre no Banco",
+      "query": "one arm dumbbell row",
+      "status": "manual_override",
+      "workoutXId": "0292",
+      "workoutXName": "Dumbbell One Arm Bent-over Row"
+    },
+    {
+      "exerciseName": "Puxada Aberta na Polia",
+      "query": "lat pulldown",
+      "status": "downloaded",
+      "workoutXId": "0673",
+      "workoutXName": "Reverse Grip Machine Lat Pulldown"
+    },
+    {
+      "exerciseName": "Puxada Fechada Triângulo",
+      "query": "close grip lat pulldown",
+      "status": "manual_override",
+      "workoutXId": "2616",
+      "workoutXName": "Cable Lateral Pulldown With V-bar"
+    },
+    {
+      "exerciseName": "Pullover na Polia com Corda",
+      "query": "pullover na polia com corda",
+      "status": "manual_override",
+      "workoutXId": "0237",
+      "workoutXName": "Cable Straight Arm Pulldown (with Rope)"
+    },
+    {
+      "exerciseName": "Rosca Direta Barra",
+      "query": "biceps curl",
+      "status": "downloaded",
+      "workoutXId": "0023",
+      "workoutXName": "Barbell Alternate Biceps Curl"
+    },
+    {
+      "exerciseName": "Bíceps Martelo",
+      "query": "hammer curl",
+      "status": "downloaded",
+      "workoutXId": "0165",
+      "workoutXName": "Cable Hammer Curl (with Rope)"
+    },
+    {
+      "exerciseName": "Rosca Scott",
+      "query": "biceps curl",
+      "status": "downloaded",
+      "workoutXId": "0023",
+      "workoutXName": "Barbell Alternate Biceps Curl"
+    },
+    {
+      "exerciseName": "Agachamento com Salto",
+      "query": "jump squat",
+      "status": "downloaded",
+      "workoutXId": "0514",
+      "workoutXName": "Jump Squat"
+    },
+    {
+      "exerciseName": "Leg Press",
+      "query": "leg press",
+      "status": "downloaded",
+      "workoutXId": "0739",
+      "workoutXName": "Sled 45° Leg Press"
+    },
+    {
+      "exerciseName": "Remada Alta",
+      "query": "seated cable row",
+      "status": "manual_override",
+      "workoutXId": "0120",
+      "workoutXName": "Barbell Upright Row"
+    },
+    {
+      "exerciseName": "Elevação Lateral na Polia",
+      "query": "lateral raise",
+      "status": "downloaded",
+      "workoutXId": "0178",
+      "workoutXName": "Cable Lateral Raise"
+    },
+    {
+      "exerciseName": "Avanço",
+      "query": "lunge",
+      "status": "downloaded",
+      "workoutXId": "0054",
+      "workoutXName": "Barbell Lunge"
+    },
+    {
+      "exerciseName": "Desenvolvimento Máquina",
+      "query": "shoulder press",
+      "status": "manual_override",
+      "workoutXId": "0869",
+      "workoutXName": "Lever Shoulder Press V. 2"
+    },
+    {
+      "exerciseName": "Cadeira Abdutora",
+      "query": "hip abduction",
+      "status": "downloaded",
+      "workoutXId": "0597",
+      "workoutXName": "Lever Seated Hip Abduction"
+    },
+    {
+      "exerciseName": "Supino na Polia",
+      "query": "barbell bench press",
+      "status": "manual_override",
+      "workoutXId": "0151",
+      "workoutXName": "Cable Bench Press"
+    },
+    {
+      "exerciseName": "Crucifixo Polia",
+      "query": "dumbbell fly",
+      "status": "downloaded",
+      "workoutXId": "0308",
+      "workoutXName": "Dumbbell Fly"
+    },
+    {
+      "exerciseName": "Tríceps Coice",
+      "query": "dumbbell kickback",
+      "status": "downloaded",
+      "workoutXId": "0333",
+      "workoutXName": "Dumbbell Kickback"
+    },
+    {
+      "exerciseName": "Remada Baixa",
+      "query": "seated cable row",
+      "status": "manual_override",
+      "workoutXId": "0861",
+      "workoutXName": "Cable Seated Row"
+    },
+    {
+      "exerciseName": "Remada Baixa Barra",
+      "query": "seated cable row",
+      "status": "manual_override",
+      "workoutXId": "0180",
+      "workoutXName": "Cable Low Seated Row"
+    },
+    {
+      "exerciseName": "Puxada Alta Fechada",
+      "query": "close grip lat pulldown",
+      "status": "manual_override",
+      "workoutXId": "2616",
+      "workoutXName": "Cable Lateral Pulldown With V-bar"
+    },
+    {
+      "exerciseName": "Bíceps na Barra",
+      "query": "biceps curl",
+      "status": "downloaded",
+      "workoutXId": "0023",
+      "workoutXName": "Barbell Alternate Biceps Curl"
+    },
+    {
+      "exerciseName": "Bíceps Alternado",
+      "query": "biceps curl",
+      "status": "downloaded",
+      "workoutXId": "0023",
+      "workoutXName": "Barbell Alternate Biceps Curl"
+    },
+    {
+      "exerciseName": "Rosca Scott Máquina",
+      "query": "biceps curl",
+      "status": "downloaded",
+      "workoutXId": "0023",
+      "workoutXName": "Barbell Alternate Biceps Curl"
+    },
+    {
+      "exerciseName": "Agachamento",
+      "query": "squat",
+      "status": "downloaded",
+      "workoutXId": "0024",
+      "workoutXName": "Barbell Bench Front Squat"
+    },
+    {
+      "exerciseName": "Panturrilha",
+      "query": "calf raise",
+      "status": "downloaded",
+      "workoutXId": "0088",
+      "workoutXName": "Barbell Seated Calf Raise"
+    },
+    {
+      "exerciseName": "Leg press 45 (fem)",
+      "query": "leg press",
+      "status": "downloaded",
+      "workoutXId": "0739",
+      "workoutXName": "Sled 45° Leg Press"
+    },
+    {
+      "exerciseName": "Elevação da coxa em pé (fem)",
+      "query": "elevacao da coxa em pe",
+      "status": "manual_override",
+      "workoutXId": "0585",
+      "workoutXName": "Lever Leg Extension"
+    },
+    {
+      "exerciseName": "Adutor na polia em pé ou abdução na máquina (fem)",
+      "query": "hip abduction",
+      "status": "downloaded",
+      "workoutXId": "0597",
+      "workoutXName": "Lever Seated Hip Abduction"
+    },
+    {
+      "exerciseName": "Cadeira extensora (fem)",
+      "query": "leg extension",
+      "status": "downloaded",
+      "workoutXId": "0585",
+      "workoutXName": "Lever Leg Extension"
+    },
+    {
+      "exerciseName": "Avanço parado (fem)",
+      "query": "lunge",
+      "status": "downloaded",
+      "workoutXId": "0054",
+      "workoutXName": "Barbell Lunge"
+    },
+    {
+      "exerciseName": "Subida no banco (fem)",
+      "query": "step up",
+      "status": "downloaded",
+      "workoutXId": "0114",
+      "workoutXName": "Barbell Step-up"
+    },
+    {
+      "exerciseName": "Agachamento livre (fem)",
+      "query": "squat",
+      "status": "downloaded",
+      "workoutXId": "0024",
+      "workoutXName": "Barbell Bench Front Squat"
+    },
+    {
+      "exerciseName": "Stiff (fem)",
+      "query": "romanian deadlift",
+      "status": "downloaded",
+      "workoutXId": "0085",
+      "workoutXName": "Barbell Romanian Deadlift"
+    },
+    {
+      "exerciseName": "Mesa flexora (fem)",
+      "query": "leg curl",
+      "status": "manual_override",
+      "workoutXId": "0586",
+      "workoutXName": "Lever Lying Leg Curl"
+    },
+    {
+      "exerciseName": "Elevação pélvica (fem)",
+      "query": "hip thrust",
+      "status": "downloaded",
+      "workoutXId": "3236",
+      "workoutXName": "Resistance Band Hip Thrusts On Knees (female)"
+    },
+    {
+      "exerciseName": "Cadeira abdutora (fem)",
+      "query": "hip abduction",
+      "status": "downloaded",
+      "workoutXId": "0597",
+      "workoutXName": "Lever Seated Hip Abduction"
+    },
+    {
+      "exerciseName": "Extensão de quadril no solo (quatro apoios) (fem)",
+      "query": "hip thrust",
+      "status": "downloaded",
+      "workoutXId": "3236",
+      "workoutXName": "Resistance Band Hip Thrusts On Knees (female)"
+    },
+    {
+      "exerciseName": "Panturrilha em pé (fem)",
+      "query": "calf raise",
+      "status": "manual_override",
+      "workoutXId": "1373",
+      "workoutXName": "Bodyweight Standing Calf Raise"
+    },
+    {
+      "exerciseName": "Stiff (fem C) (fem)",
+      "query": "romanian deadlift",
+      "status": "downloaded",
+      "workoutXId": "0085",
+      "workoutXName": "Barbell Romanian Deadlift"
+    },
+    {
+      "exerciseName": "Mesa flexora (fem C) (fem)",
+      "query": "leg curl",
+      "status": "manual_override",
+      "workoutXId": "0586",
+      "workoutXName": "Lever Lying Leg Curl"
+    },
+    {
+      "exerciseName": "Extensão de quadril no solo ou na polia (fem)",
+      "query": "hip thrust",
+      "status": "downloaded",
+      "workoutXId": "3236",
+      "workoutXName": "Resistance Band Hip Thrusts On Knees (female)"
+    },
+    {
+      "exerciseName": "Panturrilha em pé (fem C) (fem)",
+      "query": "calf raise",
+      "status": "manual_override",
+      "workoutXId": "1373",
+      "workoutXName": "Bodyweight Standing Calf Raise"
+    }
+  ]
+}

@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
       // Proxy API routes to SlatFit BE on localhost — avoids hardcoding a DHCP LAN IP.
       proxy: {
         '/auth': { target: 'http://localhost:3000', changeOrigin: true },
+        '/billing': { target: 'http://localhost:3000', changeOrigin: true },
         '/functions': { target: 'http://localhost:3000', changeOrigin: true },
         '/ai': { target: 'http://localhost:3000', changeOrigin: true },
         '/uploads': { target: 'http://localhost:3000', changeOrigin: true },

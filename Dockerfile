@@ -30,6 +30,8 @@ COPY . .
 # Public API URL baked into the static build (set at deploy time).
 ARG VITE_API_BASE_URL=""
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ARG VITE_STRIPE_PUBLISHABLE_KEY=""
+ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
 
 # Build application
 RUN npm run build

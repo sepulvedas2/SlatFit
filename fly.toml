@@ -2,7 +2,7 @@
 #
 # Deploy after SlatFit BE is live:
 #   cd SlatFit
-#   fly deploy --build-arg VITE_API_BASE_URL=https://slatfit-be.fly.dev
+#   fly deploy --build-arg VITE_API_BASE_URL=https://slatfit-be.fly.dev --build-arg VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
 #
 # Replace the URL with your actual backend Fly app hostname.
 
@@ -12,6 +12,7 @@ primary_region = 'gru'
 [build]
   [build.args]
     VITE_API_BASE_URL = 'https://slatfit-be.fly.dev'
+    VITE_STRIPE_PUBLISHABLE_KEY = ''
 
 [http_service]
   internal_port = 80

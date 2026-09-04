@@ -2,7 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 const API_BASE = "https://api.workoutxapp.com/v1";
+const CATALOG_PAGE_SIZE = 100;
 const key = process.env.WORKOUTX_API_KEY;
+const forceDownload = process.env.WORKOUTX_FORCE_DOWNLOAD === "1";
+const configuredRequestDelayMs = Number(process.env.WORKOUTX_REQUEST_DELAY_MS ?? 250);
+const requestDelayMs = Number.isFinite(configuredRequestDelayMs) ? configuredRequestDelayMs : 250;
 
 if (!key) {
   throw new Error("WORKOUTX_API_KEY is required");
@@ -12,6 +16,43 @@ const projectRoot = process.cwd();
 const weeklyPlanPath = path.join(projectRoot, "src/components/workouts/WeeklyPlan.jsx");
 const outputDir = path.join(projectRoot, "public/exercises/gifs/workoutx");
 const resolverPath = path.join(projectRoot, "src/components/workouts/exerciseGifs.jsx");
+const downloadedGifIds = new Set();
+
+const MANUAL_WORKOUTX_IDS = new Map([
+  ["Supino na Polia", "0151"],
+  ["Tríceps corda", "0200"],
+  ["Tríceps Corda", "0200"],
+  ["Tríceps Testa no Banco", "0060"],
+  ["Tríceps na Máquina", "0607"],
+  ["Tríceps Máquina", "0607"],
+  ["Flexão de Braço", "0662"],
+  ["Agachamento a Fundo", "2368"],
+  ["Cadeira flexora", "0599"],
+  ["Cadeira Flexora", "0599"],
+  ["Mesa Flexora", "0586"],
+  ["Mesa flexora (fem)", "0586"],
+  ["Mesa flexora (fem C) (fem)", "0586"],
+  ["Remada baixa aberta", "0218"],
+  ["Remada alta", "0120"],
+  ["Remada Baixa com Triângulo", "0213"],
+  ["Remada Alta", "0120"],
+  ["Remada Baixa", "0861"],
+  ["Remada Baixa Barra", "0180"],
+  ["Remada Livre no Banco", "0292"],
+  ["Puxada Fechada Triângulo", "2616"],
+  ["Puxada Alta Fechada", "2616"],
+  ["Pullover na Polia com Corda", "0237"],
+  ["Desenvolvimento com Halteres", "0405"],
+  ["Desenvolvimento Máquina", "0869"],
+  ["Elevação Lateral Sentado", "0396"],
+  ["Elevação Lateral", "0334"],
+  ["Elevação Frontal com Anilha", "0834"],
+  ["Elevação Frontal", "0310"],
+  ["Panturrilha no Leg Press Horizontal", "2335"],
+  ["Elevação da coxa em pé (fem)", "0585"],
+  ["Panturrilha em pé (fem)", "1373"],
+  ["Panturrilha em pé (fem C) (fem)", "1373"],
+]);
 
 function normalize(value) {
   return value
@@ -101,7 +142,11 @@ async function requestJson(url) {
 
 async function downloadGif(id) {
   const target = path.join(outputDir, `${id}.gif`);
-  if (fs.existsSync(target)) return target;
+  if (downloadedGifIds.has(id)) return target;
+  if (!forceDownload && fs.existsSync(target)) {
+    downloadedGifIds.add(id);
+    return target;
+  }
 
   const response = await fetchWithRetry(`${API_BASE}/gifs/${id}.gif`);
 
@@ -115,6 +160,7 @@ async function downloadGif(id) {
   }
 
   fs.writeFileSync(target, bytes);
+  downloadedGifIds.add(id);
   return target;
 }
 
@@ -125,6 +171,10 @@ async function sleep(ms) {
 async function fetchWithRetry(url) {
   let response;
   for (let attempt = 1; attempt <= 8; attempt += 1) {
+    if (requestDelayMs > 0) {
+      await sleep(requestDelayMs);
+    }
+
     response = await fetch(url, {
       headers: {
         "X-WorkoutX-Key": key,
@@ -135,15 +185,60 @@ async function fetchWithRetry(url) {
       return response;
     }
 
-    const retryAfter = Number(response.headers.get("retry-after"));
-    const waitMs = Number.isFinite(retryAfter)
-      ? retryAfter * 1000
+    const retryAfterHeader = response.headers.get("retry-after");
+    const retryAfterSeconds = retryAfterHeader ? Number(retryAfterHeader) : NaN;
+    const waitMs = Number.isFinite(retryAfterSeconds)
+      ? retryAfterSeconds * 1000
       : Math.min(20_000, 2_000 * attempt);
 
     await sleep(waitMs);
   }
 
   return response;
+}
+
+function getWorkoutXData(json) {
+  return Array.isArray(json) ? json : Array.isArray(json.data) ? json.data : [];
+}
+
+async function fetchExerciseCatalog() {
+  const catalog = [];
+  let total = Number.POSITIVE_INFINITY;
+
+  for (let offset = 0; offset < total; offset += CATALOG_PAGE_SIZE) {
+    const json = await requestJson(`${API_BASE}/exercises?limit=${CATALOG_PAGE_SIZE}&offset=${offset}`);
+    const data = getWorkoutXData(json);
+    if (!data.length) break;
+
+    catalog.push(...data);
+    const parsedTotal = Number(json?.total);
+    if (Number.isFinite(parsedTotal)) {
+      total = parsedTotal;
+    }
+  }
+
+  return catalog;
+}
+
+function findBestMatch(exerciseName, query, catalog) {
+  const manualId = MANUAL_WORKOUTX_IDS.get(exerciseName);
+  if (manualId) {
+    const manualMatch = catalog.find((candidate) => candidate?.id === manualId);
+    return manualMatch
+      ? { ...manualMatch, matchSource: "manual_override" }
+      : {
+          id: manualId,
+          name: `WorkoutX ${manualId}`,
+          gifUrl: `${API_BASE}/gifs/${manualId}.gif`,
+          matchSource: "manual_override",
+        };
+  }
+
+  return (
+    catalog
+      .filter((candidate) => candidate?.id && candidate?.gifUrl)
+      .sort((a, b) => scoreMatch(exerciseName, query, b) - scoreMatch(exerciseName, query, a))[0] ?? null
+  );
 }
 
 function buildResolverFile(mappingEntries, aliases) {
@@ -219,18 +314,13 @@ const exerciseNames = [
 
 fs.mkdirSync(outputDir, { recursive: true });
 
+const catalog = await fetchExerciseCatalog();
 const mappings = [];
 const report = [];
 
 for (const exerciseName of exerciseNames) {
   const query = toWorkoutXQuery(exerciseName);
-  await sleep(1250);
-  const json = await requestJson(`${API_BASE}/exercises/name/${encodeURIComponent(query)}`);
-  const data = Array.isArray(json) ? json : Array.isArray(json.data) ? json.data : [];
-  const match =
-    data
-      .filter((candidate) => candidate?.id && candidate?.gifUrl)
-      .sort((a, b) => scoreMatch(exerciseName, query, b) - scoreMatch(exerciseName, query, a))[0] ?? null;
+  const match = findBestMatch(exerciseName, query, catalog);
 
   if (!match) {
     report.push({ exerciseName, query, status: "missing" });
@@ -238,7 +328,6 @@ for (const exerciseName of exerciseNames) {
   }
 
   try {
-    await sleep(1250);
     await downloadGif(match.id);
   } catch (error) {
     report.push({
@@ -255,7 +344,7 @@ for (const exerciseName of exerciseNames) {
   report.push({
     exerciseName,
     query,
-    status: "downloaded",
+    status: match.matchSource ?? "downloaded",
     workoutXId: match.id,
     workoutXName: match.name,
   });
@@ -281,5 +370,6 @@ fs.writeFileSync(
 );
 
 const downloaded = new Set(mappings.map(([, id]) => id)).size;
-const missing = report.filter((item) => item.status !== "downloaded").length;
-console.log(JSON.stringify({ exercises: exerciseNames.length, uniqueGifs: downloaded, missing }, null, 2));
+const missing = report.filter((item) => item.status === "missing" || item.status === "gif_failed").length;
+const manualOverrides = report.filter((item) => item.status === "manual_override").length;
+console.log(JSON.stringify({ exercises: exerciseNames.length, uniqueGifs: downloaded, manualOverrides, missing }, null, 2));
