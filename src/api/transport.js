@@ -1,6 +1,6 @@
 import { getStoredToken } from '@/components/auth';
 
-const RENDER_BE = 'https://slatfit-be.onrender.com';
+const RENDER_BE = 'https://slatfit-be-upsu.onrender.com';
 
 function resolveApiBase() {
   if (typeof window !== 'undefined' && window.location?.hostname) {
