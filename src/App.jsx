@@ -29,8 +29,6 @@ import Subscription from './pages/Subscription';
 
 setupIframeMessaging();
 
-const BYPASS_SUBSCRIPTION_GUARD_IN_DEV = import.meta.env.DEV;
-
 const AuthenticatedApp = () => {
   const { isLoading, isAuthenticated } = useAuth();
   const location = useLocation();
@@ -38,7 +36,7 @@ const AuthenticatedApp = () => {
   const billingQuery = useQuery({
     queryKey: ['billing', 'subscription'],
     queryFn: api.billing.getSubscription,
-    enabled: isAuthenticated && !BYPASS_SUBSCRIPTION_GUARD_IN_DEV,
+    enabled: isAuthenticated,
     retry: false,
   });
 
@@ -60,7 +58,7 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (!BYPASS_SUBSCRIPTION_GUARD_IN_DEV && billingQuery.isLoading) {
+  if (billingQuery.isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: '#0B3936' }}>
         <div className="w-10 h-10 border-2 border-[#CEF17B] border-t-transparent rounded-full animate-spin" />
@@ -69,7 +67,7 @@ const AuthenticatedApp = () => {
   }
 
   const isSubscriptionRoute = location.pathname.toLowerCase() === '/subscription';
-  const hasPaidAccess = BYPASS_SUBSCRIPTION_GUARD_IN_DEV || billingQuery.data?.hasAccess === true;
+  const hasPaidAccess = billingQuery.data?.hasAccess === true;
 
   if (!hasPaidAccess && !isSubscriptionRoute) {
     return <Navigate to="/Subscription" replace />;

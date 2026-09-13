@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { format, startOfWeek } from "date-fns";
 import { useAuth } from "@/lib/AuthContext";
 import { api } from "@/api/client";
 import { db } from "@/components/supabaseApi";
@@ -24,6 +25,7 @@ export default function Workouts() {
   const [selectedWeek, setSelectedWeek] = useState(1);
 
   const queryClient = useQueryClient();
+  const currentWeekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
 
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.id],
@@ -44,7 +46,7 @@ export default function Workouts() {
   const { data: todayWorkouts = [] } = useQuery({
     queryKey: ['todayWorkouts', user?.id],
     queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const today = format(new Date(), 'yyyy-MM-dd');
       const logs = await db.WorkoutLog.filter({ 
         user_id: user.id,
         completed_date: today
@@ -56,15 +58,10 @@ export default function Workouts() {
   });
 
   const { data: weekWorkouts } = useQuery({
-    queryKey: ['weekWorkouts', user?.id],
+    queryKey: ['weekWorkouts', user?.id, currentWeekStart],
     queryFn: async () => {
-      const today = new Date();
-      const weekStart = new Date(today);
-      weekStart.setDate(today.getDate() - today.getDay() + 1);
-      const weekStartStr = weekStart.toISOString().split('T')[0];
-      
       const logs = await db.WorkoutLog.filter({ user_id: user.id });
-      return logs.filter(log => log.completed_date >= weekStartStr);
+      return logs.filter(log => log.completed_date >= currentWeekStart);
     },
     enabled: !!user?.id,
     initialData: [],
@@ -72,10 +69,11 @@ export default function Workouts() {
 
   // Fetch daily workouts
   const { data: dailyWorkouts = [] } = useQuery({
-    queryKey: ['dailyWorkouts', user?.id, selectedWeek],
+    queryKey: ['dailyWorkouts', user?.id, selectedWeek, currentWeekStart],
     queryFn: () => db.DailyWorkout.filter({ 
       user_id: user.id,
-      week_number: selectedWeek 
+      week_number: selectedWeek,
+      week_start_date: currentWeekStart,
     }),
     enabled: !!user?.id,
     initialData: [],
