@@ -1,15 +1,29 @@
 import React, { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
-import { Loader2, Eye, EyeOff, Dumbbell } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function LoginScreen({ onLogin }) {
-  const { login, register } = useAuth();
+  const { login, register, loginWithGoogle, authError } = useAuth();
   const [tab, setTab] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState(authError || '');
+  const busy = loading || googleLoading;
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError('');
+    try {
+      await loginWithGoogle();
+    } catch (err) {
+      setError(err.message || 'Não foi possível entrar com Google. Tente novamente.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +44,7 @@ export default function LoginScreen({ onLogin }) {
   };
 
   return (
-    <section className="min-h-screen w-full flex items-center justify-center px-4" style={{ backgroundColor: "#0F1C1B" }}>
+    <section className="min-h-screen w-full flex items-center justify-center px-4 py-8" style={{ backgroundColor: "#0F1C1B" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;800;900&family=Inter:wght@400;500;600&display=swap');
         .login-input { font-family: 'Inter', sans-serif; transition: all 0.2s; }
@@ -39,7 +53,7 @@ export default function LoginScreen({ onLogin }) {
       `}</style>
 
       <div className="w-full max-w-md">
-        <div className="backdrop-blur-xl bg-white/95 shadow-2xl rounded-2xl px-8 py-10 flex flex-col gap-7">
+        <div className="backdrop-blur-xl bg-white/95 shadow-2xl rounded-2xl px-5 sm:px-8 py-10 flex flex-col gap-7">
 
           {/* Logo */}
           <div className="text-center">
@@ -54,6 +68,7 @@ export default function LoginScreen({ onLogin }) {
             {['login', 'register'].map((t) => (
               <button
                 key={t}
+                disabled={busy}
                 onClick={() => { setTab(t); setError(''); }}
                 className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
                 style={tab === t
@@ -64,6 +79,25 @@ export default function LoginScreen({ onLogin }) {
                 {t === 'login' ? 'Entrar' : 'Criar Conta'}
               </button>
             ))}
+          </div>
+
+          <div className="flex flex-col gap-5">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={busy}
+              className="w-full h-11 rounded-lg border border-[#747775] bg-white text-[#1f1f1f] text-sm font-medium flex items-center justify-center gap-3 px-3 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {googleLoading
+                ? <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden="true" />
+                : <img src="/google-g.png" alt="" width="20" height="20" className="shrink-0" />}
+              {googleLoading ? 'Conectando...' : 'Continuar com Google'}
+            </button>
+            <div className="flex items-center gap-3 text-xs text-gray-500" aria-hidden="true">
+              <span className="h-px flex-1 bg-gray-200" />
+              <span>ou</span>
+              <span className="h-px flex-1 bg-gray-200" />
+            </div>
           </div>
 
           {/* Form */}
@@ -97,14 +131,14 @@ export default function LoginScreen({ onLogin }) {
             </div>
 
             {error && (
-              <div className="rounded-lg px-4 py-3 bg-red-50 border border-red-200">
+              <div role="alert" className="rounded-lg px-4 py-3 bg-red-50 border border-red-200">
                 <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={busy}
               className="w-full h-11 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200"
               style={{ background: loading ? "rgba(255,253,238,0.5)" : "linear-gradient(135deg, #FFFDEE 0%, #E3EF26 100%)", color: "#080626", boxShadow: loading ? "none" : "0 4px 14px rgba(227,239,38,0.4)" }}
             >
@@ -119,6 +153,7 @@ export default function LoginScreen({ onLogin }) {
           <p className="text-center text-sm text-gray-500">
             {tab === 'login' ? 'Não possui conta?' : 'Já tem conta?'}{' '}
             <button
+              disabled={busy}
               onClick={() => { setTab(tab === 'login' ? 'register' : 'login'); setError(''); }}
               className="font-semibold hover:underline" style={{ color: "#0B3936" }}
             >

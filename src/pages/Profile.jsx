@@ -21,6 +21,7 @@ import { motion } from "framer-motion";
 import { useTheme } from "@/components/ThemeContext";
 import ProfileAvatarPicker from "@/components/profile/ProfileAvatarPicker";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import { toast } from "@/components/ui/use-toast";
 
 const GOAL_META = {
   weight_loss:  { label: "Emagrecimento",   emoji: "🔥", phrase: "Cada treino te aproxima da melhor versão de você!", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
@@ -380,9 +381,13 @@ export default function Profile() {
             <div style={{ height: '1px', backgroundColor: 'rgba(206,241,123,0.1)' }} />
 
             <button
-              onClick={() => {
-                logout();
-                navigate("/", { replace: true });
+              onClick={async () => {
+                try {
+                  await logout();
+                  navigate("/", { replace: true });
+                } catch (error) {
+                  toast({ variant: 'destructive', description: error.message || 'Não foi possível sair. Tente novamente.' });
+                }
               }}
               className="w-full flex items-center gap-3 py-3 text-left"
             >

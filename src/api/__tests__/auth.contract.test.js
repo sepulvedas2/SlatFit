@@ -7,9 +7,16 @@ vi.mock('@/components/auth', () => ({
   getStoredUser: vi.fn(),
 }));
 
+vi.mock('@/lib/google-auth', () => ({
+  loginWithGoogle: vi.fn(),
+  restoreGoogleSession: vi.fn(),
+  signOutGoogle: vi.fn(),
+}));
+
 import { api } from '../client';
 import { API_BASE } from '../transport';
 import * as authStore from '@/components/auth';
+import { signOutGoogle } from '@/lib/google-auth';
 
 function jsonResponse(body, { ok = true, status = 200 } = {}) {
   return { ok, status, statusText: ok ? 'OK' : 'Error', json: async () => body };
@@ -18,6 +25,7 @@ function jsonResponse(body, { ok = true, status = 200 } = {}) {
 beforeEach(() => {
   authStore.saveUser.mockClear();
   authStore.clearUser.mockClear();
+  signOutGoogle.mockReset();
 });
 
 describe('api.auth contract', () => {
@@ -74,8 +82,21 @@ describe('api.auth contract', () => {
     expect(authStore.saveUser).not.toHaveBeenCalled();
   });
 
-  it('logout() clears the stored session', () => {
-    api.auth.logout();
+  it('logout() signs out of Google before clearing the stored session', async () => {
+    await api.auth.logout();
+    expect(signOutGoogle).toHaveBeenCalledTimes(1);
     expect(authStore.clearUser).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not leave a Google session behind when switching to password login', async () => {
+    global.fetch = vi.fn(async () => jsonResponse({ user: { id: 'new-user' }, token: 'new-token' }));
+    await api.auth.login('a@b.c', 'secret');
+    expect(signOutGoogle.mock.invocationCallOrder[0]).toBeLessThan(authStore.saveUser.mock.invocationCallOrder[0]);
+  });
+
+  it('keeps logout retryable if Supabase cannot sign out', async () => {
+    signOutGoogle.mockRejectedValue(new Error('Offline'));
+    await expect(api.auth.logout()).rejects.toThrow('Offline');
+    expect(authStore.clearUser).not.toHaveBeenCalled();
   });
 });

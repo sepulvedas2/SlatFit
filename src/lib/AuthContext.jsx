@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { api } from '@/api/client';
 import { getStoredToken, getStoredUser, clearUser } from '@/components/auth';
+import { watchGoogleSession } from '@/lib/google-auth';
+import { queryClientInstance } from '@/lib/query-client';
 
 const AuthContext = createContext();
 
@@ -8,22 +10,20 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
 
   const validateSession = useCallback(async () => {
-    const token = getStoredToken();
-    if (!token) {
-      setUser(null);
-      setIsAuthenticated(false);
-      setIsLoading(false);
-      return;
-    }
-
-    // Optimistically hydrate from the stored user so the UI is responsive,
-    // then confirm the session against the backend.
-    const stored = getStoredUser();
-    if (stored) setUser(stored);
-
+    setIsLoading(true);
+    setAuthError('');
     try {
+      await api.auth.restoreGoogleSession();
+      if (!getStoredToken()) {
+        setUser(null);
+        setIsAuthenticated(false);
+        return;
+      }
+      const stored = getStoredUser();
+      if (stored) setUser(stored);
       const currentUser = await api.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
@@ -32,17 +32,26 @@ export const AuthProvider = ({ children }) => {
       clearUser();
       setUser(null);
       setIsAuthenticated(false);
+      setAuthError(error.message || 'Não foi possível validar o login. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    const unsubscribe = watchGoogleSession(() => {
+      queryClientInstance.clear();
+      setUser(null);
+      setIsAuthenticated(false);
+    });
     validateSession();
+    return unsubscribe;
   }, [validateSession]);
 
   const login = useCallback(async (email, password) => {
     const loggedUser = await api.auth.login(email, password);
+    queryClientInstance.clear();
+    setAuthError('');
     setUser(loggedUser);
     setIsAuthenticated(true);
     return loggedUser;
@@ -50,13 +59,16 @@ export const AuthProvider = ({ children }) => {
 
   const register = useCallback(async (email, password, fullName) => {
     const newUser = await api.auth.register(email, password, fullName);
+    queryClientInstance.clear();
+    setAuthError('');
     setUser(newUser);
     setIsAuthenticated(true);
     return newUser;
   }, []);
 
-  const logout = useCallback(() => {
-    api.auth.logout();
+  const logout = useCallback(async () => {
+    await api.auth.logout();
+    queryClientInstance.clear();
     setUser(null);
     setIsAuthenticated(false);
   }, []);
@@ -67,7 +79,9 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthenticated,
         isLoading,
+        authError,
         login,
+        loginWithGoogle: api.auth.loginWithGoogle,
         register,
         logout,
         refresh: validateSession,
