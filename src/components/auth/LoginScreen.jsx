@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Link } from 'react-router-dom';
 
 export default function LoginScreen({ onLogin }) {
   const { login, register, loginWithGoogle, authError } = useAuth();
@@ -129,6 +130,12 @@ export default function LoginScreen({ onLogin }) {
                 {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+
+            {tab === 'login' && (
+              <Link to="/RecuperarSenha" state={{ email }} className="self-end text-sm font-medium text-[#0B3936] hover:underline">
+                Esqueci minha senha
+              </Link>
+            )}
 
             {error && (
               <div role="alert" className="rounded-lg px-4 py-3 bg-red-50 border border-red-200">

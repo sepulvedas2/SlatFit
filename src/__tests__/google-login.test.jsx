@@ -56,7 +56,10 @@ afterEach(async () => {
 
 async function render() {
   await act(async () => root.render(<App />));
-  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 20)); });
+  await vi.waitFor(async () => {
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 10)); });
+    expect(container.querySelector('[data-page], form')).not.toBeNull();
+  });
 }
 
 describe('Google login through the real auth and billing route guard', () => {
