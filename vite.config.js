@@ -31,12 +31,13 @@ export default defineConfig(({ mode }) => {
       allowedHosts: true,
       // Proxy API routes to SlatFit BE on localhost — avoids hardcoding a DHCP LAN IP.
       proxy: {
-        '/auth': { target: 'http://localhost:3000', changeOrigin: true },
-        '/billing': { target: 'http://localhost:3000', changeOrigin: true },
-        '/functions': { target: 'http://localhost:3000', changeOrigin: true },
-        '/ai': { target: 'http://localhost:3000', changeOrigin: true },
-        '/uploads': { target: 'http://localhost:3000', changeOrigin: true },
-        '/health': { target: 'http://localhost:3000', changeOrigin: true },
+        // SlatFit BE local default is 3001 (keep 3000 free for other work)
+        '/auth': { target: 'http://localhost:3001', changeOrigin: true },
+        '/billing': { target: 'http://localhost:3001', changeOrigin: true },
+        '/functions': { target: 'http://localhost:3001', changeOrigin: true },
+        '/ai': { target: 'http://localhost:3001', changeOrigin: true },
+        '/uploads': { target: 'http://localhost:3001', changeOrigin: true },
+        '/health': { target: 'http://localhost:3001', changeOrigin: true },
       },
       watch: {
         // Enable polling for better file change detection in containers

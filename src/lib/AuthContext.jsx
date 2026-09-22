@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { api } from '@/api/client';
 import { getStoredToken, getStoredUser, clearUser } from '@/components/auth';
-import { watchGoogleSession } from '@/lib/google-auth';
 import { queryClientInstance } from '@/lib/query-client';
 
 const AuthContext = createContext();
@@ -16,7 +15,6 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     setAuthError('');
     try {
-      await api.auth.restoreGoogleSession();
       if (!getStoredToken()) {
         setUser(null);
         setIsAuthenticated(false);
@@ -39,13 +37,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = watchGoogleSession(() => {
-      queryClientInstance.clear();
-      setUser(null);
-      setIsAuthenticated(false);
-    });
     validateSession();
-    return unsubscribe;
   }, [validateSession]);
 
   const login = useCallback(async (email, password) => {
@@ -81,7 +73,6 @@ export const AuthProvider = ({ children }) => {
         isLoading,
         authError,
         login,
-        loginWithGoogle: api.auth.loginWithGoogle,
         register,
         logout,
         refresh: validateSession,

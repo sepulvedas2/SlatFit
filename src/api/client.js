@@ -1,7 +1,6 @@
 import { invokeFunction, request } from './transport';
 import { entities } from './createEntityAPI';
 import { saveUser, clearUser, getStoredToken } from '@/components/auth';
-import { loginWithGoogle, restoreGoogleSession, signOutGoogle } from '@/lib/google-auth';
 
 async function me() {
   const json = await request('/auth/me');
@@ -15,7 +14,6 @@ async function me() {
 async function login(email, password) {
   const { data } = await invokeFunction('supabaseAuth', { action: 'login', email, password });
   if (data?.error) throw new Error(data.error);
-  await signOutGoogle();
   saveUser(data.user, data.token);
   return data.user;
 }
@@ -28,13 +26,11 @@ async function register(email, password, full_name) {
     full_name: full_name ?? email.split('@')[0],
   });
   if (data?.error) throw new Error(data.error);
-  await signOutGoogle();
   saveUser(data.user, data.token);
   return data.user;
 }
 
 async function logout() {
-  await signOutGoogle();
   clearUser();
 }
 
@@ -64,7 +60,7 @@ async function requestRefund() {
 
 export const api = {
   functions: { invoke: invokeFunction },
-  auth: { me, login, register, logout, loginWithGoogle, restoreGoogleSession },
+  auth: { me, login, register, logout },
   billing: {
     getPlans: getBillingPlans,
     getSubscription,
