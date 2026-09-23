@@ -156,3 +156,16 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .gradient-button {
+    background-image: linear-gradient(135deg, #fffdee 0%, #cef17b 45%, #e3ef26 100%) !important;
+    background-color: #cef17b !important;
+    color: #084734 !important;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(206, 241, 123, 0.35);
+  }
+  .gradient-button:hover:not(:disabled) {
+    filter: brightness(1.05);
+  }
+}

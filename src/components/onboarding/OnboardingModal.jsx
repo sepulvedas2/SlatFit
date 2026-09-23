@@ -423,7 +423,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                   type="button"
                   onClick={handleBack}
                   variant="outline"
-                  className="flex-1 border-white/10 hover:bg-white/5"
+                  className="flex-1 border-white/20 bg-white/95 text-[#0F1C1B] hover:bg-white hover:text-[#0F1C1B]"
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
                   Voltar
@@ -435,7 +435,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                   type="button"
                   onClick={handleNext}
                   disabled={!validateCurrentStep()}
-                  className="flex-1 gradient-button text-[#084734]"
+                  className="flex-1 border-0 bg-gradient-to-r from-[#FFFDEE] via-[#CEF17B] to-[#E3EF26] font-bold text-[#084734] shadow-[0_4px_14px_rgba(206,241,123,0.35)] hover:brightness-105 disabled:opacity-40"
                 >
                   Continuar
                   <ChevronRight className="w-4 h-4 ml-2" />
@@ -445,7 +445,7 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                   type="button"
                   onClick={handleSubmit}
                   disabled={!validateCurrentStep() || createProfileMutation.isPending}
-                  className="flex-1 gradient-button text-[#084734]"
+                  className="flex-1 border-0 bg-gradient-to-r from-[#FFFDEE] via-[#CEF17B] to-[#E3EF26] font-bold text-[#084734] shadow-[0_4px_14px_rgba(206,241,123,0.35)] hover:brightness-105 disabled:opacity-40"
                 >
                   {createProfileMutation.isPending ? "Criando seu plano..." : "Começar!"}
                 </Button>
