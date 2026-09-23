@@ -123,9 +123,9 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="bg-[#084734] border-[#CEF17B]/20 max-w-md p-0 overflow-hidden">
-        <div className="relative">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
+      <DialogContent className="flex max-h-[min(92dvh,720px)] w-[calc(100%-1.5rem)] max-w-md flex-col gap-0 overflow-hidden border-[#CEF17B]/20 bg-[#084734] p-0 sm:rounded-xl [&>button]:hidden">
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="absolute left-0 right-0 top-0 z-10 h-1 bg-white/10">
             <motion.div
               className="h-full bg-[#CEF17B]"
               initial={{ width: "0%" }}
@@ -134,16 +134,16 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
             />
           </div>
 
-          <div className="p-8">
-            <div className="text-center mb-8 mt-4">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                Seu Personal Trainer Digital
-              </h2>
-              <p className="text-[#CEEDB2]">
-                Vamos criar seu plano personalizado — passo {step} de {TOTAL_STEPS}
-              </p>
-            </div>
+          <div className="shrink-0 px-5 pb-3 pt-7 text-center sm:px-6 sm:pt-8">
+            <h2 className="mb-1 text-xl font-bold text-white sm:text-2xl">
+              Seu Personal Trainer Digital
+            </h2>
+            <p className="text-sm text-[#CEEDB2]">
+              Vamos criar seu plano personalizado — passo {step} de {TOTAL_STEPS}
+            </p>
+          </div>
 
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 sm:px-6">
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div
@@ -151,13 +151,13 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                   initial={{ x: 20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   exit={{ x: -20, opacity: 0 }}
-                  className="space-y-6"
+                  className="space-y-5 pb-2"
                 >
-                  <div className="w-16 h-16 rounded-full bg-[#CEF17B]/20 flex items-center justify-center mx-auto mb-4">
-                    <User className="w-8 h-8 text-[#CEF17B]" />
+                  <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[#CEF17B]/20">
+                    <User className="h-6 w-6 text-[#CEF17B]" />
                   </div>
 
-                  <h3 className="text-xl font-bold text-white text-center mb-6">
+                  <h3 className="mb-4 text-center text-lg font-bold text-white">
                     Informações Básicas
                   </h3>
 
@@ -342,17 +342,17 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                   initial={{ x: 20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   exit={{ x: -20, opacity: 0 }}
-                  className="space-y-6"
+                  className="space-y-3 pb-2"
                 >
-                  <div className="w-16 h-16 rounded-full bg-[#CEF17B]/20 flex items-center justify-center mx-auto mb-4">
-                    <Activity className="w-8 h-8 text-[#CEF17B]" />
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#CEF17B]/20">
+                    <Activity className="h-5 w-5 text-[#CEF17B]" />
                   </div>
 
-                  <h3 className="text-xl font-bold text-white text-center mb-6">
+                  <h3 className="text-center text-lg font-bold text-white">
                     Frequência Semanal
                   </h3>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {[
                       { value: "sedentary", label: "Sedentário", desc: "Pouco ou nenhum exercício" },
                       { value: "light", label: "Leve", desc: "Exercício 1-3x por semana" },
@@ -364,14 +364,14 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                         type="button"
                         key={option.value}
                         onClick={() => updateField("activity_level", option.value)}
-                        className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                        className={`w-full rounded-lg border-2 px-3 py-2.5 text-left transition-all ${
                           formData.activity_level === option.value
                             ? "border-[#CEF17B] bg-[#CEF17B]/10"
                             : "border-white/10 hover:border-[#CEF17B]/50"
                         }`}
                       >
-                        <div className="text-white font-semibold">{option.label}</div>
-                        <div className="text-[#CEEDB2] text-sm">{option.desc}</div>
+                        <div className="text-sm font-semibold text-white">{option.label}</div>
+                        <div className="text-xs text-[#CEEDB2]">{option.desc}</div>
                       </button>
                     ))}
                   </div>
@@ -416,8 +416,9 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
 
-            <div className="flex gap-3 mt-8">
+          <div className="flex shrink-0 gap-3 border-t border-white/10 bg-[#084734] px-5 py-4 sm:px-6">
               {step > 1 && (
                 <Button
                   type="button"
@@ -450,7 +451,6 @@ export default function OnboardingModal({ user, isOpen, onComplete }) {
                   {createProfileMutation.isPending ? "Criando seu plano..." : "Começar!"}
                 </Button>
               )}
-            </div>
           </div>
         </div>
       </DialogContent>

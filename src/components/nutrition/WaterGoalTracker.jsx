@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import WaterGoalModal from "./WaterGoalModal";
 
+const OPTIMISTIC_ID = "optimistic-temp";
+
 const calculateWaterGoalByBodyType = (bodyType, weight = 70) => {
   const baseWater = weight * 35;
   const multipliers = { ectomorph: 1.15, mesomorph: 1.0, endomorph: 0.95 };
@@ -18,7 +20,8 @@ export default function WaterGoalTracker({ userId, nutritionData, userProfile })
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [celebrateGoal, setCelebrateGoal] = useState(false);
   const queryClient = useQueryClient();
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const today = format(new Date(), "yyyy-MM-dd");
+  const queryKey = ["nutritionData", userId, today];
 
   const defaultGoal = userProfile?.body_type
     ? calculateWaterGoalByBodyType(userProfile.body_type, userProfile.current_weight)
@@ -48,12 +51,16 @@ export default function WaterGoalTracker({ userId, nutritionData, userProfile })
 
   const updateWaterMutation = useMutation({
     mutationFn: async (newIntake) => {
-      if (nutritionData?.id) {
-        return db.NutritionData.update(nutritionData.id, {
+      const cached = queryClient.getQueryData(queryKey);
+      const existingId = cached?.id;
+
+      if (existingId && existingId !== OPTIMISTIC_ID) {
+        return db.NutritionData.update(existingId, {
           water_intake_ml: newIntake,
           water_goal_reached: newIntake >= goalAmount,
         });
       }
+
       return db.NutritionData.create({
         user_id: userId,
         log_date: today,
@@ -62,13 +69,75 @@ export default function WaterGoalTracker({ userId, nutritionData, userProfile })
         water_goal_reached: newIntake >= goalAmount,
       });
     },
-    onSuccess: () => queryClient.invalidateQueries(['nutritionData']),
+    onMutate: async (newIntake) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData(queryKey);
+      const previousIntake = previous?.water_intake_ml || 0;
+
+      queryClient.setQueryData(queryKey, (old) => {
+        if (old) {
+          return {
+            ...old,
+            water_intake_ml: newIntake,
+            water_goal_reached: newIntake >= goalAmount,
+          };
+        }
+        return {
+          id: OPTIMISTIC_ID,
+          user_id: userId,
+          log_date: today,
+          water_intake_ml: newIntake,
+          water_goal_ml: goalAmount,
+          water_goal_reached: newIntake >= goalAmount,
+        };
+      });
+
+      return { previous, previousIntake };
+    },
+    onError: (_err, _newIntake, context) => {
+      if (context) {
+        queryClient.setQueryData(queryKey, context.previous ?? null);
+      }
+      toast.error("Não foi possível salvar a água. Tente de novo.");
+    },
+    onSuccess: async (saved, newIntake, context) => {
+      if (saved && typeof saved === "object") {
+        queryClient.setQueryData(queryKey, (old) => ({
+          ...(old || {}),
+          ...saved,
+          water_intake_ml: saved.water_intake_ml ?? newIntake,
+        }));
+      }
+
+      const previousIntake = context?.previousIntake || 0;
+      if (previousIntake < goalAmount && newIntake >= goalAmount) {
+        setCelebrateGoal(true);
+        try {
+          await api.functions.invoke("addXP", {
+            amount: 20,
+            source: "challenge",
+            reference_id: "water-goal",
+          });
+          queryClient.invalidateQueries({ queryKey: ["userPoints"] });
+        } catch {
+          // XP is best-effort; water progress already saved.
+        }
+        toast.success("🎉 Meta de água concluída! +20 XP");
+        setTimeout(() => setCelebrateGoal(false), 3000);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["nutritionData"] });
+    },
   });
 
   const updateGoalMutation = useMutation({
     mutationFn: async (newGoal) => {
-      if (nutritionData?.id) {
-        return db.NutritionData.update(nutritionData.id, { water_goal_ml: newGoal });
+      const cached = queryClient.getQueryData(queryKey);
+      const existingId = cached?.id;
+
+      if (existingId && existingId !== OPTIMISTIC_ID) {
+        return db.NutritionData.update(existingId, { water_goal_ml: newGoal });
       }
       return db.NutritionData.create({
         user_id: userId,
@@ -78,24 +147,17 @@ export default function WaterGoalTracker({ userId, nutritionData, userProfile })
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['nutritionData']);
+      queryClient.invalidateQueries({ queryKey: ["nutritionData"] });
       toast.success("Meta de água atualizada!");
+    },
+    onError: () => {
+      toast.error("Não foi possível atualizar a meta. Tente de novo.");
     },
   });
 
-  const handleAddWater = async (amount) => {
-    const newIntake = currentIntake + amount;
-    const wasNotReached = !isGoalReached;
-    await updateWaterMutation.mutateAsync(newIntake);
-    if (wasNotReached && newIntake >= goalAmount) {
-      setCelebrateGoal(true);
-      await api.functions.invoke('addXP', { amount: 20, source: 'challenge', reference_id: 'water-goal' });
-      queryClient.invalidateQueries(['userPoints']);
-      toast.success("🎉 Meta de água concluída! +20 XP");
-      setTimeout(() => setCelebrateGoal(false), 3000);
-    } else {
-      toast.success(`+${amount}ml adicionado!`);
-    }
+  const handleAddWater = (amount) => {
+    if (isGoalReached) return;
+    updateWaterMutation.mutate(currentIntake + amount);
   };
 
   return (
@@ -156,9 +218,9 @@ export default function WaterGoalTracker({ userId, nutritionData, userProfile })
             <motion.div
               className="h-full rounded-full"
               style={{ background: isGoalReached ? "linear-gradient(90deg,#4ade80,#22d3ee)" : "linear-gradient(90deg,#3b82f6,#06b6d4)" }}
-              initial={{ width: 0 }}
+              initial={false}
               animate={{ width: `${percentage}%` }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
             />
           </div>
           {isGoalReached && (
@@ -171,9 +233,10 @@ export default function WaterGoalTracker({ userId, nutritionData, userProfile })
         {/* Quick add buttons */}
         <div className="px-5 pb-4">
           <div className="grid grid-cols-3 gap-2">
-            {[100, 250, 500].map(amount => (
+            {[100, 250, 500].map((amount) => (
               <button
                 key={amount}
+                type="button"
                 onClick={() => handleAddWater(amount)}
                 disabled={isGoalReached}
                 className="py-3 rounded-2xl text-xs font-bold transition-all active:scale-95 disabled:opacity-40"

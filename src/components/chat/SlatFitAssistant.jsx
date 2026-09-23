@@ -91,22 +91,34 @@ export default function SlatFitAssistant({ user, userProfile, context = "geral" 
     setMessages(newMessages);
     setLoading(true);
 
-    const res = await ai.chat({
-      persona: "assistant",
-      message: msg,
-      history: messages,
-      context: {
-        name: memory.name || userName,
-        goal: memory.goal || goal,
-        weight: userProfile?.current_weight,
-        height: userProfile?.height,
-        appContext: context,
-        memory,
-      },
-    });
+    try {
+      const res = await ai.chat({
+        persona: "assistant",
+        message: msg,
+        history: messages,
+        context: {
+          name: memory.name || userName,
+          goal: memory.goal || goal,
+          weight: userProfile?.current_weight,
+          height: userProfile?.height,
+          appContext: context,
+          memory,
+        },
+      });
 
-    setMessages(prev => [...prev, { role: "assistant", content: res }]);
-    setLoading(false);
+      setMessages((prev) => [...prev, { role: "assistant", content: res }]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Não consegui responder agora. O modelo pode estar ocupado — tente de novo em alguns segundos.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const panelHeight = isExpanded ? "82vh" : "52vh";

@@ -1,11 +1,51 @@
 import { request, uploadFile as transportUploadFile } from './transport';
 
+const RETRYABLE_STATUSES = new Set([429, 502, 503]);
+const MAX_ATTEMPTS = 2;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryable(err) {
+  return RETRYABLE_STATUSES.has(err?.status);
+}
+
+function sanitizeContext(context) {
+  if (!context || typeof context !== 'object') return context;
+  const cleaned = {};
+  for (const [key, value] of Object.entries(context)) {
+    if (value === null || value === undefined) continue;
+    cleaned[key] = value;
+  }
+  return cleaned;
+}
+
 // Single source of truth for AI access. Prompts live on SlatFit BE; the client
 // only sends validated structured inputs to named operations (POST /ai/<op>).
+// Retries once on busy free-model / provider errors, then surfaces the failure.
 async function runOperation(operation, input) {
-  const data = await request(`/ai/${operation}`, { method: 'POST', body: input ?? {} });
-  if (data?.error) throw new Error(data.error);
-  return data?.result;
+  let lastError;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const data = await request(`/ai/${operation}`, { method: 'POST', body: input ?? {} });
+      if (data?.error) {
+        const error = new Error(data.error);
+        error.status = 502;
+        error.data = data;
+        throw error;
+      }
+      return data?.result;
+    } catch (err) {
+      lastError = err;
+      if (attempt < MAX_ATTEMPTS && isRetryable(err)) {
+        await sleep(600 * attempt);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError;
 }
 
 // Vision: analyze a food photo (by URL) -> { food_name, portion_size, calories, protein, carbs, fats }.
@@ -41,7 +81,12 @@ export function coachMessage({ mode, userName, profile, state }) {
 // Persona-driven assistant chat -> plain-text reply.
 // persona: 'nutrition' | 'personal' | 'iago' | 'assistant'
 export function chat({ persona, message, history, context }) {
-  return runOperation('chat', { persona, message, history, context });
+  return runOperation('chat', {
+    persona,
+    message,
+    history,
+    context: sanitizeContext(context),
+  });
 }
 
 // File upload -> { file_url }

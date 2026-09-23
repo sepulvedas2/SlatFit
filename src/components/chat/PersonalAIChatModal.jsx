@@ -111,7 +111,7 @@ export default function PersonalAIChatModal({ user, onClose }) {
     } catch (error) {
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: "Desculpe, tive um problema ao processar sua mensagem. Pode tentar novamente?" 
+        content: "Não consegui responder agora. O modelo pode estar ocupado — tente de novo em alguns segundos." 
       }]);
     }
 

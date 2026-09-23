@@ -3,6 +3,43 @@ import { useAuth } from "@/lib/AuthContext";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Link } from 'react-router-dom';
 
+function friendlyAuthError(err) {
+  const raw = String(
+    err?.data?.message || err?.data?.error || err?.message || '',
+  ).trim();
+  const lower = raw.toLowerCase();
+
+  if (!raw) return 'Não foi possível autenticar. Tente novamente.';
+  if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
+    return 'Email ou senha incorretos.';
+  }
+  if (lower.includes('email not confirmed')) {
+    return 'Confirme seu email antes de entrar.';
+  }
+  if (lower.includes('user already registered') || lower.includes('already been registered')) {
+    return 'Este email já possui uma conta. Tente entrar.';
+  }
+  if (lower.includes('password') && (lower.includes('weak') || lower.includes('least'))) {
+    return 'A senha precisa ser mais forte (mínimo 6 caracteres).';
+  }
+  if (lower.includes('rate') || lower.includes('too many')) {
+    return 'Muitas tentativas. Aguarde um momento e tente de novo.';
+  }
+  if (
+    lower.includes('internal server error') ||
+    lower.includes('unexpected') ||
+    lower.includes('fetch') ||
+    lower.includes('network')
+  ) {
+    return 'Não foi possível conectar agora. Tente novamente em instantes.';
+  }
+  // Keep short provider messages that are already readable; otherwise generic.
+  if (raw.length <= 80 && !/^error\b/i.test(raw) && !/statuscode/i.test(raw)) {
+    return raw;
+  }
+  return 'Não foi possível autenticar. Verifique seus dados e tente novamente.';
+}
+
 export default function LoginScreen({ onLogin }) {
   const { login, register, authError } = useAuth();
   const [tab, setTab] = useState('login');
@@ -10,7 +47,7 @@ export default function LoginScreen({ onLogin }) {
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(authError || '');
+  const [error, setError] = useState(authError ? friendlyAuthError({ message: authError }) : '');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,8 +60,7 @@ export default function LoginScreen({ onLogin }) {
 
       if (onLogin) onLogin(user);
     } catch (err) {
-      const errorMsg = err.data?.error || err.message || 'Erro ao autenticar. Verifique suas credenciais.';
-      setError(errorMsg);
+      setError(friendlyAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -105,9 +141,9 @@ export default function LoginScreen({ onLogin }) {
             )}
 
             {error && (
-              <div role="alert" className="rounded-lg px-4 py-3 bg-red-50 border border-red-200">
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
+              <p role="alert" className="text-center text-sm text-red-600">
+                {error}
+              </p>
             )}
 
             <button
