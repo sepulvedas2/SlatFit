@@ -177,6 +177,9 @@ export default function Subscription() {
     onSuccess: (result) => {
       if (result?.url) window.location.assign(result.url);
     },
+    onError: (error) => {
+      setNotice(error?.message || 'Nao foi possivel abrir o portal de cobranca.');
+    },
   });
 
   const refundMutation = useMutation({
@@ -271,8 +274,12 @@ export default function Subscription() {
                   disabled={portalMutation.isPending}
                   className="h-11 rounded-lg border-[#0B3936]/20"
                 >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Gerenciar
+                  {portalMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
+                  )}
+                  {portalMutation.isPending ? 'Abrindo...' : 'Gerenciar'}
                 </Button>
                 {subscription?.refundEligible && (
                   <Button

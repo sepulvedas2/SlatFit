@@ -26,15 +26,32 @@ const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.me
 
 export async function request(path, { method = 'GET', body, auth = true, headers = {} } = {}) {
   const url = `${API_BASE}${path}`;
-  const finalHeaders = { 'Content-Type': 'application/json', ...headers };
+  const methodUpper = String(method).toUpperCase();
+  // Fastify rejects POST/PUT/PATCH with Content-Type: application/json and an empty body.
+  const sendJsonBody =
+    body !== undefined ||
+    methodUpper === 'POST' ||
+    methodUpper === 'PUT' ||
+    methodUpper === 'PATCH';
+  const finalHeaders = { ...headers };
+  if (sendJsonBody && finalHeaders['Content-Type'] == null) {
+    finalHeaders['Content-Type'] = 'application/json';
+  }
 
   if (auth) {
     const token = getStoredToken();
     if (token) finalHeaders.Authorization = `Bearer ${token}`;
   }
 
+  const serializedBody = sendJsonBody
+    ? JSON.stringify(body !== undefined ? body : {})
+    : undefined;
+
   if (isDev) {
-    console.log('[transport] →', method, url, { auth: !!finalHeaders.Authorization, body: body ?? null });
+    console.log('[transport] →', method, url, {
+      auth: !!finalHeaders.Authorization,
+      body: body !== undefined ? body : sendJsonBody ? {} : null,
+    });
   }
 
   let res;
@@ -42,7 +59,7 @@ export async function request(path, { method = 'GET', body, auth = true, headers
     res = await fetch(url, {
       method,
       headers: finalHeaders,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: serializedBody,
     });
   } catch (err) {
     if (isDev) {

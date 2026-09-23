@@ -46,10 +46,16 @@ describe('api.billing contract', () => {
   it('createPortalSession() and requestRefund() use backend-only billing endpoints', async () => {
     global.fetch = vi.fn(async () => jsonResponse({ url: 'https://billing.stripe.test/session' }));
     await api.billing.createPortalSession();
-    expect(global.fetch.mock.calls[0][0]).toBe(`${API_BASE}/billing/portal-session`);
+    const [portalUrl, portalOpts] = global.fetch.mock.calls[0];
+    expect(portalUrl).toBe(`${API_BASE}/billing/portal-session`);
+    expect(portalOpts.method).toBe('POST');
+    expect(portalOpts.headers['Content-Type']).toBe('application/json');
+    expect(JSON.parse(portalOpts.body)).toEqual({});
 
     global.fetch = vi.fn(async () => jsonResponse({ subscription: { hasAccess: false } }));
     await api.billing.requestRefund();
-    expect(global.fetch.mock.calls[0][0]).toBe(`${API_BASE}/billing/refund`);
+    const [refundUrl, refundOpts] = global.fetch.mock.calls[0];
+    expect(refundUrl).toBe(`${API_BASE}/billing/refund`);
+    expect(JSON.parse(refundOpts.body)).toEqual({});
   });
 });
