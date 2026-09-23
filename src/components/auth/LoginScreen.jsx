@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Link } from 'react-router-dom';
 
 function friendlyAuthError(err) {
   const raw = String(
-    err?.data?.message || err?.data?.error || err?.message || '',
+    err?.data?.message || err?.data?.error || err?.message || err || '',
   ).trim();
   const lower = raw.toLowerCase();
 
   if (!raw) return 'Não foi possível autenticar. Tente novamente.';
+  if (lower.includes('invalid or expired token') || lower.includes('jwt') || lower.includes('expired')) {
+    return 'Sua sessão expirou. Entre novamente.';
+  }
+  if (lower.includes('missing bearer') || lower.includes('unauthorized') || lower.includes('not authenticated')) {
+    return 'Faça login para continuar.';
+  }
   if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
     return 'Email ou senha incorretos.';
   }
@@ -33,10 +39,11 @@ function friendlyAuthError(err) {
   ) {
     return 'Não foi possível conectar agora. Tente novamente em instantes.';
   }
-  // Keep short provider messages that are already readable; otherwise generic.
-  if (raw.length <= 80 && !/^error\b/i.test(raw) && !/statuscode/i.test(raw)) {
-    return raw;
+  // Avoid leaking English/provider jargon to the UI.
+  if (/^[a-z0-9 _\-.:]+$/i.test(raw) && /[A-Za-z]{4,}/.test(raw) && !/[àáâãéêíóôõúç]/i.test(raw)) {
+    return 'Não foi possível autenticar. Verifique seus dados e tente novamente.';
   }
+  if (raw.length <= 80) return raw;
   return 'Não foi possível autenticar. Verifique seus dados e tente novamente.';
 }
 
@@ -47,7 +54,11 @@ export default function LoginScreen({ onLogin }) {
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(authError ? friendlyAuthError({ message: authError }) : '');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (authError) setError(friendlyAuthError(authError));
+  }, [authError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
       clearUser();
       setUser(null);
       setIsAuthenticated(false);
-      setAuthError(error.message || 'Não foi possível validar o login. Tente novamente.');
+      setAuthError('Sua sessão expirou. Entre novamente.');
     } finally {
       setIsLoading(false);
     }
