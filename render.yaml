@@ -1,0 +1,15 @@
+# Render Static Site SPA routing.
+# If this service is a Static Site (not Docker), this ensures client routes
+# like /Dashboard serve index.html instead of an empty response.
+services:
+  - type: web
+    name: slatfit
+    runtime: static
+    repo: https://github.com/sepulvedas2/SlatFit
+    branch: main
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
