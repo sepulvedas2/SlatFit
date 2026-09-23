@@ -27,19 +27,19 @@ const DEFAULT_PLANS = [
   {
     key: "monthly",
     label: "Mensal",
-    intervalLabel: "Renovacao mensal",
+    intervalLabel: "Renovação mensal",
     highlight: false,
   },
   {
     key: "semester",
     label: "Semestral",
-    intervalLabel: "Renovacao a cada 6 meses",
+    intervalLabel: "Renovação a cada 6 meses",
     highlight: true,
   },
   {
     key: "annual",
     label: "Anual",
-    intervalLabel: "Renovacao anual",
+    intervalLabel: "Renovação anual",
     highlight: false,
   },
 ];
@@ -351,7 +351,7 @@ export default function Subscription() {
                 </p>
                 <h2 className="mt-1 text-2xl font-bold">Finalizar assinatura</h2>
                 <p className="mt-2 text-sm text-gray-600">
-                  Reembolso automatico disponivel por 7 dias apos a compra.
+                  Reembolso automático disponível por 7 dias após a compra.
                 </p>
               </div>
 
