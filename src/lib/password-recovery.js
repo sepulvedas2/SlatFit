@@ -5,6 +5,8 @@ let callbackPromise;
 let recoveryReady = false;
 
 const invalidLinkMessage = 'Este link expirou, já foi usado ou foi aberto em outro navegador. Solicite um novo link.';
+const usedOrPrefetchedMessage = 'Este link já foi usado (às vezes o provedor de email abre o link sozinho). Solicite um novo email e use o botão Continuar na página do SlatFit.';
+const wrongBrowserMessage = 'Abra o link no mesmo navegador em que você pediu a recuperação. Solicite um novo email se mudou de aparelho ou janela anônima.';
 
 /** Project root only — strip accidental /rest/v1 (PostgREST path) so Auth hits /auth/v1/*. */
 function normalizeSupabaseUrl(raw) {
@@ -48,16 +50,34 @@ export async function requestPasswordReset(email) {
   if (error) throw new Error('Não foi possível enviar o email agora. Tente novamente mais tarde.');
 }
 
+function mapExchangeError(error) {
+  const code = error?.code || '';
+  const message = (error?.message || '').toLowerCase();
+  if (code === 'pkce_code_verifier_not_found' || message.includes('code verifier')) return wrongBrowserMessage;
+  if (
+    code === 'otp_expired'
+    || code === 'flow_state_expired'
+    || code === 'flow_state_not_found'
+    || message.includes('expired')
+    || message.includes('already been used')
+    || message.includes('invalid')
+  ) {
+    return usedOrPrefetchedMessage;
+  }
+  return invalidLinkMessage;
+}
+
 async function exchangeRecoveryCode() {
   recoveryReady = false;
   const url = new URL(window.location.href);
   const hash = new URLSearchParams(url.hash.slice(1));
   try {
     if (url.searchParams.has('error') || hash.has('error') || !url.searchParams.get('code')) {
-      throw new Error(invalidLinkMessage);
+      throw new Error(usedOrPrefetchedMessage);
     }
     const { data, error } = await getClient().auth.exchangeCodeForSession(url.searchParams.get('code'));
-    if (error || !data.session || data.redirectType !== 'recovery') throw new Error(invalidLinkMessage);
+    if (error) throw new Error(mapExchangeError(error));
+    if (!data.session || data.redirectType !== 'recovery') throw new Error(invalidLinkMessage);
     recoveryReady = true;
   } finally {
     window.history.replaceState(window.history.state, '', '/RedefinirSenha');

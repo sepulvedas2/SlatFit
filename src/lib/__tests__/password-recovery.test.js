@@ -71,9 +71,21 @@ describe('password recovery', () => {
   ])('rejects missing or forged recovery links: %s', async (url) => {
     window.history.replaceState({}, '', url);
     const recovery = await import('../password-recovery');
-    await expect(recovery.validateRecoveryLink()).rejects.toThrow('Solicite um novo link');
+    await expect(recovery.validateRecoveryLink()).rejects.toThrow(/Solicite um novo/);
     expect(auth.exchangeCodeForSession).not.toHaveBeenCalled();
     expect(window.location.search + window.location.hash).toBe('');
+  });
+
+  it('explains when the one-time code was already consumed', async () => {
+    auth.exchangeCodeForSession.mockResolvedValue({ error: { code: 'otp_expired', message: 'Email link is invalid or has expired' }, data: { session: null, redirectType: null } });
+    const recovery = await import('../password-recovery');
+    await expect(recovery.validateRecoveryLink()).rejects.toThrow(/já foi usado/);
+  });
+
+  it('explains when PKCE verifier is missing (wrong browser)', async () => {
+    auth.exchangeCodeForSession.mockResolvedValue({ error: { code: 'pkce_code_verifier_not_found', message: 'PKCE code verifier not found in storage' }, data: { session: null, redirectType: null } });
+    const recovery = await import('../password-recovery');
+    await expect(recovery.validateRecoveryLink()).rejects.toThrow(/mesmo navegador/);
   });
 
   it.each(['signup', null])('does not accept a non-recovery session: %s', async (redirectType) => {
