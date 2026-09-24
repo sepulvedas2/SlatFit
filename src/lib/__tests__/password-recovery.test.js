@@ -25,8 +25,16 @@ describe('password recovery', () => {
     const { requestPasswordReset } = await import('../password-recovery');
     await requestPasswordReset(' test@example.com ');
     expect(auth.resetPasswordForEmail).toHaveBeenCalledWith('test@example.com', { redirectTo: `${window.location.origin}/RedefinirSenha` });
+    expect(createClient).toHaveBeenCalledWith('https://example.supabase.co', 'sb_publishable_test', expect.any(Object));
     expect(createClient.mock.calls[0][2].auth).toMatchObject({ flowType: 'pkce', storageKey: 'slatfit_password_recovery', detectSessionInUrl: false });
     expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it('strips accidental /rest/v1 from VITE_SUPABASE_URL before creating the client', async () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://example.supabase.co/rest/v1/');
+    const { requestPasswordReset } = await import('../password-recovery');
+    await requestPasswordReset('test@example.com');
+    expect(createClient).toHaveBeenCalledWith('https://example.supabase.co', 'sb_publishable_test', expect.any(Object));
   });
 
   it('handles missing configuration and email rate limits without provider details', async () => {

@@ -6,8 +6,23 @@ let recoveryReady = false;
 
 const invalidLinkMessage = 'Este link expirou, já foi usado ou foi aberto em outro navegador. Solicite um novo link.';
 
+/** Project root only — strip accidental /rest/v1 (PostgREST path) so Auth hits /auth/v1/*. */
+function normalizeSupabaseUrl(raw) {
+  const trimmed = raw?.trim();
+  if (!trimmed) return '';
+  try {
+    const parsed = new URL(trimmed);
+    parsed.pathname = parsed.pathname.replace(/\/rest\/v1\/?$/i, '').replace(/\/$/, '') || '';
+    parsed.search = '';
+    parsed.hash = '';
+    return parsed.origin + (parsed.pathname === '/' ? '' : parsed.pathname);
+  } catch {
+    return trimmed.replace(/\/rest\/v1\/?$/i, '').replace(/\/$/, '');
+  }
+}
+
 function getClient() {
-  const url = import.meta.env.VITE_SUPABASE_URL?.trim();
+  const url = normalizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL);
   const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
   if (!url || !key) throw new Error('A recuperação de senha está indisponível no momento. Tente novamente mais tarde.');
 

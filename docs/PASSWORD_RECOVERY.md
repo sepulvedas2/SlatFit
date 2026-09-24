@@ -8,7 +8,7 @@ O link **Esqueci minha senha** abre `/RecuperarSenha`. O Supabase envia o email 
 2. Mantenha **Site URL** como `https://slatfit.onrender.com` e preserve a URL de retorno do Google ja cadastrada.
 3. Em **Authentication > Email Templates > Reset Password**, use o link padrao `{{ .ConfirmationURL }}`. Nao substitua esse link por uma URL direta ao frontend: a confirmacao precisa passar pelo Supabase. O template deve respeitar o retorno enviado pela aplicacao.
 4. Configure um provedor **SMTP** no Supabase para enviar emails aos clientes. O envio padrao e limitado e, sem SMTP proprio, pode ficar restrito aos emails da equipe do projeto.
-5. No Render frontend, mantenha `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` do mesmo projeto usado pelo backend. Nao ha nova chave de backend nem migracao SQL.
+5. No Render frontend, mantenha `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` do mesmo projeto usado pelo backend. `VITE_SUPABASE_URL` deve ser so a raiz do projeto (`https://xxxx.supabase.co`), sem `/rest/v1` — Auth usa `/auth/v1`, nao PostgREST. Depois de alterar a env, faca um novo deploy (Vite embute a URL no build). Nao ha nova chave de backend nem migracao SQL.
 6. Publique o frontend atualizado e mantenha o rewrite `/*` para `/index.html`.
 
 ## Validar com uma conta de teste

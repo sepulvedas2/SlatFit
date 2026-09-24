@@ -27,11 +27,16 @@ RUN npm ci --include=dev
 # Copy application code
 COPY . .
 
-# Public API URL baked into the static build (set at deploy time).
+# Public values baked into the static build (set at deploy time on Render).
+# VITE_SUPABASE_URL must be the project root only — never .../rest/v1.
 ARG VITE_API_BASE_URL=""
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ARG VITE_STRIPE_PUBLISHABLE_KEY=""
 ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
+ARG VITE_SUPABASE_URL=""
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ARG VITE_SUPABASE_PUBLISHABLE_KEY=""
+ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
 
 # Build application
 RUN npm run build

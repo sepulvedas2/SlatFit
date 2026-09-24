@@ -9,6 +9,8 @@ services:
     branch: main
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
+    # Set in Render Dashboard (build-time): VITE_SUPABASE_URL=https://<ref>.supabase.co
+    # (project root only — no /rest/v1), plus VITE_SUPABASE_PUBLISHABLE_KEY and other VITE_*.
     routes:
       - type: rewrite
         source: /*
