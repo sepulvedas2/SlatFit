@@ -28,18 +28,24 @@ const DEFAULT_PLANS = [
     key: "monthly",
     label: "Mensal",
     intervalLabel: "Renovação mensal",
+    unitAmount: 2990,
+    currency: "brl",
     highlight: false,
   },
   {
     key: "semester",
     label: "Semestral",
     intervalLabel: "Renovação a cada 6 meses",
+    unitAmount: 16146,
+    currency: "brl",
     highlight: true,
   },
   {
     key: "annual",
     label: "Anual",
     intervalLabel: "Renovação anual",
+    unitAmount: 28704,
+    currency: "brl",
     highlight: false,
   },
 ];
@@ -55,6 +61,14 @@ function formatDate(value) {
     month: "short",
     year: "numeric",
   }).format(new Date(value));
+}
+
+function formatPrice(unitAmount, currency = "brl") {
+  if (typeof unitAmount !== "number") return null;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: String(currency || "brl").toUpperCase(),
+  }).format(unitAmount / 100);
 }
 
 function SubscriptionPaymentForm({ onComplete }) {
@@ -141,10 +155,16 @@ export default function Subscription() {
   const plans = useMemo(() => {
     const remote = plansQuery.data?.plans;
     if (Array.isArray(remote) && remote.length > 0) {
-      return remote.map((plan) => ({
-        ...plan,
-        highlight: plan.key === "semester",
-      }));
+      return remote.map((plan) => {
+        const fallback = DEFAULT_PLANS.find((candidate) => candidate.key === plan.key);
+        return {
+          ...fallback,
+          ...plan,
+          unitAmount: typeof plan.unitAmount === "number" ? plan.unitAmount : fallback?.unitAmount,
+          currency: plan.currency || fallback?.currency,
+          highlight: plan.key === "semester",
+        };
+      });
     }
     return DEFAULT_PLANS;
   }, [plansQuery.data]);
@@ -212,8 +232,12 @@ export default function Subscription() {
     createSubscriptionMutation.mutate(planKey);
   };
 
-  const selectedPlanLabel =
-    plans.find((plan) => plan.key === selectedPlan)?.label ?? "Selecionado";
+  const selectedPlanDetails = plans.find((plan) => plan.key === selectedPlan);
+  const selectedPlanLabel = selectedPlanDetails?.label ?? "Selecionado";
+  const selectedPlanPrice = formatPrice(
+    selectedPlanDetails?.unitAmount,
+    selectedPlanDetails?.currency,
+  );
 
   return (
     <div className="min-h-screen px-4 py-8 text-white">
@@ -305,6 +329,7 @@ export default function Subscription() {
               {plans.map((plan) => {
                 const selected = selectedPlan === plan.key;
                 const available = plan.available !== false;
+                const priceLabel = formatPrice(plan.unitAmount, plan.currency);
                 return (
                   <button
                     key={plan.key}
@@ -326,7 +351,10 @@ export default function Subscription() {
                             </span>
                           )}
                         </div>
-                        <p className="mt-2 text-sm text-[#CEEDB2]">{plan.intervalLabel}</p>
+                        {priceLabel && (
+                          <p className="mt-3 text-2xl font-bold">{priceLabel}</p>
+                        )}
+                        <p className="mt-1 text-sm text-[#CEEDB2]">{plan.intervalLabel}</p>
                       </div>
                       <CalendarClock className="h-5 w-5 text-[#CEF17B]" />
                     </div>
@@ -350,6 +378,9 @@ export default function Subscription() {
                   Plano {selectedPlanLabel}
                 </p>
                 <h2 className="mt-1 text-2xl font-bold">Finalizar assinatura</h2>
+                {selectedPlanPrice && (
+                  <p className="mt-2 text-xl font-bold text-[#0B3936]">{selectedPlanPrice}</p>
+                )}
                 <p className="mt-2 text-sm text-gray-600">
                   Reembolso automático disponível por 7 dias após a compra.
                 </p>
