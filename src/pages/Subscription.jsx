@@ -75,13 +75,16 @@ function SubscriptionPaymentForm({ onComplete }) {
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
+  const [elementReady, setElementReady] = useState(false);
+  const [paymentComplete, setPaymentComplete] = useState(false);
   const [error, setError] = useState("");
+  const canSubmit = Boolean(stripe && elements && elementReady && paymentComplete && !submitting);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
 
-    if (!stripe || !elements) return;
+    if (!canSubmit) return;
 
     setSubmitting(true);
     const { error: stripeError } = await stripe.confirmPayment({
@@ -104,7 +107,16 @@ function SubscriptionPaymentForm({ onComplete }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <PaymentElement />
+      <PaymentElement
+        onReady={() => setElementReady(true)}
+        onChange={(event) => setPaymentComplete(event.complete)}
+      />
+      {!elementReady && (
+        <p className="text-sm text-gray-600">Carregando o formulário de pagamento.</p>
+      )}
+      {elementReady && !paymentComplete && (
+        <p className="text-sm text-gray-600">Preencha os dados do cartão para continuar.</p>
+      )}
       {error && (
         <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -112,8 +124,8 @@ function SubscriptionPaymentForm({ onComplete }) {
       )}
       <Button
         type="submit"
-        disabled={!stripe || !elements || submitting}
-        className="h-12 w-full rounded-lg bg-[#CEF17B] font-bold text-[#080626] hover:bg-[#ddff91]"
+        disabled={!canSubmit}
+        className="h-12 w-full rounded-lg bg-[#CEF17B] font-bold text-[#080626] hover:bg-[#ddff91] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? (
           <>
@@ -138,6 +150,7 @@ export default function Subscription() {
   const [selectedPlan, setSelectedPlan] = useState("semester");
   const [clientSecret, setClientSecret] = useState("");
   const [notice, setNotice] = useState("");
+  const [checkoutLocked, setCheckoutLocked] = useState(false);
 
   const plansQuery = useQuery({
     queryKey: ["billing", "plans"],
@@ -187,9 +200,14 @@ export default function Subscription() {
         navigate("/Dashboard", { replace: true });
         return;
       }
-      setClientSecret(result?.clientSecret ?? "");
-      setNotice("");
+      if (result?.clientSecret) {
+        setClientSecret(result.clientSecret);
+        setNotice("");
+        return;
+      }
+      setCheckoutLocked(false);
     },
+    onError: () => setCheckoutLocked(false),
   });
 
   const portalMutation = useMutation({
@@ -227,6 +245,8 @@ export default function Subscription() {
   };
 
   const startCheckout = (planKey) => {
+    if (checkoutLocked || createSubscriptionMutation.isPending) return;
+    setCheckoutLocked(true);
     setSelectedPlan(planKey);
     setClientSecret("");
     createSubscriptionMutation.mutate(planKey);
@@ -401,10 +421,10 @@ export default function Subscription() {
               {!clientSecret && publishableKey && (
                 <Button
                   onClick={() => startCheckout(selectedPlan)}
-                  disabled={createSubscriptionMutation.isPending}
-                  className="h-12 w-full rounded-lg bg-[#0B3936] font-bold text-white hover:bg-[#114b47]"
+                  disabled={checkoutLocked || createSubscriptionMutation.isPending}
+                  className="h-12 w-full rounded-lg bg-[#0B3936] font-bold text-white hover:bg-[#114b47] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {createSubscriptionMutation.isPending ? (
+                  {checkoutLocked || createSubscriptionMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Preparando
