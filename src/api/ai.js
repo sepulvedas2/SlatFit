@@ -1,14 +1,43 @@
+import { toast } from 'sonner';
 import { request, uploadFile as transportUploadFile } from './transport';
 
 const RETRYABLE_STATUSES = new Set([429, 502, 503]);
-const MAX_ATTEMPTS = 2;
+const MAX_ATTEMPTS = 3;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function isNetworkError(err) {
+  if (err?.status) return false;
+  const message = String(err?.message || '').toLowerCase();
+  return (
+    err instanceof TypeError ||
+    message.includes('load failed') ||
+    message.includes('failed to fetch') ||
+    message.includes('network') ||
+    message.includes('aborted') ||
+    message.includes('timeout')
+  );
+}
+
 function isRetryable(err) {
-  return RETRYABLE_STATUSES.has(err?.status);
+  if (err?.retryable === false) return false;
+  return RETRYABLE_STATUSES.has(err?.status) || isNetworkError(err);
+}
+
+function retryMessage(attempt) {
+  if (attempt >= MAX_ATTEMPTS - 1) {
+    return 'Ainda sem resposta. Última tentativa...';
+  }
+  return 'A IA não respondeu. Tentando novamente...';
+}
+
+function friendlyAiError(err) {
+  if (!isNetworkError(err)) return err;
+  const error = new Error('A conexão caiu antes da IA responder. Toque em tentar novamente.');
+  error.status = err?.status;
+  return error;
 }
 
 function sanitizeContext(context) {
@@ -24,7 +53,7 @@ function sanitizeContext(context) {
 // Single source of truth for AI access. Prompts live on SlatFit BE; the client
 // only sends validated structured inputs to named operations (POST /ai/<op>).
 // Retries once on busy free-model / provider errors, then surfaces the failure.
-async function runOperation(operation, input) {
+async function runOperation(operation, input, { onRetry } = {}) {
   let lastError;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     try {
@@ -32,6 +61,7 @@ async function runOperation(operation, input) {
       if (data?.error) {
         const error = new Error(data.error);
         error.status = 502;
+        error.retryable = false;
         error.data = data;
         throw error;
       }
@@ -39,13 +69,16 @@ async function runOperation(operation, input) {
     } catch (err) {
       lastError = err;
       if (attempt < MAX_ATTEMPTS && isRetryable(err)) {
-        await sleep(600 * attempt);
+        const message = retryMessage(attempt);
+        if (onRetry) onRetry(message);
+        else toast.message(message);
+        await sleep(800 * attempt);
         continue;
       }
-      throw err;
+      throw friendlyAiError(err);
     }
   }
-  throw lastError;
+  throw friendlyAiError(lastError);
 }
 
 // Vision: analyze a food photo (by URL) -> { food_name, portion_size, calories, protein, carbs, fats }.
@@ -69,8 +102,8 @@ export function mealPlan({ goal, weight, gender, level, mode, ingredients }) {
 }
 
 // -> structured workout plan JSON
-export function workoutPlan({ objective, frequency, level, place, time, injuries }) {
-  return runOperation('workoutPlan', { objective, frequency, level, place, time, injuries });
+export function workoutPlan({ objective, frequency, level, place, time, injuries }, options) {
+  return runOperation('workoutPlan', { objective, frequency, level, place, time, injuries }, options);
 }
 
 // -> plain-text coach message

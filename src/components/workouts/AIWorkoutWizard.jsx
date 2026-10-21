@@ -141,6 +141,7 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generateStatus, setGenerateStatus] = useState("");
   const [generateError, setGenerateError] = useState(null);
   const [generatedPlan, setGeneratedPlan] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -173,6 +174,7 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
   const generateWorkoutPlan = async (answersOverride) => {
     setIsGenerating(true);
     setGenerateError(null);
+    setGenerateStatus("");
     const { objetivo, frequencia, nivel, local, tempo, lesao } = answersOverride || answers;
 
     try {
@@ -183,6 +185,8 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
         place: local,
         time: tempo,
         injuries: lesao,
+      }, {
+        onRetry: (message) => setGenerateStatus(message),
       });
 
       setGeneratedPlan(result);
@@ -338,7 +342,7 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
             <Brain className="w-10 h-10 text-[#CEF17B] animate-pulse" />
           </div>
           <h3 className="text-white text-xl font-bold">Personal Trainer IA</h3>
-          <p className="text-[#CEEDB2]">Criando seu plano personalizado...</p>
+          <p className="text-[#CEEDB2]">{generateStatus || "Criando seu plano personalizado..."}</p>
           <div className="flex gap-1 justify-center">
             {[0, 1, 2].map(i => (
               <motion.div
@@ -396,8 +400,16 @@ export default function AIWorkoutWizard({ userId, onClose, onWorkoutsGenerated }
           </div>
 
           {generateError && (
-            <div className="mb-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {generateError}
+            <div className="mb-4 space-y-3">
+              <div className="rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {generateError}
+              </div>
+              <Button
+                onClick={() => generateWorkoutPlan(answers)}
+                className="h-11 w-full rounded-xl bg-[#CEF17B] font-bold text-[#080626] hover:bg-[#ddff91]"
+              >
+                Tentar novamente
+              </Button>
             </div>
           )}
 
