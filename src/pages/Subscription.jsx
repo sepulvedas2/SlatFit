@@ -184,6 +184,7 @@ export default function Subscription() {
 
   const subscription = subscriptionQuery.data;
   const hasAccess = subscription?.hasAccess === true;
+  const isOwner = subscription?.accessType === "owner";
 
   useEffect(() => {
     if (searchParams.get("payment") === "return") {
@@ -308,11 +309,11 @@ export default function Subscription() {
                 </div>
                 <h2 className="text-2xl font-bold">Seu SlatFit esta liberado</h2>
                 <p className="mt-2 text-sm text-gray-600">
-                  Plano {subscription?.plan ?? "ativo"} ate {formatDate(subscription?.currentPeriodEnd)}.
+                  {isOwner ? "Acesso de sócio-proprietário, sem cobrança Stripe." : `Plano ${subscription?.plan ?? "ativo"} ate ${formatDate(subscription?.currentPeriodEnd)}.`}
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
+                {!isOwner && <Button
                   variant="outline"
                   onClick={() => portalMutation.mutate()}
                   disabled={portalMutation.isPending}
@@ -324,8 +325,8 @@ export default function Subscription() {
                     <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
                   )}
                   {portalMutation.isPending ? 'Abrindo...' : 'Gerenciar'}
-                </Button>
-                {subscription?.refundEligible && (
+                </Button>}
+                {!isOwner && subscription?.refundEligible && (
                   <Button
                     variant="outline"
                     onClick={() => refundMutation.mutate()}
