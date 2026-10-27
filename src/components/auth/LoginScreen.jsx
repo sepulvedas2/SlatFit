@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Link } from 'react-router-dom';
-import { request } from "@/api/transport";
 
 function friendlyAuthError(err) {
   const raw = String(
@@ -55,8 +54,6 @@ export default function LoginScreen({ onLogin }) {
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [testingWorkout, setTestingWorkout] = useState(false);
-  const [testStatus, setTestStatus] = useState("");
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -172,32 +169,6 @@ export default function LoginScreen({ onLogin }) {
               }
             </button>
           </form>
-
-          {/* TEMPORARY: remove after verifying DeepSeek workout generation. */}
-          <div className="border-t border-gray-200 pt-4 flex flex-col gap-2">
-            <button
-              type="button"
-              disabled={testingWorkout}
-              onClick={async () => {
-                setTestingWorkout(true);
-                setTestStatus("Gerando treino fictício… veja Network → test-workout → Response.");
-                try {
-                  const json = await request("/ai/test-workout", { method: "POST", auth: false });
-                  console.log("[SlatFit workout test]", json);
-                  setTestStatus("Treino gerado! Abra DevTools → Network → test-workout → Response.");
-                } catch (err) {
-                  console.error("[SlatFit workout test failed]", err);
-                  setTestStatus(`Falha no teste: ${err.message}. Veja Network → test-workout.`);
-                } finally {
-                  setTestingWorkout(false);
-                }
-              }}
-              className="w-full h-11 rounded-lg border border-green-700 text-green-800 font-semibold text-sm disabled:opacity-50"
-            >
-              {testingWorkout ? "Gerando treino de teste…" : "Testar IA de treino (temporário)"}
-            </button>
-            {testStatus && <p role="status" className="text-xs text-gray-600">{testStatus}</p>}
-          </div>
 
           {/* Footer */}
           <p className="text-center text-sm text-gray-500">
