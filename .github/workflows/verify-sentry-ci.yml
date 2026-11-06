@@ -1,0 +1,32 @@
+name: Verify pnpm build, tests and Sentry bundle (temporary)
+on:
+  push:
+    branches:
+      - test/verify-sentry-pnpm-20261106
+    paths:
+      - .github/workflows/verify-sentry-ci.yml
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: Install exactly as CI does
+        run: pnpm install --frozen-lockfile
+      - name: Build with a fake Sentry DSN
+        env:
+          VITE_SENTRY_DSN: https://test@o1.ingest.sentry.io/42
+        run: pnpm run build
+      - name: Run Vitest suite
+        run: pnpm test
+      - name: Verify Sentry DSN injection into Vite bundle
+        run: |
+          grep -Rq 'test@o1.ingest.sentry.io/42' dist || (echo 'Missing Vite Sentry DSN in bundle' && exit 1)
