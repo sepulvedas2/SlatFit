@@ -1,0 +1,73 @@
+name: Build SlatFit brand assets and verify SEO (temporary)
+on:
+  push:
+    branches:
+      - feat/slatfit-logo-favicon-seo-20261116
+    paths:
+      - .github/workflows/build-brand-assets.yml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generate PNG assets from supplied-logo vector
+        run: |
+          python -m pip install --disable-pip-version-check pillow cairosvg
+          python - <<'PY'
+          from pathlib import Path
+          from io import BytesIO
+          from PIL import Image
+          import cairosvg
+
+          svg = Path("public/slatfit-logo.svg")
+          assert svg.is_file()
+          source = Image.open(BytesIO(cairosvg.svg2png(url=str(svg), output_width=1024, output_height=1024))).convert("RGB")
+
+          source.resize((512, 512), Image.Resampling.LANCZOS).save("public/slatfit-logo.png", optimize=True)
+
+          # Crop the supplied wordmark rather than stretching the square image.
+          wordmark = source.crop((198, 394, 827, 594))
+          wordmark = wordmark.resize((920, 292), Image.Resampling.LANCZOS)
+          og = Image.new("RGB", (1200, 630), "#010b02")
+          og.paste(wordmark, ((1200 - wordmark.width) // 2, (630 - wordmark.height) // 2))
+          og.save("public/og-slatfit.png", optimize=True)
+
+          favicon = Image.open("public/favicon.png").convert("RGB")
+          favicon.resize((180, 180), Image.Resampling.LANCZOS).save("public/apple-touch-icon.png", optimize=True)
+
+          html = Path("index.html").read_text()
+          for name in ("favicon.png", "apple-touch-icon.png", "og-slatfit.png", "slatfit-logo.png"):
+            assert Path("public", name).is_file(), name
+            assert name in html, name
+          assert 'lang="pt-BR"' in html
+          assert 'rel="canonical"' in html
+          assert 'name="description"' in html
+          assert '"@type": "Organization"' in html
+          print("Brand asset generation and SEO metadata checks succeeded")
+          PY
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Verify application build with pnpm frozen lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+          pnpm test
+      - name: Commit generated brand PNG files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/slatfit-logo.png public/og-slatfit.png public/apple-touch-icon.png
+          if ! git diff --cached --quiet; then
+            git commit -m "feat(brand): generate raster logo, Open Graph preview and touch icon"
+            git push
+          fi
