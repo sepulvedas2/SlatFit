@@ -1,0 +1,51 @@
+name: Verify public SlatFit SEO assets (temporary)
+on:
+  push:
+    branches:
+      - test/check-brand-live-20261116
+    paths:
+      - .github/workflows/seo-live-check.yml
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check publicly deployed homepage and brand assets
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          const base = "https://slatfit.com.br";
+          const checks = [
+            ["/", "text/html"],
+            ["/favicon.png", "image/png"],
+            ["/slatfit-logo.png", "image/png"],
+            ["/og-slatfit.png", "image/png"],
+            ["/apple-touch-icon.png", "image/png"],
+            ["/robots.txt", "text/plain"],
+            ["/sitemap.xml", "xml"],
+          ];
+          let failing = 0;
+          for (const [path, expectedType] of checks) {
+            try {
+              const result = await fetch(base + path, { signal: AbortSignal.timeout(15000) });
+              const type = result.headers.get("content-type") ?? "";
+              const bytes = new Uint8Array(await result.arrayBuffer());
+              const png = bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50;
+              const content = expectedType === "image/png" ? "" : new TextDecoder().decode(bytes);
+              const valid = result.status === 200 && type.includes(expectedType) &&
+                (expectedType !== "image/png" || png) &&
+                (path !== "/" || (content.includes("Transforme sua rotina com a Slatfit.") && content.includes("/favicon.png")));
+              console.log(JSON.stringify({ path, status: result.status, type, size: bytes.length, passed: valid }));
+              if (!valid) failing++;
+            } catch (err) {
+              console.log(JSON.stringify({ path, passed: false, error: String(err).slice(0,130) }));
+              failing++;
+            }
+          }
+          console.log(failing ? `FAILED: ${failing} assets not live yet` : "PASSED: all brand assets live");
+          if (failing) process.exitCode = 1;
+          NODE
